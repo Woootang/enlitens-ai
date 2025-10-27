@@ -176,21 +176,45 @@ class OllamaClient:
                             raise ValueError("No valid JSON found in response")
 
                 parsed_data = self._coerce_to_model_schema(parsed_data, response_model)
-                
+
+                # Ensure we have a dictionary for Pydantic validation
+                if not isinstance(parsed_data, dict):
+                    logger.error(f"Coerced data is not a dictionary: type={type(parsed_data)}, value={parsed_data}")
+                    raise ValueError(f"Expected dict after coercion, got {type(parsed_data).__name__}")
+
                 # Validate with Pydantic model
                 validated_model = response_model.model_validate(parsed_data)
                 data_dict = validated_model.model_dump()
-                if isinstance(data_dict, dict) and any(isinstance(v, list) and not v for v in data_dict.values()):
-                    raise ValueError("Structured response contains empty lists")
+
+                # Check if ALL lists are empty (not just ANY - some empty lists are fine)
+                list_values = [v for v in data_dict.values() if isinstance(v, list)]
+                if list_values and all(not v for v in list_values):
+                    logger.warning(f"All {len(list_values)} list fields are empty - may indicate poor LLM output")
+                    raise ValueError("All list fields are empty - no content generated")
 
                 logger.info(f"Successfully validated response with {len(parsed_data)} keys")
                 return validated_model
                 
             except Exception as e:
                 attempt += 1
+                # Log detailed error information for debugging
                 logger.warning(f"Attempt {attempt} failed: {e}")
+
+                # Log response sample for debugging (first 500 chars)
+                if 'response_text' in locals():
+                    logger.debug(f"LLM response sample: {response_text[:500]}...")
+                    logger.debug(f"Response length: {len(response_text)} characters")
+
+                # Log parsed data if available
+                if 'parsed_data' in locals():
+                    logger.debug(f"Parsed data type: {type(parsed_data)}, keys: {parsed_data.keys() if isinstance(parsed_data, dict) else 'N/A'}")
+
                 if attempt >= max_retries:
                     logger.error(f"All {max_retries} attempts failed for structured generation")
+                    logger.error(f"Final error: {e}")
+                    # Log full response text on final failure for debugging
+                    if 'response_text' in locals():
+                        logger.error(f"Full LLM response on final attempt:\n{response_text}")
                     return None
 
                 # Increase temperature slightly to encourage variation

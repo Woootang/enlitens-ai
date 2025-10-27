@@ -161,8 +161,12 @@ class EnhancedExtractionTools:
         """
         try:
             # Guard: BERTopic requires >1 sample
-            if not texts or len([t for t in texts if t and t.strip()]) < 2:
-                logger.error("Error discovering topics: There needs to be more than 1 sample to build nearest the neighbors graph")
+            valid_texts = [t for t in texts if t and t.strip()]
+            if not valid_texts:
+                logger.warning("No valid texts provided for topic discovery")
+                return [], {}, {}
+            if len(valid_texts) < 2:
+                logger.warning(f"Topic discovery requires at least 2 samples, but only {len(valid_texts)} provided. Skipping topic analysis.")
                 return [], {}, {}
 
             self._load_bertopic()
