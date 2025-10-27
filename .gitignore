@@ -5,3 +5,10 @@ enlitens_corpus/input_pdfs/
 pipeline_output/
 *.log
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
