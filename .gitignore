@@ -1,9 +1,12 @@
 venv/
 venv/
 *.zip
-enlitens_corpus/input_pdfs/
+*.env
+*.env.*
+enlitens_corpus/
 pipeline_output/
 *.log
+*.json.temp
 .DS_Store
 
 # Python
