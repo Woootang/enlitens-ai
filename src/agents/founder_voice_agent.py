@@ -284,18 +284,24 @@ St. Louis Mental Health Landscape:
 - Clients want practical, science-based help
 - Skeptical of traditional "talk therapy" approaches
 
-Generate SEO content:
+CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
-1. PRIMARY KEYWORDS: Main search terms like "neuroscience therapy St. Louis"
-2. SECONDARY KEYWORDS: Supporting terms like "ADHD specialist", "trauma therapy"
-3. LONG-TAIL KEYWORDS: Specific searches like "neuroscience-based ADHD treatment"
-4. META DESCRIPTIONS: Compelling descriptions under 160 characters
-5. TITLE TAGS: SEO-optimized page titles
-6. CONTENT TOPICS: Blog topics that address real client questions
+Generate 5-10 items for each field below and return as JSON:
+
+{{
+  "primary_keywords": ["neuroscience therapy St. Louis", "ADHD specialist St. Louis", ...],
+  "secondary_keywords": ["trauma therapy", "anxiety treatment", ...],
+  "long_tail_keywords": ["neuroscience-based ADHD treatment St. Louis", ...],
+  "meta_descriptions": ["Science-backed therapy for ADHD and anxiety in St. Louis...", ...],
+  "title_tags": ["Neuroscience Therapy St. Louis | ADHD & Anxiety Treatment", ...],
+  "content_topics": ["Why Your ADHD Meds Stopped Working", ...]
+}}
 
 Write in Liz's voice - make it authentic and trustworthy.
 Target the specific pain points St. Louis clients face.
 Position Enlitens as the neuroscience alternative to traditional therapy.
+
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
             response = await self.ollama_client.generate_structured_response(
@@ -341,29 +347,41 @@ St. Louis Context:
 - They want practical help, not just "coping skills"
 - Skeptical of "one size fits all" approaches
 
-Generate website copy for ALL sections below (3-8 items per section as single strings):
+CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
-1. ABOUT SECTIONS: Paragraph-length strings telling the story, approach, and differentiation. Example: "I started Enlitens after watching countless clients struggle through years of traditional therapy without real change. The missing piece wasn't more talk therapy—it was understanding how their brains actually work. Now I combine neuroscience assessment with targeted interventions that create lasting change, not just coping skills." Each item should be one complete paragraph string.
+Generate 3-8 paragraph-length strings for each field. Each string should be a complete, substantial piece of content.
 
-2. FEATURE DESCRIPTIONS: Single-string feature descriptions. Example: "Bottom-Up Neuroscience Assessment: Unlike traditional therapy questionnaires, we measure your actual nervous system responses through interoceptive awareness evaluation, sensory processing analysis, and executive function testing to understand how your brain uniquely processes the world." Each feature should be one descriptive string.
+{{
+  "about_sections": [
+    "I started Enlitens after watching countless clients struggle through years of traditional therapy without real change. The missing piece wasn't more talk therapy—it was understanding how their brains actually work. Now I combine neuroscience assessment with targeted interventions that create lasting change, not just coping skills.",
+    "Another about paragraph...",
+    ...
+  ],
+  "feature_descriptions": [
+    "Bottom-Up Neuroscience Assessment: Unlike traditional therapy questionnaires, we measure your actual nervous system responses through interoceptive awareness evaluation, sensory processing analysis, and executive function testing to understand how your brain uniquely processes the world.",
+    ...
+  ],
+  "benefit_statements": [
+    "Reduce anxiety attacks by understanding and regulating your nervous system responses rather than just managing symptoms.",
+    ...
+  ],
+  "testimonials": [
+    "I tried five therapists before finding Liz. Within three sessions she explained why nothing worked—my brain processes sensory input differently. The strategies she taught actually work because they target my neurobiology, not generic anxiety tips. - Sarah M.",
+    ...
+  ],
+  "faq_content": [
+    "Q: How is this different from regular therapy? A: Traditional therapy focuses on thoughts and behaviors. We start with your neurobiology—how your brain actually processes information—and build interventions that work with your unique wiring, not against it.",
+    ...
+  ],
+  "service_descriptions": [
+    "ADHD Executive Function Support: Comprehensive neuroscience-based assessment of working memory, attention systems, and dopamine regulation, followed by targeted interventions including environmental modifications, cognitive strategies, and nervous system regulation techniques tailored to your specific executive function profile.",
+    ...
+  ]
+}}
 
-3. BENEFIT STATEMENTS: Clear outcome statements as single strings. Example: "Reduce anxiety attacks by understanding and regulating your nervous system responses rather than just managing symptoms." Each benefit should be one complete string.
+Use Liz's direct, authentic voice. Ground everything in neuroscience. Address real St. Louis client pain points.
 
-4. TESTIMONIALS: Testimonial narratives as single strings. Example: "I tried five therapists before finding Liz. Within three sessions she explained why nothing worked—my brain processes sensory input differently. The strategies she taught actually work because they target my neurobiology, not generic anxiety tips. - Sarah M." Each testimonial should be one quoted string.
-
-5. FAQ CONTENT: Question and answer pairs as single strings. Example: "Q: How is this different from regular therapy? A: Traditional therapy focuses on thoughts and behaviors. We start with your neurobiology—how your brain actually processes information—and build interventions that work with your unique wiring, not against it." Each FAQ should be one Q&A string.
-
-6. SERVICE DESCRIPTIONS: Service descriptions as single strings. Example: "ADHD Executive Function Support: Comprehensive neuroscience-based assessment of working memory, attention systems, and dopamine regulation, followed by targeted interventions including environmental modifications, cognitive strategies, and nervous system regulation techniques tailored to your specific executive function profile." Each service should be one descriptive string.
-
-IMPORTANT:
-- Each section needs 3-8 substantial items
-- Use Liz's direct, authentic voice
-- Ground everything in neuroscience from the research
-- Address real client pain points
-- Show understanding before offering solutions
-- Each item should be a complete paragraph or statement
-
-Return JSON with fields: about_sections, feature_descriptions, benefit_statements, testimonials, faq_content, service_descriptions
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
             response = await self.ollama_client.generate_structured_response(
@@ -410,33 +428,50 @@ Content Focus:
 - Autism and neurodiversity
 - Treatment-resistant conditions
 
-Generate blog content for ALL sections below (5-10 items per section):
+CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
-1. ARTICLE IDEAS: Complete blog post titles that address real client questions. Make them specific, actionable, and SEO-friendly. Examples: "Why Your ADHD Meds Stopped Working (And What Neuroscience Says to Do Next)"
+Generate 5-10 strings for each field below:
 
-2. BLOG OUTLINES: Brief outline summaries as single strings. Example: "Intro explaining ADHD executive function challenges, three evidence-based strategies (working memory support, dopamine regulation, environmental modifications), practical implementation steps, conclusion with next actions." Each outline should be one comprehensive string.
+{{
+  "article_ideas": [
+    "Why Your ADHD Meds Stopped Working (And What Neuroscience Says to Do Next)",
+    "The Real Reason Your Anxiety Spikes at Night (Brain Science Explains)",
+    ...
+  ],
+  "blog_outlines": [
+    "Intro explaining ADHD executive function challenges, three evidence-based strategies (working memory support, dopamine regulation, environmental modifications), practical implementation steps, conclusion with next actions.",
+    ...
+  ],
+  "talking_points": [
+    "Your brain isn't broken—it's responding to an environment it wasn't designed for.",
+    "Neuroplasticity means change is always possible, no matter your age or diagnosis.",
+    ...
+  ],
+  "expert_quotes": [
+    "I started Enlitens because I was tired of watching brilliant, capable people told they were 'broken' when their brains just work differently.",
+    ...
+  ],
+  "statistics": [
+    "Studies show 70% of ADHD clients see improvement with neuroscience-based interventions versus 40% with traditional therapy alone.",
+    ...
+  ],
+  "case_studies": [
+    "Client with treatment-resistant anxiety learned their symptoms were sensory processing differences. Using interoceptive awareness training and bottom-up regulation, they reduced panic attacks by 80% in 8 weeks.",
+    ...
+  ],
+  "how_to_guides": [
+    "5-Minute Brain Reset for Anxiety: Quick bilateral stimulation exercise using alternate nostril breathing to activate parasympathetic nervous system, reducing cortisol and restoring executive function.",
+    ...
+  ],
+  "myth_busting": [
+    "Myth: ADHD is caused by poor parenting. Reality: Neuroscience shows ADHD involves differences in dopamine regulation and prefrontal cortex development. What This Means: Parents aren't to blame; brains just work differently and need different support strategies.",
+    ...
+  ]
+}}
 
-3. TALKING POINTS: Key messages for articles. Each should be a complete sentence that could become a section header or pull quote. Ground in neuroscience from the research.
+Use Liz's rebellious, direct voice. Ground everything in neuroscience. Make it shareable and valuable.
 
-4. EXPERT QUOTES: Liz's authentic voice on important topics. Write first-person quotes as Liz would say them. Make them quotable and shareable. Include bold perspectives.
-
-5. STATISTICS: Research findings and numbers to support your approach. Include percentages, study results, client outcomes, etc. Ground in actual research when possible.
-
-6. CASE STUDIES: Brief case study summaries as single strings. Example: "Client with treatment-resistant anxiety learned their symptoms were sensory processing differences. Using interoceptive awareness training and bottom-up regulation, they reduced panic attacks by 80% in 8 weeks." Each case study should be one narrative string.
-
-7. HOW-TO GUIDES: Title and brief description as single strings. Example: "5-Minute Brain Reset for Anxiety: Quick bilateral stimulation exercise using alternate nostril breathing to activate parasympathetic nervous system, reducing cortisol and restoring executive function." Each guide should be one descriptive string.
-
-8. MYTH BUSTING: Myth-busting statements as single strings. Example: "Myth: ADHD is caused by poor parenting. Reality: Neuroscience shows ADHD involves differences in dopamine regulation and prefrontal cortex development. What This Means: Parents aren't to blame; brains just work differently and need different support strategies." Each item should be one complete string.
-
-IMPORTANT:
-- Each section needs 5-10 substantial items
-- Be specific and actionable, not generic
-- Use Liz's rebellious, direct voice
-- Ground everything in neuroscience
-- Make it shareable and valuable
-- Include clear next steps
-
-Return JSON with fields: article_ideas, blog_outlines, talking_points, expert_quotes, statistics, case_studies, how_to_guides, myth_busting
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
             response = await self.ollama_client.generate_structured_response(
@@ -477,21 +512,48 @@ Content Style:
 - Real talk about real challenges
 - Hopeful without being cheesy
 
-Generate social media content (all as single strings):
+CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
-1. POST IDEAS: Post concepts as single strings. Example: "Share your morning brain fog story—explain it's not laziness, it's your prefrontal cortex taking 90 minutes to fully wake up. Include 3 neuroscience-based wake-up strategies."
-2. CAPTIONS: Complete caption text as single strings. Example: "Your ADHD brain isn't broken. It's wired for novelty-seeking and responds differently to dopamine. That's not a disorder—that's a different operating system. Learn to work WITH your brain, not against it."
-3. QUOTES: Quotable statements as single strings. Example: "Traditional therapy asks 'what's wrong with you?' Neuroscience asks 'what happened TO you, and how did your brain adapt?'"
-4. HASHTAGS: Hashtag sets as single strings. Example: "#NeuroscienceTherapy #STLTherapist #ADHDSupport #TraumaInformed #BrainBasedHealing #StLouisMentalHealth"
-5. STORY IDEAS: Story concepts as single strings. Example: "Film morning routine showing sensory regulation techniques—demonstrate bilateral stimulation, explain vagus nerve activation in voiceover."
-6. REEL IDEAS: Reel concepts as single strings. Example: "30-second explanation of why your anxiety spikes at bedtime—show how cortisol rhythm works, demonstrate 3-minute reset technique."
-7. CAROUSEL CONTENT: Carousel topics as single strings. Example: "5 signs your anxiety is actually sensory processing differences: 1-overwhelmed by noise 2-need alone time to recharge 3-difficulty in crowds 4-sensitive to textures 5-emotional after busy days."
-8. POLL QUESTIONS: Poll questions as single strings. Example: "What time of day is your ADHD brain sharpest? A) Morning (7-10am) B) Midday (10am-2pm) C) Afternoon (2-6pm) D) Evening/Night (after 6pm)"
+Generate 5-10 strings for each field below:
 
-Write as Liz - conversational, direct, and caring.
-Show you understand the daily grind of mental health challenges.
-Balance education with empathy.
-Always include calls-to-action.
+{{
+  "post_ideas": [
+    "Share your morning brain fog story—explain it's not laziness, it's your prefrontal cortex taking 90 minutes to fully wake up. Include 3 neuroscience-based wake-up strategies.",
+    ...
+  ],
+  "captions": [
+    "Your ADHD brain isn't broken. It's wired for novelty-seeking and responds differently to dopamine. That's not a disorder—that's a different operating system. Learn to work WITH your brain, not against it.",
+    ...
+  ],
+  "quotes": [
+    "Traditional therapy asks 'what's wrong with you?' Neuroscience asks 'what happened TO you, and how did your brain adapt?'",
+    ...
+  ],
+  "hashtags": [
+    "#NeuroscienceTherapy #STLTherapist #ADHDSupport #TraumaInformed #BrainBasedHealing #StLouisMentalHealth",
+    ...
+  ],
+  "story_ideas": [
+    "Film morning routine showing sensory regulation techniques—demonstrate bilateral stimulation, explain vagus nerve activation in voiceover.",
+    ...
+  ],
+  "reel_ideas": [
+    "30-second explanation of why your anxiety spikes at bedtime—show how cortisol rhythm works, demonstrate 3-minute reset technique.",
+    ...
+  ],
+  "carousel_content": [
+    "5 signs your anxiety is actually sensory processing differences: 1-overwhelmed by noise 2-need alone time to recharge 3-difficulty in crowds 4-sensitive to textures 5-emotional after busy days.",
+    ...
+  ],
+  "poll_questions": [
+    "What time of day is your ADHD brain sharpest? A) Morning (7-10am) B) Midday (10am-2pm) C) Afternoon (2-6pm) D) Evening/Night (after 6pm)",
+    ...
+  ]
+}}
+
+Write as Liz - conversational, direct, and caring. Balance education with empathy.
+
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
             response = await self.ollama_client.generate_structured_response(
@@ -531,22 +593,51 @@ Content Goals:
 - Quarterly educational events
 - Ongoing email nurturing sequences
 
-Generate content ideas:
+CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
-1. TOPIC IDEAS: Blog and video topics that convert
-2. ANGLE IDEAS: Unique perspectives on common challenges
-3. HOOK IDEAS: Attention-grabbing openings
-4. SERIES IDEAS: Multi-part content sequences
-5. COLLABORATION IDEAS: Partnerships and guest experts
-6. TREND IDEAS: Timely topics that resonate
-7. SEASONAL IDEAS: Content tied to St. Louis events/seasons
+Generate 5-10 strings for each field below:
 
-Focus on content that:
-- Directly addresses ADHD, anxiety, trauma challenges
-- Challenges "you're broken" mental health narratives
-- Provides immediate practical value
-- Drives phone calls and consultation requests
-- Builds Liz's personal brand as the neuroscience expert
+{{
+  "topic_ideas": [
+    "How Neuroscience Explains Why Your Anxiety Gets Worse at Night",
+    "The ADHD-Trauma Connection Most Therapists Miss",
+    ...
+  ],
+  "angle_ideas": [
+    "Your brain isn't broken—it's responding to an environment it wasn't designed for",
+    "Why medication alone won't fix executive dysfunction (and what will)",
+    ...
+  ],
+  "hook_ideas": [
+    "If you've tried 5+ therapists and nothing worked, this is why...",
+    "Your ADHD diagnosis might be missing the real problem",
+    ...
+  ],
+  "series_ideas": [
+    "The Neuroscience of Self-Regulation: 4-part series on brain-body connection",
+    "Breaking the ADHD Cycle: Weekly tips for executive function",
+    ...
+  ],
+  "collaboration_ideas": [
+    "Partner with Washington University on epigenetics webinar",
+    "Co-host workshop with St. Louis Parks on nature and neuroplasticity",
+    ...
+  ],
+  "trend_ideas": [
+    "Back-to-school stress and brain development",
+    "Post-pandemic mental health and neural networks",
+    ...
+  ],
+  "seasonal_ideas": [
+    "Spring allergies and brain inflammation connection",
+    "Summer outdoor activities for nervous system regulation",
+    ...
+  ]
+}}
+
+Focus on content that directly addresses ADHD, anxiety, trauma challenges and drives inquiries.
+
+RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
             response = await self.ollama_client.generate_structured_response(
