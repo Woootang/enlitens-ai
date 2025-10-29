@@ -1,3 +1,9 @@
+# Enlitens AI Processing Log Snapshot - October 29, 2025
+# Source: /home/antons-gs/enlitens-ai/logs/logs/enlitens_complete_processing.log
+# Total log lines: 48,612 | October 29 entries: 8,668
+# Last updated: October 29, 2025 13:21
+
+# === Initial Setup (from start of log) ===
 2025-10-27 21:31:46,844 - __main__ - INFO - 🧹 Cleaned up old log files
 2025-10-27 21:31:46,845 - src.agents.base_agent - INFO - Initializing agent: EnlitensSupervisor (Multi-Agent System Orchestrator)
 2025-10-27 21:31:46,855 - src.extraction.enhanced_extraction_tools - INFO - Enhanced extraction tools initialized on cuda
@@ -13,391 +19,405 @@
 2025-10-27 21:31:46,892 - __main__ - INFO - 💾 RAM: 67.3GB available / 58.6GB available
 2025-10-27 21:31:46,892 - __main__ - INFO - 💽 Disk: 728.3GB available
 2025-10-27 21:31:46,892 - __main__ - INFO - 📚 Found 344 PDF files to process
-2025-10-27 21:31:46,892 - __main__ - INFO - 🧠 Initializing multi-agent supervisor and specialized agents
-2025-10-27 21:31:46,892 - src.agents.supervisor_agent - INFO - Initializing Supervisor Agent and all specialized agents...
-2025-10-27 21:31:46,892 - src.agents.base_agent - INFO - Initializing agent: ScienceExtraction (Scientific Content Extraction)
-2025-10-27 21:31:46,892 - src.agents.base_agent - INFO - Initializing agent: ClinicalSynthesis (Clinical Application Synthesis)
-2025-10-27 21:31:46,892 - src.agents.base_agent - INFO - Initializing agent: FounderVoiceAgent (Liz Wooten Voice and Brand Integration Specialist)
-2025-10-27 21:31:46,893 - src.agents.base_agent - INFO - Initializing agent: ContextRAG (Contextual Enhancement with RAG)
-2025-10-27 21:31:46,893 - src.agents.base_agent - INFO - Initializing agent: MarketingSEO (Marketing and SEO Content Generation)
-2025-10-27 21:31:46,893 - src.agents.base_agent - INFO - Initializing agent: Validation (Content Validation and Quality Assurance)
-2025-10-27 21:31:46,933 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: qwen3:32b
-2025-10-27 21:31:46,933 - src.agents.science_extraction_agent - INFO - ✅ ScienceExtraction agent initialized
-2025-10-27 21:31:46,933 - src.agents.supervisor_agent - INFO - ✅ Agent science_extraction initialized on attempt 1
-2025-10-27 21:31:46,961 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: qwen3:32b
-2025-10-27 21:31:46,961 - src.agents.clinical_synthesis_agent - INFO - ✅ ClinicalSynthesis agent initialized
-2025-10-27 21:31:46,961 - src.agents.supervisor_agent - INFO - ✅ Agent clinical_synthesis initialized on attempt 1
-2025-10-27 21:31:46,989 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: qwen3:32b
-2025-10-27 21:31:46,989 - src.agents.founder_voice_agent - INFO - ✅ Founder Voice Agent initialized with Liz persona
-2025-10-27 21:31:46,989 - src.agents.supervisor_agent - INFO - ✅ Agent founder_voice initialized on attempt 1
-2025-10-27 21:31:46,989 - src.agents.context_rag_agent - INFO - ✅ ContextRAG agent initialized
-2025-10-27 21:31:46,989 - src.agents.supervisor_agent - INFO - ✅ Agent context_rag initialized on attempt 1
-2025-10-27 21:31:47,017 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: llama3.1:8b
-2025-10-27 21:31:47,017 - src.agents.marketing_seo_agent - INFO - ✅ MarketingSEO agent initialized
-2025-10-27 21:31:47,017 - src.agents.supervisor_agent - INFO - ✅ Agent marketing_seo initialized on attempt 1
-2025-10-27 21:31:47,017 - src.agents.validation_agent - INFO - ✅ Validation agent initialized
-2025-10-27 21:31:47,017 - src.agents.supervisor_agent - INFO - ✅ Agent validation initialized on attempt 1
-2025-10-27 21:31:47,017 - src.agents.supervisor_agent - INFO - ✅ Supervisor and all specialized agents initialized successfully
-2025-10-27 21:31:47,017 - __main__ - INFO - 📋 No previous progress found, starting fresh
-2025-10-27 21:31:47,017 - __main__ - INFO - 📖 Processing file 1/344: 2023-67353-007.pdf
-2025-10-27 21:31:47,017 - __main__ - INFO - 🧠 Starting multi-agent processing: 2023-67353-007
-2025-10-27 21:31:47,017 - __main__ - INFO - 📄 Extracting text from PDF: 2023-67353-007.pdf
-2025-10-27 21:31:47,017 - __main__ - INFO - 📄 Extracting text from: 2023-67353-007.pdf (attempt 1)
-2025-10-27 21:31:47,020 - src.extraction.enhanced_pdf_extractor - INFO - Using cached extraction for enlitens_corpus/input_pdfs/2023-67353-007.pdf
-2025-10-27 21:31:47,020 - __main__ - INFO - ✅ Successfully extracted 122053 characters from 2023-67353-007.pdf
-2025-10-27 21:31:47,020 - __main__ - INFO - ✅ Text extracted successfully: 122053 characters
-2025-10-27 21:31:47,020 - __main__ - INFO - 🔧 Creating processing context for 2023-67353-007
-2025-10-27 21:31:47,020 - src.extraction.enhanced_extraction_tools - INFO - Analyzing 1 client intakes
-2025-10-27 21:31:47,022 - src.extraction.enhanced_extraction_tools - INFO - Auto-chunked single text into 8 samples for topic discovery
-2025-10-27 21:31:47,023 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2
-2025-10-27 21:31:48,994 - src.extraction.enhanced_extraction_tools - INFO - BERTopic model loaded with GPU acceleration
-2025-10-27 21:31:49,213 - src.extraction.enhanced_extraction_tools - ERROR - Error discovering topics: There needs to be more than 1 sample to build nearest the neighbors graph
-2025-10-27 21:31:53,765 - src.extraction.enhanced_extraction_tools - INFO - Sentiment analysis completed: compound=1.000
-2025-10-27 21:31:53,766 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-large-en-v1.5
-2025-10-27 21:31:55,006 - src.extraction.enhanced_extraction_tools - INFO - KeyBERT model loaded successfully
-2025-10-27 21:32:04,941 - src.extraction.enhanced_extraction_tools - INFO - Extracted 20 semantic keywords
-2025-10-27 21:32:04,943 - src.extraction.enhanced_extraction_tools - INFO - Analyzing 1 founder transcripts
-2025-10-27 21:32:05,207 - src.extraction.enhanced_extraction_tools - INFO - Auto-chunked single text into 8 samples for topic discovery
-2025-10-27 21:32:05,379 - src.extraction.enhanced_extraction_tools - ERROR - Error discovering topics: There needs to be more than 1 sample to build nearest the neighbors graph
-2025-10-27 21:33:24,972 - src.extraction.enhanced_extraction_tools - INFO - Sentiment analysis completed: compound=1.000
-2025-10-27 21:34:00,389 - src.extraction.enhanced_extraction_tools - INFO - Extracted 30 semantic keywords
-2025-10-27 21:34:00,389 - __main__ - INFO - ✅ Processing context created
-2025-10-27 21:34:00,389 - __main__ - INFO - 🚀 Starting supervisor processing for 2023-67353-007
-2025-10-27 21:34:00,389 - src.agents.supervisor_agent - INFO - 🎯 Supervisor starting document processing: 2023-67353-007
-2025-10-27 21:34:00,389 - src.agents.supervisor_agent - INFO - 📝 Document text length: 122053 characters
-2025-10-27 21:34:00,389 - src.agents.supervisor_agent - INFO - 🔬 Stage 1: Starting science extraction
-2025-10-27 21:34:00,389 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: science_extraction
-2025-10-27 21:34:00,389 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results']
-2025-10-27 21:34:00,389 - src.agents.base_agent - INFO - Agent ScienceExtraction starting processing
-2025-10-27 21:34:00,389 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:34:00,390 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:11,223 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:11,223 - src.synthesis.ollama_client - INFO - Generated response length: 8691 characters
-2025-10-27 21:36:11,224 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:11,227 - src.synthesis.ollama_client - INFO - Successfully validated response with 9 keys
-2025-10-27 21:36:11,227 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:36:11,227 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:24,412 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:24,412 - src.synthesis.ollama_client - INFO - Generated response length: 637 characters
-2025-10-27 21:36:24,412 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:24,417 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: 7 validation errors for NeuroMechanisms
-mechanism_evidence.polyvagal_theory.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-mechanism_evidence.memory_reconsolidation.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-mechanism_evidence.default_mode_network.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-mechanism_evidence.executive_function_networks.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-mechanism_evidence.interoception_insula.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-mechanism_evidence.reward_dopamine.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-mechanism_evidence.emotion_regulation_circuits.0
-  Input should be a valid dictionary or instance of EvidenceRef [type=model_type, input_value='NOT_PRESENT', input_type=str]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-2025-10-27 21:36:24,417 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.30000000000000004
-2025-10-27 21:36:24,417 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-27 21:36:24,417 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:31,313 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:31,313 - src.synthesis.ollama_client - INFO - Generated response length: 395 characters
-2025-10-27 21:36:31,313 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:31,314 - src.synthesis.ollama_client - INFO - Successfully validated response with 8 keys
-2025-10-27 21:36:31,314 - src.agents.base_agent - INFO - Agent ScienceExtraction completed successfully
-2025-10-27 21:36:31,314 - src.agents.supervisor_agent - INFO - ✅ Agent science_extraction completed successfully
-2025-10-27 21:36:31,314 - src.agents.supervisor_agent - INFO - 📊 Agent science_extraction result keys: ['research_content', 'extraction_quality', 'neuro_mechanisms']
-2025-10-27 21:36:31,314 - src.agents.supervisor_agent - INFO - ✅ Stage 1: Science extraction completed
-2025-10-27 21:36:31,314 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: clinical_synthesis
-2025-10-27 21:36:31,314 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'science_data']
-2025-10-27 21:36:31,314 - src.agents.base_agent - INFO - Agent ClinicalSynthesis starting processing
-2025-10-27 21:36:31,314 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:36:31,314 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:34,351 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:34,351 - src.synthesis.ollama_client - INFO - Generated response length: 201 characters
-2025-10-27 21:36:34,351 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:34,351 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
-2025-10-27 21:36:34,352 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
-2025-10-27 21:36:34,352 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.5
-2025-10-27 21:36:34,352 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-27 21:36:34,352 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:37,324 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - INFO - Generated response length: 201 characters
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
-2025-10-27 21:36:37,324 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:40,300 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - INFO - Generated response length: 201 characters
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
-{"treatment_approaches": ["NOT_PRESENT"], "assessment_methods": ["NOT_PRESENT"], "intervention_strategies": ["NOT_PRESENT"], "client_education": ["NOT_PRESENT"], "progress_indicators": ["NOT_PRESENT"]}
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:36:40,301 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:36:57,596 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:36:57,596 - src.synthesis.ollama_client - INFO - Generated response length: 1259 characters
-2025-10-27 21:36:57,596 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:36:57,596 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
-2025-10-27 21:36:57,597 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:36:57,597 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:37:02,712 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:37:02,712 - src.synthesis.ollama_client - INFO - Generated response length: 203 characters
-2025-10-27 21:37:02,713 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:37:02,713 - src.synthesis.ollama_client - INFO - Successfully validated response with 5 keys
-2025-10-27 21:37:02,713 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:37:02,713 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:37:27,504 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:37:27,505 - src.synthesis.ollama_client - INFO - Generated response length: 2061 characters
-2025-10-27 21:37:27,505 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:37:27,505 - src.synthesis.ollama_client - INFO - Successfully validated response with 2 keys
-2025-10-27 21:37:27,505 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:37:27,505 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:37:32,717 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:37:32,717 - src.synthesis.ollama_client - INFO - Generated response length: 188 characters
-2025-10-27 21:37:32,717 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:37:32,717 - src.synthesis.ollama_client - INFO - Successfully validated response with 1 keys
-2025-10-27 21:37:32,717 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:37:32,717 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:38:07,670 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:38:07,671 - src.synthesis.ollama_client - INFO - Generated response length: 1999 characters
-2025-10-27 21:38:07,671 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:38:07,671 - src.synthesis.ollama_client - INFO - Successfully validated response with 3 keys
-2025-10-27 21:38:07,671 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:38:07,671 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:39:09,203 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:39:09,204 - src.synthesis.ollama_client - INFO - Generated response length: 4670 characters
-2025-10-27 21:39:09,204 - src.synthesis.ollama_client - WARNING - Response may be truncated - generation not complete
-2025-10-27 21:39:09,204 - src.synthesis.ollama_client - WARNING - LLM response incomplete (num_predict=4096); retrying with num_predict=6144
-2025-10-27 21:39:09,204 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:39:45,942 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:39:45,943 - src.synthesis.ollama_client - INFO - Generated response length: 1173 characters
-2025-10-27 21:39:45,943 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:39:45,943 - src.synthesis.ollama_client - INFO - Successfully validated response with 2 keys
-2025-10-27 21:39:45,943 - src.agents.base_agent - WARNING - Agent ClinicalSynthesis output validation failed
-2025-10-27 21:39:45,943 - src.agents.supervisor_agent - WARNING - ⚠️ Agent clinical_synthesis returned empty results
-2025-10-27 21:39:45,943 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: founder_voice
-2025-10-27 21:39:45,943 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'clinical_data']
-2025-10-27 21:39:45,943 - src.agents.base_agent - INFO - Agent FounderVoiceAgent starting processing
-2025-10-27 21:39:45,943 - src.agents.founder_voice_agent - INFO - 🎙️ Founder Voice Agent processing: 2023-67353-007
-2025-10-27 21:39:45,974 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: llama3.1:8b
-2025-10-27 21:39:45,974 - src.synthesis.ollama_client - INFO - Generating response with model: llama3.1:8b
-2025-10-27 21:39:53,226 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:39:53,226 - src.synthesis.ollama_client - INFO - Generated response length: 2472 characters
-2025-10-27 21:39:53,227 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:39:53,227 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:40:16,893 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:40:16,893 - src.synthesis.ollama_client - INFO - Generated response length: 1518 characters
-2025-10-27 21:40:16,893 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:40:16,894 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
-2025-10-27 21:40:16,894 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:40:16,894 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:40:50,775 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:40:50,775 - src.synthesis.ollama_client - INFO - Generated response length: 2611 characters
-2025-10-27 21:40:50,776 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:40:50,776 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
-2025-10-27 21:40:50,776 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:40:50,776 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:41:16,048 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:41:16,049 - src.synthesis.ollama_client - INFO - Generated response length: 2111 characters
-2025-10-27 21:41:16,049 - src.synthesis.ollama_client - WARNING - Response may be truncated - generation not complete
-2025-10-27 21:41:16,049 - src.synthesis.ollama_client - WARNING - LLM response incomplete (num_predict=4096); retrying with num_predict=6144
-2025-10-27 21:41:16,049 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:41:48,974 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - INFO - Generated response length: 2883 characters
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.5
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-27 21:41:48,975 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:41:51,905 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - INFO - Generated response length: 160 characters
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
-2025-10-27 21:41:51,905 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:41:53,143 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - INFO - Generated response length: 86 characters
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
-{"error": "No valid clinical data provided. Please provide clinical data to proceed."}
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-27 21:41:53,143 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-27 21:41:58,863 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - INFO - Generated response length: 423 characters
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-27 21:41:58,863 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
 
-=== ... LOG CONTINUES (48,590 total lines) processing 344 PDF files ... ===
-
-2025-10-29 13:06:04,259 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:06:04,260 - src.synthesis.ollama_client - INFO - Generated response length: 3139 characters
-2025-10-29 13:06:04,260 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:06:04,260 - src.synthesis.ollama_client - INFO - Successfully validated response with 2 keys
-2025-10-29 13:06:04,260 - src.agents.base_agent - WARNING - Agent ClinicalSynthesis output validation failed
-2025-10-29 13:06:04,260 - src.agents.supervisor_agent - WARNING - ⚠️ Agent clinical_synthesis returned empty results
-2025-10-29 13:06:04,260 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: founder_voice
-2025-10-29 13:06:04,260 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'clinical_data']
-2025-10-29 13:06:04,260 - src.agents.base_agent - INFO - Agent FounderVoiceAgent starting processing
-2025-10-29 13:06:04,260 - src.agents.founder_voice_agent - INFO - 🎙️ Founder Voice Agent processing: What_is_the_relationship_between_experience-depen
-2025-10-29 13:06:04,293 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: llama3.1:8b
-2025-10-29 13:06:04,293 - src.synthesis.ollama_client - INFO - Generating response with model: llama3.1:8b
-2025-10-29 13:06:11,707 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:06:11,707 - src.synthesis.ollama_client - INFO - Generated response length: 2746 characters
-2025-10-29 13:06:11,707 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-29 13:06:11,708 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:06:41,373 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:06:41,373 - src.synthesis.ollama_client - INFO - Generated response length: 1291 characters
-2025-10-29 13:06:41,373 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:06:41,373 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
-2025-10-29 13:06:41,373 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-29 13:06:41,373 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:06:43,432 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - INFO - Generated response length: 60 characters
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.4
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-29 13:06:43,435 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:07:46,209 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:07:46,210 - src.synthesis.ollama_client - INFO - Generated response length: 3215 characters
-2025-10-29 13:07:46,210 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:07:46,210 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
-2025-10-29 13:07:46,210 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-29 13:07:46,210 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:08:23,507 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - INFO - Generated response length: 2151 characters
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.5
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-29 13:08:23,507 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:08:25,071 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - INFO - Generated response length: 54 characters
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
-2025-10-29 13:08:25,072 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:08:47,576 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:08:47,577 - src.synthesis.ollama_client - INFO - Generated response length: 1207 characters
-2025-10-29 13:08:47,577 - src.synthesis.ollama_client - WARNING - Response may be truncated - generation not complete
-2025-10-29 13:08:47,577 - src.synthesis.ollama_client - WARNING - LLM response incomplete (num_predict=4096); retrying with num_predict=6144
-2025-10-29 13:08:47,577 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:10:48,293 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - INFO - Generated response length: 6072 characters
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
-{"plan": {"about_section": {"title": "About Enlitens", "content": "For years, I watched people leave traditional therapy sessions with more questions than answers. I saw the frustration in their eyes, the way they’d shrug and say, 'I just don’t get it.' I’ve been there too. That's why I founded Enlitens. We don’t believe in guesswork. We don’t believe in the 'just talk it out' approach that leaves you stuck in the same patterns. At Enlitens, we use what science has discovered about the brain to give you clear, measurable solutions that work. This is therapy that actually changes your brain for the better. And it starts by understanding exactly what's going on in yours."}, "feature_descriptions": [{"title": "Brain-Based Solutions", "content": "Traditional therapy asks you to change your behavior without understanding why it’s happening. We look at the root cause: your brain’s wiring. By using neuroscience, we can identify exactly what’s blocking your progress and create a plan that actually restructures those patterns. It’s not about 'fixing' you. It’s about fixing what’s keeping you from your best self."}, {"title": "Personalized Care", "content": "You’re not a diagnosis. You’re not a case study. You’re a human with a complex brain that needs solutions tailored to you. That’s why every Enlitens plan is built from the ground up based on your unique brain activity, history, and goals. No cookie-cutter approaches here."}, {"title": "Measurable Progress", "content": "You deserve to see results. With neuroscience-based tools like neurofeedback and targeted brain stimulation, we track your progress in real time. You won’t just feel better—you’ll see it in the data. That’s the power of working with your brain, not against it."}], "benefit_statements": [{"title": "Break Free from Stagnation", "content": "Finally move past the same old stuck patterns that traditional therapy couldn’t shift."}, {"title": "Regain Control of Your Brain", "content": "Learn to manage anxiety, depression, and other conditions by working directly with your brain’s natural processes."}, {"title": "Feel Real, Lasting Change", "content": "Experience transformation that doesn’t fade when you leave the session."}, {"title": "Get Answers (Finally!)", "content": "Understand exactly why your brain behaves the way it does and what you can do about it."}], "testimonials": [{"name": "Jamie T.", "quote": "I’d been to therapists for years and kept hitting the same dead ends. With Enlitens, for the first time, I finally feel like someone actually understands what’s going on inside me. It’s changed my life."}, {"name": "Maria S.", "quote": "I was skeptical at first. But after just a few sessions, I could feel the difference. It’s like my brain finally started working with me instead of against me."}, {"name": "Alex R.", "quote": "Traditional therapy made me feel like something was wrong with me. Enlitens made me feel like something was just misunderstood. And now, it’s being understood."}], "faq_content": [{"question": "Is this really science-based?", "answer": "Absolutely. Every tool we use is grounded in decades of neuroscience research. We don’t use unproven gimmicks—we use the same principles that top neuroscientists use to understand and change brain function."}, {"question": "Will this work if traditional therapy didn’t?", "answer": "Yes. Because we’re not just talking about your problems—we’re changing the actual neural pathways that create them. Traditional therapy can help with coping, but neuroscience changes the root cause."}, {"question": "Is this expensive?", "answer": "We believe in accessible, effective care. Our pricing is competitive with traditional therapy and offers more measurable results for your investment."}, {"question": "Do I need to stop my current therapy?", "answer": "Not necessarily. We often work alongside other providers to give you a more complete approach. Just let us know what you’re already doing so we can coordinate care."}, {"question": "What if I don’t see results?", "answer": "We stand behind our work. If you don’t see meaningful progress in our first few sessions, we’ll work with you to find the right path forward—no strings attached."}], "service_descriptions": [{"title": "Neurofeedback Training", "content": "This is your brain learning how to regulate itself. Using real-time data from your brain activity, we train you to shift into healthier patterns. It’s like physical therapy—but for your brain. You’ll see improvements in focus, mood, and emotional regulation that last."}, {"title": "Cognitive Behavioral Neuroscience", "content": "We take the best of CBT and upgrade it with neuroscience. By understanding the specific brain regions involved in your thoughts and behaviors, we can create interventions that actually change how those networks function. It’s CBT with a brain-based upgrade."}, {"title": "Brain Mapping & Assessment", "content": "Before we begin, we want to understand your brain’s unique fingerprint. Using advanced mapping techniques, we identify exactly where your brain is working well and where it needs support. This is the foundation for everything we do."}, {"title": "Neurostimulation Protocols", "content": "For deeper, faster change, we use targeted stimulation to help your brain rebalance itself. These protocols are customized to your specific needs and are backed by strong scientific evidence. Think of it as jump-starting your brain’s natural healing processes."}, {"title": "Mind-Body Integration", "content": "Your brain doesn’t work in isolation. Our approach includes techniques that integrate your physical health with your mental well-being. From movement-based therapies to breathwork that directly impacts brain function, we help you create whole-person healing."}]},"meta": {"title": "Enlitens: Neuroscience-Based Therapy in St. Louis", "description": "Enlitens offers brain-based solutions for those who've struggled with traditional therapy. Our neuroscience-informed approach delivers real, measurable change for anxiety, depression, and more."}}
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-29 13:10:48,294 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - ERROR - Ollama request failed: 
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - INFO - Direct parsing failed, attempting JSON repair
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - INFO - JSON repair successful
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - ERROR - Coerced data is not a dictionary: type=<class 'str'>, value=
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: Expected dict after coercion, got str
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-29 13:15:48,395 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:19:29,329 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:19:29,330 - src.synthesis.ollama_client - INFO - Generated response length: 11220 characters
-2025-10-29 13:19:29,330 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:19:29,330 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: 16 validation errors for BlogContent
-article_ideas.0
-  Input should be a valid string [type=string_type, input_value={'title': "Why Traditiona...ve function challenges'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-article_ideas.1
-  Input should be a valid string [type=string_type, input_value={'title': "Anxiety Isn't ...d emotional regulation'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-article_ideas.2
-  Input should be a valid string [type=string_type, input_value={'title': 'Trauma Recover...auma and PTSD recovery'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-article_ideas.3
-  Input should be a valid string [type=string_type, input_value={'title': "Neurodiversity...ism and neurodiversity'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-article_ideas.4
-  Input should be a valid string [type=string_type, input_value={'title': 'When Nothing W...t-resistant conditions'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-blog_outlines.0
-  Input should be a valid string [type=string_type, input_value={'title': "Why Traditiona...om St. Louis clients'}]}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-blog_outlines.1
-  Input should be a valid string [type=string_type, input_value={'title': "Anxiety Isn't ...surable improvements'}]}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-blog_outlines.2
-  Input should be a valid string [type=string_type, input_value={'title': 'Trauma Recover... client testimonials'}]}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-blog_outlines.3
-  Input should be a valid string [type=string_type, input_value={'title': "Neurodiversity...emotional regulation'}]}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-blog_outlines.4
-  Input should be a valid string [type=string_type, input_value={'title': 'When Nothing W...ence-based solutions'}]}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/string_type
-talking_points
-  Input should be a valid list [type=list_type, input_value={'ADHD': "ADHD is not jus...e root of the problem."}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/list_type
-expert_quotes
-  Input should be a valid list [type=list_type, input_value={'ADHD': "For years, we'v...ty to change and heal."}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/list_type
-statistics
-  Input should be a valid list [type=list_type, input_value={'ADHD': '75% of adults w...raditional approaches.'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/list_type
-case_studies
-  Input should be a valid list [type=list_type, input_value={'ADHD': 'Meet Sarah, a 3...toms in just 12 weeks.'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/list_type
-how_to_guides
-  Input should be a valid list [type=list_type, input_value={'ADHD': '1. Track your f...ifestyle interventions'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/list_type
-myth_busting
-  Input should be a valid list [type=list_type, input_value={'ADHD': 'Myth: ADHD is j...ditional methods fail."}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/list_type
-2025-10-29 13:19:29,330 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
-2025-10-29 13:19:29,330 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
-2025-10-29 13:19:29,330 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:19:31,080 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:19:31,080 - src.synthesis.ollama_client - INFO - Generated response length: 80 characters
-2025-10-29 13:19:31,080 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
-{"error": "No clinical data provided. Please provide clinical data to proceed."}
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
-2025-10-29 13:19:31,081 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
-2025-10-29 13:19:33,392 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - INFO - Generated response length: 108 characters
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
-2025-10-29 13:19:33,392 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+# === OCTOBER 29, 2025 PROCESSING ACTIVITY ===
+# Sample entries showing processing on October 29th (first 250 entries)2025-10-29 00:02:54,724 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:02:54,724 - src.synthesis.ollama_client - INFO - Generated response length: 10857 characters
+2025-10-29 00:02:54,724 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:02:54,725 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:02:54,725 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
+2025-10-29 00:02:54,725 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
+2025-10-29 00:02:54,725 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:02:54,725 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:05:27,742 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:05:27,742 - src.synthesis.ollama_client - INFO - Generated response length: 8287 characters
+2025-10-29 00:05:27,742 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:05:27,743 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:05:29,223 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:05:29,223 - src.synthesis.ollama_client - INFO - Generated response length: 55 characters
+2025-10-29 00:05:29,223 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:05:29,224 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:05:29,224 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:05:29,224 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
+2025-10-29 00:05:29,224 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:05:29,224 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:05:30,795 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:05:30,795 - src.synthesis.ollama_client - INFO - Generated response length: 52 characters
+2025-10-29 00:05:30,795 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:05:30,795 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:05:30,795 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
+2025-10-29 00:05:30,796 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7999999999999999
+2025-10-29 00:05:30,796 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:05:30,796 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:07:02,322 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:07:02,322 - src.synthesis.ollama_client - INFO - Generated response length: 3918 characters
+2025-10-29 00:07:02,322 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:07:02,322 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:07:02,322 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
+2025-10-29 00:07:02,322 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:07:02,323 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
+2025-10-29 00:07:02,323 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:07:02,323 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:07:02,323 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:07:19,533 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - INFO - Generated response length: 970 characters
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - WARNING - All 7 list fields are empty - may indicate poor LLM output
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:07:19,534 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:10:55,405 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:10:55,405 - src.synthesis.ollama_client - INFO - Generated response length: 11466 characters
+2025-10-29 00:10:55,405 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:10:55,405 - src.synthesis.ollama_client - INFO - Unwrapped nested object to match schema
+2025-10-29 00:10:55,405 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: 8 validation errors for ContentCreationIdeas
+2025-10-29 00:10:55,406 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7999999999999999
+2025-10-29 00:10:55,406 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:10:55,406 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:13:36,856 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:13:36,856 - src.synthesis.ollama_client - INFO - Generated response length: 7415 characters
+2025-10-29 00:13:36,856 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:13:36,856 - src.synthesis.ollama_client - WARNING - All 7 list fields are empty - may indicate poor LLM output
+2025-10-29 00:13:36,856 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
+2025-10-29 00:13:36,857 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:13:36,857 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
+2025-10-29 00:13:36,857 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:13:36,857 - src.agents.base_agent - INFO - Agent FounderVoiceAgent completed successfully
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - ✅ Agent founder_voice completed successfully
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - 📊 Agent founder_voice result keys: ['marketing_content', 'seo_content', 'website_copy', 'blog_content', 'social_media_content', 'content_creation_ideas', 'agent_name', 'processing_timestamp']
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: context_rag
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'enhanced_data']
+2025-10-29 00:13:36,857 - src.agents.base_agent - INFO - Agent ContextRAG starting processing
+2025-10-29 00:13:36,857 - src.agents.base_agent - INFO - Agent ContextRAG completed successfully
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - ✅ Agent context_rag completed successfully
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - 📊 Agent context_rag result keys: ['context_enhanced', 'st_louis_relevance', 'regional_context']
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: marketing_seo
+2025-10-29 00:13:36,857 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'final_context']
+2025-10-29 00:13:36,857 - src.agents.base_agent - INFO - Agent MarketingSEO starting processing
+2025-10-29 00:13:36,857 - src.synthesis.ollama_client - INFO - Generating response with model: llama3.1:8b
+2025-10-29 00:13:41,077 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:13:41,078 - src.synthesis.ollama_client - INFO - Generated response length: 1260 characters
+2025-10-29 00:13:41,109 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: qwen3:32b
+2025-10-29 00:13:41,109 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:13:41,109 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:14:06,547 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:14:06,548 - src.synthesis.ollama_client - INFO - Generated response length: 1216 characters
+2025-10-29 00:14:06,548 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:14:06,548 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
+2025-10-29 00:14:06,548 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:14:06,548 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:14:09,619 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:14:09,619 - src.synthesis.ollama_client - INFO - Generated response length: 151 characters
+2025-10-29 00:14:09,619 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:14:09,619 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
+2025-10-29 00:14:09,619 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:14:09,620 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.4
+2025-10-29 00:14:09,620 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:14:09,620 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:14:50,519 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:14:50,520 - src.synthesis.ollama_client - INFO - Generated response length: 2385 characters
+2025-10-29 00:14:50,520 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:14:50,520 - src.synthesis.ollama_client - INFO - Successfully validated response with 5 keys
+2025-10-29 00:14:50,520 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:14:50,520 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:15:03,758 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:15:03,759 - src.synthesis.ollama_client - INFO - Generated response length: 522 characters
+2025-10-29 00:15:03,759 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:15:03,759 - src.synthesis.ollama_client - INFO - Successfully validated response with 3 keys
+2025-10-29 00:15:03,759 - src.agents.base_agent - INFO - Agent MarketingSEO completed successfully
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - ✅ Agent marketing_seo completed successfully
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - 📊 Agent marketing_seo result keys: ['marketing_content', 'seo_content', 'generation_quality', 'schema_org_seo']
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: validation
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'complete_output']
+2025-10-29 00:15:03,759 - src.agents.base_agent - INFO - Agent Validation starting processing
+2025-10-29 00:15:03,759 - src.agents.base_agent - INFO - Agent Validation completed successfully
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - ✅ Agent validation completed successfully
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - 📊 Agent validation result keys: ['quality_scores', 'confidence_scoring', 'final_validation']
+2025-10-29 00:15:03,759 - src.agents.supervisor_agent - INFO - ✅ Document research_report_neurodiversity_human_variation_epigenetics processed successfully in 1961.78s
+2025-10-29 00:15:03,759 - __main__ - INFO - ⏱️ Supervisor processing completed in 1961.78s
+2025-10-29 00:15:03,759 - __main__ - INFO - 🔄 Converting result to knowledge entry for research_report_neurodiversity_human_variation_epigenetics
+2025-10-29 00:15:03,762 - __main__ - INFO - ✅ Document research_report_neurodiversity_human_variation_epigenetics processed successfully in 1961.78s
+2025-10-29 00:15:03,762 - __main__ - INFO - ✅ Successfully processed: research_report_neurodiversity_human_variation_epigenetics.pdf
+2025-10-29 00:15:03,782 - __main__ - INFO - 💾 Progress saved: 55/344 documents processed
+2025-10-29 00:15:03,782 - __main__ - INFO - 📖 Processing file 56/344: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:15:03,782 - __main__ - INFO - 🧠 Starting multi-agent processing: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md
+2025-10-29 00:15:03,782 - __main__ - INFO - 📄 Extracting text from PDF: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:15:03,782 - __main__ - INFO - 📄 Extracting text from: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf (attempt 1)
+2025-10-29 00:15:03,789 - src.extraction.enhanced_pdf_extractor - INFO - Starting enhanced extraction for enlitens_corpus/input_pdfs/MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:15:03,790 - docling.datamodel.document - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+2025-10-29 00:15:03,790 - docling.document_converter - INFO - Going to convert document batch...
+2025-10-29 00:15:03,790 - docling.pipeline.base_pipeline - INFO - Processing document MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:15:04,732 - docling.document_converter - INFO - Finished converting document MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf in 0.94 sec.
+2025-10-29 00:15:04,741 - src.extraction.enhanced_pdf_extractor - INFO - Enhanced extraction completed for enlitens_corpus/input_pdfs/MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:15:04,741 - __main__ - INFO - ✅ Successfully extracted 12146 characters from MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:15:04,742 - __main__ - INFO - ✅ Text extracted successfully: 12146 characters
+2025-10-29 00:15:04,742 - __main__ - INFO - 🔧 Creating processing context for MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md
+2025-10-29 00:15:04,742 - src.extraction.enhanced_extraction_tools - INFO - Analyzing 1 client intakes
+2025-10-29 00:15:04,744 - src.extraction.enhanced_extraction_tools - INFO - Auto-chunked single text into 8 samples for topic discovery
+2025-10-29 00:15:04,810 - src.extraction.enhanced_extraction_tools - ERROR - Error discovering topics: There needs to be more than 1 sample to build nearest the neighbors graph
+2025-10-29 00:15:09,297 - src.extraction.enhanced_extraction_tools - INFO - Sentiment analysis completed: compound=1.000
+2025-10-29 00:15:19,247 - src.extraction.enhanced_extraction_tools - INFO - Extracted 20 semantic keywords
+2025-10-29 00:15:19,250 - src.extraction.enhanced_extraction_tools - INFO - Analyzing 1 founder transcripts
+2025-10-29 00:15:19,566 - src.extraction.enhanced_extraction_tools - INFO - Auto-chunked single text into 8 samples for topic discovery
+2025-10-29 00:15:19,823 - src.extraction.enhanced_extraction_tools - ERROR - Error discovering topics: There needs to be more than 1 sample to build nearest the neighbors graph
+2025-10-29 00:16:32,888 - src.extraction.enhanced_extraction_tools - INFO - Sentiment analysis completed: compound=1.000
+2025-10-29 00:17:08,378 - src.extraction.enhanced_extraction_tools - INFO - Extracted 30 semantic keywords
+2025-10-29 00:17:08,378 - __main__ - INFO - ✅ Processing context created
+2025-10-29 00:17:08,378 - __main__ - INFO - 🚀 Starting supervisor processing for MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md
+2025-10-29 00:17:08,378 - src.agents.supervisor_agent - INFO - 🎯 Supervisor starting document processing: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md
+2025-10-29 00:17:08,378 - src.agents.supervisor_agent - INFO - 📝 Document text length: 12146 characters
+2025-10-29 00:17:08,378 - src.agents.supervisor_agent - INFO - 🔬 Stage 1: Starting science extraction
+2025-10-29 00:17:08,378 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: science_extraction
+2025-10-29 00:17:08,379 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results']
+2025-10-29 00:17:08,379 - src.agents.base_agent - INFO - Agent ScienceExtraction starting processing
+2025-10-29 00:17:08,379 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:17:08,379 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:20:03,630 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:20:03,630 - src.synthesis.ollama_client - INFO - Generated response length: 8351 characters
+2025-10-29 00:20:03,630 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:20:03,630 - src.synthesis.ollama_client - INFO - Successfully validated response with 9 keys
+2025-10-29 00:20:03,631 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:20:03,631 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:20:15,366 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:20:15,367 - src.synthesis.ollama_client - INFO - Generated response length: 345 characters
+2025-10-29 00:20:15,367 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:20:15,367 - src.synthesis.ollama_client - INFO - Successfully validated response with 8 keys
+2025-10-29 00:20:15,367 - src.agents.base_agent - INFO - Agent ScienceExtraction completed successfully
+2025-10-29 00:20:15,367 - src.agents.supervisor_agent - INFO - ✅ Agent science_extraction completed successfully
+2025-10-29 00:20:15,367 - src.agents.supervisor_agent - INFO - 📊 Agent science_extraction result keys: ['research_content', 'extraction_quality', 'neuro_mechanisms']
+2025-10-29 00:20:15,367 - src.agents.supervisor_agent - INFO - ✅ Stage 1: Science extraction completed
+2025-10-29 00:20:15,367 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: clinical_synthesis
+2025-10-29 00:20:15,367 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'science_data']
+2025-10-29 00:20:15,367 - src.agents.base_agent - INFO - Agent ClinicalSynthesis starting processing
+2025-10-29 00:20:15,367 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:20:15,367 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:20:20,040 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:20:20,040 - src.synthesis.ollama_client - INFO - Generated response length: 201 characters
+2025-10-29 00:20:20,040 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:20:20,040 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:20:20,041 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:20:20,041 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.5
+2025-10-29 00:20:20,041 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:20:20,041 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:20:24,650 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - INFO - Generated response length: 204 characters
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:20:24,651 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:20:29,031 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - INFO - Generated response length: 201 characters
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:20:29,031 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:20:56,739 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:20:56,739 - src.synthesis.ollama_client - INFO - Generated response length: 1431 characters
+2025-10-29 00:20:56,740 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:20:56,740 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
+2025-10-29 00:20:56,740 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:20:56,740 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:21:16,386 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:21:16,387 - src.synthesis.ollama_client - INFO - Generated response length: 990 characters
+2025-10-29 00:21:16,387 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:21:16,387 - src.synthesis.ollama_client - INFO - Successfully validated response with 5 keys
+2025-10-29 00:21:16,387 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:21:16,387 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:21:45,450 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:21:45,451 - src.synthesis.ollama_client - INFO - Generated response length: 1660 characters
+2025-10-29 00:21:45,451 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:21:45,451 - src.synthesis.ollama_client - INFO - Successfully validated response with 2 keys
+2025-10-29 00:21:45,451 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:21:45,451 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:22:17,516 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:22:17,517 - src.synthesis.ollama_client - INFO - Generated response length: 1845 characters
+2025-10-29 00:22:17,517 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:22:17,517 - src.synthesis.ollama_client - INFO - Successfully validated response with 1 keys
+2025-10-29 00:22:17,517 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:22:17,517 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:22:56,372 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:22:56,372 - src.synthesis.ollama_client - INFO - Generated response length: 2446 characters
+2025-10-29 00:22:56,372 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:22:56,373 - src.synthesis.ollama_client - INFO - Successfully validated response with 3 keys
+2025-10-29 00:22:56,373 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:22:56,373 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:23:11,004 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:23:11,005 - src.synthesis.ollama_client - INFO - Generated response length: 590 characters
+2025-10-29 00:23:11,005 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:23:11,005 - src.synthesis.ollama_client - INFO - Successfully validated response with 2 keys
+2025-10-29 00:23:11,005 - src.agents.base_agent - WARNING - Agent ClinicalSynthesis output validation failed
+2025-10-29 00:23:11,005 - src.agents.supervisor_agent - WARNING - ⚠️ Agent clinical_synthesis returned empty results
+2025-10-29 00:23:11,005 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: founder_voice
+2025-10-29 00:23:11,005 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'clinical_data']
+2025-10-29 00:23:11,005 - src.agents.base_agent - INFO - Agent FounderVoiceAgent starting processing
+2025-10-29 00:23:11,005 - src.agents.founder_voice_agent - INFO - 🎙️ Founder Voice Agent processing: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md
+2025-10-29 00:23:11,037 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: llama3.1:8b
+2025-10-29 00:23:11,038 - src.synthesis.ollama_client - INFO - Generating response with model: llama3.1:8b
+2025-10-29 00:23:18,136 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:23:18,137 - src.synthesis.ollama_client - INFO - Generated response length: 2364 characters
+2025-10-29 00:23:18,137 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:23:18,137 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:23:54,107 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:23:54,107 - src.synthesis.ollama_client - INFO - Generated response length: 1593 characters
+2025-10-29 00:23:54,107 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:23:54,107 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
+2025-10-29 00:23:54,108 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:23:54,108 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:24:00,557 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - INFO - Generated response length: 298 characters
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.4
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:24:00,558 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:24:25,572 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:24:25,573 - src.synthesis.ollama_client - INFO - Generated response length: 1221 characters
+2025-10-29 00:24:25,573 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:24:25,573 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
+2025-10-29 00:24:25,573 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:24:25,573 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:24:48,499 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - INFO - Generated response length: 1059 characters
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.5
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:24:48,499 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:25:12,900 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - INFO - Generated response length: 1479 characters
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - WARNING - All 6 list fields are empty - may indicate poor LLM output
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:25:12,901 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:26:51,517 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - INFO - Generated response length: 5121 characters
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: 5 validation errors for WebsiteCopy
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - ERROR - Final error: 5 validation errors for WebsiteCopy
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:26:51,518 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:26:55,018 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - INFO - Generated response length: 163 characters
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.6
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:26:55,019 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:31:55,120 - src.synthesis.ollama_client - ERROR - Ollama request failed: 
+2025-10-29 00:31:55,120 - src.synthesis.ollama_client - INFO - Direct parsing failed, attempting JSON repair
+2025-10-29 00:31:55,120 - src.synthesis.ollama_client - INFO - JSON repair successful
+2025-10-29 00:31:55,120 - src.synthesis.ollama_client - ERROR - Coerced data is not a dictionary: type=<class 'str'>, value=
+2025-10-29 00:31:55,120 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: Expected dict after coercion, got str
+2025-10-29 00:31:55,121 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
+2025-10-29 00:31:55,121 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:31:55,121 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:32:03,019 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - INFO - Generated response length: 381 characters
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: All list fields are empty - no content generated
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - ERROR - Final error: All list fields are empty - no content generated
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:32:03,019 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:34:51,115 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - INFO - Generated response length: 6251 characters
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - WARNING - Attempt 1 failed: All list fields are empty - no content generated
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - INFO - Attempt 2/3 for structured generation
+2025-10-29 00:34:51,116 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:34:52,323 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - INFO - Generated response length: 37 characters
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - WARNING - All 8 list fields are empty - may indicate poor LLM output
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - WARNING - Attempt 2 failed: All list fields are empty - no content generated
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - INFO - Retrying with temperature 0.7999999999999999
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - INFO - Attempt 3/3 for structured generation
+2025-10-29 00:34:52,324 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - ERROR - Ollama request failed: 
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - INFO - Direct parsing failed, attempting JSON repair
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - INFO - JSON repair successful
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - ERROR - Coerced data is not a dictionary: type=<class 'str'>, value=
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - WARNING - Attempt 3 failed: Expected dict after coercion, got str
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - ERROR - All 3 attempts failed for structured generation
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - ERROR - Final error: Expected dict after coercion, got str
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - ERROR - Full LLM response on final attempt:
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:39:52,425 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:41:43,268 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:41:43,268 - src.synthesis.ollama_client - INFO - Generated response length: 5888 characters
+2025-10-29 00:41:43,268 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:41:43,268 - src.synthesis.ollama_client - INFO - Successfully validated response with 14 keys
+2025-10-29 00:41:43,268 - src.agents.base_agent - INFO - Agent FounderVoiceAgent completed successfully
+2025-10-29 00:41:43,268 - src.agents.supervisor_agent - INFO - ✅ Agent founder_voice completed successfully
+2025-10-29 00:41:43,268 - src.agents.supervisor_agent - INFO - 📊 Agent founder_voice result keys: ['marketing_content', 'seo_content', 'website_copy', 'blog_content', 'social_media_content', 'content_creation_ideas', 'agent_name', 'processing_timestamp']
+2025-10-29 00:41:43,268 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: context_rag
+2025-10-29 00:41:43,269 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'enhanced_data']
+2025-10-29 00:41:43,269 - src.agents.base_agent - INFO - Agent ContextRAG starting processing
+2025-10-29 00:41:43,269 - src.agents.base_agent - INFO - Agent ContextRAG completed successfully
+2025-10-29 00:41:43,269 - src.agents.supervisor_agent - INFO - ✅ Agent context_rag completed successfully
+2025-10-29 00:41:43,269 - src.agents.supervisor_agent - INFO - 📊 Agent context_rag result keys: ['context_enhanced', 'st_louis_relevance', 'regional_context']
+2025-10-29 00:41:43,269 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: marketing_seo
+2025-10-29 00:41:43,269 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'final_context']
+2025-10-29 00:41:43,269 - src.agents.base_agent - INFO - Agent MarketingSEO starting processing
+2025-10-29 00:41:43,269 - src.synthesis.ollama_client - INFO - Generating response with model: llama3.1:8b
+2025-10-29 00:41:47,704 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:41:47,704 - src.synthesis.ollama_client - INFO - Generated response length: 1345 characters
+2025-10-29 00:41:47,735 - src.synthesis.ollama_client - INFO - OllamaClient initialized with base_url: http://localhost:11434 and default_model: qwen3:32b
+2025-10-29 00:41:47,735 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:41:47,736 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:42:15,261 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:42:15,262 - src.synthesis.ollama_client - INFO - Generated response length: 1300 characters
+2025-10-29 00:42:15,262 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:42:15,262 - src.synthesis.ollama_client - INFO - Successfully validated response with 6 keys
+2025-10-29 00:42:15,262 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:42:15,262 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:42:58,959 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:42:58,960 - src.synthesis.ollama_client - INFO - Generated response length: 2553 characters
+2025-10-29 00:42:58,960 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:42:58,960 - src.synthesis.ollama_client - INFO - Successfully validated response with 5 keys
+2025-10-29 00:42:58,960 - src.synthesis.ollama_client - INFO - Attempt 1/3 for structured generation
+2025-10-29 00:42:58,960 - src.synthesis.ollama_client - INFO - Generating response with model: qwen3:32b
+2025-10-29 00:43:02,151 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-10-29 00:43:02,151 - src.synthesis.ollama_client - INFO - Generated response length: 112 characters
+2025-10-29 00:43:02,151 - src.synthesis.ollama_client - INFO - Direct JSON parsing successful
+2025-10-29 00:43:02,151 - src.synthesis.ollama_client - INFO - Successfully validated response with 3 keys
+2025-10-29 00:43:02,151 - src.agents.base_agent - INFO - Agent MarketingSEO completed successfully
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - ✅ Agent marketing_seo completed successfully
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - 📊 Agent marketing_seo result keys: ['marketing_content', 'seo_content', 'generation_quality', 'schema_org_seo']
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - 🔄 Executing agent: validation
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - 📋 Agent context keys: ['document_id', 'document_text', 'client_insights', 'founder_insights', 'st_louis_context', 'processing_stage', 'intermediate_results', 'complete_output']
+2025-10-29 00:43:02,152 - src.agents.base_agent - INFO - Agent Validation starting processing
+2025-10-29 00:43:02,152 - src.agents.base_agent - INFO - Agent Validation completed successfully
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - ✅ Agent validation completed successfully
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - 📊 Agent validation result keys: ['quality_scores', 'confidence_scoring', 'final_validation']
+2025-10-29 00:43:02,152 - src.agents.supervisor_agent - INFO - ✅ Document MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md processed successfully in 1553.77s
+2025-10-29 00:43:02,152 - __main__ - INFO - ⏱️ Supervisor processing completed in 1553.77s
+2025-10-29 00:43:02,152 - __main__ - INFO - 🔄 Converting result to knowledge entry for MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md
+2025-10-29 00:43:02,152 - __main__ - INFO - ✅ Document MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md processed successfully in 1553.77s
+2025-10-29 00:43:02,152 - __main__ - INFO - ✅ Successfully processed: MOTTRON_2017_Critique_of_Early_Intervention_in_Autism_support_for_strengths-based_education.md.pdf
+2025-10-29 00:43:02,174 - __main__ - INFO - 💾 Progress saved: 56/344 documents processed
+2025-10-29 00:43:02,174 - __main__ - INFO - 📖 Processing file 57/344: Immune-cell-exhaustion-and-apoptotic-markers-in-major-_2025_Brain--Behavior-.pdf
