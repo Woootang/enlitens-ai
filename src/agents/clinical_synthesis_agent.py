@@ -35,37 +35,61 @@ class ClinicalSynthesisAgent(BaseAgent):
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Synthesize clinical applications from research."""
         try:
+            # Get context data
             science_data = context.get("science_data", {})
             research_content = science_data.get("research_content", {})
-            
+            document_text = context.get("document_text", "")[:5000]  # First 5000 chars
+
             prompt = f"""
-You are a clinical psychologist translating neuroscience research into therapy applications.
+You are a clinical psychologist extracting therapeutic applications from neuroscience research.
+
+DOCUMENT EXCERPT:
+{document_text}
 
 RESEARCH FINDINGS:
-{research_content.get('key_findings', [])}
+{research_content.get('findings', [])}
 
-NEUROSCIENCE MECHANISMS:
-{research_content.get('neuroscience_mechanisms', [])}
+METHODOLOGIES:
+{research_content.get('methodologies', [])}
 
-Synthesize clinical content:
-1. Treatment approaches (3-5 therapy techniques)
-2. Assessment methods (how to evaluate clients)
-3. Intervention strategies (specific interventions)
-4. Client education points (what to teach clients)
-5. Progress indicators (signs of improvement)
+CLINICAL IMPLICATIONS:
+{research_content.get('implications', [])}
 
-Return as JSON with these exact fields:
-- treatment_approaches: [list of strings]
-- assessment_methods: [list of strings]
-- intervention_strategies: [list of strings]
-- client_education: [list of strings]
-- progress_indicators: [list of strings]
+Extract and synthesize clinical content from this research. If information is not explicitly stated, infer practical applications from the research findings. Be liberal in your extraction - related concepts count!
+
+Generate content for ALL fields below:
+
+1. INTERVENTIONS: List 3-8 specific therapeutic interventions or techniques that could be applied based on this research. Include evidence-based practices, neuroscience-informed approaches, and practical therapy techniques.
+
+2. ASSESSMENTS: List 3-8 assessment methods or evaluation tools that would be relevant. Include diagnostic tools, measurement instruments, observational methods, and screening approaches.
+
+3. OUTCOMES: List 3-8 expected clinical outcomes or treatment goals. What changes should clients experience? Include behavioral, cognitive, emotional, and neurobiological outcomes.
+
+4. PROTOCOLS: List 3-8 treatment protocols or structured approaches. Include session structures, treatment phases, or therapeutic frameworks that could be used.
+
+5. GUIDELINES: List 3-8 clinical guidelines or best practices. Include recommendations for implementation, ethical considerations, and evidence-based standards.
+
+6. CONTRAINDICATIONS: List 3-8 contraindications or situations where caution is needed. When should these approaches NOT be used? Who should avoid them?
+
+7. SIDE EFFECTS: List 3-8 potential side effects or risks to monitor. What could go wrong? What should therapists watch for?
+
+8. MONITORING: List 3-8 monitoring approaches or progress indicators. How should therapists track progress? What metrics matter?
+
+IMPORTANT:
+- Extract liberally - if research mentions anxiety, include anxiety assessment tools and interventions
+- Infer practical applications from theoretical findings
+- Each list should have 3-8 items minimum
+- Use plain language, no numbering or bullet points in strings
+- If a field seems not applicable, still provide related content (e.g., general best practices)
+
+Return as JSON with these EXACT field names:
+{{"interventions": [list], "assessments": [list], "outcomes": [list], "protocols": [list], "guidelines": [list], "contraindications": [list], "side_effects": [list], "monitoring": [list]}}
 """
 
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ClinicalContent,
-                temperature=0.4,
+                temperature=0.7,  # Increased for better generation
                 max_retries=3
             )
 

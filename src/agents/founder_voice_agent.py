@@ -315,9 +315,18 @@ Position Enlitens as the neuroscience alternative to traditional therapy.
                                    context: Dict[str, Any]) -> WebsiteCopy:
         """Generate website copy that converts visitors to clients."""
         try:
+            document_text = context.get("document_text", "")
+            summary = self._summarize_research(document_text, max_chars=1500)
+
             prompt = f"""
 You are Liz Wooten writing website copy that converts St. Louis visitors into clients.
 Your website needs to speak directly to people who've tried traditional therapy and want something different.
+
+RESEARCH CONTEXT:
+{summary}
+
+CLINICAL INSIGHTS:
+{clinical_data}
 
 Website Goals:
 - Convert visitors who are frustrated with traditional approaches
@@ -326,34 +335,41 @@ Website Goals:
 - Build trust through authenticity and expertise
 - Address objections and skepticism
 
-Clinical Data:
-{clinical_data}
-
 St. Louis Context:
 - Clients often feel misunderstood by traditional providers
 - Many have treatment-resistant conditions
 - They want practical help, not just "coping skills"
 - Skeptical of "one size fits all" approaches
 
-Generate website copy:
+Generate website copy for ALL sections below (3-8 items per section):
 
-1. ABOUT SECTIONS: "About Enlitens" that tells your story
-2. FEATURE DESCRIPTIONS: What makes your approach different
-3. BENEFIT STATEMENTS: Clear outcomes clients will experience
-4. TESTIMONIALS: Client success stories in their own words
-5. FAQ CONTENT: Answer common objections and questions
-6. SERVICE DESCRIPTIONS: Specific services with neuroscience focus
+1. ABOUT SECTIONS: "About Enlitens" paragraphs that tell your story, explain your approach, and connect with frustrated clients. Include origin story, philosophy, and differentiation.
 
-Write as Liz - direct, authentic, and compelling.
-Show you understand their frustration with traditional therapy.
-Present neuroscience as the evidence-based alternative.
-Make it impossible to ignore the difference.
+2. FEATURE DESCRIPTIONS: Specific features that make your neuroscience approach different from traditional therapy. Include methodology, assessment process, treatment approach, and unique offerings.
+
+3. BENEFIT STATEMENTS: Clear, concrete outcomes clients will experience. Include emotional, cognitive, behavioral, and relationship benefits. Be specific!
+
+4. TESTIMONIALS: Sample client success stories in their own words. Create realistic testimonials based on common client outcomes. Include before/after narratives.
+
+5. FAQ CONTENT: Answer common objections and questions like "How is this different from regular therapy?", "Does insurance cover this?", "How long does treatment take?", etc.
+
+6. SERVICE DESCRIPTIONS: Specific services with neuroscience focus. Include ADHD support, anxiety treatment, trauma therapy, autism assessment, etc. Make each compelling and specific.
+
+IMPORTANT:
+- Each section needs 3-8 substantial items
+- Use Liz's direct, authentic voice
+- Ground everything in neuroscience from the research
+- Address real client pain points
+- Show understanding before offering solutions
+- Each item should be a complete paragraph or statement
+
+Return JSON with fields: about_sections, feature_descriptions, benefit_statements, testimonials, faq_content, service_descriptions
 """
 
             response = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=WebsiteCopy,
-                temperature=0.4,
+                temperature=0.6,  # Increased for better generation
                 max_retries=3
             )
 
@@ -367,9 +383,18 @@ Make it impossible to ignore the difference.
                                    context: Dict[str, Any]) -> BlogContent:
         """Generate blog content that establishes thought leadership."""
         try:
+            document_text = context.get("document_text", "")
+            summary = self._summarize_research(document_text, max_chars=1500)
+
             prompt = f"""
 You are Liz Wooten writing blog content that positions Enlitens as the neuroscience therapy leader in St. Louis.
 Your blog should educate, challenge traditional approaches, and drive inquiries.
+
+RESEARCH CONTEXT:
+{summary}
+
+CLINICAL INSIGHTS:
+{clinical_data}
 
 Blog Strategy:
 - Establish expertise in neuroscience-based therapy
@@ -378,9 +403,6 @@ Blog Strategy:
 - Drive calls-to-action naturally
 - Target specific St. Louis mental health concerns
 
-Clinical Data:
-{clinical_data}
-
 Content Focus:
 - ADHD and executive function challenges
 - Anxiety and emotional regulation
@@ -388,27 +410,39 @@ Content Focus:
 - Autism and neurodiversity
 - Treatment-resistant conditions
 
-Generate blog content:
+Generate blog content for ALL sections below (5-10 items per section):
 
-1. ARTICLE IDEAS: Topics that address real client questions
-2. BLOG OUTLINES: Structured posts with clear value
-3. TALKING POINTS: Key messages for each article
-4. EXPERT QUOTES: Liz's authentic voice on important topics
-5. STATISTICS: Research findings to support your approach
-6. CASE STUDIES: Anonymous client success stories
-7. HOW-TO GUIDES: Practical neuroscience-based strategies
-8. MYTH BUSTING: Challenging traditional therapy assumptions
+1. ARTICLE IDEAS: Complete blog post titles that address real client questions. Make them specific, actionable, and SEO-friendly. Examples: "Why Your ADHD Meds Stopped Working (And What Neuroscience Says to Do Next)"
 
-Write as Liz - authoritative, rebellious, and helpful.
-Make complex neuroscience accessible and actionable.
-Always connect back to real client outcomes.
-End with clear calls-to-action.
+2. BLOG OUTLINES: Full blog post outlines with intro, 3-5 main points, conclusion, and CTA. Make each outline comprehensive enough to write from.
+
+3. TALKING POINTS: Key messages for articles. Each should be a complete sentence that could become a section header or pull quote. Ground in neuroscience from the research.
+
+4. EXPERT QUOTES: Liz's authentic voice on important topics. Write first-person quotes as Liz would say them. Make them quotable and shareable. Include bold perspectives.
+
+5. STATISTICS: Research findings and numbers to support your approach. Include percentages, study results, client outcomes, etc. Ground in actual research when possible.
+
+6. CASE STUDIES: Anonymous client success stories showing before/after transformation. Include presenting problem, neuroscience explanation, intervention approach, and outcomes.
+
+7. HOW-TO GUIDES: Practical neuroscience-based strategies clients can try. Step-by-step guides like "5-Minute Brain Reset for Anxiety" or "Executive Function Hack for ADHD."
+
+8. MYTH BUSTING: Challenge traditional therapy assumptions. Format: "Myth: [common belief]. Reality: [neuroscience truth]. What This Means: [practical implication]"
+
+IMPORTANT:
+- Each section needs 5-10 substantial items
+- Be specific and actionable, not generic
+- Use Liz's rebellious, direct voice
+- Ground everything in neuroscience
+- Make it shareable and valuable
+- Include clear next steps
+
+Return JSON with fields: article_ideas, blog_outlines, talking_points, expert_quotes, statistics, case_studies, how_to_guides, myth_busting
 """
 
             response = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=BlogContent,
-                temperature=0.5,
+                temperature=0.65,  # Increased for better creative content
                 max_retries=3
             )
 
