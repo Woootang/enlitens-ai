@@ -108,12 +108,14 @@ Return as JSON with these EXACT field names:
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the synthesized clinical content."""
         clinical_content = output.get("clinical_content", {})
-        
+
+        # Check for correct field names matching ClinicalContent schema
         has_content = any([
-            clinical_content.get("treatment_approaches"),
-            clinical_content.get("intervention_strategies")
+            clinical_content.get("interventions"),
+            clinical_content.get("assessments"),
+            clinical_content.get("outcomes")
         ])
-        
+
         return has_content
 
     async def cleanup(self):
