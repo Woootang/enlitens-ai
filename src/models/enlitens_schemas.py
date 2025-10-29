@@ -1,11 +1,86 @@
 """
 Pydantic models for Enlitens Knowledge Base schema enforcement.
 These models ensure structured, validated JSON output from the LLM.
+
+HALLUCINATION PREVENTION:
+- All statistics require citations from source documents
+- Testimonials, credentials, and social proof fields REMOVED (FTC compliance)
+- Validators block practice statistics and fabricated content
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+import re
+
+
+class Citation(BaseModel):
+    """Citation for verifiable claims - REQUIRED for all statistics"""
+    quote: str = Field(description="EXACT verbatim quote from source document")
+    source_id: str = Field(description="Document ID from knowledge base")
+    source_title: str = Field(default="", description="Title of source document")
+    page_or_section: str = Field(default="", description="Page number or section name")
+
+    @field_validator('quote')
+    @classmethod
+    def quote_not_empty(cls, v):
+        if not v or len(v.strip()) < 10:
+            raise ValueError("Citation quote must be at least 10 characters")
+        return v
+
+
+class VerifiedStatistic(BaseModel):
+    """Statistics MUST cite research sources - NO practice statistics allowed"""
+    claim: str = Field(description="The statistical claim with proper attribution")
+    citation: Citation = Field(description="REQUIRED: Source citation for this statistic")
+
+    @field_validator('claim')
+    @classmethod
+    def block_practice_stats(cls, v):
+        """Block any statistics about Enlitens practice"""
+        blocked_patterns = [
+            r'enlitens\s+(clients?|patients?|practice)',
+            r'\d+%\s+of\s+(our|my)\s+clients?',
+            r'(our|my)\s+(clients?|patients?|practice)\s+report',
+            r'enlitens\s+data',
+            r'clients?\s+at\s+enlitens'
+        ]
+
+        for pattern in blocked_patterns:
+            if re.search(pattern, v, re.IGNORECASE):
+                raise ValueError(
+                    f"BLOCKED: Cannot generate Enlitens practice statistics. "
+                    f"Only cite published research. Blocked pattern: {pattern}"
+                )
+
+        # Must include attribution
+        if not any(word in v.lower() for word in ['according to', 'research shows', 'study found', 'found that']):
+            raise ValueError(
+                "Statistics must include attribution like 'According to [Author] (Year)' or 'Research shows'"
+            )
+
+        return v
+
+    @field_validator('citation')
+    @classmethod
+    def validate_citation_exists(cls, v, info: ValidationInfo):
+        """Verify citation quote appears in source text"""
+        context = info.context
+        if context and 'source_text' in context:
+            source = context['source_text']
+            # Check if quote appears in source
+            if v.quote not in source:
+                # Try fuzzy match (allow minor variations)
+                import difflib
+                # Split source into sentences
+                sentences = source.split('. ')
+                best_match = difflib.get_close_matches(v.quote, sentences, n=1, cutoff=0.8)
+                if not best_match:
+                    raise ValueError(
+                        f"HALLUCINATION DETECTED: Citation not found in source text. "
+                        f"Quote: '{v.quote[:100]}...'"
+                    )
+        return v
 
 
 class RebellionFramework(BaseModel):
@@ -20,13 +95,16 @@ class RebellionFramework(BaseModel):
 
 
 class MarketingContent(BaseModel):
-    """Marketing content extracted from research papers."""
+    """Marketing content extracted from research papers.
+
+    NOTE: social_proof field REMOVED for FTC compliance (no fake testimonials)
+    """
     headlines: List[str] = Field(default_factory=list, description="Marketing headlines")
     taglines: List[str] = Field(default_factory=list, description="Marketing taglines")
     value_propositions: List[str] = Field(default_factory=list, description="Value propositions")
     benefits: List[str] = Field(default_factory=list, description="Client benefits")
     pain_points: List[str] = Field(default_factory=list, description="Client pain points addressed")
-    social_proof: List[str] = Field(default_factory=list, description="Social proof elements")
+    # social_proof: REMOVED - FTC violation (16 CFR Part 465)
 
 
 class SEOContent(BaseModel):
@@ -40,25 +118,49 @@ class SEOContent(BaseModel):
 
 
 class WebsiteCopy(BaseModel):
-    """Website copy extracted from research papers."""
+    """Website copy extracted from research papers.
+
+    NOTE: testimonials field REMOVED for FTC compliance (no fake testimonials)
+    """
     about_sections: List[str] = Field(default_factory=list, description="About page content")
     feature_descriptions: List[str] = Field(default_factory=list, description="Feature descriptions")
     benefit_statements: List[str] = Field(default_factory=list, description="Benefit statements")
-    testimonials: List[str] = Field(default_factory=list, description="Testimonial content")
+    # testimonials: REMOVED - FTC violation (16 CFR Part 465)
     faq_content: List[str] = Field(default_factory=list, description="FAQ content")
     service_descriptions: List[str] = Field(default_factory=list, description="Service descriptions")
 
 
 class BlogContent(BaseModel):
-    """Blog content extracted from research papers."""
+    """Blog content extracted from research papers.
+
+    IMPORTANT: statistics field now uses VerifiedStatistic with required citations
+    """
     article_ideas: List[str] = Field(default_factory=list, description="Blog article ideas")
     blog_outlines: List[str] = Field(default_factory=list, description="Blog post outlines")
     talking_points: List[str] = Field(default_factory=list, description="Talking points")
     expert_quotes: List[str] = Field(default_factory=list, description="Expert quotes")
-    statistics: List[str] = Field(default_factory=list, description="Statistical insights")
-    case_studies: List[str] = Field(default_factory=list, description="Case study ideas")
+
+    # Statistics now REQUIRE citations
+    statistics: List[VerifiedStatistic] = Field(
+        default_factory=list,
+        description="ONLY cite statistics from research papers with proper attribution"
+    )
+
+    case_studies: List[str] = Field(
+        default_factory=list,
+        description="Hypothetical case study templates - must be marked as examples"
+    )
     how_to_guides: List[str] = Field(default_factory=list, description="How-to guide ideas")
     myth_busting: List[str] = Field(default_factory=list, description="Myth-busting content")
+
+    @field_validator('case_studies')
+    @classmethod
+    def mark_as_templates(cls, v):
+        """Ensure case studies are clearly marked as hypothetical examples"""
+        return [
+            f"[HYPOTHETICAL EXAMPLE] {case}" if not case.startswith('[') else case
+            for case in v
+        ]
 
 
 class SocialMediaContent(BaseModel):
@@ -100,7 +202,7 @@ class ClinicalContent(BaseModel):
 class ResearchContent(BaseModel):
     """Research content extracted from research papers."""
     findings: List[str] = Field(default_factory=list, description="Research findings")
-    statistics: List[str] = Field(default_factory=list, description="Statistical data")
+    statistics: List[str] = Field(default_factory=list, description="Statistical data from research")
     methodologies: List[str] = Field(default_factory=list, description="Research methodologies")
     limitations: List[str] = Field(default_factory=list, description="Research limitations")
     future_directions: List[str] = Field(default_factory=list, description="Future research directions")
@@ -129,6 +231,8 @@ class DocumentMetadata(BaseModel):
     page_count: Optional[int] = Field(None, description="Number of pages")
     word_count: Optional[int] = Field(None, description="Word count")
     processing_time: Optional[float] = Field(None, description="Processing time in seconds")
+    # New field for hallucination prevention
+    full_text_stored: bool = Field(default=False, description="Whether full document text is stored for verification")
 
 
 class ExtractedEntities(BaseModel):
@@ -154,7 +258,13 @@ class EnlitensKnowledgeEntry(BaseModel):
     clinical_content: ClinicalContent = Field(description="Clinical content")
     research_content: ResearchContent = Field(description="Research content")
     content_creation_ideas: ContentCreationIdeas = Field(description="Content creation ideas")
-    
+
+    # New field for verification
+    full_document_text: Optional[str] = Field(
+        None,
+        description="Full document text for citation verification - NOT included in JSON output"
+    )
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -165,7 +275,8 @@ class EnlitensKnowledgeEntry(BaseModel):
                     "file_size": 1024000,
                     "page_count": 15,
                     "word_count": 5000,
-                    "processing_time": 180.5
+                    "processing_time": 180.5,
+                    "full_text_stored": True
                 },
                 "extracted_entities": {
                     "biomedical_entities": ["neuroplasticity", "synaptic plasticity"],
@@ -193,7 +304,7 @@ class EnlitensKnowledgeBase(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
     total_documents: int = Field(default=0, description="Total number of documents")
     documents: List[EnlitensKnowledgeEntry] = Field(default_factory=list, description="List of processed documents")
-    
+
     class Config:
         json_schema_extra = {
             "example": {

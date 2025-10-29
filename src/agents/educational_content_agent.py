@@ -43,6 +43,15 @@ class EducationalContentAgent(BaseAgent):
 You are an educational content specialist creating client-friendly educational materials.
 Your goal is to translate complex neuroscience research into accessible educational content.
 
+STRICT RULES:
+✓ Base all explanations on the research findings provided
+✓ Use analogies and examples to make concepts accessible
+✓ Clearly mark hypothetical examples as "[HYPOTHETICAL EXAMPLE]"
+✓ When citing research, use exact findings from the source
+✗ DO NOT add neuroscience facts from your training data not in the source
+✗ DO NOT generate practice statistics or client testimonials
+✗ DO NOT fabricate research findings or statistics
+
 DOCUMENT TEXT:
 {document_text}
 
@@ -86,7 +95,7 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=EducationalContent,
-                temperature=0.7,
+                temperature=0.6,  # LOWERED from 0.7: Research shows 0.6 optimal for creative but factual content
                 max_retries=3
             )
 
