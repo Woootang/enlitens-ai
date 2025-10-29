@@ -41,12 +41,21 @@ class ScienceExtractionAgent(BaseAgent):
             text_excerpt = document_text[:8000] if len(document_text) > 8000 else document_text
 
             prompt = f"""
-You are a neuroscience research analyst extracting comprehensive scientific content.
+You are a neuroscience research analyst extracting comprehensive scientific content from academic papers.
+
+STRICT RULES:
+✓ Extract ONLY information explicitly stated in the source document
+✓ Quote exact statistics and data points - NO approximations
+✓ Include source context for all citations (author, year, page if available)
+✓ Mark any inferred implications as "Potential implication:" to distinguish from stated findings
+✗ DO NOT fabricate statistics, citations, or research findings
+✗ DO NOT add information from your training data
+✗ DO NOT approximate numbers - use exact figures from the text
 
 DOCUMENT TEXT:
 {text_excerpt}
 
-Extract ALL research content from this document. Be thorough and liberal in extraction - include both explicit statements and reasonable inferences. Even if information seems limited, extract what you can and infer related content.
+Extract ALL research content from this document. Be thorough but accurate - only include what is explicitly stated or can be directly inferred from the text.
 
 Generate content for ALL fields below:
 
@@ -67,13 +76,18 @@ Generate content for ALL fields below:
 8. REFERENCES: List 5-15 bibliographic details, reference list entries, or source materials. Extract any reference information present.
 
 IMPORTANT EXTRACTION RULES:
-- Extract liberally - related content counts!
-- If explicit information is missing, infer reasonable content from what IS present
-- Break down complex findings into multiple list items
-- Each list should have AT LEAST 3 items, preferably 5-15
-- Use clear, complete sentences
+- Extract only what is explicitly stated in the source document
+- Quote exact statistics with context - NO rounding or approximation
+- For citations, include exact author names and years as stated in document
+- For implications, distinguish between stated conclusions and potential applications
+- Each list should have AT LEAST 3 items from the source document
+- Use clear, complete sentences with exact quotes where appropriate
 - No numbering or bullet points in strings
-- Better to over-extract than under-extract!
+- Quality over quantity - accuracy is critical!
+
+STATISTICS FORMAT:
+- "According to [Author] ([Year]), [exact quoted statistic with numbers]"
+- Include context: sample size, methodology, significance levels as stated
 
 Return as JSON with these EXACT field names:
 {{"findings": [list], "statistics": [list], "methodologies": [list], "limitations": [list], "future_directions": [list], "implications": [list], "citations": [list], "references": [list]}}
@@ -82,7 +96,7 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ResearchContent,
-                temperature=0.6,  # Increased for better generation
+                temperature=0.3,  # LOWERED from 0.6: Research shows 0.3 optimal for factual extraction
                 max_retries=3
             )
 
@@ -101,14 +115,14 @@ Return as JSON with these EXACT field names:
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the extracted scientific content."""
         research_content = output.get("research_content", {})
-        
-        # Check if we have at least some content
+
+        # Check if we have at least some content matching ResearchContent schema
         has_content = any([
-            research_content.get("key_findings"),
+            research_content.get("findings"),
             research_content.get("methodologies"),
-            research_content.get("neuroscience_mechanisms")
+            research_content.get("implications")
         ])
-        
+
         return has_content
 
     async def cleanup(self):

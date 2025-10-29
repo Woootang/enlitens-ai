@@ -43,6 +43,15 @@ class RebellionFrameworkAgent(BaseAgent):
 You are applying Enlitens' proprietary Rebellion Framework to neuroscience research.
 The Rebellion Framework challenges traditional deficit-based narratives and reframes neurodivergence as adaptation and strength.
 
+STRICT RULES:
+✓ Base all reframings on actual research findings provided
+✓ Use neuroscience evidence to challenge deficit-based narratives
+✓ Distinguish between research-supported claims and creative reframing
+✓ Mark speculative strengths as "Potential strength:" when not explicitly stated in research
+✗ DO NOT fabricate neuroscience findings to support reframing
+✗ DO NOT generate practice statistics or client testimonials
+✗ DO NOT add claims not supported by the research context
+
 DOCUMENT TEXT:
 {document_text}
 
@@ -92,7 +101,7 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=RebellionFramework,
-                temperature=0.75,  # Higher for creative reframing
+                temperature=0.6,  # LOWERED from 0.75: Research shows 0.6 optimal for creative but grounded content
                 max_retries=3
             )
 

@@ -43,6 +43,14 @@ class ClinicalSynthesisAgent(BaseAgent):
             prompt = f"""
 You are a clinical psychologist extracting therapeutic applications from neuroscience research.
 
+STRICT RULES:
+✓ Extract ONLY clinical applications that can be reasonably inferred from the research
+✓ Base all interventions on stated research findings
+✓ Clearly distinguish between stated protocols and potential applications
+✗ DO NOT fabricate therapeutic protocols not supported by the research
+✗ DO NOT add clinical practices from your training data
+✗ DO NOT generate practice statistics or client outcome claims
+
 DOCUMENT EXCERPT:
 {document_text}
 
@@ -55,7 +63,7 @@ METHODOLOGIES:
 CLINICAL IMPLICATIONS:
 {research_content.get('implications', [])}
 
-Extract and synthesize clinical content from this research. If information is not explicitly stated, infer practical applications from the research findings. Be liberal in your extraction - related concepts count!
+Extract and synthesize clinical content from this research. Base all clinical applications on the research findings above. For potential applications not explicitly stated, use prefix "Potential application:"
 
 Generate content for ALL fields below:
 
@@ -89,7 +97,7 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ClinicalContent,
-                temperature=0.7,  # Increased for better generation
+                temperature=0.3,  # LOWERED from 0.7: Research shows 0.3 optimal for factual clinical content
                 max_retries=3
             )
 

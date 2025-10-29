@@ -14,7 +14,7 @@ from .base_agent import BaseAgent
 from ..synthesis.ollama_client import OllamaClient
 from ..models.enlitens_schemas import (
     MarketingContent, SEOContent, WebsiteCopy, BlogContent,
-    SocialMediaContent, ContentCreationIdeas
+    SocialMediaContent, ContentCreationIdeas, VerifiedStatistic, Citation
 )
 
 logger = logging.getLogger(__name__)
@@ -173,17 +173,19 @@ Craft bold marketing assets that turn this research into action.
 - 3-5 value propositions tying neuroscience to relief.
 - 3-5 benefits mixing emotional relief + tangible wins.
 - 3-5 pain points echoing client language.
-- 3-5 social proof lines (stats, testimonials, media, credentials).
+
+NOTE: Do NOT generate social proof, testimonials, credentials, or practice statistics (FTC violation).
+Only reference research findings from the provided context.
 
 Avoid repetition. Keep copy punchy; no bullets/numbers in strings.
-Respond with JSON matching MarketingContent schema.
+Respond with JSON matching MarketingContent schema (NO social_proof field).
 """
 
             llama_client = self.ollama_client.clone_with_model("llama3.1:8b")
 
             raw_notes = await llama_client.generate_text(
                 prompt=prompt,
-                temperature=0.75,
+                temperature=0.6,  # LOWERED from 0.75: Research optimal for creative
                 num_predict=1024
             )
             logger.debug(
@@ -201,14 +203,13 @@ You are a JSON formatter. Convert the following Liz Wooten marketing notes into 
   "taglines": [string],
   "value_propositions": [string],
   "benefits": [string],
-  "pain_points": [string],
-  "social_proof": [string]
+  "pain_points": [string]
 }}}}
 Each list must have 3-5 items. Preserve Liz's voice. Content:
 ---
 {normalized_notes}
 ---
-Respond with valid JSON only.
+Respond with valid JSON only. DO NOT include social_proof field (removed for FTC compliance).
 """
             try:
                 structured = await self.ollama_client.generate_structured_response(
@@ -365,10 +366,6 @@ Generate 3-8 paragraph-length strings for each field. Each string should be a co
     "Reduce anxiety attacks by understanding and regulating your nervous system responses rather than just managing symptoms.",
     ...
   ],
-  "testimonials": [
-    "I tried five therapists before finding Liz. Within three sessions she explained why nothing worked—my brain processes sensory input differently. The strategies she taught actually work because they target my neurobiology, not generic anxiety tips. - Sarah M.",
-    ...
-  ],
   "faq_content": [
     "Q: How is this different from regular therapy? A: Traditional therapy focuses on thoughts and behaviors. We start with your neurobiology—how your brain actually processes information—and build interventions that work with your unique wiring, not against it.",
     ...
@@ -379,6 +376,8 @@ Generate 3-8 paragraph-length strings for each field. Each string should be a co
   ]
 }}
 
+NOTE: Testimonials field REMOVED for FTC compliance (16 CFR Part 465 - no AI-generated testimonials).
+
 Use Liz's direct, authentic voice. Ground everything in neuroscience. Address real St. Louis client pain points.
 
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
@@ -387,7 +386,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             response = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=WebsiteCopy,
-                temperature=0.6,  # Increased for better generation
+                temperature=0.6,  # Research optimal for creative content (lowered from 0.7)
                 max_retries=3
             )
 
@@ -452,11 +451,11 @@ Generate 5-10 strings for each field below:
     ...
   ],
   "statistics": [
-    "Studies show 70% of ADHD clients see improvement with neuroscience-based interventions versus 40% with traditional therapy alone.",
+    {{"claim": "According to Smith et al. (2023), 67% of participants showed improved executive function after 8 weeks of neurofeedback training", "citation": {{"quote": "Sixty-seven percent of participants demonstrated statistically significant improvements in executive function measures", "source_id": "doc_id", "source_title": "Study Name", "page_or_section": "pg 12"}}}},
     ...
   ],
   "case_studies": [
-    "Client with treatment-resistant anxiety learned their symptoms were sensory processing differences. Using interoceptive awareness training and bottom-up regulation, they reduced panic attacks by 80% in 8 weeks.",
+    "[HYPOTHETICAL EXAMPLE] Client with treatment-resistant anxiety learned their symptoms were sensory processing differences. Using interoceptive awareness training and bottom-up regulation, they reduced panic attacks by 80% in 8 weeks.",
     ...
   ],
   "how_to_guides": [
@@ -469,6 +468,17 @@ Generate 5-10 strings for each field below:
   ]
 }}
 
+CRITICAL STATISTICS RULES:
+- Statistics MUST include proper citations with exact quotes from research papers
+- Format: {{"claim": "According to [Author] ([Year]), [statistic]", "citation": {{"quote": "exact quote", "source_id": "doc_id", ...}}}}
+- NEVER generate Enlitens practice statistics or client outcome data
+- Only cite published research findings from provided documents
+
+CASE STUDY RULES:
+- ALL case studies must be marked as "[HYPOTHETICAL EXAMPLE]"
+- NO real client names, testimonials, or specific practice data
+- Base examples on research findings, not fabricated scenarios
+
 Use Liz's rebellious, direct voice. Ground everything in neuroscience. Make it shareable and valuable.
 
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
@@ -477,7 +487,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             response = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=BlogContent,
-                temperature=0.65,  # Increased for better creative content
+                temperature=0.6,  # LOWERED from 0.65: Research optimal for creative content
                 max_retries=3
             )
 
