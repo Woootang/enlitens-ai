@@ -36,32 +36,53 @@ class ScienceExtractionAgent(BaseAgent):
         """Extract scientific content from the document."""
         try:
             document_text = context.get("document_text", "")
-            
+
+            # Use more text for better extraction
+            text_excerpt = document_text[:8000] if len(document_text) > 8000 else document_text
+
             prompt = f"""
-You are a neuroscience research analyst extracting key scientific findings.
+You are a neuroscience research analyst extracting comprehensive scientific content.
 
-DOCUMENT TEXT (first 5000 chars):
-{document_text[:5000]}
+DOCUMENT TEXT:
+{text_excerpt}
 
-Extract the following research content:
-1. Key findings (3-5 major discoveries or conclusions)
-2. Methodologies (research methods used)
-3. Neuroscience mechanisms (brain processes explained)
-4. Clinical implications (how this applies to therapy)
-5. Evidence strength (quality of evidence)
+Extract ALL research content from this document. Be thorough and liberal in extraction - include both explicit statements and reasonable inferences. Even if information seems limited, extract what you can and infer related content.
 
-Return as JSON with these exact fields:
-- key_findings: [list of strings]
-- methodologies: [list of strings]
-- neuroscience_mechanisms: [list of strings]
-- clinical_implications: [list of strings]
-- evidence_strength: [list of strings]
+Generate content for ALL fields below:
+
+1. FINDINGS: List 5-15 key research findings, discoveries, or conclusions. Include main results, secondary findings, interesting observations, and supporting evidence. Be comprehensive!
+
+2. STATISTICS: List 5-15 statistical data points, numbers, percentages, effect sizes, sample sizes, p-values, confidence intervals, or quantitative results. Include any numerical data mentioned.
+
+3. METHODOLOGIES: List 5-15 research methods, study designs, experimental procedures, data collection methods, analysis techniques, participant selection methods, or measurement approaches used.
+
+4. LIMITATIONS: List 3-10 study limitations, weaknesses, potential confounds, sample restrictions, methodological concerns, or areas needing further research. If not stated, infer reasonable limitations.
+
+5. FUTURE_DIRECTIONS: List 3-10 suggestions for future research, unanswered questions, areas needing investigation, or next steps mentioned or implied by the research.
+
+6. IMPLICATIONS: List 5-15 clinical implications, practical applications, therapeutic relevance, real-world applications, or how this research informs practice. Be creative in inferring applications!
+
+7. CITATIONS: List 5-15 key papers cited, author names mentioned, referenced studies, or important sources. Extract any citation information present.
+
+8. REFERENCES: List 5-15 bibliographic details, reference list entries, or source materials. Extract any reference information present.
+
+IMPORTANT EXTRACTION RULES:
+- Extract liberally - related content counts!
+- If explicit information is missing, infer reasonable content from what IS present
+- Break down complex findings into multiple list items
+- Each list should have AT LEAST 3 items, preferably 5-15
+- Use clear, complete sentences
+- No numbering or bullet points in strings
+- Better to over-extract than under-extract!
+
+Return as JSON with these EXACT field names:
+{{"findings": [list], "statistics": [list], "methodologies": [list], "limitations": [list], "future_directions": [list], "implications": [list], "citations": [list], "references": [list]}}
 """
 
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ResearchContent,
-                temperature=0.3,
+                temperature=0.6,  # Increased for better generation
                 max_retries=3
             )
 

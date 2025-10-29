@@ -112,8 +112,8 @@ class OllamaClient:
         model: str = "qwen3:32b",
         temperature: float = 0.7,
         max_retries: int = 3,
-        base_num_predict: int = 2048,
-        max_num_predict: int = 4096,
+        base_num_predict: int = 4096,  # Increased default for better generation
+        max_num_predict: int = 8192,  # Increased max for complex extractions
     ) -> Optional[BaseModel]:
         """
         Generate structured response with automatic JSON repair and validation.
@@ -186,11 +186,18 @@ class OllamaClient:
                 validated_model = response_model.model_validate(parsed_data)
                 data_dict = validated_model.model_dump()
 
-                # Check if ALL lists are empty (not just ANY - some empty lists are fine)
+                # Check if ALL lists are empty (more lenient check)
                 list_values = [v for v in data_dict.values() if isinstance(v, list)]
-                if list_values and all(not v for v in list_values):
-                    logger.warning(f"All {len(list_values)} list fields are empty - may indicate poor LLM output")
-                    raise ValueError("All list fields are empty - no content generated")
+                if list_values:
+                    non_empty_count = sum(1 for v in list_values if v)
+                    empty_count = len(list_values) - non_empty_count
+
+                    # Only fail if more than 80% of lists are empty
+                    if empty_count / len(list_values) > 0.8:
+                        logger.warning(f"{empty_count}/{len(list_values)} list fields are empty - may indicate poor LLM output")
+                        raise ValueError(f"Too many empty fields: {empty_count}/{len(list_values)} lists are empty")
+                    elif empty_count > 0:
+                        logger.info(f"Partial extraction: {non_empty_count}/{len(list_values)} fields populated ({empty_count} empty)")
 
                 logger.info(f"Successfully validated response with {len(parsed_data)} keys")
                 return validated_model

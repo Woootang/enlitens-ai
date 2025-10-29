@@ -18,6 +18,8 @@ from .founder_voice_agent import FounderVoiceAgent
 from .context_rag_agent import ContextRAGAgent
 from .marketing_seo_agent import MarketingSEOAgent
 from .validation_agent import ValidationAgent
+from .educational_content_agent import EducationalContentAgent
+from .rebellion_framework_agent import RebellionFrameworkAgent
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +76,8 @@ class SupervisorAgent(BaseAgent):
             self.agents = {
                 "science_extraction": ScienceExtractionAgent(),
                 "clinical_synthesis": ClinicalSynthesisAgent(),
+                "educational_content": EducationalContentAgent(),
+                "rebellion_framework": RebellionFrameworkAgent(),
                 "founder_voice": FounderVoiceAgent(),
                 "context_rag": ContextRAGAgent(),
                 "marketing_seo": MarketingSEOAgent(),
@@ -145,43 +149,73 @@ class SupervisorAgent(BaseAgent):
             logger.info(f"✅ Stage 1: Science extraction completed")
 
             # Stage 2: Clinical Synthesis
+            logger.info(f"🏥 Stage 2: Starting clinical synthesis")
             context.processing_stage = "clinical_synthesis"
             context.intermediate_results.update(science_results)
             clinical_results = await self._execute_agent_sequentially(
                 "clinical_synthesis", context,
-                {"science_data": science_results}
+                {"science_data": science_results, "document_text": context.document_text}
             )
+            logger.info(f"✅ Stage 2: Clinical synthesis completed")
 
-            # Stage 3: Founder Voice Integration
-            context.processing_stage = "founder_voice"
+            # Stage 3: Educational Content Generation
+            logger.info(f"📚 Stage 3: Starting educational content generation")
+            context.processing_stage = "educational_content"
             context.intermediate_results.update(clinical_results)
+            educational_results = await self._execute_agent_sequentially(
+                "educational_content", context,
+                {"science_data": science_results, "clinical_content": clinical_results, "document_text": context.document_text}
+            )
+            logger.info(f"✅ Stage 3: Educational content completed")
+
+            # Stage 4: Rebellion Framework Application
+            logger.info(f"⚡ Stage 4: Applying rebellion framework")
+            context.processing_stage = "rebellion_framework"
+            context.intermediate_results.update(educational_results)
+            rebellion_results = await self._execute_agent_sequentially(
+                "rebellion_framework", context,
+                {"science_data": science_results, "clinical_content": clinical_results, "document_text": context.document_text}
+            )
+            logger.info(f"✅ Stage 4: Rebellion framework completed")
+
+            # Stage 5: Founder Voice Integration
+            logger.info(f"🎙️ Stage 5: Starting founder voice integration")
+            context.processing_stage = "founder_voice"
+            context.intermediate_results.update(rebellion_results)
             founder_results = await self._execute_agent_sequentially(
                 "founder_voice", context,
-                {"clinical_data": clinical_results}
+                {"clinical_data": clinical_results, "document_text": context.document_text}
             )
+            logger.info(f"✅ Stage 5: Founder voice completed")
 
-            # Stage 4: Context and RAG Enhancement
+            # Stage 6: Context and RAG Enhancement
+            logger.info(f"🔗 Stage 6: Starting context enhancement")
             context.processing_stage = "context_rag"
             context.intermediate_results.update(founder_results)
             rag_results = await self._execute_agent_sequentially(
                 "context_rag", context,
                 {"enhanced_data": context.intermediate_results}
             )
+            logger.info(f"✅ Stage 6: Context enhancement completed")
 
-            # Stage 5: Marketing and SEO Content Generation
+            # Stage 7: Marketing and SEO Content Generation
+            logger.info(f"📢 Stage 7: Starting marketing and SEO generation")
             context.processing_stage = "marketing_seo"
             context.intermediate_results.update(rag_results)
             marketing_results = await self._execute_agent_sequentially(
                 "marketing_seo", context,
                 {"final_context": context.intermediate_results}
             )
+            logger.info(f"✅ Stage 7: Marketing and SEO completed")
 
-            # Stage 6: Final Validation and Quality Assurance
+            # Stage 8: Final Validation and Quality Assurance
+            logger.info(f"✓ Stage 8: Starting final validation")
             context.processing_stage = "validation"
             final_results = await self._execute_agent_sequentially(
                 "validation", context,
                 {"complete_output": context.intermediate_results}
             )
+            logger.info(f"✅ Stage 8: Validation completed")
 
             # Check quality and retry if needed
             quality_score = final_results.get("quality_scores", {}).get("overall_quality", 0)

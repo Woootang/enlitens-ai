@@ -1,0 +1,119 @@
+"""
+Educational Content Agent - Extracts and generates educational materials.
+"""
+
+import logging
+from typing import Dict, Any
+from .base_agent import BaseAgent
+from src.synthesis.ollama_client import OllamaClient
+from src.models.enlitens_schemas import EducationalContent
+
+logger = logging.getLogger(__name__)
+
+class EducationalContentAgent(BaseAgent):
+    """Agent specialized in generating educational content for clients."""
+
+    def __init__(self):
+        super().__init__(
+            name="EducationalContent",
+            role="Client Education Material Generation",
+            model="qwen3:32b"
+        )
+        self.ollama_client = None
+
+    async def initialize(self) -> bool:
+        """Initialize the educational content agent."""
+        try:
+            self.ollama_client = OllamaClient(default_model=self.model)
+            self.is_initialized = True
+            logger.info(f"✅ {self.name} agent initialized")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize {self.name}: {e}")
+            return False
+
+    async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate educational content from research."""
+        try:
+            document_text = context.get("document_text", "")[:8000]
+            research_content = context.get("science_data", {}).get("research_content", {})
+            clinical_content = context.get("clinical_content", {})
+
+            prompt = f"""
+You are an educational content specialist creating client-friendly educational materials.
+Your goal is to translate complex neuroscience research into accessible educational content.
+
+DOCUMENT TEXT:
+{document_text}
+
+RESEARCH FINDINGS:
+{research_content.get('findings', [])}
+
+CLINICAL APPLICATIONS:
+{clinical_content.get('interventions', [])}
+
+Create comprehensive educational content for ALL sections below (5-10 items per section):
+
+1. EXPLANATIONS: Clear, accessible explanations of neuroscience concepts from the research. Break down complex ideas into understandable language. Explain HOW things work in the brain.
+
+2. EXAMPLES: Concrete, relatable examples that illustrate neuroscience concepts. Use everyday situations clients would recognize. Show concepts in action.
+
+3. ANALOGIES: Creative analogies and metaphors that make neuroscience accessible. Compare brain processes to familiar things (e.g., "Your amygdala is like a smoke alarm").
+
+4. DEFINITIONS: Simple definitions of technical terms, brain regions, processes, and neuroscience jargon. Make terminology accessible without dumbing down.
+
+5. PROCESSES: Step-by-step explanations of how brain processes work. Explain sequences like "How anxiety develops in the brain" or "How memory consolidation happens."
+
+6. COMPARISONS: Compare and contrast different concepts, brain regions, or processes. Show how things are similar or different. Help clients understand relationships.
+
+7. VISUAL AIDS: Descriptions of diagrams, charts, or visual aids that would help explain concepts. Describe what should be illustrated and why it would help learning.
+
+8. LEARNING OBJECTIVES: Clear learning objectives for each topic. What should clients understand after learning this? What should they be able to do with this knowledge?
+
+EXTRACTION GUIDELINES:
+- Make everything client-accessible (8th grade reading level)
+- Use concrete examples from daily life
+- Explain "why this matters" for each concept
+- Avoid jargon or explain it when necessary
+- Each item should be substantial (2-4 sentences minimum)
+- Focus on practical understanding, not academic detail
+- Each section needs 5-10 items minimum
+
+Return as JSON with these EXACT field names:
+{{"explanations": [list], "examples": [list], "analogies": [list], "definitions": [list], "processes": [list], "comparisons": [list], "visual_aids": [list], "learning_objectives": [list]}}
+"""
+
+            result = await self.ollama_client.generate_structured_response(
+                prompt=prompt,
+                response_model=EducationalContent,
+                temperature=0.7,
+                max_retries=3
+            )
+
+            if result:
+                return {
+                    "educational_content": result.model_dump(),
+                    "generation_quality": "high"
+                }
+            else:
+                return {"educational_content": EducationalContent().model_dump()}
+
+        except Exception as e:
+            logger.error(f"Educational content generation failed: {e}")
+            return {"educational_content": EducationalContent().model_dump()}
+
+    async def validate_output(self, output: Dict[str, Any]) -> bool:
+        """Validate the generated educational content."""
+        educational_content = output.get("educational_content", {})
+
+        has_content = any([
+            educational_content.get("explanations"),
+            educational_content.get("examples"),
+            educational_content.get("analogies")
+        ])
+
+        return has_content
+
+    async def cleanup(self):
+        """Clean up resources."""
+        logger.info(f"Cleaning up {self.name} agent")
