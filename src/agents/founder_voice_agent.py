@@ -341,19 +341,19 @@ St. Louis Context:
 - They want practical help, not just "coping skills"
 - Skeptical of "one size fits all" approaches
 
-Generate website copy for ALL sections below (3-8 items per section):
+Generate website copy for ALL sections below (3-8 items per section as single strings):
 
-1. ABOUT SECTIONS: "About Enlitens" paragraphs that tell your story, explain your approach, and connect with frustrated clients. Include origin story, philosophy, and differentiation.
+1. ABOUT SECTIONS: Paragraph-length strings telling the story, approach, and differentiation. Example: "I started Enlitens after watching countless clients struggle through years of traditional therapy without real change. The missing piece wasn't more talk therapy—it was understanding how their brains actually work. Now I combine neuroscience assessment with targeted interventions that create lasting change, not just coping skills." Each item should be one complete paragraph string.
 
-2. FEATURE DESCRIPTIONS: Specific features that make your neuroscience approach different from traditional therapy. Include methodology, assessment process, treatment approach, and unique offerings.
+2. FEATURE DESCRIPTIONS: Single-string feature descriptions. Example: "Bottom-Up Neuroscience Assessment: Unlike traditional therapy questionnaires, we measure your actual nervous system responses through interoceptive awareness evaluation, sensory processing analysis, and executive function testing to understand how your brain uniquely processes the world." Each feature should be one descriptive string.
 
-3. BENEFIT STATEMENTS: Clear, concrete outcomes clients will experience. Include emotional, cognitive, behavioral, and relationship benefits. Be specific!
+3. BENEFIT STATEMENTS: Clear outcome statements as single strings. Example: "Reduce anxiety attacks by understanding and regulating your nervous system responses rather than just managing symptoms." Each benefit should be one complete string.
 
-4. TESTIMONIALS: Sample client success stories in their own words. Create realistic testimonials based on common client outcomes. Include before/after narratives.
+4. TESTIMONIALS: Testimonial narratives as single strings. Example: "I tried five therapists before finding Liz. Within three sessions she explained why nothing worked—my brain processes sensory input differently. The strategies she taught actually work because they target my neurobiology, not generic anxiety tips. - Sarah M." Each testimonial should be one quoted string.
 
-5. FAQ CONTENT: Answer common objections and questions like "How is this different from regular therapy?", "Does insurance cover this?", "How long does treatment take?", etc.
+5. FAQ CONTENT: Question and answer pairs as single strings. Example: "Q: How is this different from regular therapy? A: Traditional therapy focuses on thoughts and behaviors. We start with your neurobiology—how your brain actually processes information—and build interventions that work with your unique wiring, not against it." Each FAQ should be one Q&A string.
 
-6. SERVICE DESCRIPTIONS: Specific services with neuroscience focus. Include ADHD support, anxiety treatment, trauma therapy, autism assessment, etc. Make each compelling and specific.
+6. SERVICE DESCRIPTIONS: Service descriptions as single strings. Example: "ADHD Executive Function Support: Comprehensive neuroscience-based assessment of working memory, attention systems, and dopamine regulation, followed by targeted interventions including environmental modifications, cognitive strategies, and nervous system regulation techniques tailored to your specific executive function profile." Each service should be one descriptive string.
 
 IMPORTANT:
 - Each section needs 3-8 substantial items
@@ -414,7 +414,7 @@ Generate blog content for ALL sections below (5-10 items per section):
 
 1. ARTICLE IDEAS: Complete blog post titles that address real client questions. Make them specific, actionable, and SEO-friendly. Examples: "Why Your ADHD Meds Stopped Working (And What Neuroscience Says to Do Next)"
 
-2. BLOG OUTLINES: Full blog post outlines with intro, 3-5 main points, conclusion, and CTA. Make each outline comprehensive enough to write from.
+2. BLOG OUTLINES: Brief outline summaries as single strings. Example: "Intro explaining ADHD executive function challenges, three evidence-based strategies (working memory support, dopamine regulation, environmental modifications), practical implementation steps, conclusion with next actions." Each outline should be one comprehensive string.
 
 3. TALKING POINTS: Key messages for articles. Each should be a complete sentence that could become a section header or pull quote. Ground in neuroscience from the research.
 
@@ -422,11 +422,11 @@ Generate blog content for ALL sections below (5-10 items per section):
 
 5. STATISTICS: Research findings and numbers to support your approach. Include percentages, study results, client outcomes, etc. Ground in actual research when possible.
 
-6. CASE STUDIES: Anonymous client success stories showing before/after transformation. Include presenting problem, neuroscience explanation, intervention approach, and outcomes.
+6. CASE STUDIES: Brief case study summaries as single strings. Example: "Client with treatment-resistant anxiety learned their symptoms were sensory processing differences. Using interoceptive awareness training and bottom-up regulation, they reduced panic attacks by 80% in 8 weeks." Each case study should be one narrative string.
 
-7. HOW-TO GUIDES: Practical neuroscience-based strategies clients can try. Step-by-step guides like "5-Minute Brain Reset for Anxiety" or "Executive Function Hack for ADHD."
+7. HOW-TO GUIDES: Title and brief description as single strings. Example: "5-Minute Brain Reset for Anxiety: Quick bilateral stimulation exercise using alternate nostril breathing to activate parasympathetic nervous system, reducing cortisol and restoring executive function." Each guide should be one descriptive string.
 
-8. MYTH BUSTING: Challenge traditional therapy assumptions. Format: "Myth: [common belief]. Reality: [neuroscience truth]. What This Means: [practical implication]"
+8. MYTH BUSTING: Myth-busting statements as single strings. Example: "Myth: ADHD is caused by poor parenting. Reality: Neuroscience shows ADHD involves differences in dopamine regulation and prefrontal cortex development. What This Means: Parents aren't to blame; brains just work differently and need different support strategies." Each item should be one complete string.
 
 IMPORTANT:
 - Each section needs 5-10 substantial items
@@ -477,16 +477,16 @@ Content Style:
 - Real talk about real challenges
 - Hopeful without being cheesy
 
-Generate social media content:
+Generate social media content (all as single strings):
 
-1. POST IDEAS: Content that stops the scroll
-2. CAPTIONS: Engaging text that converts
-3. QUOTES: Liz's authentic voice on key topics
-4. HASHTAGS: Relevant tags for St. Louis mental health
-5. STORY IDEAS: Behind-the-scenes and client spotlights
-6. REEL IDEAS: Short videos demonstrating techniques
-7. CAROUSEL CONTENT: Educational slide decks
-8. POLL QUESTIONS: Engage audience and gather insights
+1. POST IDEAS: Post concepts as single strings. Example: "Share your morning brain fog story—explain it's not laziness, it's your prefrontal cortex taking 90 minutes to fully wake up. Include 3 neuroscience-based wake-up strategies."
+2. CAPTIONS: Complete caption text as single strings. Example: "Your ADHD brain isn't broken. It's wired for novelty-seeking and responds differently to dopamine. That's not a disorder—that's a different operating system. Learn to work WITH your brain, not against it."
+3. QUOTES: Quotable statements as single strings. Example: "Traditional therapy asks 'what's wrong with you?' Neuroscience asks 'what happened TO you, and how did your brain adapt?'"
+4. HASHTAGS: Hashtag sets as single strings. Example: "#NeuroscienceTherapy #STLTherapist #ADHDSupport #TraumaInformed #BrainBasedHealing #StLouisMentalHealth"
+5. STORY IDEAS: Story concepts as single strings. Example: "Film morning routine showing sensory regulation techniques—demonstrate bilateral stimulation, explain vagus nerve activation in voiceover."
+6. REEL IDEAS: Reel concepts as single strings. Example: "30-second explanation of why your anxiety spikes at bedtime—show how cortisol rhythm works, demonstrate 3-minute reset technique."
+7. CAROUSEL CONTENT: Carousel topics as single strings. Example: "5 signs your anxiety is actually sensory processing differences: 1-overwhelmed by noise 2-need alone time to recharge 3-difficulty in crowds 4-sensitive to textures 5-emotional after busy days."
+8. POLL QUESTIONS: Poll questions as single strings. Example: "What time of day is your ADHD brain sharpest? A) Morning (7-10am) B) Midday (10am-2pm) C) Afternoon (2-6pm) D) Evening/Night (after 6pm)"
 
 Write as Liz - conversational, direct, and caring.
 Show you understand the daily grind of mental health challenges.
