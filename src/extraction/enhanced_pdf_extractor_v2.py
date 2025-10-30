@@ -21,6 +21,7 @@ import html
 import docling
 from docling.document_converter import DocumentConverter
 from docling.datamodel.pipeline_options import PdfPipelineOptions
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -28,19 +29,29 @@ logger = logging.getLogger(__name__)
 class EnhancedPDFExtractorV2:
     """
     Enhanced PDF extractor with fixed architecture for proper content extraction.
-    
+
     Fixes:
     - Table extraction with proper rows and columns
     - Clean metadata without HTML entities
     - Better title and author extraction
     - Improved content structure
+    - GPU OOM mitigation by forcing CPU for RT-DETR when needed
     """
-    
+
     def __init__(self, cache_dir: str = "./cache"):
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
-        
-        # Configure Docling with proper options
+
+        # Check if we should force CPU mode to avoid GPU OOM with vLLM
+        force_cpu = os.getenv("DOCLING_FORCE_CPU", "false").lower() == "true"
+        device = "cpu" if force_cpu else ("cuda" if torch.cuda.is_available() else "cpu")
+
+        if force_cpu:
+            logger.info("🖥️ Docling configured to use CPU to avoid GPU OOM while vLLM is running")
+        else:
+            logger.info(f"🖥️ Docling configured to use device: {device}")
+
+        # Configure Docling with proper options and device
         self.pipeline_options = PdfPipelineOptions(
             do_ocr=True,
             do_table_structure=True,
@@ -51,10 +62,19 @@ class EnhancedPDFExtractorV2:
             table_cell_matching_options={
                 "do_unify_full_cells": True,
                 "do_use_table_structure": True,
-            }
+            },
+            # Force CPU for layout model to avoid GPU OOM
+            images_scale=1.0 if device == "cpu" else 2.0,  # Reduce image processing on CPU
         )
-        
-        self.docling_converter = DocumentConverter()
+
+        # Create converter with device configuration
+        converter_config = {}
+        if force_cpu:
+            # Force all models to CPU
+            converter_config["device"] = "cpu"
+
+        self.docling_converter = DocumentConverter(**converter_config)
+        self.device = device
     
     def extract(self, pdf_path: str) -> Dict[str, Any]:
         """

@@ -3,64 +3,124 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Optional, Set, Annotated
 
-from pydantic import BaseModel, Field, ConfigDict
+from typing_extensions import TypedDict
 
 
-class WorkflowState(BaseModel):
-    """Pydantic model holding the shared workflow state across nodes."""
+def _keep_last_value(existing: Any, new: Any) -> Any:
+    """Reducer function that keeps only the last value written to a channel.
 
+    This allows multiple nodes to write to the same channel (like 'stage')
+    without triggering InvalidUpdateError. The last value wins.
+    """
+    return new
+
+
+class WorkflowState(TypedDict, total=False):
+    """TypedDict holding the shared workflow state across nodes.
+
+    Note: Changed from Pydantic BaseModel to TypedDict to support LangGraph's
+    Annotated reducer pattern for handling multiple writes per step.
+
+    The 'stage' field uses Annotated with a reducer to allow multiple agents
+    to update it in the same step without raising InvalidUpdateError.
+    """
+
+    # Required fields
     document_id: str
     document_text: str
-    doc_type: Optional[str] = None
-    client_insights: Optional[Dict[str, Any]] = None
-    founder_insights: Optional[Dict[str, Any]] = None
-    st_louis_context: Optional[Dict[str, Any]] = None
 
-    # Shared orchestration metadata
-    stage: str = "initial"
-    skip_nodes: Set[str] = Field(default_factory=set)
-    completed_nodes: Dict[str, str] = Field(default_factory=dict)
-    attempt_counters: Dict[str, int] = Field(default_factory=dict)
-    errors: Dict[str, str] = Field(default_factory=dict)
-    intermediate_results: Dict[str, Any] = Field(default_factory=dict)
-    cache_prefix: str = Field(default_factory=lambda: "workflow")
-    cache_chunk_id: str = Field(default_factory=lambda: "root")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    # Optional input context
+    doc_type: Optional[str]
+    client_insights: Optional[Dict[str, Any]]
+    founder_insights: Optional[Dict[str, Any]]
+    st_louis_context: Optional[Dict[str, Any]]
+
+    # Shared orchestration metadata - use Annotated to allow multiple updates
+    stage: Annotated[str, _keep_last_value]
+    skip_nodes: Set[str]
+    completed_nodes: Dict[str, str]
+    attempt_counters: Dict[str, int]
+    errors: Dict[str, str]
+    intermediate_results: Dict[str, Any]
+    cache_prefix: str
+    cache_chunk_id: str
+    metadata: Dict[str, Any]
 
     # Node outputs tracked explicitly
-    science_result: Optional[Dict[str, Any]] = None
-    context_result: Optional[Dict[str, Any]] = None
-    clinical_result: Optional[Dict[str, Any]] = None
-    educational_result: Optional[Dict[str, Any]] = None
-    rebellion_result: Optional[Dict[str, Any]] = None
-    founder_voice_result: Optional[Dict[str, Any]] = None
-    marketing_result: Optional[Dict[str, Any]] = None
-    validation_result: Optional[Dict[str, Any]] = None
+    science_result: Optional[Dict[str, Any]]
+    context_result: Optional[Dict[str, Any]]
+    clinical_result: Optional[Dict[str, Any]]
+    educational_result: Optional[Dict[str, Any]]
+    rebellion_result: Optional[Dict[str, Any]]
+    founder_voice_result: Optional[Dict[str, Any]]
+    marketing_result: Optional[Dict[str, Any]]
+    validation_result: Optional[Dict[str, Any]]
 
     # Runtime bookkeeping
-    start_timestamp: Optional[datetime] = None
-    end_timestamp: Optional[datetime] = None
-    marketing_completed: bool = False
-    validation_completed: bool = False
+    start_timestamp: Optional[datetime]
+    end_timestamp: Optional[datetime]
+    marketing_completed: bool
+    validation_completed: bool
 
-    model_config = ConfigDict(
-        frozen=False,
-        validate_assignment=True,
-        use_enum_values=True,
+
+def create_initial_state(
+    document_id: str,
+    document_text: str,
+    doc_type: Optional[str] = None,
+    client_insights: Optional[Dict[str, Any]] = None,
+    founder_insights: Optional[Dict[str, Any]] = None,
+    st_louis_context: Optional[Dict[str, Any]] = None,
+    cache_prefix: Optional[str] = None,
+    cache_chunk_id: Optional[str] = None,
+) -> WorkflowState:
+    """Create a properly initialized workflow state."""
+    return WorkflowState(
+        document_id=document_id,
+        document_text=document_text,
+        doc_type=doc_type,
+        client_insights=client_insights,
+        founder_insights=founder_insights,
+        st_louis_context=st_louis_context,
+        stage="initial",
+        skip_nodes=set(),
+        completed_nodes={},
+        attempt_counters={},
+        errors={},
+        intermediate_results={},
+        cache_prefix=cache_prefix or document_id,
+        cache_chunk_id=cache_chunk_id or f"{document_id}:root",
+        metadata={},
+        science_result=None,
+        context_result=None,
+        clinical_result=None,
+        educational_result=None,
+        rebellion_result=None,
+        founder_voice_result=None,
+        marketing_result=None,
+        validation_result=None,
+        start_timestamp=None,
+        end_timestamp=None,
+        marketing_completed=False,
+        validation_completed=False,
     )
 
-    def mark_completed(self, node_name: str, status: str = "done") -> None:
-        self.completed_nodes[node_name] = status
 
-    def record_attempt(self, node_name: str) -> int:
-        attempts = self.attempt_counters.get(node_name, 0) + 1
-        self.attempt_counters[node_name] = attempts
-        return attempts
+def mark_completed(state: WorkflowState, node_name: str, status: str = "done") -> None:
+    """Mark a node as completed in the workflow state."""
+    state["completed_nodes"][node_name] = status
 
-    def as_dict(self) -> Dict[str, Any]:
-        data = self.model_dump()
-        # Convert sets to lists for JSON compatibility
-        data["skip_nodes"] = list(self.skip_nodes)
-        return data
+
+def record_attempt(state: WorkflowState, node_name: str) -> int:
+    """Record an attempt for a node and return the total count."""
+    attempts = state["attempt_counters"].get(node_name, 0) + 1
+    state["attempt_counters"][node_name] = attempts
+    return attempts
+
+
+def as_dict(state: WorkflowState) -> Dict[str, Any]:
+    """Convert state to a plain dict, with sets converted to lists for JSON compatibility."""
+    data = dict(state)
+    data["skip_nodes"] = list(data.get("skip_nodes", set()))
+    return data

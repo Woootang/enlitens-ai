@@ -18,7 +18,7 @@ from .marketing_seo_agent import MarketingSEOAgent
 from .validation_agent import ValidationAgent
 from .educational_content_agent import EducationalContentAgent
 from .rebellion_framework_agent import RebellionFrameworkAgent
-from .workflow_state import WorkflowState
+from .workflow_state import WorkflowState, create_initial_state, record_attempt, as_dict
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +170,7 @@ class SupervisorAgent(BaseAgent):
 
     async def process_document(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         logger.info("🎯 Supervisor starting document processing: %s", payload.get("document_id"))
-        state = WorkflowState(
+        state = create_initial_state(
             document_id=payload["document_id"],
             document_text=payload["document_text"],
             doc_type=payload.get("doc_type"),
@@ -220,184 +220,184 @@ class SupervisorAgent(BaseAgent):
     # ----- LangGraph Node Implementations -------------------------------------------------
 
     async def _entry_node(self, state: WorkflowState) -> Dict[str, Any]:
-        logger.info("🚦 Entry node activated for %s", state.document_id)
-        shortcut = self.doc_type_shortcuts.get(state.doc_type or "", {})
+        logger.info("🚦 Entry node activated for %s", state["document_id"])
+        shortcut = self.doc_type_shortcuts.get(state.get("doc_type") or "", {})
         skip_nodes = set(shortcut.get("skip", set()))
         metadata = {
-            "doc_type": state.doc_type,
+            "doc_type": state.get("doc_type"),
             "shortcut_applied": bool(shortcut),
         }
         return {
             "stage": "entry",
             "start_timestamp": datetime.utcnow(),
             "skip_nodes": skip_nodes,
-            "metadata": {**state.metadata, **metadata},
+            "metadata": {**state.get("metadata", {}), **metadata},
         }
 
     async def _science_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "science_extraction" in state.skip_nodes:
+        if "science_extraction" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping science extraction due to doc_type route")
             return {
                 "stage": "science_extraction_skipped",
-                "science_result": state.science_result or {},
-                "completed_nodes": {**state.completed_nodes, "science_extraction": "skipped"},
+                "science_result": state.get("science_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "science_extraction": "skipped"},
             }
 
-        payload = {"document_text": state.document_text}
+        payload = {"document_text": state["document_text"]}
         result = await self._run_agent_with_retry("science_extraction", state, payload)
         return self._merge_results(state, "science_extraction", result, "science_result")
 
     async def _context_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "context_rag" in state.skip_nodes:
+        if "context_rag" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping context retrieval due to doc_type route")
             return {
                 "stage": "context_skipped",
-                "context_result": state.context_result or {},
-                "completed_nodes": {**state.completed_nodes, "context_rag": "skipped"},
+                "context_result": state.get("context_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "context_rag": "skipped"},
             }
 
         payload = {
-            "enhanced_data": state.intermediate_results,
-            "st_louis_context": state.st_louis_context or {},
+            "enhanced_data": state.get("intermediate_results", {}),
+            "st_louis_context": state.get("st_louis_context") or {},
         }
         result = await self._run_agent_with_retry("context_rag", state, payload)
         return self._merge_results(state, "context_rag", result, "context_result")
 
     async def _clinical_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "clinical_synthesis" in state.skip_nodes:
+        if "clinical_synthesis" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping clinical synthesis due to doc_type route")
             return {
                 "stage": "clinical_skipped",
-                "clinical_result": state.clinical_result or {},
-                "completed_nodes": {**state.completed_nodes, "clinical_synthesis": "skipped"},
+                "clinical_result": state.get("clinical_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "clinical_synthesis": "skipped"},
             }
 
-        if state.science_result is None and "science_extraction" not in state.skip_nodes:
+        if state.get("science_result") is None and "science_extraction" not in state.get("skip_nodes", set()):
             logger.debug("Waiting for science extraction before clinical synthesis")
             return {"stage": "clinical_waiting_science"}
 
         payload = {
-            "science_data": state.science_result or {},
-            "document_text": state.document_text,
-            "context_result": state.context_result,
+            "science_data": state.get("science_result") or {},
+            "document_text": state["document_text"],
+            "context_result": state.get("context_result"),
         }
         result = await self._run_agent_with_retry("clinical_synthesis", state, payload)
         return self._merge_results(state, "clinical_synthesis", result, "clinical_result")
 
     async def _education_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "educational_content" in state.skip_nodes:
+        if "educational_content" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping educational content due to doc_type route")
             return {
                 "stage": "education_skipped",
-                "educational_result": state.educational_result or {},
-                "completed_nodes": {**state.completed_nodes, "educational_content": "skipped"},
+                "educational_result": state.get("educational_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "educational_content": "skipped"},
             }
 
-        if state.clinical_result is None and "clinical_synthesis" not in state.skip_nodes:
+        if state.get("clinical_result") is None and "clinical_synthesis" not in state.get("skip_nodes", set()):
             logger.debug("Waiting for clinical synthesis before education")
             return {"stage": "education_waiting_clinical"}
 
         payload = {
-            "document_text": state.document_text,
-            "science_data": state.science_result or {},
-            "clinical_content": state.clinical_result or {},
+            "document_text": state["document_text"],
+            "science_data": state.get("science_result") or {},
+            "clinical_content": state.get("clinical_result") or {},
         }
         result = await self._run_agent_with_retry("educational_content", state, payload)
         return self._merge_results(state, "educational_content", result, "educational_result")
 
     async def _rebellion_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "rebellion_framework" in state.skip_nodes:
+        if "rebellion_framework" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping rebellion framework due to doc_type route")
             return {
                 "stage": "rebellion_skipped",
-                "rebellion_result": state.rebellion_result or {},
-                "completed_nodes": {**state.completed_nodes, "rebellion_framework": "skipped"},
+                "rebellion_result": state.get("rebellion_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "rebellion_framework": "skipped"},
             }
 
-        if state.clinical_result is None and "clinical_synthesis" not in state.skip_nodes:
+        if state.get("clinical_result") is None and "clinical_synthesis" not in state.get("skip_nodes", set()):
             logger.debug("Waiting for clinical synthesis before rebellion framework")
             return {"stage": "rebellion_waiting_clinical"}
 
         payload = {
-            "document_text": state.document_text,
-            "science_data": state.science_result or {},
-            "clinical_content": state.clinical_result or {},
+            "document_text": state["document_text"],
+            "science_data": state.get("science_result") or {},
+            "clinical_content": state.get("clinical_result") or {},
         }
         result = await self._run_agent_with_retry("rebellion_framework", state, payload)
         return self._merge_results(state, "rebellion_framework", result, "rebellion_result")
 
     async def _founder_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "founder_voice" in state.skip_nodes:
+        if "founder_voice" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping founder voice due to doc_type route")
             return {
                 "stage": "founder_skipped",
-                "founder_voice_result": state.founder_voice_result or {},
-                "completed_nodes": {**state.completed_nodes, "founder_voice": "skipped"},
+                "founder_voice_result": state.get("founder_voice_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "founder_voice": "skipped"},
             }
 
-        if state.clinical_result is None and "clinical_synthesis" not in state.skip_nodes:
+        if state.get("clinical_result") is None and "clinical_synthesis" not in state.get("skip_nodes", set()):
             logger.debug("Waiting for clinical synthesis before founder voice")
             return {"stage": "founder_waiting_clinical"}
 
         payload = {
-            "clinical_data": state.clinical_result or {},
-            "enhanced_data": state.intermediate_results,
-            "document_id": state.document_id,
-            "document_text": state.document_text,
+            "clinical_data": state.get("clinical_result") or {},
+            "enhanced_data": state.get("intermediate_results", {}),
+            "document_id": state["document_id"],
+            "document_text": state["document_text"],
         }
         result = await self._run_agent_with_retry("founder_voice", state, payload)
         return self._merge_results(state, "founder_voice", result, "founder_voice_result")
 
     async def _marketing_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "marketing_seo" in state.skip_nodes:
-            if not state.marketing_completed:
+        if "marketing_seo" in state.get("skip_nodes", set()):
+            if not state.get("marketing_completed", False):
                 logger.info("⏭️ Skipping marketing due to doc_type route")
             return {
                 "stage": "marketing_skipped",
-                "marketing_result": state.marketing_result or {},
+                "marketing_result": state.get("marketing_result") or {},
                 "marketing_completed": True,
-                "completed_nodes": {**state.completed_nodes, "marketing_seo": "skipped"},
+                "completed_nodes": {**state.get("completed_nodes", {}), "marketing_seo": "skipped"},
             }
 
         required = [
-            state.educational_result or {},
-            state.rebellion_result or {},
-            state.founder_voice_result or {},
+            state.get("educational_result") or {},
+            state.get("rebellion_result") or {},
+            state.get("founder_voice_result") or {},
         ]
         if not all(required):
             logger.debug("Waiting for creative fan-out before marketing")
             return {"stage": "marketing_waiting_creatives"}
 
-        if state.marketing_completed:
+        if state.get("marketing_completed", False):
             return {"stage": "marketing_done"}
 
-        payload = {"final_context": state.intermediate_results}
+        payload = {"final_context": state.get("intermediate_results", {})}
         result = await self._run_agent_with_retry("marketing_seo", state, payload)
         merged = self._merge_results(state, "marketing_seo", result, "marketing_result")
         merged.update({"marketing_completed": True})
         return merged
 
     async def _validation_node(self, state: WorkflowState) -> Dict[str, Any]:
-        if "validation" in state.skip_nodes:
-            if not state.validation_completed:
+        if "validation" in state.get("skip_nodes", set()):
+            if not state.get("validation_completed", False):
                 logger.info("⏭️ Skipping validation due to doc_type route")
             return {
                 "stage": "validation_skipped",
-                "validation_result": state.validation_result or {},
+                "validation_result": state.get("validation_result") or {},
                 "validation_completed": True,
-                "completed_nodes": {**state.completed_nodes, "validation": "skipped"},
+                "completed_nodes": {**state.get("completed_nodes", {}), "validation": "skipped"},
                 "end_timestamp": datetime.utcnow(),
             }
 
-        marketing_needed = "marketing_seo" not in state.skip_nodes
-        if marketing_needed and not state.marketing_completed:
+        marketing_needed = "marketing_seo" not in state.get("skip_nodes", set())
+        if marketing_needed and not state.get("marketing_completed", False):
             logger.debug("Waiting for marketing completion before validation")
             return {"stage": "validation_waiting_marketing"}
 
-        if state.validation_completed:
+        if state.get("validation_completed", False):
             return {"stage": "validation_done", "end_timestamp": datetime.utcnow()}
 
-        payload = {"complete_output": state.intermediate_results}
+        payload = {"complete_output": state.get("intermediate_results", {})}
         result = await self._run_agent_with_retry("validation", state, payload)
         merged = self._merge_results(state, "validation", result, "validation_result")
         merged.update({"validation_completed": True, "end_timestamp": datetime.utcnow()})
@@ -416,16 +416,16 @@ class SupervisorAgent(BaseAgent):
             logger.warning("⚠️ %s returned empty results", node_name)
             return {
                 "stage": f"{node_name}_empty",
-                target_field: getattr(state, target_field) or {},
-                "completed_nodes": {**state.completed_nodes, node_name: "empty"},
+                target_field: state.get(target_field) or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), node_name: "empty"},
             }
 
-        merged_results = {**state.intermediate_results, **result}
+        merged_results = {**state.get("intermediate_results", {}), **result}
         return {
             "stage": f"{node_name}_completed",
             target_field: result,
             "intermediate_results": merged_results,
-            "completed_nodes": {**state.completed_nodes, node_name: "done"},
+            "completed_nodes": {**state.get("completed_nodes", {}), node_name: "done"},
         }
 
     async def _run_agent_with_retry(
@@ -449,7 +449,7 @@ class SupervisorAgent(BaseAgent):
             agent_context = self._build_agent_context(state, payload, agent_name, attempt)
             logger.info("🔄 Executing %s attempt %d/%d", agent_name, attempt, max_attempts)
             result = await agent.execute(agent_context)
-            state.record_attempt(agent_name)
+            record_attempt(state, agent_name)
 
             if result and (success_predicate is None or success_predicate(result)):
                 return result
@@ -470,15 +470,15 @@ class SupervisorAgent(BaseAgent):
         attempt: int,
     ) -> Dict[str, Any]:
         base_context = {
-            "document_id": state.document_id,
-            "document_text": state.document_text,
-            "client_insights": state.client_insights,
-            "founder_insights": state.founder_insights,
-            "st_louis_context": state.st_louis_context,
-            "processing_stage": state.stage,
-            "intermediate_results": dict(state.intermediate_results),
-            "cache_prefix": f"{state.cache_prefix}:{agent_name}",
-            "cache_chunk_id": state.cache_chunk_id,
+            "document_id": state["document_id"],
+            "document_text": state["document_text"],
+            "client_insights": state.get("client_insights"),
+            "founder_insights": state.get("founder_insights"),
+            "st_louis_context": state.get("st_louis_context"),
+            "processing_stage": state.get("stage"),
+            "intermediate_results": dict(state.get("intermediate_results", {})),
+            "cache_prefix": f"{state.get('cache_prefix')}:{agent_name}",
+            "cache_chunk_id": state.get("cache_chunk_id"),
             "retry_attempt": attempt,
         }
         base_context.update(payload)
@@ -486,41 +486,41 @@ class SupervisorAgent(BaseAgent):
 
     def _finalize_output(self, state: WorkflowState) -> Dict[str, Any]:
         processing_time = None
-        if state.start_timestamp and state.end_timestamp:
-            processing_time = (state.end_timestamp - state.start_timestamp).total_seconds()
+        if state.get("start_timestamp") and state.get("end_timestamp"):
+            processing_time = (state.get("end_timestamp") - state.get("start_timestamp")).total_seconds()
 
         quality_score = 0.0
         confidence_score = 0.0
         validation_passed = False
-        if state.validation_result:
-            quality_score = state.validation_result.get("quality_scores", {}).get(
+        if state.get("validation_result"):
+            quality_score = state.get("validation_result").get("quality_scores", {}).get(
                 "overall_quality", 0.0
             )
-            confidence_score = state.validation_result.get("confidence_scoring", {}).get(
+            confidence_score = state.get("validation_result").get("confidence_scoring", {}).get(
                 "confidence_score", 0.0
             )
             validation_passed = quality_score >= self.quality_thresholds["minimum_quality"]
 
         final_output = {
-            "document_id": state.document_id,
-            "document_text": state.document_text,
+            "document_id": state["document_id"],
+            "document_text": state["document_text"],
             "processing_timestamp": datetime.utcnow().isoformat(),
             "processing_time_seconds": processing_time,
             "supervisor_status": "completed" if validation_passed else "completed_with_issues",
-            "agent_outputs": state.intermediate_results,
+            "agent_outputs": state.get("intermediate_results", {}),
             "quality_score": quality_score,
             "confidence_score": confidence_score,
             "validation_passed": validation_passed,
-            "retry_counts": state.attempt_counters,
-            "completed_nodes": state.completed_nodes,
-            "metadata": state.as_dict().get("metadata", {}),
+            "retry_counts": state.get("attempt_counters", {}),
+            "completed_nodes": state.get("completed_nodes", {}),
+            "metadata": as_dict(state).get("metadata", {}),
         }
 
         self.processing_history.append(
             {
-                "document_id": state.document_id,
-                "start_time": state.start_timestamp.isoformat() if state.start_timestamp else None,
-                "end_time": state.end_timestamp.isoformat() if state.end_timestamp else None,
+                "document_id": state["document_id"],
+                "start_time": state.get("start_timestamp").isoformat() if state.get("start_timestamp") else None,
+                "end_time": state.get("end_timestamp").isoformat() if state.get("end_timestamp") else None,
                 "processing_time": processing_time,
                 "success": validation_passed,
                 "quality_score": quality_score,
@@ -529,7 +529,7 @@ class SupervisorAgent(BaseAgent):
 
         logger.info(
             "✅ Document %s processed. Quality %.2f Confidence %.2f",
-            state.document_id,
+            state["document_id"],
             quality_score,
             confidence_score,
         )
