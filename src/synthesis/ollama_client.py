@@ -17,6 +17,7 @@ from .prompts import (
     TEMPERATURE_CREATIVE,
     get_full_system_prompt,
 )
+from src.utils.prompt_cache import PromptCache
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,32 @@ class VLLMClient:
     * ``benchmark_batch_sizes`` can be used to exercise continuous batching with
       batch sizes 8/16/24 as required by operations run-books.
     """
+    
+    _shared_prompt_cache = PromptCache()
+
+    def __init__(
+        self,
+        base_url: str = "http://localhost:11434",
+        default_model: str = "qwen3:32b",
+        client: Optional[httpx.AsyncClient] = None,
+    ):
+        self.base_url = base_url
+        # Increase timeout to 15 minutes (900s) for large documents and complex generations
+        if client is None:
+            self.client = httpx.AsyncClient(base_url=self.base_url, timeout=900.0)
+            logger.info(
+                "OllamaClient initialized with base_url: %s and default_model: %s",
+                self.base_url,
+                default_model,
+            )
+        else:
+            self.client = client
+            logger.debug(
+                "OllamaClient cloned with shared HTTP client for model %s", default_model
+            )
+
+        self.default_model = default_model
+        self.prompt_cache = OllamaClient._shared_prompt_cache
 
     def __init__(
         self,
@@ -73,6 +100,13 @@ class VLLMClient:
             continuous_batch_sizes=self.continuous_batch_sizes,
         )
     def clone_with_model(self, model: str) -> "OllamaClient":
+        """Create a lightweight clone that reuses the underlying HTTP client."""
+
+        return OllamaClient(
+            base_url=self.base_url,
+            default_model=model,
+            client=self.client,
+        )
         clone = OllamaClient.__new__(OllamaClient)
         clone.base_url = self.base_url
         clone.client = self.client
@@ -249,6 +283,8 @@ class VLLMClient:
         max_num_predict: int = 8192,  # Increased max for complex extractions
         use_cot_prompt: bool = True,  # NEW: Enable Chain-of-Thought prompting
         validation_context: Optional[Dict[str, Any]] = None,  # NEW: For citation checking
+        cache_prefix: Optional[str] = None,
+        cache_chunk_id: Optional[str] = None,
         enforce_grammar: bool = False,
     ) -> Optional[BaseModel]:
         if use_cot_prompt:
@@ -258,6 +294,21 @@ class VLLMClient:
             full_prompt = f"{system_prompt}\n\n{prompt}"
         else:
             full_prompt = prompt
+
+        cache_namespace = cache_prefix or f"{model}:{response_model.__name__}"
+        cache_chunk = cache_chunk_id or "global"
+
+        cached_payload = self.prompt_cache.get(cache_namespace, cache_chunk, full_prompt)
+        if cached_payload is not None:
+            try:
+                logger.info(
+                    "🔁 Using cached structured response for prefix '%s' chunk '%s'",
+                    cache_namespace,
+                    cache_chunk,
+                )
+                return response_model.model_validate(cached_payload)
+            except Exception:
+                logger.warning("Cached payload failed validation, regenerating")
 
         num_predict = base_num_predict
         attempt = 0
@@ -330,6 +381,9 @@ class VLLMClient:
                         logger.info(f"Partial extraction: {non_empty_count}/{len(list_values)} fields populated ({empty_count} empty)")
 
                 logger.info(f"Successfully validated response with {len(parsed_data)} keys")
+
+                # Persist deterministic cache payload for identical prompts
+                self.prompt_cache.set(cache_namespace, cache_chunk, full_prompt, data_dict)
                 return validated_model
                 
             except Exception as e:

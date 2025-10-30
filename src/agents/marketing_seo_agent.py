@@ -79,6 +79,10 @@ Compliance guardrails:
 
 {marketing_examples}
 RESEARCH THEMES (inspiration only):
+{research_content.get('findings', [])[:5]}
+
+CLINICAL FOCUS:
+{clinical_content.get('interventions', [])[:5]}
 {research_findings[:5]}
 
 CLINICAL FOCUS:
@@ -118,6 +122,10 @@ Return ONLY valid JSON in this exact format:
 }}
 """
 
+            marketing_client = self.ollama_client
+            seo_client = self.ollama_client.clone_with_model("qwen3:32b")
+            marketing_cache = self._cache_kwargs(context, suffix="marketing")
+            marketing_result = await marketing_client.generate_structured_response(
             qwen_client = OllamaClient(default_model="qwen2.5-32b-instruct-q4_k_m")
             marketing_result = await qwen_client.generate_structured_response(
             marketing_result = await self.ollama_client.generate_structured_response(
@@ -126,6 +134,7 @@ Return ONLY valid JSON in this exact format:
                 temperature=0.3,
                 max_retries=3,
                 use_cot_prompt=False,  # CRITICAL: Disable CoT for creative content
+                **marketing_cache,
                 enforce_grammar=True,
                 model="qwen3:32b",
             )
@@ -135,6 +144,7 @@ Return ONLY valid JSON in this exact format:
 Generate SEO-optimized content for Enlitens, a neuroscience-based therapy practice in St. Louis.
 
 RESEARCH THEMES (inspiration):
+{research_content.get('findings', [])[:5]}
 {research_findings[:5]}
 
 TARGET AUDIENCE: St. Louis adults with ADHD, anxiety, trauma, autism
@@ -172,12 +182,15 @@ Return ONLY valid JSON in this exact format:
 }}
 """
 
+            seo_cache = self._cache_kwargs(context, suffix="seo")
+            seo_result = await seo_client.generate_structured_response(
             seo_result = await self.ollama_client.generate_structured_response(
                 prompt=seo_prompt,
                 response_model=SEOContent,
                 temperature=0.3,
                 max_retries=3,
                 use_cot_prompt=False,  # CRITICAL: Disable CoT for creative SEO content
+                **seo_cache,
                 enforce_grammar=True,
                 model="qwen3:32b",
             )
@@ -197,6 +210,24 @@ Return ONLY valid JSON in this exact format:
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the marketing and SEO content."""
+        marketing_content = output.get("marketing_content", {})
+        seo_content = output.get("seo_content", {})
+        
+        has_marketing = any(
+            [
+                marketing_content.get("headlines"),
+                marketing_content.get("value_propositions"),
+                marketing_content.get("benefits"),
+            ]
+        )
+
+        has_seo = any(
+            [
+                seo_content.get("meta_descriptions"),
+                seo_content.get("primary_keywords"),
+                seo_content.get("title_tags"),
+            ]
+        )
         marketing_content = output.get("marketing_content") or {}
         seo_content = output.get("seo_content") or {}
 

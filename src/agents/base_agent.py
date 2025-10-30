@@ -45,6 +45,11 @@ class BaseAgent(ABC):
         Execute the agent's main function with error handling.
         """
         try:
+            # Work with a copy so downstream modifications don't leak across nodes
+            context = dict(context)
+            context.setdefault("cache_prefix", self.name)
+            context.setdefault("cache_chunk_id", context.get("document_id", "global"))
+
             if not self.is_initialized:
                 success = await self.initialize()
                 if not success:
@@ -76,4 +81,15 @@ class BaseAgent(ABC):
             "model": self.model,
             "initialized": self.is_initialized,
             "created_at": self.created_at.isoformat()
+        }
+
+    def _cache_kwargs(self, context: Dict[str, Any], suffix: Optional[str] = None) -> Dict[str, str]:
+        """Helper to build cache arguments for prompt-based agents."""
+        prefix = context.get("cache_prefix", self.name)
+        if suffix:
+            prefix = f"{prefix}:{suffix}"
+        chunk_id = context.get("cache_chunk_id") or context.get("document_id", "global")
+        return {
+            "cache_prefix": prefix,
+            "cache_chunk_id": chunk_id,
         }

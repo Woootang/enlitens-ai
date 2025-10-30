@@ -111,6 +111,14 @@ Return as JSON with these EXACT field names:
 {{"findings": [list], "statistics": [list], "methodologies": [list], "limitations": [list], "future_directions": [list], "implications": [list], "citations": [list], "references": [list]}}
 """
 
+            cache_kwargs = self._cache_kwargs(context)
+            result = await self.ollama_client.generate_structured_response(
+                prompt=prompt,
+                response_model=ResearchContent,
+                temperature=0.3,  # LOWERED from 0.6: Research shows 0.3 optimal for factual extraction
+                max_retries=3,
+                **cache_kwargs,
+            )
             samples = await self._run_self_consistency_sampling(prompt)
 
             if samples:

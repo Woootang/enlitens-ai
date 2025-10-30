@@ -98,11 +98,13 @@ Return as JSON with these EXACT field names:
 {{"narrative_deconstruction": [list], "sensory_profiling": [list], "executive_function": [list], "social_processing": [list], "strengths_synthesis": [list], "rebellion_themes": [list], "aha_moments": [list]}}
 """
 
+            cache_kwargs = self._cache_kwargs(context)
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=RebellionFramework,
                 temperature=0.6,  # LOWERED from 0.75: Research shows 0.6 optimal for creative but grounded content
-                max_retries=3
+                max_retries=3,
+                **cache_kwargs,
             )
 
             if result:
