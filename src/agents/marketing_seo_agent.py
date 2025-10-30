@@ -39,82 +39,111 @@ class MarketingSEOAgent(BaseAgent):
             clinical_content = final_context.get("clinical_content", {})
             research_content = final_context.get("research_content", {})
             
-            # Generate marketing content using two-stage approach
+            # Generate marketing content using creative approach
+            # IMPORTANT: Marketing content is CREATIVE and forward-looking
+            # It's about IDEAS for how to talk about the research, not extraction from sources
             marketing_prompt = f"""
 You are a marketing strategist for Enlitens, a neuroscience-based therapy practice in St. Louis.
 
-CLINICAL INSIGHTS:
-{clinical_content.get('treatment_approaches', [])}
+Your goal is to CREATE compelling marketing messages inspired by (but not limited to) the research themes.
 
-RESEARCH FINDINGS:
-{research_content.get('key_findings', [])}
+RESEARCH THEMES (inspiration only):
+{research_content.get('key_findings', [])[:5]}
 
-Create compelling marketing content:
-1. Headlines (3-5 attention-grabbing headlines)
-2. Taglines (3-5 memorable slogans)
-3. Value propositions (3-5 unique benefits)
-4. Benefits (3-5 client outcomes)
-5. Pain points (3-5 problems we solve)
-6. Social proof (3-5 credibility statements)
+CLINICAL FOCUS:
+{clinical_content.get('treatment_approaches', [])[:5]}
 
-Keep each item under 18 words. Use plain language, no numbering.
-"""
+CREATE marketing content that positions Enlitens as the neuroscience therapy leader in St. Louis:
 
-            # Generate free-form marketing notes
-            marketing_notes = await self.ollama_client.generate_text(
-                prompt=marketing_prompt,
-                temperature=0.8,
-                num_predict=1024
-            )
-            
-            # Format into structured JSON
-            formatting_prompt = f"""
-Convert these marketing notes into JSON with fields:
+1. Headlines (3-5 attention-grabbing headlines under 18 words each)
+   - Should speak to client pain points
+   - Emphasize neuroscience-based solutions
+
+2. Taglines (3-5 memorable taglines under 12 words each)
+   - Rebellious, direct tone
+   - Challenge traditional therapy narratives
+
+3. Value propositions (3-5 unique benefits under 20 words each)
+   - What makes Enlitens different
+   - Tie neuroscience to relief
+
+4. Benefits (3-5 client outcomes under 15 words each)
+   - Tangible wins clients will experience
+   - Mix emotional relief + practical improvements
+
+5. Pain points (3-5 problems we solve under 15 words each)
+   - Real struggles St. Louis clients face
+   - ADHD, anxiety, trauma, treatment resistance
+
+NOTE: Generate NEW creative content - don't just quote research. This is about IDEAS and MARKETING ANGLES.
+
+Return ONLY valid JSON in this exact format:
 {{
-  "headlines": [list of 3-5 strings],
-  "taglines": [list of 3-5 strings],
-  "value_propositions": [list of 3-5 strings],
-  "benefits": [list of 3-5 strings],
-  "pain_points": [list of 3-5 strings],
-  "social_proof": [list of 3-5 strings]
+  "headlines": ["headline 1", "headline 2", "headline 3"],
+  "taglines": ["tagline 1", "tagline 2", "tagline 3"],
+  "value_propositions": ["value 1", "value 2", "value 3"],
+  "benefits": ["benefit 1", "benefit 2", "benefit 3"],
+  "pain_points": ["pain 1", "pain 2", "pain 3"]
 }}
-
-NOTES:
-{marketing_notes}
-
-Return valid JSON only.
 """
 
             qwen_client = OllamaClient(default_model="qwen3:32b")
             marketing_result = await qwen_client.generate_structured_response(
-                prompt=formatting_prompt,
+                prompt=marketing_prompt,
                 response_model=MarketingContent,
-                temperature=0.2,
-                max_retries=3
+                temperature=0.7,  # Higher for creativity
+                max_retries=3,
+                use_cot_prompt=False  # CRITICAL: Disable CoT for creative content
             )
 
             # Generate SEO content
             seo_prompt = f"""
-Generate SEO-optimized content for a neuroscience therapy practice.
+Generate SEO-optimized content for Enlitens, a neuroscience-based therapy practice in St. Louis.
 
-TOPICS:
-{research_content.get('key_findings', [])}
+RESEARCH THEMES (inspiration):
+{research_content.get('key_findings', [])[:5]}
 
-Create SEO content:
-1. Meta titles (3-5 titles, 50-60 chars each)
-2. Meta descriptions (3-5 descriptions, 150-160 chars each)
-3. Keywords (10-15 relevant keywords)
-4. Content topics (5-10 blog/article topics)
-5. FAQ questions (5-10 common questions)
+TARGET AUDIENCE: St. Louis adults with ADHD, anxiety, trauma, autism
 
-Return as JSON.
+CREATE SEO content optimized for local search and mental health queries:
+
+1. Primary keywords (5-10 keywords)
+   - Focus on "neuroscience therapy St. Louis", "ADHD specialist", etc.
+
+2. Secondary keywords (5-10 keywords)
+   - Related terms like "trauma therapy", "anxiety treatment"
+
+3. Long-tail keywords (5-10 specific phrases)
+   - "neuroscience-based ADHD treatment St. Louis"
+
+4. Meta descriptions (3-5 descriptions, 150-160 characters each)
+   - Compelling descriptions for search results
+
+5. Title tags (3-5 titles, 50-60 characters each)
+   - SEO-optimized page titles
+
+6. Content topics (5-10 blog/article ideas)
+   - Topics that would rank well and attract clients
+
+NOTE: Generate creative, searchable content - not just quotes from research.
+
+Return ONLY valid JSON in this exact format:
+{{
+  "primary_keywords": ["keyword1", "keyword2"],
+  "secondary_keywords": ["keyword1", "keyword2"],
+  "long_tail_keywords": ["phrase1", "phrase2"],
+  "meta_descriptions": ["desc1", "desc2"],
+  "title_tags": ["title1", "title2"],
+  "content_topics": ["topic1", "topic2"]
+}}
 """
 
             seo_result = await qwen_client.generate_structured_response(
                 prompt=seo_prompt,
                 response_model=SEOContent,
-                temperature=0.3,
-                max_retries=3
+                temperature=0.6,  # Moderate creativity for SEO
+                max_retries=3,
+                use_cot_prompt=False  # CRITICAL: Disable CoT for creative SEO content
             )
 
             return {

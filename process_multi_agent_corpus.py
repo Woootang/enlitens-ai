@@ -479,6 +479,10 @@ class MultiAgentProcessor:
                     if hasattr(content_creation_ideas, field) and isinstance(value, list):
                         setattr(content_creation_ideas, field, value)
 
+            # Get full document text for citation verification
+            full_document_text = result.get("document_text", "")
+            logger.info(f"📄 Storing full document text: {len(full_document_text)} characters")
+
             return EnlitensKnowledgeEntry(
                 metadata=metadata,
                 extracted_entities=entities,
@@ -491,12 +495,14 @@ class MultiAgentProcessor:
                 educational_content=educational_content,
                 clinical_content=clinical_content,
                 research_content=research_content,
-                content_creation_ideas=content_creation_ideas
+                content_creation_ideas=content_creation_ideas,
+                full_document_text=full_document_text  # CRITICAL: Store for citation verification
             )
 
         except Exception as e:
             logger.error(f"Error converting to knowledge entry: {e}")
-            # Return minimal valid entry
+            # Return minimal valid entry with document text if available
+            full_document_text = result.get("document_text", "") if isinstance(result, dict) else ""
             return EnlitensKnowledgeEntry(
                 metadata=DocumentMetadata(
                     document_id=document_id,
@@ -513,7 +519,8 @@ class MultiAgentProcessor:
                 educational_content=EducationalContent(),
                 clinical_content=ClinicalContent(),
                 research_content=ResearchContent(),
-                content_creation_ideas=ContentCreationIdeas()
+                content_creation_ideas=ContentCreationIdeas(),
+                full_document_text=full_document_text  # Store even in fallback case
             )
 
     async def process_corpus(self):
