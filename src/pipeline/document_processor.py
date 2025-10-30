@@ -12,6 +12,7 @@ This module orchestrates the complete PDF processing pipeline:
 import os
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
@@ -34,6 +35,8 @@ from src.schema.knowledge_schema import (
 )
 from src.utils.retry import IntelligentRetryManager
 from src.validation.layered_validation import LayeredValidationPipeline
+
+from src.monitoring.observability import get_observability
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +81,10 @@ class DocumentProcessor:
         # Initialize knowledge base
         self.knowledge_base_path = self.output_dir / "enlitens-knowledge-core.json"
         self.knowledge_base = self._load_knowledge_base()
-        
+
+        # Observability
+        self.observability = get_observability()
+
         logger.info("DocumentProcessor initialized")
     
     def _load_knowledge_base(self) -> KnowledgeBase:
@@ -112,68 +118,286 @@ class DocumentProcessor:
         Returns:
             Tuple of (success, document, error_message)
         """
-        logger.info(f"Processing document: {pdf_path}")
-        
+        document_id = Path(pdf_path).stem
+        logger.info(
+            f"Processing document: {pdf_path}",
+            extra={"document_id": document_id, "processing_stage": "start"}
+        )
+
         try:
             # Stage 1: PDF Extraction
-            logger.info("Stage 1: PDF Extraction")
-            extraction_outcome = self.retry_manager.run(
-                "pdf_extraction",
-                lambda: self.pdf_extractor.extract(pdf_path),
-                correction_prompt="Re-run extraction with OCR fallback and adjust layout heuristics",
-                degradation=lambda: self._fallback_extraction(os.path.basename(pdf_path)),
-            )
-            extraction_result = extraction_outcome.result
-            if not extraction_outcome.success and extraction_result is None:
-                return False, None, extraction_outcome.error or "Extraction failed"
+            extraction_start = datetime.utcnow()
+            extraction_perf = time.perf_counter()
+            logger.info("Stage 1: PDF Extraction", extra={"processing_stage": "extraction"})
+            try:
+                with self.observability.start_span(
+                    "pipeline.pdf_extraction",
+                    {
+                        "document.id": document_id,
+                        "pdf.path": str(pdf_path),
+                    },
+                ) as span:
+                    extraction_result = self.pdf_extractor.extract(pdf_path)
+                    page_count = len(extraction_result.get('pages', [])) if isinstance(extraction_result, dict) else 0
+                    span.set_attribute("extraction.page_count", page_count)
+            except Exception as extraction_error:
+                extraction_end = datetime.utcnow()
+                self.observability.record_stage_timing(
+                    document_id,
+                    "PDF Extraction",
+                    "HybridExtractor",
+                    extraction_start,
+                    extraction_end,
+                    "error",
+                    {"error": str(extraction_error)},
+                )
+                raise
 
-            # Validate extraction quality
+            extraction_end = datetime.utcnow()
+            extraction_duration = time.perf_counter() - extraction_perf
+            self.observability.record_stage_timing(
+                document_id,
+                "PDF Extraction",
+                "HybridExtractor",
+                extraction_start,
+                extraction_end,
+                "success",
+                {"duration_seconds": extraction_duration},
+            )
+            self.observability.check_latency_anomaly("pdf_extraction", extraction_duration)
+
             extraction_metrics = self.quality_validator.validate_extraction(extraction_result)
-            if extraction_metrics.overall_score < 0.95:
-                logger.warning(f"Extraction quality below threshold: {extraction_metrics.overall_score:.2f}")
+            extraction_score = getattr(extraction_metrics, "overall_score", 0.0)
+            if extraction_score < 0.95:
+                logger.warning(
+                    f"Extraction quality below threshold: {extraction_score:.2f}",
+                    extra={"document_id": document_id}
+                )
+            extraction_metrics_payload = {}
+            if hasattr(extraction_metrics, "dict"):
+                try:
+                    extraction_metrics_payload = extraction_metrics.dict()
+                except TypeError:
+                    extraction_metrics_payload = getattr(extraction_metrics, "__dict__", {})
+            else:
+                extraction_metrics_payload = {"overall_score": extraction_score}
+            self.observability.record_quality_metrics(
+                document_id,
+                {"stage": "extraction", **extraction_metrics_payload}
+            )
 
             # Stage 2: Entity Extraction
-            logger.info("Stage 2: Entity Extraction")
-            entity_outcome = self.retry_manager.run(
-                "entity_extraction",
-                lambda: self._extract_entities(extraction_result),
-                correction_prompt="Reload spaCy/transformer weights and ensure GPU memory is free",
-                degradation=lambda: {},
+            entity_start = datetime.utcnow()
+            entity_perf = time.perf_counter()
+            logger.info("Stage 2: Entity Extraction", extra={"processing_stage": "entity_extraction"})
+            with self.observability.start_span(
+                "pipeline.entity_extraction",
+                {"document.id": document_id},
+            ) as span:
+                if not self.entity_extractor.initialize():
+                    self.observability.record_stage_timing(
+                        document_id,
+                        "Entity Extraction",
+                        "NeuroscienceEntityExtractor",
+                        entity_start,
+                        datetime.utcnow(),
+                        "error",
+                        {"reason": "initialization failed"},
+                    )
+                    self.observability.emit_alert(
+                        "Entity extractor unavailable",
+                        "error",
+                        "Failed to initialize entity extractor",
+                        {"document_id": document_id},
+                    )
+                    return False, None, "Entity extractor initialization failed"
+
+                source_text = ""
+                if isinstance(extraction_result, dict):
+                    source_text = extraction_result.get('full_text', '')
+                entities = self.entity_extractor.extract_entities(source_text)
+                if isinstance(entities, dict):
+                    total_entities = sum(len(v) for v in entities.values() if isinstance(v, list))
+                    span.set_attribute("entity.count", total_entities)
+            entity_end = datetime.utcnow()
+            entity_duration = time.perf_counter() - entity_perf
+            self.observability.record_stage_timing(
+                document_id,
+                "Entity Extraction",
+                "NeuroscienceEntityExtractor",
+                entity_start,
+                entity_end,
+                "success",
+                {"duration_seconds": entity_duration},
             )
-            if not entity_outcome.success and entity_outcome.result is None:
-                return False, None, entity_outcome.error or "Entity extraction failed"
-            entities = entity_outcome.result or {}
+            self.observability.check_latency_anomaly("entity_extraction", entity_duration)
 
             # Stage 3: AI Synthesis
-            logger.info("Stage 3: AI Synthesis")
+            synthesis_start = datetime.utcnow()
+            synthesis_perf = time.perf_counter()
+            logger.info("Stage 3: AI Synthesis", extra={"processing_stage": "synthesis"})
             if not self.ollama_client.is_available():
-                logger.warning("Ollama is not available - attempting graceful degradation")
-            synthesis_outcome = self.retry_manager.run(
-                "ai_synthesis",
-                lambda: self.synthesizer.synthesize(extraction_result),
-                correction_prompt="Regenerate with shorter context window and stricter JSON schema",
-                degradation=lambda: self._fallback_synthesis(extraction_result),
+                self.observability.record_stage_timing(
+                    document_id,
+                    "AI Synthesis",
+                    "NeuroscienceSynthesizer",
+                    synthesis_start,
+                    datetime.utcnow(),
+                    "error",
+                    {"reason": "ollama unavailable"},
+                )
+                self.observability.emit_alert(
+                    "Ollama unavailable",
+                    "error",
+                    "Local Ollama server is not responding",
+                    {"document_id": document_id},
+                )
+                return False, None, "Ollama is not available"
+
+            with self.observability.start_span(
+                "pipeline.ai_synthesis",
+                {"document.id": document_id},
+            ) as span:
+                synthesis_result = self.synthesizer.synthesize(extraction_result)
+                span.set_attribute("synthesis.quality_score", synthesis_result.quality_score)
+                if getattr(synthesis_result, "validation_issues", None):
+                    span.set_attribute(
+                        "synthesis.issues",
+                        ",".join(synthesis_result.validation_issues)
+                    )
+            synthesis_end = datetime.utcnow()
+            synthesis_duration = time.perf_counter() - synthesis_perf
+            self.observability.record_stage_timing(
+                document_id,
+                "AI Synthesis",
+                "NeuroscienceSynthesizer",
+                synthesis_start,
+                synthesis_end,
+                "success",
+                {"duration_seconds": synthesis_duration, "quality": synthesis_result.quality_score},
             )
-            synthesis_result = synthesis_outcome.result
-            if synthesis_result is None:
-                return False, None, synthesis_outcome.error or "AI synthesis failed"
+            self.observability.check_latency_anomaly("ai_synthesis", synthesis_duration)
+            self.observability.check_quality_anomaly(
+                document_id,
+                synthesis_result.quality_score,
+                getattr(synthesis_result, "validation_issues", None),
+            )
 
             # Stage 4: Create Knowledge Document
-            logger.info("Stage 4: Creating Knowledge Document")
-            document = self._create_knowledge_document(
-                pdf_path, extraction_result, entities, synthesis_result
+            creation_start = datetime.utcnow()
+            creation_perf = time.perf_counter()
+            logger.info("Stage 4: Creating Knowledge Document", extra={"processing_stage": "document_build"})
+            with self.observability.start_span(
+                "pipeline.document_assembly",
+                {"document.id": document_id},
+            ):
+                document = self._create_knowledge_document(
+                    pdf_path, extraction_result, entities, synthesis_result
+                )
+            creation_end = datetime.utcnow()
+            creation_duration = time.perf_counter() - creation_perf
+            self.observability.record_stage_timing(
+                document_id,
+                "Document Assembly",
+                "DocumentProcessor",
+                creation_start,
+                creation_end,
+                "success",
+                {"duration_seconds": creation_duration},
             )
 
             # Stage 5: Quality Validation
-            logger.info("Stage 5: Quality Validation")
-            if not self._validate_document_quality(document):
-                logger.warning("Document quality validation failed")
-            
+            validation_start = datetime.utcnow()
+            validation_perf = time.perf_counter()
+            logger.info("Stage 5: Quality Validation", extra={"processing_stage": "quality_validation"})
+            is_valid = self._validate_document_quality(document)
+            validation_end = datetime.utcnow()
+            validation_duration = time.perf_counter() - validation_perf
+            self.observability.record_stage_timing(
+                document_id,
+                "Quality Validation",
+                "QualityValidator",
+                validation_start,
+                validation_end,
+                "success" if is_valid else "warning",
+                {"duration_seconds": validation_duration, "quality_score": document.get_quality_score()},
+            )
+            if not is_valid:
+                logger.warning("Document quality validation failed", extra={"document_id": document_id})
+
+            # Aggregate metrics and RAG exports
+            prompt_text = getattr(synthesis_result, "prompt_text", "")
+            estimated_tokens = int(len(prompt_text) / 4) if prompt_text else 0
+            self.observability.check_cost_anomaly(document_id, estimated_tokens)
+
+            sections = extraction_result.get('sections', []) if isinstance(extraction_result, dict) else []
+            context_chunks = []
+            for section in sections[:5]:
+                if isinstance(section, dict):
+                    chunk = section.get('content') or section.get('text') or ''
+                else:
+                    chunk = str(section)
+                if chunk:
+                    context_chunks.append(chunk[:500])
+            if not context_chunks and isinstance(extraction_result, dict):
+                full_text = extraction_result.get('full_text')
+                if full_text:
+                    context_chunks.append(full_text[:500])
+
+            citations = []
+            for idx, finding in enumerate(synthesis_result.key_findings):
+                text = finding.get('finding_text', '') if isinstance(finding, dict) else str(finding)
+                if text:
+                    citations.append({"id": f"finding-{idx}", "label": text[:120]})
+
+            self.observability.record_rag_metrics(
+                document_id,
+                prompt_text,
+                context_chunks,
+                synthesis_result.enlitens_takeaway,
+                citations,
+                synthesis_result.quality_score,
+            )
+
+            concept_nodes = []
+            for idx, concept in enumerate(synthesis_result.neuroscientific_concepts):
+                label = concept.get('concept_name', '') if isinstance(concept, dict) else str(concept)
+                if label:
+                    concept_nodes.append({"id": f"concept-{idx}", "label": label, "type": "concept"})
+
+            graph_nodes = (
+                [{"id": document_id, "label": document.source_metadata.title or document_id, "type": "document"}]
+                + concept_nodes
+                + [{"id": citation["id"], "label": citation["label"], "type": "finding"} for citation in citations]
+            )
+            graph_edges = []
+            for concept in concept_nodes:
+                graph_edges.append({"source": concept["id"], "target": document_id})
+            for citation in citations:
+                graph_edges.append({"source": citation["id"], "target": document_id})
+            self.observability.record_citation_graph(document_id, graph_nodes, graph_edges)
+
+            summary_metrics = {
+                "stage": "document",
+                "quality_score": document.get_quality_score(),
+                "synthesis_quality": synthesis_result.quality_score,
+                "extraction_quality": extraction_score,
+                "entity_total": sum(len(v) for v in entities.values()) if isinstance(entities, dict) else 0,
+            }
+            self.observability.record_quality_metrics(document_id, summary_metrics)
+
             logger.info(f"Document processed successfully: {document.document_id}")
             return True, document, ""
-            
+
         except Exception as e:
             error_msg = f"Document processing failed: {str(e)}"
+            self.observability.capture_exception(
+                e,
+                {
+                    "pdf_path": pdf_path,
+                    "document_id": document_id,
+                },
+            )
             logger.error(error_msg)
             logger.error(traceback.format_exc())
             return False, None, error_msg

@@ -1,242 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Enlitens AI Monitor - Real-Time Quality Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <h1 class="logo">
-                <span class="robot-icon">🤖</span>
-                Enlitens AI Monitor
-            </h1>
-            <div class="connection-status">
-                <div class="status-indicator" id="connectionStatus">
-                    <div class="pulse"></div>
-                    <span id="statusText">Connecting...</span>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <h3>📊 Dashboard</h3>
-                <nav class="nav-menu">
-                    <button class="nav-item active" data-view="logs">
-                        📋 Live Logs
-                    </button>
-                    <button class="nav-item" data-view="quality">
-                        ✅ Quality Metrics
-                    </button>
-                    <button class="nav-item" data-view="foreman">
-                        🏗️ Foreman AI
-                    </button>
-                    <button class="nav-item" data-view="stats">
-                        📈 Statistics
-                    </button>
-                </nav>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>🎯 Quick Stats</h3>
-                <div class="stat-card">
-                    <div class="stat-label">Total Logs</div>
-                    <div class="stat-value" id="totalLogs">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Errors</div>
-                    <div class="stat-value error" id="totalErrors">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Warnings</div>
-                    <div class="stat-value warning" id="totalWarnings">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Quality Score</div>
-                    <div class="stat-value success" id="qualityScore">--%</div>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>🔧 Controls</h3>
-                <button class="control-btn" onclick="clearLogs()">
-                    🗑️ Clear Logs
-                </button>
-                <button class="control-btn" onclick="pauseStream()">
-                    ⏸️ <span id="pauseText">Pause</span>
-                </button>
-                <button class="control-btn" onclick="exportLogs()">
-                    💾 Export
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Logs View -->
-            <div class="view active" id="logsView">
-                <div class="view-header">
-                    <h2>📋 Live Processing Logs</h2>
-                    <div class="filter-controls">
-                        <select id="levelFilter" onchange="applyFilters()">
-                            <option value="all">All Levels</option>
-                            <option value="DEBUG">🔍 Debug</option>
-                            <option value="INFO">✅ Info</option>
-                            <option value="WARNING">⚠️ Warning</option>
-                            <option value="ERROR">❌ Error</option>
-                            <option value="CRITICAL">🚨 Critical</option>
-                        </select>
-                        <input type="text" id="searchFilter" placeholder="🔎 Search logs..." oninput="applyFilters()">
-                    </div>
-                </div>
-                <div class="logs-container" id="logsContainer">
-                    <div class="log-entry welcome">
-                        <div class="log-header">
-                            <span class="log-level">INFO</span>
-                            <span class="log-time" id="welcomeLogTime">--:--:--</span>
-                        </div>
-                        <div class="log-message">
-                            🎉 Welcome to Enlitens AI Monitor! Waiting for processing to start...
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quality View -->
-            <div class="view" id="qualityView">
-                <div class="view-header">
-                    <h2>✅ Quality Metrics & Analysis</h2>
-                </div>
-                <div class="quality-dashboard">
-                    <div class="quality-card">
-                        <h3>📄 Document Quality</h3>
-                        <canvas id="documentQualityChart"></canvas>
-                        <div class="quality-details" id="documentQuality">
-                            <p class="placeholder">No data available yet...</p>
-                        </div>
-                    </div>
-                    <div class="quality-card">
-                        <h3>🎯 Agent Performance</h3>
-                        <div class="agent-metrics" id="agentMetrics">
-                            <p class="placeholder">Agents not yet active...</p>
-                        </div>
-                    </div>
-                    <div class="quality-card">
-                        <h3>⚡ Processing Speed</h3>
-                        <div class="speed-metrics" id="speedMetrics">
-                            <p class="placeholder">No processing activity...</p>
-                        </div>
-                    </div>
-                    <div class="quality-card">
-                        <h3>🔍 Hallucination Detection</h3>
-                        <div class="hallucination-metrics" id="hallucinationMetrics">
-                            <div class="metric-row">
-                                <span>Citations Verified:</span>
-                                <span class="metric-value">0</span>
-                            </div>
-                            <div class="metric-row">
-                                <span>Failed Validations:</span>
-                                <span class="metric-value error">0</span>
-                            </div>
-                            <div class="metric-row">
-                                <span>Empty Fields Detected:</span>
-                                <span class="metric-value warning">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Foreman AI View -->
-            <div class="view" id="foremanView">
-                <div class="view-header">
-                    <h2>🏗️ Chat with Foreman AI</h2>
-                    <p class="subtitle">Ask questions about processing quality and get intelligent insights</p>
-                </div>
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message foreman">
-                            <div class="message-avatar">🏗️</div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <strong>Foreman AI</strong>
-                                    <span class="message-time" id="foremanWelcomeTime">--:--:--</span>
-                                </div>
-                                <div class="message-text">
-                                    Hello! I'm your AI Foreman, monitoring the Enlitens knowledge base extraction process.
-                                    I can help you understand quality metrics, troubleshoot issues, and provide insights about the processing pipeline.
-                                    <br><br>
-                                    Try asking me:
-                                    <ul>
-                                        <li>"What's the current processing status?"</li>
-                                        <li>"Are there any quality concerns?"</li>
-                                        <li>"Explain the latest error"</li>
-                                        <li>"Show me the hallucination prevention metrics"</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chat-input-container">
-                        <input
-                            type="text"
-                            id="chatInput"
-                            placeholder="Ask the Foreman AI a question..."
-                            onkeypress="if(event.key === 'Enter') sendMessage()"
-                        >
-                        <button class="send-btn" onclick="sendMessage()">
-                            Send 📤
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats View -->
-            <div class="view" id="statsView">
-                <div class="view-header">
-                    <h2>📈 Detailed Statistics</h2>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <h3>📊 Processing Overview</h3>
-                        <div id="processingStats">
-                            <p class="placeholder">No processing data yet...</p>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <h3>🤖 Agent Activity</h3>
-                        <div id="agentStats">
-                            <p class="placeholder">Agents not yet active...</p>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <h3>⏱️ Performance Metrics</h3>
-                        <div id="performanceStats">
-                            <p class="placeholder">No performance data...</p>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <h3>🎯 Quality Breakdown</h3>
-                        <div id="qualityBreakdown">
-                            <p class="placeholder">No quality metrics yet...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <script src="/static/app.js" defer></script>
-</body>
+<html lang="en" data-theme="dark" data-motion="full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enlitens AI Control Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <div id="root" class="app-root"></div>
+    <noscript>
+      <div class="no-script">
+        <h1>Enlitens AI Control Deck</h1>
+        <p>This dashboard requires JavaScript to render the real-time interface.</p>
+      </div>
+    </noscript>
+    <script type="text/babel" src="/static/app.js"></script>
+  </body>
 </html>
