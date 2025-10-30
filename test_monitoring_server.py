@@ -4,7 +4,9 @@ Quick test to verify monitoring server can start and respond.
 """
 
 import asyncio
-import httpx
+import pytest
+
+httpx = pytest.importorskip("httpx")
 import subprocess
 import time
 import sys

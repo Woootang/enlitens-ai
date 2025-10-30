@@ -233,6 +233,12 @@ function updateQualityDashboard(data) {
         qualityLabel = 'POOR';
     }
 
+    const precision = metrics.precision_at_3;
+    const recall = metrics.recall_at_3;
+    const faithfulness = metrics.faithfulness;
+    const hallucinationRate = metrics.hallucination_rate;
+    const layerFailures = metrics.layer_failures || [];
+
     grid.innerHTML = `
         <div class="metric-card">
             <div class="metric-header">
@@ -245,22 +251,47 @@ function updateQualityDashboard(data) {
 
         <div class="metric-card">
             <div class="metric-header">
-                <h3>Processing Progress</h3>
-                <div class="metric-icon">📈</div>
-            </div>
-            <div class="metric-value-lg">${data.progress_percentage?.toFixed(0) || 0}%</div>
-            <p style="margin-top: 0.5rem; color: #6b7280;">
-                ${data.documents_processed || 0} / ${data.total_documents || 0} documents
-            </p>
-        </div>
-
-        <div class="metric-card">
-            <div class="metric-header">
                 <h3>Citations Verified</h3>
                 <div class="metric-icon">✅</div>
             </div>
             <div class="metric-value-lg" style="color: #10b981;">${metrics.citation_verified || 0}</div>
             <p style="margin-top: 0.5rem; color: #6b7280;">Source verification checks</p>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3>Precision @ 3</h3>
+                <div class="metric-icon">📐</div>
+            </div>
+            <div class="metric-value-lg" style="color: #10b981;">${formatPercent(precision)}</div>
+            <p style="margin-top: 0.5rem; color: #6b7280;">Supported key findings</p>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3>Recall @ 3</h3>
+                <div class="metric-icon">📊</div>
+            </div>
+            <div class="metric-value-lg" style="color: #667eea;">${formatPercent(recall)}</div>
+            <p style="margin-top: 0.5rem; color: #6b7280;">Recovered ground-truth claims</p>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3>Faithfulness</h3>
+                <div class="metric-icon">🔒</div>
+            </div>
+            <div class="metric-value-lg" style="color: #2563eb;">${formatPercent(faithfulness)}</div>
+            <p style="margin-top: 0.5rem; color: #6b7280;">Average semantic agreement</p>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3>Hallucination Rate</h3>
+                <div class="metric-icon">🧠</div>
+            </div>
+            <div class="metric-value-lg" style="color: #ef4444;">${formatPercent(hallucinationRate)}</div>
+            <p style="margin-top: 0.5rem; color: #6b7280;">Flagged critical findings</p>
         </div>
 
         <div class="metric-card">
@@ -279,6 +310,26 @@ function updateQualityDashboard(data) {
             </div>
             <div class="metric-value-lg" style="color: #f6ad55;">${metrics.empty_fields || 0}</div>
             <p style="margin-top: 0.5rem; color: #6b7280;">Missing data fields</p>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3>Layer Failures</h3>
+                <div class="metric-icon">🧩</div>
+            </div>
+            <div class="metric-value-lg" style="color: #f97316;">${layerFailures.length}</div>
+            <p style="margin-top: 0.5rem; color: #6b7280;">${layerFailures.join(', ') || 'All layers passing'}</p>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3>Processing Progress</h3>
+                <div class="metric-icon">📈</div>
+            </div>
+            <div class="metric-value-lg">${data.progress_percentage?.toFixed(0) || 0}%</div>
+            <p style="margin-top: 0.5rem; color: #6b7280;">
+                ${data.documents_processed || 0} / ${data.total_documents || 0} documents
+            </p>
         </div>
 
         <div class="metric-card">
@@ -468,10 +519,26 @@ function calculateQualityScore(data) {
     // Deduct for empty fields (2 points each, max 20)
     score -= Math.min((metrics.empty_fields || 0) * 2, 20);
 
+    // Precision/recall/faithfulness adjustments when available
+    const precision = typeof metrics.precision_at_3 === 'number' ? metrics.precision_at_3 : null;
+    const recall = typeof metrics.recall_at_3 === 'number' ? metrics.recall_at_3 : null;
+    const faithfulness = typeof metrics.faithfulness === 'number' ? metrics.faithfulness : null;
+    const hallucinationRate = typeof metrics.hallucination_rate === 'number' ? metrics.hallucination_rate : null;
+
+    if (precision !== null) score += Math.round((precision - 0.75) * 40);
+    if (recall !== null) score += Math.round((recall - 0.75) * 30);
+    if (faithfulness !== null) score += Math.round((faithfulness - 0.8) * 40);
+    if (hallucinationRate !== null) score -= Math.round(hallucinationRate * 60);
+
     // Bonus for citations verified (1 point each, max 20)
     score += Math.min((metrics.citation_verified || 0), 20);
 
     return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function formatPercent(value, decimals = 1) {
+    if (value === null || value === undefined || isNaN(value)) return '--';
+    return `${(value * 100).toFixed(decimals)}%`;
 }
 
 // Format duration in seconds to human-readable

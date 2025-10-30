@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 import traceback
+from types import SimpleNamespace
 
 # Import our modules
 from src.extraction.pdf_extractor import HybridExtractor
@@ -23,14 +24,16 @@ from src.extraction.quality_validator import ExtractionQualityValidator
 from src.models.specialized_models import NeuroscienceEntityExtractor, ModelManager
 from src.synthesis.ai_synthesizer import NeuroscienceSynthesizer, OllamaClient
 from src.schema.knowledge_schema import (
-    EnlitensKnowledgeDocument, 
-    SourceMetadata, 
+    EnlitensKnowledgeDocument,
+    SourceMetadata,
     ArchivalContent,
     EntityExtraction,
     AISynthesis,
     ProcessingMetadata,
     KnowledgeBase
 )
+from src.utils.retry import IntelligentRetryManager
+from src.validation.layered_validation import LayeredValidationPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +72,8 @@ class DocumentProcessor:
         self.entity_extractor = NeuroscienceEntityExtractor(self.model_manager)
         self.ollama_client = OllamaClient(ollama_url, ollama_model)
         self.synthesizer = NeuroscienceSynthesizer(self.ollama_client)
+        self.retry_manager = IntelligentRetryManager()
+        self.layered_validator = LayeredValidationPipeline()
         
         # Initialize knowledge base
         self.knowledge_base_path = self.output_dir / "enlitens-knowledge-core.json"
@@ -112,35 +117,53 @@ class DocumentProcessor:
         try:
             # Stage 1: PDF Extraction
             logger.info("Stage 1: PDF Extraction")
-            extraction_result = self.pdf_extractor.extract(pdf_path)
-            
+            extraction_outcome = self.retry_manager.run(
+                "pdf_extraction",
+                lambda: self.pdf_extractor.extract(pdf_path),
+                correction_prompt="Re-run extraction with OCR fallback and adjust layout heuristics",
+                degradation=lambda: self._fallback_extraction(os.path.basename(pdf_path)),
+            )
+            extraction_result = extraction_outcome.result
+            if not extraction_outcome.success and extraction_result is None:
+                return False, None, extraction_outcome.error or "Extraction failed"
+
             # Validate extraction quality
             extraction_metrics = self.quality_validator.validate_extraction(extraction_result)
             if extraction_metrics.overall_score < 0.95:
                 logger.warning(f"Extraction quality below threshold: {extraction_metrics.overall_score:.2f}")
-            
+
             # Stage 2: Entity Extraction
             logger.info("Stage 2: Entity Extraction")
-            if not self.entity_extractor.initialize():
-                logger.error("Failed to initialize entity extractor")
-                return False, None, "Entity extractor initialization failed"
-            
-            entities = self.entity_extractor.extract_entities(extraction_result['full_text'])
-            
+            entity_outcome = self.retry_manager.run(
+                "entity_extraction",
+                lambda: self._extract_entities(extraction_result),
+                correction_prompt="Reload spaCy/transformer weights and ensure GPU memory is free",
+                degradation=lambda: {},
+            )
+            if not entity_outcome.success and entity_outcome.result is None:
+                return False, None, entity_outcome.error or "Entity extraction failed"
+            entities = entity_outcome.result or {}
+
             # Stage 3: AI Synthesis
             logger.info("Stage 3: AI Synthesis")
             if not self.ollama_client.is_available():
-                logger.error("Ollama is not available")
-                return False, None, "Ollama is not available"
-            
-            synthesis_result = self.synthesizer.synthesize(extraction_result)
-            
+                logger.warning("Ollama is not available - attempting graceful degradation")
+            synthesis_outcome = self.retry_manager.run(
+                "ai_synthesis",
+                lambda: self.synthesizer.synthesize(extraction_result),
+                correction_prompt="Regenerate with shorter context window and stricter JSON schema",
+                degradation=lambda: self._fallback_synthesis(extraction_result),
+            )
+            synthesis_result = synthesis_outcome.result
+            if synthesis_result is None:
+                return False, None, synthesis_outcome.error or "AI synthesis failed"
+
             # Stage 4: Create Knowledge Document
             logger.info("Stage 4: Creating Knowledge Document")
             document = self._create_knowledge_document(
                 pdf_path, extraction_result, entities, synthesis_result
             )
-            
+
             # Stage 5: Quality Validation
             logger.info("Stage 5: Quality Validation")
             if not self._validate_document_quality(document):
@@ -236,7 +259,7 @@ class DocumentProcessor:
     def _validate_document_quality(self, document: EnlitensKnowledgeDocument) -> bool:
         """Validate overall document quality"""
         quality_score = document.get_quality_score()
-        
+
         if quality_score < 0.8:
             logger.warning(f"Document quality below threshold: {quality_score:.2f}")
             return False
@@ -253,8 +276,50 @@ class DocumentProcessor:
         if not document.ai_synthesis or not document.ai_synthesis.enlitens_takeaway:
             logger.warning("Document missing synthesis")
             return False
-        
+
+        layered_result = self.layered_validator.validate_document(document)
+        logger.info("QUALITY_METRICS %s", json.dumps(layered_result.to_quality_payload()))
+        if not layered_result.passed:
+            for layer in layered_result.layers:
+                for issue in layer.issues:
+                    logger.warning("Layered validation issue (%s): %s", layer.name, issue)
+            return False
+
         return True
+
+    def _extract_entities(self, extraction_result: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+        if not self.entity_extractor.initialize():
+            raise RuntimeError("Entity extractor initialization failed")
+        full_text = extraction_result.get('full_text') or extraction_result.get('full_document_text', '')
+        return self.entity_extractor.extract_entities(full_text)
+
+    def _fallback_extraction(self, source_filename: str) -> Dict[str, Any]:
+        logger.info("Producing fallback extraction for %s", source_filename)
+        return {
+            'title': f"Fallback extraction for {source_filename}",
+            'abstract': 'Extraction failed; this is a placeholder abstract ensuring pipeline continuity.',
+            'full_text': 'Extraction failed; placeholder content inserted to allow downstream validation.',
+            'sections': [],
+            'tables': [],
+            'references': [],
+        }
+
+    def _fallback_synthesis(self, extraction_result: Dict[str, Any]):
+        logger.info("Producing fallback synthesis due to generation failure")
+        placeholder_claim = "Fallback synthesis generated due to upstream failure"
+        return SimpleNamespace(
+            enlitens_takeaway="We were unable to generate a full synthesis. Please review the source document manually.",
+            eli5_summary="An issue occurred during synthesis; content needs human review.",
+            key_findings=[SimpleNamespace(finding_text=placeholder_claim, evidence_strength="preliminary", relevance_to_enlitens="Manual follow-up required")],
+            neuroscientific_concepts=[],
+            clinical_applications=[],
+            therapeutic_targets=[],
+            client_presentations=[],
+            intervention_suggestions=[],
+            contraindications=[],
+            evidence_strength="preliminary",
+            quality_score=0.0,
+        )
     
     def process_batch(self, pdf_paths: List[str], max_retries: int = 3) -> Dict[str, Any]:
         """
