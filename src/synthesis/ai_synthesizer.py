@@ -35,6 +35,8 @@ class SynthesisResult:
     evidence_strength: str
     quality_score: float
     synthesis_timestamp: str
+    prompt_text: Optional[str] = None
+    validation_issues: Optional[List[str]] = None
 
 
 class OllamaClient:
@@ -289,6 +291,8 @@ class NeuroscienceSynthesizer:
             prompt = self.templates.get_synthesis_prompt(extraction_result)
             
             # Get synthesis from Qwen2.5
+
+            # Get synthesis from Qwen3
             synthesis_text = self.ollama.generate(prompt, temperature=0.3)
             
             if not synthesis_text:
@@ -300,7 +304,12 @@ class NeuroscienceSynthesizer:
             
             # Validate synthesis
             validation_result = self._validate_synthesis(synthesis_data)
-            
+            validation_issues = []
+            if isinstance(validation_result, dict):
+                issues = validation_result.get('issues')
+                if isinstance(issues, list):
+                    validation_issues = issues
+
             # Create result object
             result = SynthesisResult(
                 enlitens_takeaway=synthesis_data.get('enlitens_takeaway', ''),
@@ -313,8 +322,10 @@ class NeuroscienceSynthesizer:
                 intervention_suggestions=synthesis_data.get('intervention_suggestions', []),
                 contraindications=synthesis_data.get('contraindications', []),
                 evidence_strength=synthesis_data.get('evidence_strength', 'preliminary'),
-                quality_score=validation_result.get('quality_score', 0.0),
-                synthesis_timestamp=datetime.now().isoformat()
+                quality_score=validation_result.get('quality_score', 0.0) if isinstance(validation_result, dict) else 0.0,
+                synthesis_timestamp=datetime.now().isoformat(),
+                prompt_text=prompt,
+                validation_issues=validation_issues
             )
             
             logger.info(f"Synthesis completed with quality score {result.quality_score:.2f}")
@@ -424,7 +435,9 @@ class NeuroscienceSynthesizer:
             contraindications=[],
             evidence_strength="preliminary",
             quality_score=0.0,
-            synthesis_timestamp=datetime.now().isoformat()
+            synthesis_timestamp=datetime.now().isoformat(),
+            prompt_text=None,
+            validation_issues=[],
         )
 
 

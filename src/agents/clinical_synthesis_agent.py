@@ -4,9 +4,11 @@ Clinical Synthesis Agent - Synthesizes clinical applications from research.
 
 import logging
 from typing import Dict, Any
+
 from .base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient
 from src.models.enlitens_schemas import ClinicalContent
+from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
+from src.synthesis.ollama_client import OllamaClient
 
 logger = logging.getLogger(__name__)
 
@@ -40,17 +42,29 @@ class ClinicalSynthesisAgent(BaseAgent):
             research_content = science_data.get("research_content", {})
             document_text = context.get("document_text", "")[:5000]  # First 5000 chars
 
+            few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
+                task="clinical_synthesis",
+                query=document_text,
+                k=2,
+            )
+
+            exemplars = (
+                "FEW-SHOT EXEMPLARS (mirror structure, mark speculation clearly):\n"
+                f"{few_shot_block}\n\n" if few_shot_block else ""
+            )
+
             prompt = f"""
 You are a clinical psychologist extracting therapeutic applications from neuroscience research.
 
 STRICT RULES:
 ✓ Extract ONLY clinical applications that can be reasonably inferred from the research
-✓ Base all interventions on stated research findings
-✓ Clearly distinguish between stated protocols and potential applications
+✓ Base all interventions on stated research findings and cite the relevant finding in plain language
+✓ Clearly distinguish between stated protocols and potential applications (prefix speculative items with "Potential application:")
 ✗ DO NOT fabricate therapeutic protocols not supported by the research
 ✗ DO NOT add clinical practices from your training data
 ✗ DO NOT generate practice statistics or client outcome claims
 
+{exemplars}
 DOCUMENT EXCERPT:
 {document_text}
 
@@ -63,7 +77,7 @@ METHODOLOGIES:
 CLINICAL IMPLICATIONS:
 {research_content.get('implications', [])}
 
-Extract and synthesize clinical content from this research. Base all clinical applications on the research findings above. For potential applications not explicitly stated, use prefix "Potential application:"
+Extract and synthesize clinical content from this research. Base all clinical applications on the research findings above. For potential applications not explicitly stated, use prefix "Potential application:" and state the supporting finding.
 
 Generate content for ALL fields below:
 
@@ -97,8 +111,9 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ClinicalContent,
-                temperature=0.3,  # LOWERED from 0.7: Research shows 0.3 optimal for factual clinical content
-                max_retries=3
+                temperature=0.2,
+                max_retries=3,
+                enforce_grammar=True,
             )
 
             if result:
@@ -106,8 +121,8 @@ Return as JSON with these EXACT field names:
                     "clinical_content": result.model_dump(),
                     "synthesis_quality": "high"
                 }
-            else:
-                return {"clinical_content": ClinicalContent().model_dump()}
+
+            return {"clinical_content": ClinicalContent().model_dump()}
 
         except Exception as e:
             logger.error(f"Clinical synthesis failed: {e}")

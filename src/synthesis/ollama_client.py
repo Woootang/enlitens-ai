@@ -72,7 +72,11 @@ class VLLMClient:
             gpu_memory_utilization=self.gpu_memory_utilization_target,
             continuous_batch_sizes=self.continuous_batch_sizes,
         )
+    def clone_with_model(self, model: str) -> "OllamaClient":
+        clone = OllamaClient.__new__(OllamaClient)
+        clone.base_url = self.base_url
         clone.client = self.client
+        clone.default_model = model
         return clone
 
     def _resolve_model(self, model: Optional[str]) -> str:
@@ -140,6 +144,50 @@ class VLLMClient:
 
         try:
             response = await self.client.post("chat/completions", json=payload)
+        top_p: Optional[float] = 0.9,
+        grammar: Optional[str] = None,
+        response_format: Optional[str] = None,
+        extra_options: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Generate response from Ollama with optional schema enforcement.
+        
+        Args:
+            prompt: The input prompt
+            model: The model to use
+            temperature: Sampling temperature (0.0 to 1.0)
+            num_ctx: Optional override for context window
+            num_predict: Optional override for maximum generated tokens
+            extra_options: Additional Ollama generation options
+        """
+        try:
+            model_name = self._resolve_model(model)
+            logger.info(f"Generating response with model: {model_name}")
+            
+            # Prepare request payload
+            payload = {
+                "model": model_name,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "num_gpu": -1,
+                    "temperature": temperature,
+                    "num_ctx": num_ctx or 4096,
+                    "num_predict": num_predict or 2048,
+                    "top_p": top_p if top_p is not None else 0.9,
+                },
+            }
+
+            if grammar:
+                payload["options"]["grammar"] = grammar
+
+            if extra_options:
+                payload["options"].update(extra_options)
+
+            if response_format:
+                payload["format"] = response_format
+            
+            response = await self.client.post("/api/generate", json=payload)
             response.raise_for_status()
             data = response.json()
             content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
@@ -197,6 +245,11 @@ class VLLMClient:
         max_num_predict: int = 8192,
         use_cot_prompt: bool = True,
         validation_context: Optional[Dict[str, Any]] = None,
+        base_num_predict: int = 4096,  # Increased default for better generation
+        max_num_predict: int = 8192,  # Increased max for complex extractions
+        use_cot_prompt: bool = True,  # NEW: Enable Chain-of-Thought prompting
+        validation_context: Optional[Dict[str, Any]] = None,  # NEW: For citation checking
+        enforce_grammar: bool = False,
     ) -> Optional[BaseModel]:
         if use_cot_prompt:
             system_prompt = get_full_system_prompt(
@@ -208,6 +261,19 @@ class VLLMClient:
 
         num_predict = base_num_predict
         attempt = 0
+        grammar: Optional[str] = None
+
+        if enforce_grammar:
+            try:
+                grammar = self._build_grammar_for_model(response_model)
+                logger.debug("Applied grammar enforcement for %s", response_model.__name__)
+            except Exception as grammar_error:
+                logger.warning(
+                    "Failed to build grammar for %s: %s",
+                    response_model.__name__,
+                    grammar_error,
+                )
+                grammar = None
 
         while attempt < max_retries:
             try:
@@ -217,6 +283,8 @@ class VLLMClient:
                     temperature=temperature,
                     num_predict=num_predict,
                     max_num_predict=max_num_predict,
+                    top_p=0.9,
+                    grammar=grammar,
                 )
 
                 if truncated:
@@ -256,6 +324,31 @@ class VLLMClient:
                         raise ValueError(
                             f"Too many empty fields: {empty_count}/{len(list_values)} lists empty"
                         )
+                        logger.warning(f"{empty_count}/{len(list_values)} list fields are empty - may indicate poor LLM output")
+                        raise ValueError(f"Too many empty fields: {empty_count}/{len(list_values)} lists are empty")
+                    elif empty_count > 0:
+                        logger.info(f"Partial extraction: {non_empty_count}/{len(list_values)} fields populated ({empty_count} empty)")
+
+                logger.info(f"Successfully validated response with {len(parsed_data)} keys")
+                return validated_model
+                
+            except Exception as e:
+                attempt += 1
+                # Log detailed error information for debugging
+                logger.warning(f"Attempt {attempt} failed: {e}")
+
+                if grammar is not None:
+                    logger.warning("Disabling grammar enforcement after failure")
+                    grammar = None
+
+                # Log response sample for debugging (first 1000 chars for better context)
+                if 'response_text' in locals():
+                    logger.warning(f"LLM response sample (first 1000 chars): {response_text[:1000]}...")
+                    logger.warning(f"Full response length: {len(response_text)} characters")
+
+                # Log parsed data if available
+                if 'parsed_data' in locals():
+                    logger.debug(f"Parsed data type: {type(parsed_data)}, keys: {parsed_data.keys() if isinstance(parsed_data, dict) else 'N/A'}")
 
                 return validated
             except Exception as exc:
@@ -276,6 +369,8 @@ class VLLMClient:
         temperature: float,
         num_predict: int,
         max_num_predict: int,
+        top_p: float = 0.9,
+        grammar: Optional[str] = None,
     ) -> Tuple[str, bool]:
         current = num_predict
         while True:
@@ -286,6 +381,11 @@ class VLLMClient:
                 num_predict=current,
                 system_prompt="",
                 extra_options={"extra_body": {"skip_special_tokens": True}},
+                num_ctx=None,
+                num_predict=current_num_predict,
+                top_p=top_p,
+                grammar=grammar,
+                extra_options=None,
             )
             text = payload.get("response", "")
             raw = payload.get("raw", {})
@@ -303,6 +403,19 @@ class VLLMClient:
             )
 
     def _coerce_to_model_schema(self, parsed: Any, response_model: Type[BaseModel]) -> Any:
+    def _build_grammar_for_model(self, response_model: Type[BaseModel]) -> str:
+        """Create a GBNF grammar that constrains output to the model schema."""
+
+        schema = response_model.model_json_schema()
+        builder = _GBNFBuilder()
+        return builder.build(schema)
+
+    def _coerce_to_model_schema(
+        self,
+        parsed_data: Any,
+        response_model: Type[BaseModel]
+    ) -> Any:
+        """Attempt to align parsed JSON with the expected response model schema."""
         expected_fields = set(response_model.model_fields.keys())
         if isinstance(parsed, dict):
             parsed_keys = set(parsed.keys())
@@ -376,3 +489,83 @@ class VLLMClient:
 
 # Backwards compatibility for existing imports.
 OllamaClient = VLLMClient
+        # Return as-is if we can't coerce
+        return parsed_data
+
+
+class _GBNFBuilder:
+    """Utility to convert a JSON schema into a restrictive GBNF grammar."""
+
+    def __init__(self) -> None:
+        self.rules: Dict[str, str] = {}
+        self.order: List[str] = []
+
+    def build(self, schema: Dict[str, Any]) -> str:
+        root_rule = "rule_root"
+        self._emit_rule(root_rule, schema)
+
+        base_rules = [
+            "root ::= ws " + root_rule + " ws",
+            'ws ::= (" " | "\\t" | "\\n" | "\\r")*',
+            'string ::= "\"" characters "\""',
+            'characters ::= character*',
+            'character ::= [^"\\] | "\\\\" ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")',
+            'number ::= "-"? int frac? exp?',
+            'int ::= "0" | digit19 digit*',
+            'frac ::= "." digit+',
+            'exp ::= ("e" | "E") ("+" | "-")? digit+',
+            'digit ::= "0" | digit19',
+            'digit19 ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"',
+            'boolean ::= "true" | "false"',
+            'null ::= "null"',
+        ]
+
+        rule_lines = [self.rules[name] for name in self.order]
+        return "\n".join(base_rules + rule_lines)
+
+    def _emit_rule(self, name: str, schema: Dict[str, Any]) -> None:
+        if name in self.rules:
+            return
+
+        schema = schema or {}
+        rule: str
+
+        schema_type = schema.get("type")
+        if schema_type == "object":
+            properties = schema.get("properties", {}) or {}
+            if not properties:
+                rule = f'{name} ::= "{{" ws "}}"'
+            else:
+                pairs = []
+                for key, subschema in properties.items():
+                    child_name = f"{name}_{key}"
+                    self._emit_rule(child_name, subschema)
+                    pairs.append(
+                        f'"\\"{key}\\""' + ' ws ":" ws ' + child_name
+                    )
+                joined = ' ws "," ws '.join(pairs)
+                rule = f'{name} ::= "{{" ws {joined} ws "}}"'
+        elif schema_type == "array":
+            items = schema.get("items", {}) or {}
+            child_name = f"{name}_item"
+            self._emit_rule(child_name, items)
+            rule = f'{name} ::= "[" ws ({child_name} (ws "," ws {child_name})*)? ws "]"'
+        elif schema_type == "number" or schema_type == "integer":
+            rule = f"{name} ::= number"
+        elif schema_type == "boolean":
+            rule = f"{name} ::= boolean"
+        elif schema.get("enum"):
+            options = " | ".join(f'"{value}"' for value in schema["enum"])
+            rule = f"{name} ::= {options}"
+        elif "anyOf" in schema:
+            option_names = []
+            for idx, option in enumerate(schema["anyOf"]):
+                option_name = f"{name}_alt_{idx}"
+                self._emit_rule(option_name, option)
+                option_names.append(option_name)
+            rule = f"{name} ::= {' | '.join(option_names)}"
+        else:
+            rule = f"{name} ::= string"
+
+        self.rules[name] = rule
+        self.order.append(name)

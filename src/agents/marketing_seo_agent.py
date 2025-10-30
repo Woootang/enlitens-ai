@@ -2,11 +2,14 @@
 Marketing SEO Agent - Generates marketing and SEO content.
 """
 
+import json
 import logging
 from typing import Dict, Any
+
 from .base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient
 from src.models.enlitens_schemas import MarketingContent, SEOContent
+from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
+from src.synthesis.ollama_client import OllamaClient
 
 logger = logging.getLogger(__name__)
 
@@ -38,20 +41,48 @@ class MarketingSEOAgent(BaseAgent):
             final_context = context.get("final_context", {})
             clinical_content = final_context.get("clinical_content", {})
             research_content = final_context.get("research_content", {})
+
+            research_findings = (
+                research_content.get("key_findings")
+                or research_content.get("findings")
+                or []
+            )
+            clinical_focus = (
+                clinical_content.get("treatment_approaches")
+                or clinical_content.get("interventions")
+                or []
+            )
             
             # Generate marketing content using creative approach
             # IMPORTANT: Marketing content is CREATIVE and forward-looking
             # It's about IDEAS for how to talk about the research, not extraction from sources
+            marketing_few_shot = FEW_SHOT_LIBRARY.render_for_prompt(
+                task="marketing_content",
+                query=json.dumps(research_findings[:5]),
+                k=1,
+            )
+
+            marketing_examples = (
+                "FEW-SHOT EXEMPLAR (tone + compliance reference):\n"
+                f"{marketing_few_shot}\n\n" if marketing_few_shot else ""
+            )
+
             marketing_prompt = f"""
 You are a marketing strategist for Enlitens, a neuroscience-based therapy practice in St. Louis.
 
 Your goal is to CREATE compelling marketing messages inspired by (but not limited to) the research themes.
 
+Compliance guardrails:
+- No testimonials, guarantees, or unverifiable claims.
+- Anchor messaging in St. Louis community needs.
+- Keep tone rebellious yet trauma-informed.
+
+{marketing_examples}
 RESEARCH THEMES (inspiration only):
-{research_content.get('key_findings', [])[:5]}
+{research_findings[:5]}
 
 CLINICAL FOCUS:
-{clinical_content.get('treatment_approaches', [])[:5]}
+{clinical_focus[:5]}
 
 CREATE marketing content that positions Enlitens as the neuroscience therapy leader in St. Louis:
 
@@ -89,11 +120,14 @@ Return ONLY valid JSON in this exact format:
 
             qwen_client = OllamaClient(default_model="qwen2.5-32b-instruct-q4_k_m")
             marketing_result = await qwen_client.generate_structured_response(
+            marketing_result = await self.ollama_client.generate_structured_response(
                 prompt=marketing_prompt,
                 response_model=MarketingContent,
-                temperature=0.7,  # Higher for creativity
+                temperature=0.3,
                 max_retries=3,
-                use_cot_prompt=False  # CRITICAL: Disable CoT for creative content
+                use_cot_prompt=False,  # CRITICAL: Disable CoT for creative content
+                enforce_grammar=True,
+                model="qwen3:32b",
             )
 
             # Generate SEO content
@@ -101,7 +135,7 @@ Return ONLY valid JSON in this exact format:
 Generate SEO-optimized content for Enlitens, a neuroscience-based therapy practice in St. Louis.
 
 RESEARCH THEMES (inspiration):
-{research_content.get('key_findings', [])[:5]}
+{research_findings[:5]}
 
 TARGET AUDIENCE: St. Louis adults with ADHD, anxiety, trauma, autism
 
@@ -138,12 +172,14 @@ Return ONLY valid JSON in this exact format:
 }}
 """
 
-            seo_result = await qwen_client.generate_structured_response(
+            seo_result = await self.ollama_client.generate_structured_response(
                 prompt=seo_prompt,
                 response_model=SEOContent,
-                temperature=0.6,  # Moderate creativity for SEO
+                temperature=0.3,
                 max_retries=3,
-                use_cot_prompt=False  # CRITICAL: Disable CoT for creative SEO content
+                use_cot_prompt=False,  # CRITICAL: Disable CoT for creative SEO content
+                enforce_grammar=True,
+                model="qwen3:32b",
             )
 
             return {
@@ -161,19 +197,22 @@ Return ONLY valid JSON in this exact format:
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the marketing and SEO content."""
-        marketing_content = output.get("marketing_content", {})
-        seo_content = output.get("seo_content", {})
-        
-        has_marketing = any([
-            marketing_content.get("headlines"),
-            marketing_content.get("value_propositions")
-        ])
-        
-        has_seo = any([
-            seo_content.get("meta_titles"),
-            seo_content.get("keywords")
-        ])
-        
+        marketing_content = output.get("marketing_content") or {}
+        seo_content = output.get("seo_content") or {}
+
+        marketing_fields = ("headlines", "taglines", "value_propositions", "benefits", "pain_points")
+        has_marketing = any(bool(marketing_content.get(field)) for field in marketing_fields)
+
+        seo_fields = (
+            "meta_descriptions",
+            "title_tags",
+            "primary_keywords",
+            "secondary_keywords",
+            "long_tail_keywords",
+            "content_topics",
+        )
+        has_seo = any(bool(seo_content.get(field)) for field in seo_fields)
+
         return has_marketing or has_seo
 
     async def cleanup(self):

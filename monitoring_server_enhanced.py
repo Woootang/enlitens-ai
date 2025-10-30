@@ -63,6 +63,12 @@ class ProcessingState:
             "validation_failures": 0,
             "empty_fields": 0,
             "avg_quality_score": 0.0,
+            "precision_at_3": None,
+            "recall_at_3": None,
+            "faithfulness": None,
+            "hallucination_rate": None,
+            "layer_failures": [],
+            "last_quality_event": None,
             "documents_scored": []
         }
         self.agent_performance = defaultdict(lambda: {
@@ -80,6 +86,27 @@ class ProcessingState:
 
         message = log_data.get("message", "")
         level = log_data.get("level", "INFO")
+
+        message = message.strip()
+
+        # Structured quality metrics payloads
+        if message.startswith("QUALITY_METRICS"):
+            payload = message[len("QUALITY_METRICS"):].strip()
+            try:
+                metrics_update = json.loads(payload)
+                self.quality_metrics["precision_at_3"] = metrics_update.get("precision_at_3")
+                self.quality_metrics["recall_at_3"] = metrics_update.get("recall_at_3")
+                self.quality_metrics["faithfulness"] = metrics_update.get("faithfulness")
+                self.quality_metrics["hallucination_rate"] = metrics_update.get("hallucination_rate")
+                failures = metrics_update.get("layer_failures", []) or []
+                self.quality_metrics["layer_failures"] = failures
+                if failures:
+                    self.quality_metrics["validation_failures"] += len(failures)
+                self.quality_metrics["last_quality_event"] = metrics_update.get("evaluated_at")
+                self.quality_metrics["documents_scored"].append(metrics_update)
+                self.quality_metrics["documents_scored"] = self.quality_metrics["documents_scored"][-20:]
+            except json.JSONDecodeError:
+                logger.warning("Failed to parse quality metrics payload: %s", payload)
 
         # Track document processing
         if "Processing file" in message:
@@ -174,6 +201,16 @@ class ProcessingState:
 
 # Global state
 processing_state = ProcessingState()
+
+
+def format_percentage(value: Optional[float]) -> str:
+    if value is None:
+        return "--"
+    try:
+        return f"{float(value) * 100:.1f}%"
+    except Exception:
+        return "--"
+
 
 # Connection manager
 class ConnectionManager:
@@ -395,6 +432,22 @@ Respond as the monitoring foreman."""
             f"I monitor {status['total_documents']} documents with {len(status['agent_pipeline'])} "
             "agents in the pipeline. Ask me about status, errors, or quality metrics!"
         )
+            precision = metrics.get('precision_at_3')
+            recall = metrics.get('recall_at_3')
+            faithfulness = metrics.get('faithfulness')
+            hallucinations = metrics.get('hallucination_rate')
+            return (
+                "🎯 **Quality Metrics:**\n"
+                f"- ✅ Citations Verified: {metrics['citation_verified']}\n"
+                f"- 📐 Precision@3: {format_percentage(precision)}\n"
+                f"- 📊 Recall@3: {format_percentage(recall)}\n"
+                f"- 🔒 Faithfulness: {format_percentage(faithfulness)}\n"
+                f"- 🧠 Hallucination Rate: {format_percentage(hallucinations)}\n"
+                f"- ❌ Validation Failures: {metrics['validation_failures']}\n"
+                f"- ⚠️ Empty Fields: {metrics['empty_fields']}\n"
+                "\nOverall: "
+                f"{'Excellent' if (precision or 0) >= 0.9 and (hallucinations or 0) < 0.1 else 'Needs review'}"
+            )
 
 
 foreman_ai = ForemanAI()
