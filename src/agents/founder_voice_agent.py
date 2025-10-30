@@ -216,7 +216,8 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                     prompt=structuring_prompt,
                     response_model=MarketingContent,
                     temperature=0.2,
-                    max_retries=3
+                    max_retries=3,
+                    use_cot_prompt=False  # Creative marketing content - no CoT
                 )
             except Exception as err:
                 logger.error("Founder structured fallback failed: %s", err)
@@ -309,7 +310,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 prompt=prompt,
                 response_model=SEOContent,
                 temperature=0.3,
-                max_retries=3
+                max_retries=3,
+                use_cot_prompt=False  # Creative SEO content - no CoT
             )
 
             return response or SEOContent()
@@ -387,7 +389,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 prompt=prompt,
                 response_model=WebsiteCopy,
                 temperature=0.6,  # Research optimal for creative content (lowered from 0.7)
-                max_retries=3
+                max_retries=3,
+                use_cot_prompt=False  # Creative website copy - no CoT
             )
 
             return response or WebsiteCopy()
@@ -488,7 +491,9 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 prompt=prompt,
                 response_model=BlogContent,
                 temperature=0.6,  # LOWERED from 0.65: Research optimal for creative content
-                max_retries=3
+                max_retries=3,
+                use_cot_prompt=False,  # Creative blog content - no CoT needed
+                validation_context={'source_text': document_text}  # CRITICAL: Enable citation verification
             )
 
             return response or BlogContent()
@@ -570,7 +575,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 prompt=prompt,
                 response_model=SocialMediaContent,
                 temperature=0.6,  # Higher creativity for social media
-                max_retries=3
+                max_retries=3,
+                use_cot_prompt=False  # Creative social media - no CoT
             )
 
             return response or SocialMediaContent()
@@ -654,7 +660,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 prompt=prompt,
                 response_model=ContentCreationIdeas,
                 temperature=0.6,
-                max_retries=3
+                max_retries=3,
+                use_cot_prompt=False  # Creative content ideas - no CoT
             )
 
             return response or ContentCreationIdeas()

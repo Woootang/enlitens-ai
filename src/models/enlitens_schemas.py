@@ -53,10 +53,21 @@ class VerifiedStatistic(BaseModel):
                     f"Only cite published research. Blocked pattern: {pattern}"
                 )
 
-        # Must include attribution
-        if not any(word in v.lower() for word in ['according to', 'research shows', 'study found', 'found that']):
+        # Must include attribution - flexible patterns
+        attribution_phrases = [
+            'according to', 'research shows', 'study found', 'found that',
+            'suggests that', 'indicates that', 'demonstrates that', 'reports that',
+            'showed that', 'revealed that', 'data show', 'evidence suggests'
+        ]
+
+        # Also accept year patterns like (2023) or et al. (2023)
+        has_year_pattern = bool(re.search(r'\(\d{4}\)', v))
+        has_attribution = any(phrase in v.lower() for phrase in attribution_phrases)
+
+        if not (has_attribution or has_year_pattern):
             raise ValueError(
-                "Statistics must include attribution like 'According to [Author] (Year)' or 'Research shows'"
+                "Statistics must include attribution like 'According to [Author] (Year)' "
+                "or phrases like 'Research shows', 'Study found', etc."
             )
 
         return v
