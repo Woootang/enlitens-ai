@@ -384,12 +384,19 @@ class SemanticSimilarityValidator:
             f"Claim below similarity threshold ({item['similarity']:.2f}): {item['claim']}"
             for item in below_threshold
         ]
+        detail_payload = {
+            "scored_claims": [
+                {"claim": claim, "similarity": score} for claim, score in scored_claims
+            ],
+            "below_threshold": below_threshold,
+        }
+
         return ValidationLayerResult(
             name="Semantic Similarity (BGE-M3)",
             passed=len(below_threshold) == 0,
             score=avg_score,
             issues=issues,
-            details={"scored_claims": scored_claims},
+            details=detail_payload,
         )
 
 
@@ -446,18 +453,16 @@ class LayeredValidationPipeline:
 
         synthesis = getattr(document, "ai_synthesis", None)
         source_text = getattr(getattr(document, "archival_content", None), "full_document_text_markdown", "")
-        claims = [getattr(finding, "finding_text", str(finding)) for finding in (getattr(synthesis, "key_findings", []) or [])]
+        claims = _extract_claim_texts(getattr(synthesis, "key_findings", []))
 
         semantic_result = self.semantic_validator.validate(claims, source_text)
         layers.append(semantic_result)
 
-        for issue in semantic_result.issues:
-            matched = next(
-                (detail for detail in semantic_result.details.get("scored_claims", []) if detail[0] in issue),
-                None,
-            )
-            claim_text = matched[0] if matched else issue
-            similarity = matched[1] if matched else 0.0
+        below_threshold = semantic_result.details.get("below_threshold", [])
+
+        for flagged in below_threshold:
+            claim_text = flagged.get("claim", "")
+            similarity = flagged.get("similarity", 0.0)
             decision = self.judge.evaluate_claim(claim_text, source_text)
             flagged_entry = {
                 "claim": claim_text,
@@ -505,8 +510,10 @@ def _precision_at_k(claims: Sequence[str], flagged: Sequence[Dict[str, Any]], k:
         return 1.0
     top_k = claims[:k]
     flagged_claims = {entry.get("claim") for entry in flagged}
+    if not top_k:
+        return 1.0
     hits = sum(1 for claim in top_k if claim not in flagged_claims)
-    return hits / min(len(top_k), k)
+    return hits / len(top_k)
 
 
 def _recall_at_k(claims: Sequence[str], flagged: Sequence[Dict[str, Any]], k: int) -> float:
@@ -514,7 +521,37 @@ def _recall_at_k(claims: Sequence[str], flagged: Sequence[Dict[str, Any]], k: in
         return 1.0
     flagged_claims = {entry.get("claim") for entry in flagged}
     protected_claims = [claim for claim in claims if claim not in flagged_claims]
+    if not protected_claims:
+        return 0.0
     return len(protected_claims[:k]) / min(len(claims), k)
+
+
+def _extract_claim_texts(key_findings: Optional[Sequence[Any]]) -> List[str]:
+    claims: List[str] = []
+    if not key_findings:
+        return claims
+
+    for finding in key_findings:
+        text: Optional[str] = None
+        if isinstance(finding, str):
+            text = finding
+        elif isinstance(finding, dict):
+            text = (
+                finding.get("finding_text")
+                or finding.get("text")
+                or finding.get("summary")
+            )
+        else:
+            text = getattr(finding, "finding_text", None) or getattr(finding, "text", None)
+
+        if not text:
+            text = str(finding)
+
+        normalised = text.strip()
+        if normalised:
+            claims.append(normalised)
+
+    return claims
 
 
 def _token_overlap(text_a: str, text_b: str) -> float:
