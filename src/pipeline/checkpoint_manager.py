@@ -40,7 +40,7 @@ class CheckpointManager:
     - Processing 400+ papers takes hours
     - Failures can occur at any stage
     - GPU memory issues can cause crashes
-    - Network issues can interrupt Ollama
+    - Network issues can interrupt vLLM
     - Resume from last successful stage
     """
     

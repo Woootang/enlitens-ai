@@ -1,5 +1,5 @@
 #!/bin/bash
-# Fix Ollama GPU Configuration
+# Fix vLLM GPU Configuration
 
 echo "🔧 FIXING OLLAMA GPU CONFIGURATION"
 echo "=================================="
@@ -29,22 +29,22 @@ echo "🔄 Reloading systemd..."
 sudo systemctl daemon-reload
 
 # Restart Ollama
-echo "🔄 Restarting Ollama service..."
+echo "🔄 Restarting vLLM service..."
 sudo systemctl restart ollama
 
 # Wait for Ollama to start
-echo "⏳ Waiting for Ollama to start..."
+echo "⏳ Waiting for vLLM to start..."
 sleep 5
 
 # Check status
-echo "📊 Checking Ollama status..."
+echo "📊 Checking vLLM status..."
 sudo systemctl status ollama --no-pager | head -20
 
 echo ""
 echo "✅ OLLAMA GPU CONFIGURATION COMPLETE"
 echo ""
 echo "🧪 Testing GPU usage..."
-echo "Run this command to test: ollama run qwen3:32b 'Say hello'"
+echo "Run this command to test: curl http://localhost:8000/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\": \"qwen2.5-32b-instruct-q4_k_m\", \"messages\": [{\"role\": \"user\", \"content\": \"Say hello\"}]}'"
 echo ""
 echo "📊 Monitor GPU with: watch -n 1 nvidia-smi"
 

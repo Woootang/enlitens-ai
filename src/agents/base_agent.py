@@ -17,7 +17,7 @@ class BaseAgent(ABC):
     Base class for all agents in the Enlitens multi-agent system.
     """
 
-    def __init__(self, name: str, role: str, model: str = "qwen3:32b"):
+    def __init__(self, name: str, role: str, model: str = "qwen2.5-32b-instruct-q4_k_m"):
         self.name = name
         self.role = role
         self.model = model

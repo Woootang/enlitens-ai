@@ -87,7 +87,7 @@ Return ONLY valid JSON in this exact format:
 }}
 """
 
-            qwen_client = OllamaClient(default_model="qwen3:32b")
+            qwen_client = OllamaClient(default_model="qwen2.5-32b-instruct-q4_k_m")
             marketing_result = await qwen_client.generate_structured_response(
                 prompt=marketing_prompt,
                 response_model=MarketingContent,

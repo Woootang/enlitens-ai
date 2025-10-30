@@ -46,24 +46,15 @@ sudo apt install nvidia-driver-535
 
 # Install Python dependencies
 pip install -r requirements.txt
-
-# Set environment variables for optimal performance
-export OLLAMA_MAX_LOADED_MODELS=1
-export OLLAMA_MAX_QUEUE=1
-export OLLAMA_RUNNERS_DIR=/tmp/ollama-runners
-export TORCH_USE_CUDA_DSA=1
 ```
 
-### 2. Ollama Setup
+### 2. vLLM Setup
 ```bash
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
+# Install vLLM
+pip install "vllm>=0.5.4"
 
-# Start Ollama service
-ollama serve
-
-# Pull the required model (in another terminal)
-ollama pull qwen3:32b
+# Start the vLLM servers + processing pipeline
+./stable_run.sh
 ```
 
 ### 3. Verify GPU Setup
@@ -117,8 +108,8 @@ nvidia-smi
 # Monitor specific log files
 tail -f logs/multi_agent_processing_*.log
 
-# Check Ollama status
-curl http://localhost:11434/api/tags
+# Check vLLM status
+curl http://localhost:8000/v1/models
 ```
 
 ### Progress Tracking
@@ -151,13 +142,13 @@ nvidia-smi
 # Clear GPU memory
 python3 -c "import torch; torch.cuda.empty_cache()"
 
-# Restart Ollama with memory limits
-pkill ollama
-ollama serve
+# Restart vLLM servers
+pkill -f "vllm" || true
+./stable_run.sh
 ```
 
 ### Common Issues
-1. **Ollama not responding**: Restart with `ollama serve`
+1. **vLLM not responding**: Rerun `./stable_run.sh`
 2. **GPU out of memory**: Process fewer documents or restart system
 3. **JSON parsing errors**: Check log files for specific error messages
 4. **Slow processing**: Monitor GPU utilization with `nvidia-smi`
@@ -213,7 +204,7 @@ The system incorporates:
 ## 🔐 Data Privacy & Ethics
 
 - All processing happens locally on your system
-- No data is sent to external services except Ollama (local)
+- No data is sent to external services except the optional Groq fallback
 - Client intake data is anonymized and processed locally
 - Founder transcripts are used only for voice pattern analysis
 

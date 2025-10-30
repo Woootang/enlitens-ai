@@ -17,7 +17,7 @@ class ClinicalSynthesisAgent(BaseAgent):
         super().__init__(
             name="ClinicalSynthesis",
             role="Clinical Application Synthesis",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.ollama_client = None
 

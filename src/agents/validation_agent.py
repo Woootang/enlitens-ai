@@ -15,7 +15,7 @@ class ValidationAgent(BaseAgent):
         super().__init__(
             name="Validation",
             role="Content Validation and Quality Assurance",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
 
     async def initialize(self) -> bool:

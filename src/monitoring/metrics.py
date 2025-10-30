@@ -319,7 +319,7 @@ class MetricsCollector:
         if error_types.get('memory', 0) > 0:
             recommendations.append("Consider reducing batch size or model memory usage")
         if error_types.get('ollama', 0) > 0:
-            recommendations.append("Check Ollama service status and restart if needed")
+            recommendations.append("Check vLLM service status and restart if needed")
         if error_types.get('extraction', 0) > 0:
             recommendations.append("Review PDF quality and extraction parameters")
         

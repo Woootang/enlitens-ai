@@ -1,7 +1,7 @@
 """
 AI Synthesis Engine for Enlitens Pipeline
 
-This module uses Qwen3 32B to synthesize neuroscience research into therapeutic applications.
+This module uses Qwen2.5 32B (served via vLLM) to synthesize neuroscience research into therapeutic applications.
 Key features:
 - Structured prompts for consistent output
 - Enlitens voice (shame to science translation)
@@ -9,6 +9,7 @@ Key features:
 - Quality validation for scientific accuracy
 """
 
+import hashlib
 import json
 import logging
 from typing import Dict, List, Any, Optional, Tuple
@@ -37,65 +38,82 @@ class SynthesisResult:
 
 
 class OllamaClient:
+    """Compatibility wrapper that now targets the vLLM OpenAI server.
+
+    The class name is preserved to avoid refactoring the wider pipeline, but
+    all requests are routed through the vLLM REST API that serves the
+    Qwen2.5-32B Q4_K_M model with paged attention and FlashAttention enabled.
     """
-    Client for interacting with Ollama API
-    
-    Why Ollama:
-    - Local processing (privacy)
-    - No API costs
-    - Qwen3 32B with thinking mode
-    - Better reasoning than OpenAI for complex neuroscience
-    """
-    
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = "qwen3:32b"):
-        self.base_url = base_url
+
+    def __init__(
+        self,
+        base_url: str = "http://localhost:8000/v1",
+        model: str = "qwen2.5-32b-instruct-q4_k_m",
+        *,
+        gpu_memory_utilization: float = 0.92,
+        system_prompt: Optional[str] = None,
+    ):
+        self.base_url = base_url.rstrip("/")
         self.model = model
         self.session = requests.Session()
-        
-    def generate(self, prompt: str, temperature: float = 0.3, max_tokens: int = 4000) -> str:
-        """
-        Generate text using Ollama
-        
-        Args:
-            prompt: Input prompt
-            temperature: Sampling temperature
-            max_tokens: Maximum tokens to generate
-            
-        Returns:
-            Generated text
-        """
+        self.gpu_memory_utilization = gpu_memory_utilization
+        self.system_prompt = system_prompt or (
+            "You are the Enlitens neuroscience synthesis engine. "
+            "Respond with structured JSON that matches the requested schema."
+        )
+        self._prefix_cache_key = hashlib.sha256(
+            f"{self.model}::{self.system_prompt}".encode("utf-8")
+        ).hexdigest()
+
+    def generate(
+        self,
+        prompt: str,
+        temperature: float = 0.3,
+        max_tokens: int = 4000,
+    ) -> str:
+        """Generate text using the vLLM OpenAI-compatible endpoint."""
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "extra_body": {
+                "cache_prompt": True,
+                "prompt_cache_key": self._prefix_cache_key,
+                "stream": False,
+                "best_of": 1,
+            },
+        }
+
         try:
             response = self.session.post(
-                f"{self.base_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": temperature,
-                        "num_predict": max_tokens
-                    }
-                },
-                timeout=300  # 5 minute timeout
+                f"{self.base_url}/chat/completions",
+                json=payload,
+                timeout=300,
             )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return result.get('response', '')
-            else:
-                logger.error(f"Ollama API error: {response.status_code}")
-                return ""
-                
-        except Exception as e:
-            logger.error(f"Failed to generate with Ollama: {str(e)}")
+            response.raise_for_status()
+            data = response.json()
+            return (
+                data.get("choices", [{}])[0]
+                .get("message", {})
+                .get("content", "")
+            )
+        except Exception as exc:
+            logger.error(f"Failed to generate with vLLM: {exc}")
             return ""
-    
+
     def is_available(self) -> bool:
-        """Check if Ollama is available"""
+        """Check if the vLLM server is reachable."""
+
         try:
-            response = self.session.get(f"{self.base_url}/api/tags", timeout=5)
-            return response.status_code == 200
-        except:
+            response = self.session.get(f"{self.base_url}/models", timeout=5)
+            response.raise_for_status()
+            return True
+        except Exception:
             return False
 
 
@@ -244,8 +262,8 @@ class NeuroscienceSynthesizer:
     Main synthesis engine using Qwen3 32B
     
     Why this approach:
-    - Qwen3 32B has excellent reasoning capabilities
-    - Thinking mode provides explicit reasoning chains
+- Qwen2.5 32B has excellent reasoning capabilities
+- vLLM's paged attention keeps long-context reasoning efficient
     - Local processing ensures privacy
     - Can be fine-tuned for Enlitens voice
     """
@@ -270,7 +288,7 @@ class NeuroscienceSynthesizer:
             # Generate synthesis prompt
             prompt = self.templates.get_synthesis_prompt(extraction_result)
             
-            # Get synthesis from Qwen3
+            # Get synthesis from Qwen2.5
             synthesis_text = self.ollama.generate(prompt, temperature=0.3)
             
             if not synthesis_text:
@@ -345,7 +363,7 @@ class NeuroscienceSynthesizer:
             # Generate validation prompt
             validation_prompt = self.templates.get_validation_prompt(synthesis_data)
             
-            # Get validation from Qwen3
+            # Get validation from Qwen2.5
             validation_text = self.ollama.generate(validation_prompt, temperature=0.1)
             
             if not validation_text:
@@ -479,7 +497,7 @@ if __name__ == "__main__":
     ollama_client = OllamaClient()
     
     if ollama_client.is_available():
-        print("Ollama is available")
+        print("vLLM is available")
         
         synthesizer = NeuroscienceSynthesizer(ollama_client)
         
@@ -501,4 +519,4 @@ if __name__ == "__main__":
         print(f"Takeaway: {result.enlitens_takeaway[:200]}...")
         
     else:
-        print("Ollama is not available")
+        print("vLLM is not available")
