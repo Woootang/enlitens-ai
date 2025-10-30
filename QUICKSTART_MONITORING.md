@@ -6,7 +6,7 @@ I've created a comprehensive enhanced monitoring system that gives you complete 
 
 ### 🤖 Intelligent Foreman AI
 An AI-powered monitoring agent that watches over all your other agents like "HR or Internal Affairs". The Foreman:
-- Uses Ollama (qwen3:32b model) for intelligent analysis
+- Uses vLLM (qwen2.5-32b-instruct-q4_k_m) for intelligent analysis with Groq fallback
 - Investigates errors and provides troubleshooting suggestions
 - Monitors the supervisor/agent hierarchy in real-time
 - Answers questions about processing status, quality, and errors
@@ -46,14 +46,9 @@ Confirm the quality of your knowledge base extraction:
 
 ## Quick Start
 
-### 1. Start Ollama (if not running)
+### 1. Start vLLM services (if not running)
 ```bash
-ollama serve
-```
-
-Make sure you have the qwen3:32b model:
-```bash
-ollama pull qwen3:32b
+./stable_run.sh
 ```
 
 ### 2. Start the Enhanced Monitoring Server
@@ -71,7 +66,7 @@ You should see:
 🔌 WebSocket: ws://0.0.0.0:8765/ws
 📡 Log Endpoint: http://0.0.0.0:8765/api/log
 📈 Stats: http://0.0.0.0:8765/api/stats
-🤖 Using Ollama at: http://localhost:11434
+🤖 Primary vLLM endpoint: http://localhost:8000/v1
 ================================================================================
 ```
 
@@ -195,9 +190,9 @@ If disconnected:
 4. You should get a response analyzing current stats
 
 If Foreman doesn't respond:
-- Verify Ollama is running: `curl http://localhost:11434/api/tags`
-- Check browser console for errors
-- The system will fall back to heuristic responses if Ollama is unavailable
+- Verify vLLM is running: `curl http://localhost:8000/v1/models`
+- Check `http://localhost:8765/api/foreman/health`
+- Configure `GROQ_API_KEY` for fallback or rerun `./stable_run.sh`
 
 ### Check Remote Logging
 Run a simple test:
@@ -256,16 +251,16 @@ Then update your URL to `http://localhost:8766`
 2. Check processing system is using enhanced logging
 3. Verify network connectivity to monitoring server
 
-### Ollama Connection Failed
-1. Check Ollama is running:
+### vLLM Connection Failed
+1. Check vLLM is running:
    ```bash
-   ps aux | grep ollama
+   pgrep -f vllm
    ```
-2. Test Ollama directly:
+2. Test vLLM directly:
    ```bash
-   ollama list  # Should show qwen3:32b
+   curl http://localhost:8000/v1/models | jq '.'
    ```
-3. If Ollama isn't available, Foreman will still work with fallback responses
+3. If vLLM isn't available, rerun `./stable_run.sh` or configure Groq fallback
 
 ### JSON Viewer Shows Error
 1. Verify `enlitens_knowledge_base_latest.json` exists:

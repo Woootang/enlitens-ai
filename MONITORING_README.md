@@ -7,7 +7,8 @@ The enhanced monitoring system provides comprehensive real-time visibility into 
 ## Features
 
 ### 🤖 Intelligent Foreman AI
-- Powered by Ollama (`qwen3:32b` model)
+- Powered by vLLM (`qwen2.5-32b-instruct-q4_k_m`) with prompt prefix caching
+- Automatically falls back to Groq Llama-3.1-8B when the local GPU is offline
 - Analyzes errors and provides troubleshooting suggestions
 - Monitors agent pipeline and processing status
 - Answers questions about quality metrics and system health
@@ -53,8 +54,8 @@ The enhanced monitoring system provides comprehensive real-time visibility into 
 1. **Enhanced Monitoring Server** (`monitoring_server_enhanced.py`)
    - FastAPI web server with WebSocket support
    - ProcessingState tracker for comprehensive metrics
-   - ForemanAI class with Ollama integration
-   - API endpoints for stats, pipeline, and knowledge base
+   - ForemanAI router that prefers local vLLM and falls back to Groq
+   - API endpoints for stats, pipeline, knowledge base, and Foreman health
 
 2. **Enhanced Web UI** (`monitoring_ui/`)
    - `index_enhanced.html`: Main dashboard with multiple views
@@ -75,21 +76,25 @@ The enhanced monitoring system provides comprehensive real-time visibility into 
    pip install fastapi uvicorn httpx websockets
    ```
 
-2. **Ollama** installed and running:
+2. **vLLM** runtime installed (GPU build recommended):
    ```bash
-   # Install Ollama from https://ollama.ai
-   ollama pull qwen3:32b
+   pip install "vllm>=0.5.4"
    ```
 
-3. **Enlitens AI Processing System** configured and ready
+3. **Quantised Qwen models** downloaded (weights stored locally):
+   - `qwen2.5-32b-instruct-q4_k_m`
+   - `qwen2.5-3b-instruct-q4_k_m`
+
+4. **Enlitens AI Processing System** configured and ready
 
 ### Setup
 
-1. **Start Ollama** (if not already running):
+1. **Start vLLM servers** (main + monitoring models):
    ```bash
-   ollama serve
+   ./stable_run.sh  # starts vLLM daemons before launching processing
    ```
-   Default URL: `http://localhost:11434`
+   Main URL: `http://localhost:8000/v1`
+   Foreman URL: `http://localhost:8001/v1`
 
 2. **Start Enhanced Monitoring Server**:
    ```bash
@@ -117,6 +122,34 @@ The enhanced monitoring system provides comprehensive real-time visibility into 
 
 4. **Open Dashboard**:
    Navigate to: `http://localhost:8765`
+
+## Model Switch SOP (Local vLLM ↔ Groq)
+
+1. **Run health checks** before switching:
+   ```bash
+   python -m src.monitoring.health_checks
+   ```
+   Ensure the vLLM batching, document latency (<10 minutes), and Foreman responsiveness tests all pass.
+
+2. **Switch to Groq fallback** when the GPU node is unavailable:
+   ```bash
+   export FOREMAN_LOCAL_URL=""
+   export GROQ_API_KEY="<your_groq_key>"
+   export GROQ_MODEL="llama-3.1-8b-instant"
+   ```
+   Restart `monitoring_server_enhanced.py` to pick up the change.
+
+3. **Return to local vLLM** once the GPU is back online:
+   ```bash
+   export FOREMAN_LOCAL_URL="http://localhost:8001/v1"
+   unset GROQ_API_KEY
+   ```
+   Restart the monitoring server and rerun the health checks.
+
+4. **Document the switch** in the operations log with:
+   - Timestamp and reason for the change
+   - Health check results before/after
+   - Any remediation steps taken
 
 ## Usage
 
@@ -178,24 +211,22 @@ The monitoring server exposes these REST endpoints:
 
 ### Environment Variables
 
-- `OLLAMA_BASE_URL`: Ollama server URL (default: `http://localhost:11434`)
+- `VLLM_BASE_URL`: Primary inference endpoint (default: `http://localhost:8000/v1`)
+- `FOREMAN_LOCAL_URL`: Optional monitoring model endpoint (default: `http://localhost:8001/v1`)
+- `GROQ_API_KEY`: Enables Groq fallback when provided
+- `GROQ_MODEL`: Groq model identifier (default: `llama-3.1-8b-instant`)
 - `ENLITENS_MONITOR_URL`: Monitoring server URL for remote logging
 
 ### Customization
 
-**Change Ollama Model**:
-Edit `monitoring_server_enhanced.py`:
-```python
-class ForemanAI:
-    async def analyze_query(self, query: str, context: Dict[str, Any]) -> str:
-        response = await self.client.post(
-            f"{self.ollama_url}/api/generate",
-            json={
-                "model": "qwen3:32b",  # Change this
-                # ...
-            }
-        )
+**Change Foreman routing**:
+Update the environment variables before launching the server:
+```bash
+export FOREMAN_LOCAL_URL="http://localhost:8001/v1"   # empty string disables local model
+export GROQ_API_KEY="..."                             # optional Groq fallback
+export GROQ_MODEL="llama-3.1-8b-instant"
 ```
+No code changes are required; restart `monitoring_server_enhanced.py` to apply updates.
 
 **Adjust Update Frequency**:
 Edit `app_enhanced.js`:
@@ -224,16 +255,21 @@ lsof -i :8765  # Check if port is in use
 python monitoring_server_enhanced.py --port 8766
 ```
 
-### Ollama Connection Failed
+### vLLM Connection Failed
 
-**Verify Ollama is running**:
+**Verify vLLM is running**:
 ```bash
-curl http://localhost:11434/api/tags
+curl http://localhost:8000/v1/models | jq '.'
 ```
 
-**Check Ollama URL**:
+**Check Foreman endpoint**:
 ```bash
-export OLLAMA_BASE_URL="http://localhost:11434"
+curl http://localhost:8001/v1/models | jq '.'
+```
+
+**Re-run health checks**:
+```bash
+python -m src.monitoring.health_checks
 ```
 
 ### No Logs Appearing
@@ -255,19 +291,24 @@ curl -X POST http://localhost:8765/api/log \
 
 ### Foreman AI Not Responding
 
-1. **Verify Ollama is running** with correct model:
+1. **Verify local monitoring model**:
    ```bash
-   ollama list  # Should show qwen3:32b
+   curl http://localhost:8001/v1/models | jq '.'
    ```
 
-2. **Check browser console** for WebSocket errors
-
-3. **Test Ollama directly**:
+2. **Check Groq configuration** (if using fallback):
    ```bash
-   curl http://localhost:11434/api/generate -d '{
-     "model": "qwen3:32b",
-     "prompt": "test"
-   }'
+   echo $GROQ_API_KEY
+   ```
+
+3. **Use the Foreman health endpoint**:
+   ```bash
+   curl http://localhost:8765/api/foreman/health | jq '.'
+   ```
+
+4. **Run operational health checks**:
+   ```bash
+   python -m src.monitoring.health_checks
    ```
 
 ### Knowledge Base JSON Not Loading
@@ -290,13 +331,13 @@ KNOWLEDGE_BASE_PATH = Path("enlitens_knowledge_base_latest.json")
 - **CPU**: Minimal (< 5% on modern systems)
 - **Memory**: ~50-100 MB for server
 - **Network**: ~1-10 KB/s for log streaming
-- **Ollama**: Variable based on model size (qwen3:32b ~18GB RAM)
+- **vLLM main**: ~18GB VRAM for `qwen2.5-32b-instruct-q4_k_m`
 
 ### Optimization Tips
 
 1. **Reduce Polling Frequency**: Increase interval in `startStatusPolling()`
 2. **Limit Log History**: Adjust `max_history` in ConnectionManager
-3. **Use Smaller Ollama Model**: Switch to lighter model like `llama2:7b`
+3. **Use Smaller vLLM Model**: Switch to a quantised 13B/7B checkpoint if GPU memory is constrained
 4. **Disable Features**: Comment out unnecessary API calls
 
 ## Security Considerations
@@ -359,7 +400,7 @@ For issues, questions, or feature requests:
 ## Version History
 
 ### v2.0.0 - Enhanced Monitoring System
-- ✅ Intelligent Foreman AI with Ollama integration
+- ✅ Intelligent Foreman AI with vLLM + Groq routing
 - ✅ Real-time processing status tracking
 - ✅ Comprehensive quality dashboard
 - ✅ Agent pipeline visualization

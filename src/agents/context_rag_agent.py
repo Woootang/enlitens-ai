@@ -15,7 +15,7 @@ class ContextRAGAgent(BaseAgent):
         super().__init__(
             name="ContextRAG",
             role="Contextual Enhancement with RAG",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
 
     async def initialize(self) -> bool:

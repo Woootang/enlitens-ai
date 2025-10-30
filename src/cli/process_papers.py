@@ -88,9 +88,9 @@ class EnlitensCLI:
             console.print("[red]Processor not initialized[/red]")
             return False
         
-        # Check Ollama availability
+        # Check vLLM availability
         if not self.processor.ollama_client.is_available():
-            console.print("[red]Ollama is not available. Please start Ollama first.[/red]")
+            console.print("[red]vLLM is not available. Please start the inference server first.[/red]")
             return False
         
         # Check GPU availability
@@ -232,7 +232,7 @@ class EnlitensCLI:
         table.add_column("Component", style="cyan")
         table.add_column("Status", style="magenta")
         
-        table.add_row("Ollama", "✓ Available" if status['ollama_available'] else "✗ Not Available")
+        table.add_row("vLLM", "✓ Available" if status['vllm_available'] else "✗ Not Available")
         table.add_row("Knowledge Base", "✓ Exists" if status['knowledge_base_exists'] else "✗ Not Found")
         table.add_row("Total Documents", str(status['total_documents']))
         
@@ -331,10 +331,10 @@ def main():
                        help="Output directory for processed data")
     parser.add_argument("--cache-dir", default="./enlitens_corpus/cache_markdown", 
                        help="Cache directory for intermediate files")
-    parser.add_argument("--ollama-url", default="http://localhost:11434", 
-                       help="Ollama API URL")
-    parser.add_argument("--ollama-model", default="qwen3:32b", 
-                       help="Ollama model to use")
+    parser.add_argument("--ollama-url", default="http://localhost:8000/v1",
+                       help="vLLM OpenAI-compatible URL")
+    parser.add_argument("--ollama-model", default="qwen2.5-32b-instruct-q4_k_m",
+                       help="vLLM model to use")
     parser.add_argument("--batch-size", type=int, default=5, 
                        help="Batch size for processing")
     parser.add_argument("--interactive", action="store_true", 

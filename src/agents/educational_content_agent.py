@@ -4,9 +4,11 @@ Educational Content Agent - Extracts and generates educational materials.
 
 import logging
 from typing import Dict, Any
+
 from .base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient
 from src.models.enlitens_schemas import EducationalContent
+from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
+from src.synthesis.ollama_client import OllamaClient
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class EducationalContentAgent(BaseAgent):
         super().__init__(
             name="EducationalContent",
             role="Client Education Material Generation",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.ollama_client = None
 
@@ -39,6 +41,17 @@ class EducationalContentAgent(BaseAgent):
             research_content = context.get("science_data", {}).get("research_content", {})
             clinical_content = context.get("clinical_content", {})
 
+            few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
+                task="educational_content",
+                query=document_text,
+                k=2,
+            )
+
+            exemplars = (
+                "FEW-SHOT EXEMPLARS (match tone, show client-level clarity):\n"
+                f"{few_shot_block}\n\n" if few_shot_block else ""
+            )
+
             prompt = f"""
 You are an educational content specialist creating client-friendly educational materials.
 Your goal is to translate complex neuroscience research into accessible educational content.
@@ -52,6 +65,7 @@ STRICT RULES:
 ✗ DO NOT generate practice statistics or client testimonials
 ✗ DO NOT fabricate research findings or statistics
 
+{exemplars}
 DOCUMENT TEXT:
 {document_text}
 
@@ -99,6 +113,9 @@ Return as JSON with these EXACT field names:
                 temperature=0.6,  # LOWERED from 0.7: Research shows 0.6 optimal for creative but factual content
                 max_retries=3,
                 **cache_kwargs,
+                temperature=0.25,
+                max_retries=3,
+                enforce_grammar=True,
             )
 
             if result:
@@ -106,8 +123,8 @@ Return as JSON with these EXACT field names:
                     "educational_content": result.model_dump(),
                     "generation_quality": "high"
                 }
-            else:
-                return {"educational_content": EducationalContent().model_dump()}
+
+            return {"educational_content": EducationalContent().model_dump()}
 
         except Exception as e:
             logger.error(f"Educational content generation failed: {e}")
