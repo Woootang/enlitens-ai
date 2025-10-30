@@ -121,6 +121,7 @@ class KeyFinding(BaseModel):
     finding_text: str = Field(..., description="The specific finding")
     evidence_strength: EvidenceStrength = Field(..., description="Strength of evidence")
     relevance_to_enlitens: str = Field(..., description="How this applies to therapy")
+    citations: List[str] = Field(default_factory=list, description="Citation identifiers supporting the finding")
 
 
 class NeuroscientificConcept(BaseModel):
@@ -129,6 +130,7 @@ class NeuroscientificConcept(BaseModel):
     concept_type: ConceptType = Field(..., description="Type of concept")
     definition_accessible: str = Field(..., description="Accessible definition")
     clinical_relevance: str = Field(..., description="Clinical relevance")
+    citations: List[str] = Field(default_factory=list, description="Citation identifiers supporting the concept")
 
 
 class ClinicalApplication(BaseModel):
@@ -138,6 +140,7 @@ class ClinicalApplication(BaseModel):
     evidence_level: EvidenceStrength = Field(..., description="Evidence level")
     timeline: str = Field(..., description="Expected timeline")
     contraindications: str = Field(..., description="Who should avoid this")
+    citations: List[str] = Field(default_factory=list, description="Citation identifiers supporting the application")
 
 
 class TherapeuticTarget(BaseModel):
@@ -146,6 +149,7 @@ class TherapeuticTarget(BaseModel):
     intervention_type: str = Field(..., description="How to modulate it")
     expected_outcomes: str = Field(..., description="Expected outcomes")
     practical_application: str = Field(..., description="Practical application")
+    citations: List[str] = Field(default_factory=list, description="Citation identifiers supporting the target")
 
 
 class ClientPresentation(BaseModel):
@@ -154,6 +158,7 @@ class ClientPresentation(BaseModel):
     neural_basis: str = Field(..., description="Neural basis")
     validation_approach: str = Field(..., description="How to validate")
     hope_message: str = Field(..., description="Hope message")
+    citations: List[str] = Field(default_factory=list, description="Citation identifiers supporting the presentation")
 
 
 class InterventionSuggestion(BaseModel):
@@ -162,6 +167,7 @@ class InterventionSuggestion(BaseModel):
     how_to_implement: str = Field(..., description="Implementation steps")
     expected_timeline: str = Field(..., description="Expected timeline")
     monitoring_indicators: str = Field(..., description="How to monitor progress")
+    citations: List[str] = Field(default_factory=list, description="Citation identifiers supporting the suggestion")
 
 
 class AISynthesis(BaseModel):
@@ -178,6 +184,7 @@ class AISynthesis(BaseModel):
     evidence_strength: EvidenceStrength = Field(..., description="Overall evidence strength")
     powerful_quotes: List[str] = Field(default_factory=list, description="Powerful quotes")
     synthesis_quality_score: float = Field(0.0, description="Quality score of synthesis")
+    source_citations: List[Dict[str, Any]] = Field(default_factory=list, description="Structured citation metadata for verification")
 
 
 class ExtractedEntity(BaseModel):

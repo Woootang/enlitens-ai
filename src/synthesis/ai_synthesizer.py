@@ -12,10 +12,13 @@ Key features:
 import hashlib
 import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 import requests
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from src.synthesis.prompts import StructuredSynthesisPrompts
+from src.validation.citation_verifier import CitationVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +38,8 @@ class SynthesisResult:
     evidence_strength: str
     quality_score: float
     synthesis_timestamp: str
+    powerful_quotes: List[str] = field(default_factory=list)
+    source_citations: List[Dict[str, Any]] = field(default_factory=list)
     prompt_text: Optional[str] = None
     validation_issues: Optional[List[str]] = None
 
@@ -273,8 +278,14 @@ class NeuroscienceSynthesizer:
     def __init__(self, ollama_client: OllamaClient):
         self.ollama = ollama_client
         self.templates = PromptTemplates()
-        
-    def synthesize(self, extraction_result: Dict[str, Any]) -> SynthesisResult:
+        self.prompts = StructuredSynthesisPrompts()
+        self.citation_verifier = CitationVerifier()
+
+    def synthesize(
+        self,
+        extraction_result: Dict[str, Any],
+        retriever: Optional[Any] = None,
+    ) -> SynthesisResult:
         """
         Synthesize neuroscience research into therapeutic applications
         
@@ -287,6 +298,14 @@ class NeuroscienceSynthesizer:
         logger.info("Starting AI synthesis")
         
         try:
+            if retriever is not None:
+                staged_result = self._two_stage_synthesis(extraction_result, retriever)
+                if staged_result:
+                    return staged_result
+
+            logger.info("Falling back to legacy single prompt synthesis")
+            return self._legacy_synthesis(extraction_result)
+
             # Generate synthesis prompt
             prompt = self.templates.get_synthesis_prompt(extraction_result)
             
@@ -334,6 +353,150 @@ class NeuroscienceSynthesizer:
         except Exception as e:
             logger.error(f"Synthesis failed: {str(e)}")
             return self._create_empty_result()
+
+    def _two_stage_synthesis(self, extraction_result: Dict[str, Any], retriever: Any) -> Optional[SynthesisResult]:
+        title = extraction_result.get('metadata', {}).get('title') or extraction_result.get('title', 'Unknown Title')
+        abstract = extraction_result.get('abstract', '')
+        query = title or extraction_result.get('metadata', {}).get('doi', '')
+
+        retrieval_results = retriever.retrieve(query, top_k=10)
+        if not retrieval_results:
+            logger.warning("Hybrid retriever returned no results for %s", query)
+            return None
+
+        context_chunks = [
+            {
+                **(result.get('payload', {}) or {}),
+                'text': result.get('text', ''),
+                'chunk_id': result.get('chunk_id')
+            }
+            for result in retrieval_results
+        ]
+
+        stage_one_prompt = self.prompts.verbatim_prompt(title, query, context_chunks)
+        stage_one_raw = self.ollama.generate(stage_one_prompt, temperature=0.0)
+        quotes = self._parse_stage_one_quotes(stage_one_raw)
+
+        if not quotes:
+            logger.warning("Stage-one extraction failed, falling back to top chunks")
+            quotes = self._fallback_quotes(context_chunks)
+
+        verification_feedback: List[str] = []
+        final_payload: Optional[Dict[str, Any]] = None
+        verification_passed = False
+
+        for attempt in range(2):
+            stage_two_prompt = self.prompts.stage_two_prompt(title, abstract, quotes, verification_feedback)
+            stage_two_raw = self.ollama.generate(stage_two_prompt, temperature=0.2)
+            payload = self._parse_synthesis_response(stage_two_raw)
+            payload.setdefault('source_citations', quotes)
+
+            verification_passed, issues = self.citation_verifier.verify(payload, quotes)
+            if verification_passed:
+                final_payload = payload
+                break
+
+            verification_feedback = [
+                f"- {issue}" for issue in issues
+            ]
+            final_payload = payload
+
+        if final_payload is None:
+            return None
+
+        quality = 0.95 if verification_passed else 0.7
+        return self._build_result(final_payload, quotes, quality)
+
+    def _legacy_synthesis(self, extraction_result: Dict[str, Any]) -> SynthesisResult:
+        prompt = self.templates.get_synthesis_prompt(extraction_result)
+        synthesis_text = self.ollama.generate(prompt, temperature=0.3)
+
+        if not synthesis_text:
+            logger.error("Failed to generate synthesis")
+            return self._create_empty_result()
+
+        synthesis_data = self._parse_synthesis_response(synthesis_text)
+        validation_result = self._validate_synthesis(synthesis_data)
+
+        result = SynthesisResult(
+            enlitens_takeaway=synthesis_data.get('enlitens_takeaway', ''),
+            eli5_summary=synthesis_data.get('eli5_summary', ''),
+            key_findings=synthesis_data.get('key_findings', []),
+            neuroscientific_concepts=synthesis_data.get('neuroscientific_concepts', []),
+            clinical_applications=synthesis_data.get('clinical_applications', []),
+            therapeutic_targets=synthesis_data.get('therapeutic_targets', []),
+            client_presentations=synthesis_data.get('client_presentations', []),
+            intervention_suggestions=synthesis_data.get('intervention_suggestions', []),
+            contraindications=synthesis_data.get('contraindications', []),
+            evidence_strength=synthesis_data.get('evidence_strength', 'preliminary'),
+            quality_score=validation_result.get('quality_score', 0.0),
+            synthesis_timestamp=datetime.now().isoformat(),
+            powerful_quotes=synthesis_data.get('powerful_quotes', []),
+            source_citations=synthesis_data.get('source_citations', []),
+        )
+        logger.info("Legacy synthesis completed with quality score %.2f", result.quality_score)
+        return result
+
+    def _build_result(
+        self,
+        payload: Dict[str, Any],
+        quotes: List[Dict[str, Any]],
+        quality_score: float,
+    ) -> SynthesisResult:
+        return SynthesisResult(
+            enlitens_takeaway=payload.get('enlitens_takeaway', ''),
+            eli5_summary=payload.get('eli5_summary', ''),
+            key_findings=payload.get('key_findings', []),
+            neuroscientific_concepts=payload.get('neuroscientific_concepts', []),
+            clinical_applications=payload.get('clinical_applications', []),
+            therapeutic_targets=payload.get('therapeutic_targets', []),
+            client_presentations=payload.get('client_presentations', []),
+            intervention_suggestions=payload.get('intervention_suggestions', []),
+            contraindications=payload.get('contraindications', []),
+            evidence_strength=payload.get('evidence_strength', 'preliminary'),
+            quality_score=quality_score,
+            synthesis_timestamp=datetime.now().isoformat(),
+            powerful_quotes=[quote.get('quote', '') for quote in quotes],
+            source_citations=payload.get('source_citations', quotes),
+        )
+
+    def _parse_stage_one_quotes(self, response_text: str) -> List[Dict[str, Any]]:
+        if not response_text:
+            return []
+
+        try:
+            if '```' in response_text:
+                start = response_text.find('```')
+                end = response_text.rfind('```')
+                json_body = response_text[start:].split('\n', 1)[1].rsplit('```', 1)[0]
+            else:
+                json_body = response_text
+            payload = json.loads(json_body)
+            quotes = payload.get('quotes', [])
+            return [quote for quote in quotes if quote.get('quote')]
+        except Exception as exc:
+            logger.error("Failed to parse stage-one quotes: %s", exc)
+            return []
+
+    def _fallback_quotes(self, context_chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        quotes: List[Dict[str, Any]] = []
+        for idx, chunk in enumerate(context_chunks[:5]):
+            text = chunk.get('text', '')
+            if not text:
+                continue
+            snippet = text.strip().split('\n')[0][:500]
+            doi = chunk.get('doi') or (chunk.get('metadata') or {}).get('doi', '')
+            quotes.append(
+                {
+                    'citation_id': f'FALLBACK_{idx}',
+                    'quote': snippet,
+                    'pages': chunk.get('pages', []),
+                    'section': (chunk.get('sections') or ['unknown'])[0] if chunk.get('sections') else 'unknown',
+                    'chunk_id': chunk.get('chunk_id'),
+                    'doi': doi,
+                }
+            )
+        return quotes
     
     def _parse_synthesis_response(self, response_text: str) -> Dict[str, Any]:
         """Parse the JSON response from Qwen3"""
@@ -436,6 +599,8 @@ class NeuroscienceSynthesizer:
             evidence_strength="preliminary",
             quality_score=0.0,
             synthesis_timestamp=datetime.now().isoformat(),
+            powerful_quotes=[],
+            source_citations=[],
             prompt_text=None,
             validation_issues=[],
         )
