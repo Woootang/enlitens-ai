@@ -19,7 +19,7 @@ class ClinicalSynthesisAgent(BaseAgent):
         super().__init__(
             name="ClinicalSynthesis",
             role="Clinical Application Synthesis",
-            model="qwen2.5-32b-instruct-q4_k_m"
+            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
 
@@ -27,6 +27,10 @@ class ClinicalSynthesisAgent(BaseAgent):
         """Initialize the clinical synthesis agent."""
         try:
             self.ollama_client = OllamaClient(default_model=self.model)
+            if not await self.ollama_client.check_connection():
+                raise RuntimeError(
+                    f"vLLM server is not reachable at {self.ollama_client.base_url}. Please run stable_run.sh or start the vLLM server."
+                )
             self.is_initialized = True
             logger.info(f"✅ {self.name} agent initialized")
             return True
@@ -112,12 +116,10 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ClinicalContent,
-                temperature=0.3,  # LOWERED from 0.7: Research shows 0.3 optimal for factual clinical content
-                max_retries=3,
-                **cache_kwargs,
                 temperature=0.2,
                 max_retries=3,
                 enforce_grammar=True,
+                **cache_kwargs,
             )
 
             if result:

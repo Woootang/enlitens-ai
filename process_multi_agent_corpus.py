@@ -30,7 +30,7 @@ import argparse
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from src.agents.supervisor_agent import SupervisorAgent, ProcessingContext
+from src.agents.supervisor_agent import SupervisorAgent
 from src.models.enlitens_schemas import EnlitensKnowledgeBase, EnlitensKnowledgeEntry
 from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
@@ -47,7 +47,7 @@ os.makedirs("logs", exist_ok=True)
 # Determine remote monitoring endpoint (defaults to local monitoring server)
 monitor_endpoint_env = os.getenv("ENLITENS_MONITOR_URL")
 if monitor_endpoint_env is None:
-    monitor_endpoint = "http://localhost:8765/api/broadcast"
+    monitor_endpoint = os.getenv("ENLITENS_MONITOR_URL", "http://localhost:8765/api/log")
 else:
     monitor_endpoint = monitor_endpoint_env.strip()
 
@@ -297,37 +297,37 @@ class MultiAgentProcessor:
         except Exception as e:
             logger.error(f"❌ Error saving progress: {e}")
 
-    async def _create_processing_context(self, text: str, document_id: str) -> ProcessingContext:
+    async def _create_processing_context(self, text: str, document_id: str) -> Dict[str, Any]:
         """Create processing context for the supervisor."""
         # Analyze client and founder data for enhanced context
         client_analysis = self._analyze_client_insights()
         founder_analysis = self._analyze_founder_insights()
 
-        return ProcessingContext(
-            document_id=document_id,
-            document_text=text,
-            client_insights={
+        return {
+            "document_id": document_id,
+            "document_text": text,
+            "client_insights": {
                 "challenges": self.st_louis_context["demographics"]["mental_health_challenges"],
                 "priorities": self.st_louis_context["clinical_priorities"],
                 "enhanced_analysis": client_analysis,
                 "pain_points": client_analysis.get("pain_points", []),
-                "key_themes": client_analysis.get("key_themes", [])
+                "key_themes": client_analysis.get("key_themes", []),
             },
-            founder_insights={
+            "founder_insights": {
                 "voice_characteristics": self.st_louis_context["founder_voice"],
                 "clinical_philosophy": [
                     "Bottom-up sensory meets top-down cognitive",
                     "Neuroplasticity as hope",
                     "Interoceptive awareness foundation",
-                    "Executive function neuroscience support"
+                    "Executive function neuroscience support",
                 ],
                 "enhanced_analysis": founder_analysis,
                 "voice_profile": founder_analysis.get("voice_characteristics", {}),
-                "key_messages": founder_analysis.get("key_messages", [])
+                "key_messages": founder_analysis.get("key_messages", []),
             },
-            st_louis_context=self.st_louis_context["demographics"],
-            processing_stage="initial"
-        )
+            "st_louis_context": self.st_louis_context["demographics"],
+            "processing_stage": "initial",
+        }
 
     async def process_document(self, pdf_path: Path) -> Optional[EnlitensKnowledgeEntry]:
         """Process a single document through the complete multi-agent system."""

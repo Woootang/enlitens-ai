@@ -1,9 +1,8 @@
-"""vLLM Client with structured output helpers and prompt prefix caching."""
+"""Unified Ollama/vLLM client with caching and schema-aware helpers."""
 
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
@@ -22,49 +21,14 @@ from src.utils.prompt_cache import PromptCache
 logger = logging.getLogger(__name__)
 
 VLLM_DEFAULT_URL = "http://localhost:8000/v1"
-VLLM_DEFAULT_MODEL = "qwen2.5-32b-instruct-q4_k_m"
-MONITORING_MODEL = "qwen2.5-3b-instruct-q4_k_m"
+VLLM_DEFAULT_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
+MONITORING_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
 
 
 class VLLMClient:
-    """Async helper around a vLLM OpenAI-compatible server.
+    """Async client for Ollama/vLLM style servers with prompt caching support."""
 
-    The client keeps feature parity with the original Ollama integration while
-    unlocking vLLM-specific optimisations:
-
-    * Paged attention and FlashAttention are assumed to be configured on the
-      server process; ``gpu_memory_utilization`` is exposed for monitoring.
-    * Prompt prefix caching is enabled for repeated system messages to minimise
-      prefill latency.
-    * ``benchmark_batch_sizes`` can be used to exercise continuous batching with
-      batch sizes 8/16/24 as required by operations run-books.
-    """
-    
     _shared_prompt_cache = PromptCache()
-
-    def __init__(
-        self,
-        base_url: str = "http://localhost:11434",
-        default_model: str = "qwen3:32b",
-        client: Optional[httpx.AsyncClient] = None,
-    ):
-        self.base_url = base_url
-        # Increase timeout to 15 minutes (900s) for large documents and complex generations
-        if client is None:
-            self.client = httpx.AsyncClient(base_url=self.base_url, timeout=900.0)
-            logger.info(
-                "OllamaClient initialized with base_url: %s and default_model: %s",
-                self.base_url,
-                default_model,
-            )
-        else:
-            self.client = client
-            logger.debug(
-                "OllamaClient cloned with shared HTTP client for model %s", default_model
-            )
-
-        self.default_model = default_model
-        self.prompt_cache = OllamaClient._shared_prompt_cache
 
     def __init__(
         self,
@@ -73,53 +37,30 @@ class VLLMClient:
         *,
         timeout_seconds: float = 900.0,
         enable_prefix_caching: bool = True,
-        gpu_memory_utilization: float = 0.92,
         continuous_batch_sizes: Optional[Iterable[int]] = None,
+        prompt_cache: Optional[PromptCache] = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.client = httpx.AsyncClient(base_url=self.base_url, timeout=timeout_seconds)
         self.default_model = default_model
         self.enable_prefix_caching = enable_prefix_caching
-        self.gpu_memory_utilization_target = gpu_memory_utilization
+        self.prompt_cache = prompt_cache or self._shared_prompt_cache
         self.continuous_batch_sizes = list(continuous_batch_sizes or (8, 16, 24))
-        self._prefix_cache: Dict[str, str] = {}
-        logger.info(
-            "VLLMClient initialised with base_url=%s model=%s gpu_utilisation≈%.2f",
-            self.base_url,
-            self.default_model,
-            self.gpu_memory_utilization_target,
-        )
 
     def clone_with_model(self, model: str) -> "VLLMClient":
-        clone = VLLMClient(
-            self.base_url,
-            default_model=model,
-            timeout_seconds=self.client.timeout.read,
-            enable_prefix_caching=self.enable_prefix_caching,
-            gpu_memory_utilization=self.gpu_memory_utilization_target,
-            continuous_batch_sizes=self.continuous_batch_sizes,
-        )
-    def clone_with_model(self, model: str) -> "OllamaClient":
         """Create a lightweight clone that reuses the underlying HTTP client."""
 
-        return OllamaClient(
-            base_url=self.base_url,
-            default_model=model,
-            client=self.client,
-        )
-        clone = OllamaClient.__new__(OllamaClient)
+        clone = object.__new__(VLLMClient)
         clone.base_url = self.base_url
         clone.client = self.client
         clone.default_model = model
+        clone.enable_prefix_caching = self.enable_prefix_caching
+        clone.prompt_cache = self.prompt_cache
+        clone.continuous_batch_sizes = list(self.continuous_batch_sizes)
         return clone
 
     def _resolve_model(self, model: Optional[str]) -> str:
-        return model or getattr(self, "default_model", VLLM_DEFAULT_MODEL)
-
-    def _prefix_cache_key(self, system_prompt: str, model: str) -> str:
-        digest = hashlib.sha256(f"{model}::{system_prompt}".encode("utf-8")).hexdigest()
-        self._prefix_cache.setdefault(digest, system_prompt)
-        return digest
+        return model or self.default_model
 
     async def generate_response(
         self,
@@ -131,14 +72,13 @@ class VLLMClient:
         num_predict: Optional[int] = None,
         system_prompt: Optional[str] = None,
         extra_options: Optional[Dict[str, Any]] = None,
+        top_p: Optional[float] = 0.9,
+        grammar: Optional[str] = None,
+        response_format: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Generate a chat completion via vLLM."""
+        """Generate a completion from the serving endpoint."""
 
         model_name = self._resolve_model(model)
-        if system_prompt is None:
-            system_prompt = get_full_system_prompt(
-                content_type="factual" if temperature <= 0.4 else "creative"
-            )
 
         messages: List[Dict[str, str]] = []
         if system_prompt:
@@ -150,100 +90,31 @@ class VLLMClient:
             "messages": messages,
             "temperature": temperature,
             "max_tokens": num_predict or 2048,
-        }
-
-        # vLLM supports passing implementation-specific settings via extra_body.
-        extra_body: Dict[str, Any] = {
-            "cache_prompt": False,
-            "best_of": 1,
-            "logprobs": None,
             "stream": False,
         }
 
-        if self.enable_prefix_caching and system_prompt:
-            cache_key = self._prefix_cache_key(system_prompt, model_name)
-            extra_body.update({
-                "cache_prompt": True,
-                "prompt_cache_key": cache_key,
-            })
-
-        if num_ctx:
-            extra_body["max_model_len"] = num_ctx
-
+        if top_p is not None:
+            payload["top_p"] = top_p
+        if response_format:
+            payload["response_format"] = {"type": response_format}
+        if num_ctx is not None:
+            payload.setdefault("extra_body", {})["max_model_len"] = num_ctx
+        if grammar:
+            payload.setdefault("extra_body", {})["grammar"] = grammar
         if extra_options:
-            payload.update({k: v for k, v in extra_options.items() if k not in {"extra_body"}})
-            extra_body.update(extra_options.get("extra_body", {}))
+            payload.setdefault("extra_body", {}).update(extra_options)
 
-        payload["extra_body"] = extra_body
-
-        try:
-            response = await self.client.post("chat/completions", json=payload)
-        top_p: Optional[float] = 0.9,
-        grammar: Optional[str] = None,
-        response_format: Optional[str] = None,
-        extra_options: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
-        """
-        Generate response from Ollama with optional schema enforcement.
-        
-        Args:
-            prompt: The input prompt
-            model: The model to use
-            temperature: Sampling temperature (0.0 to 1.0)
-            num_ctx: Optional override for context window
-            num_predict: Optional override for maximum generated tokens
-            extra_options: Additional Ollama generation options
-        """
-        try:
-            model_name = self._resolve_model(model)
-            logger.info(f"Generating response with model: {model_name}")
-            
-            # Prepare request payload
-            payload = {
-                "model": model_name,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "num_gpu": -1,
-                    "temperature": temperature,
-                    "num_ctx": num_ctx or 4096,
-                    "num_predict": num_predict or 2048,
-                    "top_p": top_p if top_p is not None else 0.9,
-                },
-            }
-
-            if grammar:
-                payload["options"]["grammar"] = grammar
-
-            if extra_options:
-                payload["options"].update(extra_options)
-
-            if response_format:
-                payload["format"] = response_format
-            
-            response = await self.client.post("/api/generate", json=payload)
-            response.raise_for_status()
-            data = response.json()
-            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-            return {
-                "response": content,
-                "raw": data,
-                "done": True,
-            }
-        except httpx.RequestError as exc:
-            error_msg = f"vLLM request failed: {type(exc).__name__}: {exc}"
-            logger.error(error_msg)
-            return {"response": f"Error: {error_msg}", "done": True}
-        except httpx.HTTPStatusError as exc:
-            error_msg = (
-                f"vLLM API error {exc.response.status_code}: {exc.response.text[:500]}"
-            )
-            logger.error(error_msg)
-            return {"response": f"Error: {error_msg}", "done": True}
-        except Exception as exc:  # pragma: no cover - defensive
-            error_msg = f"Unexpected vLLM error: {type(exc).__name__}: {exc}"
-            logger.exception(error_msg)
-            return {"response": f"Error: {error_msg}", "done": True}
+        response = await self.client.post("/chat/completions", json=payload)
+        response.raise_for_status()
+        data = response.json()
+        choice = data.get("choices", [{}])[0]
+        message = choice.get("message", {})
+        finish_reason = choice.get("finish_reason")
+        return {
+            "response": message.get("content", ""),
+            "raw": data,
+            "done": finish_reason != "length",
+        }
 
     async def generate_text(
         self,
@@ -279,86 +150,62 @@ class VLLMClient:
         max_num_predict: int = 8192,
         use_cot_prompt: bool = True,
         validation_context: Optional[Dict[str, Any]] = None,
-        base_num_predict: int = 4096,  # Increased default for better generation
-        max_num_predict: int = 8192,  # Increased max for complex extractions
-        use_cot_prompt: bool = True,  # NEW: Enable Chain-of-Thought prompting
-        validation_context: Optional[Dict[str, Any]] = None,  # NEW: For citation checking
         cache_prefix: Optional[str] = None,
         cache_chunk_id: Optional[str] = None,
         enforce_grammar: bool = False,
     ) -> Optional[BaseModel]:
-        if use_cot_prompt:
-            system_prompt = get_full_system_prompt(
-                content_type="factual" if temperature <= 0.4 else "creative"
-            )
-            full_prompt = f"{system_prompt}\n\n{prompt}"
-        else:
-            full_prompt = prompt
+        """Generate a structured response and validate it against a model."""
 
-        cache_namespace = cache_prefix or f"{model}:{response_model.__name__}"
+        system_prompt = (
+            get_full_system_prompt("factual" if temperature <= 0.4 else "creative")
+            if use_cot_prompt
+            else None
+        )
+        full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+
+        cache_namespace = cache_prefix or f"{self._resolve_model(model)}:{response_model.__name__}"
         cache_chunk = cache_chunk_id or "global"
 
-        cached_payload = self.prompt_cache.get(cache_namespace, cache_chunk, full_prompt)
-        if cached_payload is not None:
-            try:
-                logger.info(
-                    "🔁 Using cached structured response for prefix '%s' chunk '%s'",
-                    cache_namespace,
-                    cache_chunk,
-                )
-                return response_model.model_validate(cached_payload)
-            except Exception:
-                logger.warning("Cached payload failed validation, regenerating")
+        if self.enable_prefix_caching:
+            cached = self.prompt_cache.get(cache_namespace, cache_chunk, full_prompt)
+            if cached is not None:
+                try:
+                    logger.info(
+                        "🔁 Using cached structured response for prefix '%s' chunk '%s'",
+                        cache_namespace,
+                        cache_chunk,
+                    )
+                    return response_model.model_validate(cached)
+                except Exception as exc:  # pragma: no cover - defensive guard
+                    logger.warning("Cached payload failed validation: %s", exc)
 
-        num_predict = base_num_predict
-        attempt = 0
+        attempts = 0
+        current_temperature = temperature
         grammar: Optional[str] = None
-
         if enforce_grammar:
             try:
                 grammar = self._build_grammar_for_model(response_model)
-                logger.debug("Applied grammar enforcement for %s", response_model.__name__)
-            except Exception as grammar_error:
-                logger.warning(
-                    "Failed to build grammar for %s: %s",
-                    response_model.__name__,
-                    grammar_error,
-                )
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.warning("Failed to build grammar for %s: %s", response_model.__name__, exc)
                 grammar = None
 
-        while attempt < max_retries:
+        while attempts < max_retries:
             try:
-                response_text, truncated = await self._generate_text_with_dynamic_predict(
-                    prompt=full_prompt,
+                text, truncated = await self._generate_text_with_dynamic_predict(
+                    prompt=prompt,
+                    system_prompt=system_prompt,
                     model=self._resolve_model(model),
-                    temperature=temperature,
-                    num_predict=num_predict,
+                    temperature=current_temperature,
+                    num_predict=base_num_predict,
                     max_num_predict=max_num_predict,
                     top_p=0.9,
                     grammar=grammar,
                 )
-
                 if truncated:
                     raise ValueError("LLM response truncated after dynamic retries")
 
-                try:
-                    parsed = json.loads(response_text)
-                except json.JSONDecodeError:
-                    try:
-                        parsed = repair_json(response_text, return_objects=True)
-                    except Exception as repair_error:
-                        if "```json" in response_text:
-                            start = response_text.find("```json") + 7
-                            end = response_text.find("```", start)
-                            if end != -1:
-                                parsed = json.loads(response_text[start:end].strip())
-                            else:
-                                raise ValueError("Incomplete JSON in markdown") from repair_error
-                        else:
-                            raise ValueError("No valid JSON found in response") from repair_error
-
+                parsed = self._parse_structured_payload(text)
                 parsed = self._coerce_to_model_schema(parsed, response_model)
-
                 if not isinstance(parsed, dict):
                     raise ValueError(f"Expected dict after coercion, got {type(parsed).__name__}")
 
@@ -368,50 +215,27 @@ class VLLMClient:
                     validated = response_model.model_validate(parsed)
 
                 data_dict = validated.model_dump()
-                list_values = [v for v in data_dict.values() if isinstance(v, list)]
+                list_values = [value for value in data_dict.values() if isinstance(value, list)]
                 if list_values:
-                    empty_count = sum(1 for v in list_values if not v)
-                    if empty_count / len(list_values) > 0.8:
+                    empty = sum(1 for value in list_values if not value)
+                    if empty / len(list_values) > 0.8:
                         raise ValueError(
-                            f"Too many empty fields: {empty_count}/{len(list_values)} lists empty"
+                            f"Too many empty fields: {empty}/{len(list_values)} lists are empty"
                         )
-                        logger.warning(f"{empty_count}/{len(list_values)} list fields are empty - may indicate poor LLM output")
-                        raise ValueError(f"Too many empty fields: {empty_count}/{len(list_values)} lists are empty")
-                    elif empty_count > 0:
-                        logger.info(f"Partial extraction: {non_empty_count}/{len(list_values)} fields populated ({empty_count} empty)")
 
-                logger.info(f"Successfully validated response with {len(parsed_data)} keys")
-
-                # Persist deterministic cache payload for identical prompts
-                self.prompt_cache.set(cache_namespace, cache_chunk, full_prompt, data_dict)
-                return validated_model
-                
-            except Exception as e:
-                attempt += 1
-                # Log detailed error information for debugging
-                logger.warning(f"Attempt {attempt} failed: {e}")
-
-                if grammar is not None:
-                    logger.warning("Disabling grammar enforcement after failure")
-                    grammar = None
-
-                # Log response sample for debugging (first 1000 chars for better context)
-                if 'response_text' in locals():
-                    logger.warning(f"LLM response sample (first 1000 chars): {response_text[:1000]}...")
-                    logger.warning(f"Full response length: {len(response_text)} characters")
-
-                # Log parsed data if available
-                if 'parsed_data' in locals():
-                    logger.debug(f"Parsed data type: {type(parsed_data)}, keys: {parsed_data.keys() if isinstance(parsed_data, dict) else 'N/A'}")
+                if self.enable_prefix_caching:
+                    self.prompt_cache.set(cache_namespace, cache_chunk, full_prompt, data_dict)
 
                 return validated
+
             except Exception as exc:
-                attempt += 1
-                logger.warning("Structured generation attempt %s failed: %s", attempt, exc)
-                if attempt >= max_retries:
-                    logger.error("All %s structured generation attempts failed", max_retries)
+                attempts += 1
+                logger.warning("Structured generation attempt %s failed: %s", attempts, exc)
+                grammar = None  # Disable grammar after first failure
+                current_temperature = min(1.0, current_temperature + 0.1)
+                if attempts >= max_retries:
+                    logger.error("All %s structured generations failed", max_retries)
                     return None
-                temperature = min(1.0, temperature + 0.1)
 
         return None
 
@@ -419,12 +243,13 @@ class VLLMClient:
         self,
         *,
         prompt: str,
+        system_prompt: Optional[str],
         model: str,
         temperature: float,
         num_predict: int,
         max_num_predict: int,
-        top_p: float = 0.9,
-        grammar: Optional[str] = None,
+        top_p: float,
+        grammar: Optional[str],
     ) -> Tuple[str, bool]:
         current = num_predict
         while True:
@@ -433,66 +258,60 @@ class VLLMClient:
                 model=model,
                 temperature=temperature,
                 num_predict=current,
-                system_prompt="",
-                extra_options={"extra_body": {"skip_special_tokens": True}},
-                num_ctx=None,
-                num_predict=current_num_predict,
+                system_prompt=system_prompt,
                 top_p=top_p,
                 grammar=grammar,
-                extra_options=None,
             )
             text = payload.get("response", "")
-            raw = payload.get("raw", {})
-            finish_reason = raw.get("choices", [{}])[0].get("finish_reason")
-            if finish_reason and finish_reason != "length":
+            if payload.get("done", True):
                 return text, False
             if current >= max_num_predict:
                 return text, True
             previous = current
             current = min(max_num_predict, max(current + 512, int(current * 1.5)))
             logger.warning(
-                "vLLM response truncated at %s tokens; retrying with %s",
+                "LLM response truncated at %s tokens; retrying with %s",
                 previous,
                 current,
             )
 
+    def _parse_structured_payload(self, response_text: str) -> Any:
+        try:
+            return json.loads(response_text)
+        except json.JSONDecodeError:
+            try:
+                return repair_json(response_text, return_objects=True)
+            except Exception:
+                if "```json" in response_text:
+                    start = response_text.find("```json") + 7
+                    end = response_text.find("```", start)
+                    if end != -1:
+                        return json.loads(response_text[start:end].strip())
+                raise
+
     def _coerce_to_model_schema(self, parsed: Any, response_model: Type[BaseModel]) -> Any:
-    def _build_grammar_for_model(self, response_model: Type[BaseModel]) -> str:
-        """Create a GBNF grammar that constrains output to the model schema."""
-
-        schema = response_model.model_json_schema()
-        builder = _GBNFBuilder()
-        return builder.build(schema)
-
-    def _coerce_to_model_schema(
-        self,
-        parsed_data: Any,
-        response_model: Type[BaseModel]
-    ) -> Any:
-        """Attempt to align parsed JSON with the expected response model schema."""
         expected_fields = set(response_model.model_fields.keys())
         if isinstance(parsed, dict):
             parsed_keys = set(parsed.keys())
             if expected_fields <= parsed_keys:
                 return parsed
-            for wrapper in ("data", "result", "output"):
-                if wrapper in parsed and isinstance(parsed[wrapper], dict):
-                    wrapper_value = parsed[wrapper]
-                    if expected_fields <= set(wrapper_value.keys()):
-                        logger.info("Unwrapped '%s' object to match schema", wrapper)
-                        return wrapper_value
+            for wrapper_key in ("data", "result", "output"):
+                wrapper = parsed.get(wrapper_key)
+                if isinstance(wrapper, dict) and expected_fields <= set(wrapper.keys()):
+                    logger.info("Unwrapped '%s' object to match schema", wrapper_key)
+                    return wrapper
             for value in parsed.values():
                 if isinstance(value, dict) and expected_fields <= set(value.keys()):
                     logger.info("Unwrapped nested object to match schema")
                     return value
         return parsed
 
-    async def benchmark_batch_sizes(self, prompt: str) -> Dict[int, float]:
-        """Benchmark configured batch sizes to validate continuous batching.
+    def _build_grammar_for_model(self, response_model: Type[BaseModel]) -> str:
+        builder = _GBNFBuilder()
+        return builder.build(response_model.model_json_schema())
 
-        Returns a mapping ``batch_size -> seconds`` representing how long the
-        server took to respond to *all* prompts in that batch.
-        """
+    async def benchmark_batch_sizes(self, prompt: str) -> Dict[int, float]:
+        """Run simple continuous batching benchmarks for observability."""
 
         async def _run_batch(size: int) -> Tuple[int, float]:
             import time
@@ -504,7 +323,7 @@ class VLLMClient:
                         prompt,
                         model=self.default_model,
                         temperature=TEMPERATURE_CREATIVE,
-                        extra_options={"extra_body": {"skip_special_tokens": True}},
+                        extra_options={"skip_special_tokens": True},
                     )
                     for _ in range(size)
                 ]
@@ -513,25 +332,28 @@ class VLLMClient:
 
         results = await asyncio.gather(*[_run_batch(size) for size in self.continuous_batch_sizes])
         benchmark = {size: duration for size, duration in results}
-        logger.info("Continuous batching benchmark: %s", benchmark)
+        logger.info("Continuous batching benchmark results: %s", benchmark)
         return benchmark
 
     async def check_connection(self) -> bool:
+        """Verify the backing server is reachable."""
+
         try:
-            response = await self.client.get("models")
+            response = await self.client.get("/models")
             response.raise_for_status()
             return True
-        except Exception as exc:  # pragma: no cover - network guard
-            logger.error("vLLM connection failed: %s", exc)
+        except Exception as exc:
+            logger.error("LLM connection failed: %s", exc)
             return False
 
     async def list_models(self) -> List[Dict[str, Any]]:
         try:
-            response = await self.client.get("models")
+            response = await self.client.get("/models")
             response.raise_for_status()
-            return response.json().get("data", [])
-        except Exception as exc:  # pragma: no cover - network guard
-            logger.error("Failed to list vLLM models: %s", exc)
+            data = response.json()
+            return data.get("data", data.get("models", []))
+        except Exception as exc:
+            logger.error("Failed to list models: %s", exc)
             return []
 
     async def close(self) -> None:
@@ -543,8 +365,6 @@ class VLLMClient:
 
 # Backwards compatibility for existing imports.
 OllamaClient = VLLMClient
-        # Return as-is if we can't coerce
-        return parsed_data
 
 
 class _GBNFBuilder:
@@ -582,36 +402,35 @@ class _GBNFBuilder:
             return
 
         schema = schema or {}
-        rule: str
-
         schema_type = schema.get("type")
+
         if schema_type == "object":
             properties = schema.get("properties", {}) or {}
             if not properties:
                 rule = f'{name} ::= "{{" ws "}}"'
             else:
-                pairs = []
+                parts = []
                 for key, subschema in properties.items():
                     child_name = f"{name}_{key}"
                     self._emit_rule(child_name, subschema)
-                    pairs.append(
-                        f'"\\"{key}\\""' + ' ws ":" ws ' + child_name
+                    parts.append(
+                        f'"\"{key}\""' + ' ws ":" ws ' + child_name
                     )
-                joined = ' ws "," ws '.join(pairs)
+                joined = ' ws "," ws '.join(parts)
                 rule = f'{name} ::= "{{" ws {joined} ws "}}"'
         elif schema_type == "array":
             items = schema.get("items", {}) or {}
             child_name = f"{name}_item"
             self._emit_rule(child_name, items)
             rule = f'{name} ::= "[" ws ({child_name} (ws "," ws {child_name})*)? ws "]"'
-        elif schema_type == "number" or schema_type == "integer":
+        elif schema_type in {"number", "integer"}:
             rule = f"{name} ::= number"
         elif schema_type == "boolean":
             rule = f"{name} ::= boolean"
         elif schema.get("enum"):
             options = " | ".join(f'"{value}"' for value in schema["enum"])
             rule = f"{name} ::= {options}"
-        elif "anyOf" in schema:
+        elif schema.get("anyOf"):
             option_names = []
             for idx, option in enumerate(schema["anyOf"]):
                 option_name = f"{name}_alt_{idx}"

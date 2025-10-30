@@ -28,7 +28,7 @@ class FounderVoiceAgent(BaseAgent):
         super().__init__(
             name="FounderVoiceAgent",
             role="Liz Wooten Voice and Brand Integration Specialist",
-            model="qwen2.5-32b-instruct-q4_k_m"
+            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client: Optional[OllamaClient] = None
 

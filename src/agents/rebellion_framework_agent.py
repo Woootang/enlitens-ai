@@ -17,7 +17,7 @@ class RebellionFrameworkAgent(BaseAgent):
         super().__init__(
             name="RebellionFramework",
             role="Rebellion Framework Application",
-            model="qwen2.5-32b-instruct-q4_k_m"
+            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
 
@@ -25,6 +25,10 @@ class RebellionFrameworkAgent(BaseAgent):
         """Initialize the rebellion framework agent."""
         try:
             self.ollama_client = OllamaClient(default_model=self.model)
+            if not await self.ollama_client.check_connection():
+                raise RuntimeError(
+                    f"vLLM server is not reachable at {self.ollama_client.base_url}. Please run stable_run.sh or start the vLLM server."
+                )
             self.is_initialized = True
             logger.info(f"✅ {self.name} agent initialized")
             return True

@@ -333,7 +333,7 @@ def main():
                        help="Cache directory for intermediate files")
     parser.add_argument("--ollama-url", default="http://localhost:8000/v1",
                        help="vLLM OpenAI-compatible URL")
-    parser.add_argument("--ollama-model", default="qwen2.5-32b-instruct-q4_k_m",
+    parser.add_argument("--ollama-model", default="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct",
                        help="vLLM model to use")
     parser.add_argument("--batch-size", type=int, default=5, 
                        help="Batch size for processing")

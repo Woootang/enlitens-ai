@@ -62,7 +62,7 @@ class DocumentProcessor:
                  output_dir: str = "./enlitens_corpus/output",
                  cache_dir: str = "./enlitens_corpus/cache_markdown",
                  ollama_url: str = "http://localhost:8000/v1",
-                 ollama_model: str = "qwen2.5-32b-instruct-q4_k_m"):
+                 ollama_model: str = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"):
         
         self.pdf_input_dir = Path(pdf_input_dir)
         self.output_dir = Path(output_dir)
@@ -499,9 +499,9 @@ class DocumentProcessor:
         # Create processing metadata
         processing_metadata = ProcessingMetadata(
             extraction_method="pymupdf4llm_marker",
-            synthesis_method="two_stage_qwen3_32b",
+            synthesis_method="two_stage_mistral7b_awq",
             extraction_method="hybrid_docling_marker",
-            synthesis_method="qwen2.5_32b_vllm",
+            synthesis_method="mistral7b_awq_vllm",
             quality_scores={
                 'extraction': extraction_result.get('quality_score', 0.0),
                 'entity_extraction': 0.9,

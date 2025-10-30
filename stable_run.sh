@@ -2,8 +2,8 @@
 # Stable orchestration script for the Enlitens processing pipeline.
 set -euo pipefail
 
-VLLM_MAIN_MODEL="qwen2.5-32b-instruct-q4_k_m"
-VLLM_MONITOR_MODEL="qwen2.5-3b-instruct-q4_k_m"
+VLLM_MAIN_MODEL="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
+VLLM_MONITOR_MODEL=""
 VLLM_GPU_UTIL="0.92"
 MAIN_PORT="8000"
 MONITOR_PORT="8001"
@@ -17,14 +17,14 @@ start_vllm_server() {
 
   if ! pgrep -f "vllm.*--port ${port}" >/dev/null 2>&1; then
     echo "🚀 Starting vLLM server for ${model} on port ${port}"
-    nohup python3 -m vllm.entrypoints.openai.api_server \
+    nohup .venv_vllm/bin/python -m vllm.entrypoints.openai.api_server \
       --model "${model}" \
-      --quantization "q4_k_m" \
       --dtype "auto" \
+      --trust-remote-code \
       --tensor-parallel-size 1 \
+      --max-model-len 8192 \
       --port "${port}" \
       --host "0.0.0.0" \
-      --enable-paged-attention \
       --enable-chunked-prefill \
       --kv-cache-dtype auto \
       "${extra_flags[@]}" \
@@ -47,10 +47,12 @@ echo
 
 echo "🧹 Cleaning up old logs and outputs"
 rm -f *.json *.json.temp *.log || true
-rm -f ${LOG_DIR}/*.log || true
+rm -f ${LOG_DIR}/enlitens_complete_processing.log ${LOG_DIR}/temp_processing.log || true
 
 start_vllm_server "${VLLM_MAIN_MODEL}" "${MAIN_PORT}" "${LOG_DIR}/vllm-main.log"
-start_vllm_server "${VLLM_MONITOR_MODEL}" "${MONITOR_PORT}" "${LOG_DIR}/vllm-monitor.log"
+if [[ -n "${VLLM_MONITOR_MODEL}" ]]; then
+  start_vllm_server "${VLLM_MONITOR_MODEL}" "${MONITOR_PORT}" "${LOG_DIR}/vllm-monitor.log"
+fi
 
 if command -v nvidia-smi >/dev/null 2>&1; then
   echo "🔥 GPU Status:"

@@ -19,7 +19,7 @@ class EducationalContentAgent(BaseAgent):
         super().__init__(
             name="EducationalContent",
             role="Client Education Material Generation",
-            model="qwen2.5-32b-instruct-q4_k_m"
+            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
 
@@ -27,6 +27,10 @@ class EducationalContentAgent(BaseAgent):
         """Initialize the educational content agent."""
         try:
             self.ollama_client = OllamaClient(default_model=self.model)
+            if not await self.ollama_client.check_connection():
+                raise RuntimeError(
+                    f"vLLM server is not reachable at {self.ollama_client.base_url}. Please run stable_run.sh or start the vLLM server."
+                )
             self.is_initialized = True
             logger.info(f"✅ {self.name} agent initialized")
             return True
@@ -110,12 +114,10 @@ Return as JSON with these EXACT field names:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=EducationalContent,
-                temperature=0.6,  # LOWERED from 0.7: Research shows 0.6 optimal for creative but factual content
-                max_retries=3,
-                **cache_kwargs,
-                temperature=0.25,
+                temperature=0.35,
                 max_retries=3,
                 enforce_grammar=True,
+                **cache_kwargs,
             )
 
             if result:

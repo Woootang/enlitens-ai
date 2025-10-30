@@ -391,14 +391,10 @@ Respond as the monitoring foreman."""
             current = status['current_document'] or 'initializing'
             active = ', '.join(status['active_agents']) or 'waiting'
             return (
-                "📊 **Processing Status:**
-"
-                f"- Currently on: `{current}`
-"
-                f"- Progress: **{progress:.1f}%** ({status['documents_processed']}/{status['total_documents']})
-"
-                f"- Active agents: {active}
-"
+                "📊 **Processing Status:**\n"
+                f"- Currently on: `{current}`\n"
+                f"- Progress: **{progress:.1f}%** ({status['documents_processed']}/{status['total_documents']})\n"
+                f"- Active agents: {active}\n"
                 f"- Recent errors: {len(status['recent_errors'])}"
             )
 
@@ -416,15 +412,10 @@ Respond as the monitoring foreman."""
         if any(word in query_lower for word in ("quality", "hallucination", "validation")):
             metrics = status['quality_metrics']
             return (
-                "🎯 **Quality Metrics:**
-"
-                f"- ✅ Citations Verified: {metrics['citation_verified']}
-"
-                f"- ❌ Validation Failures: {metrics['validation_failures']}
-"
-                f"- ⚠️ Empty Fields: {metrics['empty_fields']}
-
-"
+                "🎯 **Quality Metrics:**\n"
+                f"- ✅ Citations Verified: {metrics['citation_verified']}\n"
+                f"- ❌ Validation Failures: {metrics['validation_failures']}\n"
+                f"- ⚠️ Empty Fields: {metrics['empty_fields']}\n"
                 f"Overall: {'Good' if metrics['validation_failures'] < 5 else 'Needs attention'}"
             )
 
@@ -432,23 +423,6 @@ Respond as the monitoring foreman."""
             f"I monitor {status['total_documents']} documents with {len(status['agent_pipeline'])} "
             "agents in the pipeline. Ask me about status, errors, or quality metrics!"
         )
-            precision = metrics.get('precision_at_3')
-            recall = metrics.get('recall_at_3')
-            faithfulness = metrics.get('faithfulness')
-            hallucinations = metrics.get('hallucination_rate')
-            return (
-                "🎯 **Quality Metrics:**\n"
-                f"- ✅ Citations Verified: {metrics['citation_verified']}\n"
-                f"- 📐 Precision@3: {format_percentage(precision)}\n"
-                f"- 📊 Recall@3: {format_percentage(recall)}\n"
-                f"- 🔒 Faithfulness: {format_percentage(faithfulness)}\n"
-                f"- 🧠 Hallucination Rate: {format_percentage(hallucinations)}\n"
-                f"- ❌ Validation Failures: {metrics['validation_failures']}\n"
-                f"- ⚠️ Empty Fields: {metrics['empty_fields']}\n"
-                "\nOverall: "
-                f"{'Excellent' if (precision or 0) >= 0.9 and (hallucinations or 0) < 0.1 else 'Needs review'}"
-            )
-
 
 foreman_ai = ForemanAI()
 

@@ -1,0 +1,1097 @@
+/*
+Theme Name:    Hello Enlitens
+Template:      hello-elementor
+Author:        Enlitens X Designs
+Description:   A custom child theme for Enlitens Counseling, refactored for scalability and fluid responsiveness.
+Version:       2.0.0
+*/
+
+/* ==========================================================================
+   1. SETTINGS - Fonts, Design Tokens (Variables)
+   ========================================================================== */
+
+/* --- Font-Face Declarations --- */
+@font-face {
+  font-family: 'CAS Red Ink';
+  src: url('https://enlitens.com/wp-content/uploads/2025/07/CAS-Red-Ink.woff2') format('woff2'),
+       url('https://enlitens.com/wp-content/uploads/2025/07/CAS-Red-Ink.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Badas Child Basic';
+  src: url('https://enlitens.com/wp-content/uploads/2025/07/Badas-Child-Basic.woff2') format('woff2'),
+       url('https://enlitens.com/wp-content/uploads/2025/06/Badas-Child-Basic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Badas Child Contour';
+  src: url('https://enlitens.com/wp-content/uploads/2025/07/Badas-Child-Contour.woff2') format('woff2'),
+       url('https://enlitens.com/wp-content/uploads/2025/06/Badas-Child-Contour.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Badas Child Hole';
+  src: url('https://enlitens.com/wp-content/uploads/2025/07/Badas-Child-Hole.woff2') format('woff2'),
+       url('https://enlitens.com/wp-content/uploads/2025/06/Badas-Child-Hole.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bitbybit';
+  src: url('https://enlitens.com/wp-content/uploads/2025/06/bitbybit.woff2') format('woff2'),
+       url('https://enlitens.com/wp-content/uploads/2025/06/Bitbybit.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bitbybit';
+  src: url('https://enlitens.com/wp-content/uploads/2025/06/bitbybit-bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cute Bubble';
+  src: url('https://enlitens.com/wp-content/uploads/2025/06/cutebubble.woff2') format('woff2'),
+       url('https://enlitens.com/wp-content/uploads/2025/06/CuteBubble.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* --- Root Variables --- */
+:root {
+  /* Brand Colors */
+  --color-primary: #C105F5;
+  --color-primary-dark: #9A0BBF;
+  --color-primary-light-1: #D33DF9;
+  --color-primary-light-2: #E76CFD;
+  
+  --color-secondary: #FF4502;
+  --color-secondary-dark: #CC3701;
+  --color-secondary-light-1: #FF6B3B;
+  --color-secondary-light-2: #FF946F;
+  
+  --color-accent: #05F2C7;
+  --color-accent-dark: #049E9F;
+  --color-accent-light-1: #33F8D9;
+  --color-accent-light-2: #66FCEB;
+  
+  --color-highlight: #FFF700;
+  --color-highlight-dark: #CCCC00;
+  --color-highlight-light-1: #FFFF33;
+  --color-highlight-light-2: #FFFF66;
+  
+  --color-success-brand: #7CFC00;
+  --color-success-brand-dark: #63B000;
+  --color-success-brand-light-1: #9CFF33;
+  --color-success-brand-light-2: #CFFF66;
+  
+  /* Status Colors */
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-error: #F87171;
+  
+  /* Theme Colors - Light Mode Default */
+  --color-background: #FFFFFF;
+  --color-text: #1F1F1F;
+  --color-card-bg: #F3F4F6;
+  --color-border: #E1E1E1;
+  --color-text-muted: #9CA3AF;
+  
+  /* Typography Families */
+  --font-heading: 'Cute Bubble', monospace;
+  --font-body: 'Noto Sans', sans-serif;
+  --font-serif: 'Noto Serif', serif;
+  --font-pixel: 'Bitbybit', monospace;
+  --font-badas: 'Badas Child Basic', sans-serif;
+
+  /* NEW: Fluid Typography Scale */
+  --font-size-sm: clamp(0.8rem, 0.17vw + 0.76rem, 0.94rem);
+  --font-size-base: clamp(1rem, 0.34vw + 0.91rem, 1.25rem);
+  --font-size-md: clamp(1.25rem, 0.61vw + 1.1rem, 1.75rem);
+  --font-size-lg: clamp(1.56rem, 1vw + 1.31rem, 2rem);
+  --font-size-xl: clamp(1.95rem, 1.56vw + 1.56rem, 3.13rem);
+  --font-size-xxl: clamp(2.44rem, 2.44vw + 1.81rem, 4.38rem);
+  --font-size-xxxl: clamp(3.05rem, 3.81vw + 2.1rem, 5.13rem);
+
+  /* NEW: Fluid Spacing Scale */
+  --space-3xs: clamp(0.3125rem, 0.11vw + 0.29rem, 0.375rem);
+  --space-2xs: clamp(0.5625rem, 0.22vw + 0.5rem, 0.75rem);
+  --space-xs: clamp(0.875rem, 0.39vw + 0.78rem, 1.125rem);
+  --space-sm: clamp(1.125rem, 0.5vw + 1rem, 1.5rem);
+  --space-md: clamp(1.6875rem, 0.83vw + 1.48rem, 2.25rem);
+  --space-lg: clamp(2.25rem, 1.11vw + 1.97rem, 3rem);
+  --space-xl: clamp(3.375rem, 1.67vw + 2.95rem, 4.5rem);
+  --space-2xl: clamp(4.5rem, 2.22vw + 3.94rem, 6rem);
+  --space-3xl: clamp(6.75rem, 3.33vw + 5.91rem, 9rem);
+  --space-section-y: clamp(3.75rem, 7.5vw + 2.25rem, 7.5rem);
+  
+  /* Transitions, Borders, Shadows */
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* NEW: Content Width */
+  --content-width-max: 1440px;
+  --content-width-preferred: 90vw;
+}
+
+/* Dark Mode Variable Overrides */
+[data-theme="dark"] {
+  --color-background: #1A1A1A;
+  --color-text: #E1E1E1;
+  --color-card-bg: #2A2A2A;
+  --color-border: #3A3A3A;
+  --color-text-muted: #9CA3AF;
+  --shadow-sm: 0 2px 4px rgba(255,255,255,0.05);
+  --shadow-md: 0 4px 8px rgba(255,255,255,0.05);
+  --shadow-lg: 0 8px 16px rgba(255,255,255,0.05);
+}
+
+
+/* ==========================================================================
+   2. BASE - Global Resets & Base Element Styling
+   ========================================================================== */
+
+body {
+  background-color: var(--color-background);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  line-height: 1.6;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Hide Default WordPress Page Titles */
+.page-header .entry-title {
+    display: none;
+}
+
+
+/* ==========================================================================
+   3. GLOBAL WIDGETS - Default Elementor Widget Styles
+   ========================================================================== */
+
+/* --- Default Headings --- */
+h1, h2, h3, h4, h5, h6,
+.elementor-widget-heading .elementor-heading-title {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  margin-block-end: var(--space-sm);
+  font-weight: 700;
+  letter-spacing: 2px; /* ADD THIS LINE */
+  max-width: 65ch; /* NEW: Prevents overly long headings on wide screens */
+}
+
+/* Apply fluid font sizes from variables */
+h1, .elementor-heading-title.elementor-size-xxl { font-size: var(--font-size-xxxl); letter-spacing: -0.02em; }
+h2, .elementor-heading-title.elementor-size-xl { font-size: var(--font-size-xxl); letter-spacing: -0.01em; }
+
+/* REVISED HIERARCHY FOR BLOG CONTENT */
+h3, .elementor-heading-title.elementor-size-large { font-size: var(--font-size-lg); }
+h4, .elementor-heading-title.elementor-size-medium { font-size: var(--font-size-md); }
+h5, .elementor-heading-title.elementor-size-small { font-size: var(--font-size-base); }
+h6, .elementor-heading-title.elementor-size-xs { font-size: var(--font-size-sm); }
+
+/* --- Default Text & Links --- */
+.elementor-widget-text-editor, .prose {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+.elementor-widget-text-editor p, .prose p {
+    margin-block-end: var(--space-md);
+    max-width: 75ch;
+}
+
+.prose a {
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: all var(--transition-fast);
+}
+
+[data-theme="light"] .prose a {
+    color: var(--color-primary);
+    -webkit-text-stroke: 0.5px var(--color-text);
+}
+[data-theme="light"] .prose a:hover {
+    color: var(--color-primary-dark);
+}
+[data-theme="dark"] .prose a {
+    color: var(--color-primary-light-1); 
+    -webkit-text-stroke: 0; 
+}
+[data-theme="dark"] .prose a:hover {
+    color: var(--color-accent-light-1);
+}
+
+/* --- Default Section Padding --- */
+.elementor-section.elementor-section-boxed > .elementor-container {
+    padding-block: var(--space-section-y);
+    padding-inline: var(--space-lg);
+}
+
+
+/* --- Sidebar --- */
+.sidebar-column {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 160px;
+  height: 100vh;
+  background-color: var(--color-background);
+  border-right: 3px solid var(--color-accent);
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+/* --- Main Content Spacing --- */
+
+/* For tablet and desktop */
+@media (min-width: 1025px) {
+  .main-content-pusher {
+    margin-left: 160px;
+  }
+}
+
+/* For very wide desktops to override "Boxed" layout */
+@media (min-width: 1440px) {
+  .main-content-pusher {
+    max-width: none;
+  }
+}
+[data-theme="dark"] .sidebar-column .elementor-widget-text-editor p,
+[data-theme="dark"] .sidebar-column .elementor-heading-title {
+  -webkit-text-stroke: 0;
+}
+
+/* --- Main Navigation (Desktop) --- */
+.elementor-nav-menu {
+  font-family: var(--font-heading) !important;
+}
+.elementor-nav-menu > li > a {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  -webkit-text-stroke: .5px #1a1a1a;
+}
+[data-theme="dark"] .elementor-nav-menu > li > a {
+  -webkit-text-stroke: 0;
+}
+.elementor-nav-menu a span {
+  margin-right: 1px;
+}
+.elementor-nav-menu a .word-space {
+  margin-right: 10px !important;
+}
+
+/* --- Dropdown Navigation (Desktop) --- */
+.elementor-nav-menu--dropdown {
+  background-color: var(--color-background);
+  border: 2px solid var(--color-accent);
+  font-family: var(--font-heading) !important;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+}
+.elementor-nav-menu--dropdown a {
+  color: var(--color-text) !important;
+  background-color: transparent;
+  -webkit-text-stroke: 0.5px #1a1a1a;
+  font-size: clamp(1rem, 2vw, 1.25rem) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  padding: 10px 20px !important;
+  display: block;
+  transition: all var(--transition-fast);
+}
+[data-theme="dark"] .elementor-nav-menu--dropdown {
+  border-color: var(--color-accent);
+}
+[data-theme="dark"] .elementor-nav-menu--dropdown a {
+  -webkit-text-stroke: 0;
+}
+.elementor-nav-menu--dropdown a:hover {
+  background-color: rgba(193, 5, 245, 0.1);
+  -webkit-text-stroke: 0.5px #1a1a1a;
+}
+.elementor-nav-menu--dropdown a span {
+  margin-right: 1px;
+}
+.elementor-nav-menu--dropdown a .word-space {
+  margin-right: 8px !important;
+}
+
+/* ==========================================================================
+   5. COMPONENTS - Reusable Styled Modules
+   ========================================================================== */
+
+/* --- Buttons & Stickers (Revised) --- */
+.enlitens-button {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all var(--transition-base);
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  text-decoration: none;
+}
+.enlitens-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--color-primary-light-1);
+}
+
+.sticker-button .elementor-button {
+  /* This targets the actual button link inside your widget */
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.sticker-button .elementor-button:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: var(--shadow-lg);
+}
+
+.sticker-button .elementor-button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+/* --- Dark Mode Toggle --- */
+.dark-mode-switch {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background: var(--color-grey-light);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-base);
+  border: 2px solid var(--color-border);
+  margin: 20px auto;
+}
+.dark-mode-switch::before {
+  content: '☀️';
+  position: absolute; left: 5px; top: 50%;
+  transform: translateY(-50%); font-size: 16px;
+  transition: opacity var(--transition-base);
+}
+.dark-mode-switch::after {
+  content: '🌙';
+  position: absolute; right: 5px; top: 50%;
+  transform: translateY(-50%); font-size: 16px;
+  opacity: 0.3; transition: opacity var(--transition-base);
+}
+.dark-mode-switch .slider {
+  position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  background: white; border-radius: var(--radius-full);
+  transition: transform var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+[data-theme="dark"] .dark-mode-switch {
+  background: var(--color-primary-dark);
+}
+[data-theme="dark"] .dark-mode-switch .slider {
+  transform: translateX(28px);
+}
+[data-theme="dark"] .dark-mode-switch::before {
+  opacity: 0.3;
+}
+[data-theme="dark"] .dark-mode-switch::after {
+  opacity: 1;
+}
+
+/* --- Mobile Popup Menu --- */
+.elementor-popup-modal-145 .dialog-widget-content {
+    height: auto !important; min-height: 100vh !important;
+    overflow-y: auto !important;
+}
+.elementor-popup-modal-145 .dialog-message {
+    height: auto !important; min-height: 100vh !important;
+}
+.elementor-popup-modal-145 h2 {
+    font-family: var(--font-heading) !important;
+    color: var(--color-primary) !important;
+    font-size: var(--font-size-xxl) !important;
+    text-align: center !important;
+    margin-bottom: var(--space-lg) !important;
+}
+.elementor-popup-modal-145 .elementor-nav-menu a {
+    font-family: var(--font-heading) !important;
+    font-size: var(--font-size-xl) !important;
+    text-transform: uppercase !important;
+    padding: var(--space-sm) var(--space-md) !important;
+}
+.elementor-popup-modal .elementor-nav-menu--layout-vertical {
+    height: auto !important; overflow: visible !important;
+}
+.elementor-popup-modal .elementor-nav-menu--layout-vertical .sub-menu {
+    position: static !important; height: auto !important; width: 100% !important;
+    padding: 0 !important; margin: 0 !important; list-style: none !important;
+    background: transparent !important; box-shadow: none !important; border: none !important;
+}
+.elementor-popup-modal .sub-menu a {
+    font-family: var(--font-heading) !important;
+    font-size: var(--font-size-lg) !important;
+    text-transform: uppercase !important; font-weight: 700 !important;
+    padding: var(--space-xs) var(--space-sm) var(--space-xs) var(--space-xl) !important;
+    display: block !important; color: inherit !important;
+    opacity: 1 !important; visibility: visible !important;
+}
+.elementor-popup-modal .sub-menu li {
+    display: block !important; position: static !important; width: 100% !important;
+    height: auto !important; opacity: 1 !important; visibility: visible !important;
+}
+.elementor-popup-modal .menu-item-has-children {
+    position: static !important; height: auto !important; overflow: visible !important;
+}
+.elementor-popup-modal .submenu-toggle {
+    color: var(--color-primary) !important; font-size: 1.5rem !important;
+    font-weight: bold !important; float: right !important; font-family: monospace !important;
+    margin-left: 15px !important; line-height: 1 !important;
+}
+[data-theme="dark"] .elementor-popup-modal .submenu-toggle {
+    color: var(--color-accent) !important;
+}
+[data-theme="light"] .elementor-popup-modal,
+[data-theme="light"] .elementor-popup-modal .dialog-widget-content,
+[data-theme="light"] .elementor-popup-modal .dialog-message {
+    background-color: #FFFFFF !important; color: #1F1F1F !important;
+}
+[data-theme="dark"] .elementor-popup-modal,
+[data-theme="dark"] .elementor-popup-modal .dialog-widget-content,
+[data-theme="dark"] .elementor-popup-modal .dialog-message {
+    background-color: #1A1A1A !important; color: #E1E1E1 !important;
+}
+[data-theme="dark"] .elementor-popup-modal .dialog-close-button,
+[data-theme="dark"] .elementor-popup-modal .eicon-close {
+    color: #E1E1E1 !important;
+}
+.elementor-popup-modal .menu-item.current-menu-item > a,
+.elementor-popup-modal .menu-item.current-menu-parent > a,
+.elementor-popup-modal li.current-menu-item > a {
+    -webkit-text-stroke: .5px #1a1a1a !important;
+}
+[data-theme="dark"] .elementor-popup-modal .menu-item.current-menu-item > a,
+[data-theme="dark"] .elementor-popup-modal .menu-item.current-menu-item > a span {
+    -webkit-text-stroke: 0 !important;
+}
+
+
+/* --- Game Boy CTA & Modal --- */
+/* ===== Game Boy CTA (final) ===== */
+
+#gba-cta {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 770px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
+
+  /* stop page-level horizontal scroll when the SVG scales */
+  overflow: hidden;                    /* broadest browser support */
+}
+
+/* never scale the wrapper itself */
+#gba-cta:hover {
+  transform: none !important;
+  filter: none !important;
+}
+
+/* scale the SVG only */
+#gba-cta svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  transform-origin: 50% 50%;
+  transition: transform .2s ease, filter .2s ease;
+}
+#gba-cta:hover svg {
+  filter: brightness(1.05);
+  transform: scale(1.02); /* hover zoom */
+}
+
+/* Elementor sometimes puts overflow:auto on the widget container.
+   Loosen it for this one widget so it won't create a scrollbar. */
+.elementor-widget-container > #gba-cta { overflow: visible; }
+
+/* belt-and-suspenders: kill any stray page-level x-scroll */
+html, body { overflow-x: hidden; }
+
+#gba-cta text {
+    font-family: var(--font-pixel); font-weight: 700;
+    letter-spacing: 0.5px; fill: #000;
+    user-select: none; pointer-events: none;
+}
+#btn-a, #btn-b, #btn-c {
+    cursor: pointer; pointer-events: all;
+}
+.truth-modal {
+    display: none; position: fixed;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--color-primary-dark);
+    border: 4px solid var(--color-text); border-radius: 20px;
+    padding: var(--space-lg); max-width: 500px; width: 90%;
+    z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.truth-modal h3 {
+    font-family: var(--font-pixel); color: var(--color-accent);
+    margin-bottom: var(--space-sm); font-size: var(--font-size-lg);
+    text-align: center;
+}
+.truth-modal p {
+    font-family: var(--font-body); color: #fff; line-height: 1.6;
+    font-size: var(--font-size-base);
+}
+.truth-modal button {
+    background: var(--color-accent); border: none;
+    padding: var(--space-xs) var(--space-sm);
+    font-family: var(--font-pixel); font-weight: 700;
+    border-radius: 10px; margin-top: var(--space-sm);
+    cursor: pointer; font-size: 1rem; display: block;
+    margin-inline: auto; transition: all var(--transition-base);
+}
+.truth-modal button:hover {
+    background: var(--color-secondary); transform: translateY(-2px);
+}
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.7);
+    z-index: 9999;
+}
+[data-theme="dark"] .truth-modal {
+    background: var(--color-card-bg); border-color: var(--color-accent);
+}
+
+/* --- Falling Pages Animation --- */
+#falling-pages-section {
+    overflow: visible !important; transform: none !important;
+    z-index: 10 !important; max-height: 100vh !important;
+}
+.falling-pages-container {
+    position: relative; z-index: 10; isolation: isolate;
+}
+.falling-pages-container .pages-wrapper {
+    width: 100%; height: 100vh;
+    display: flex; justify-content: center; align-items: flex-start;
+    overflow: hidden; position: relative; z-index: 10;
+}
+.falling-pages-container .page {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 600px; border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform-origin: center top; background-color: #fff;
+    top: 10%;
+}
+.falling-pages-container .page img.page-svg { 
+    width: 100%; display: block; border-radius: 8px; 
+}
+.falling-pages-container .page.page-1 { z-index: 3; transform: translateX(-50%) rotate(-1deg); }
+.falling-pages-container .page.page-2 { z-index: 2; transform: translateX(-50%) rotate(.5deg) translateY(50px); }
+.falling-pages-container .page.page-3 { z-index: 1; transform: translateX(-50%) rotate(-.5deg) translateY(100px);}
+.falling-pages-container .page-link { display: block; cursor: pointer; transition: transform 0.3s ease, filter 0.3s ease; }
+.falling-pages-container .page-3:hover { transform: translateX(-50%) rotate(-1deg) translateY(100px) scale(1.03) !important; filter: brightness(1.05); }
+
+/* --- Comparison Section --- */
+section.comparison-section {
+    position: relative; z-index: 10;
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+.comparison-section h2 {
+    color: var(--color-primary) !important;
+}
+.comparison-section p,
+.comparison-section h4,
+.comparison-section .elementor-widget-text-editor {
+    color: #1F1F1F !important;
+}
+.comparison-section .dark-mode-text,
+.comparison-section .dark-mode-text * {
+    color: var(--color-text) !important;
+}
+
+/* ============================================
+   22. FLIP CARD EFFECT (Final Version)
+   ============================================ */
+
+/*
+* This wrapper (assigned in the Elementor panel) centers the card in its column.
+*/
+.flip-card-widget-wrapper {
+  width: 100%;
+  display: grid;
+  place-content: center;
+}
+
+/*
+* This is the main card element. It is now sized by its content.
+*/
+.flip-card {
+  width: 100%;
+  max-width: 450px; /* Controls the maximum size on large screens */
+  perspective: 1500px;
+  cursor: pointer;
+  /* KEY CHANGE: We have REMOVED the fixed aspect-ratio from here. */
+}
+
+/*
+* The inner container that performs the flip. It must be relative
+* to serve as the positioning context for the front and back faces.
+*/
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/*
+* The front and back faces. They are absolutely positioned
+* to stack on top of each other within the .flip-card-inner container.
+*/
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0; /* Makes them fill the parent (.flip-card-inner) */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* The back face is pre-rotated out of view */
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/*
+* The image will now define the container's aspect ratio.
+* We also hide the back-face image initially to prevent layout shifts.
+*/
+.flip-card img {
+  width: 100%;
+  height: auto; /* Let the height be determined by the image's aspect ratio */
+  display: block; /* Removes any extra space below the image */
+}
+.flip-card-back img {
+    visibility: hidden;
+}
+.flip-card.flipped .flip-card-back img {
+    visibility: visible;
+}
+
+/* --- Sticky Icons --- */
+.elementor-widget.consult-sticker {
+    position: fixed !important; bottom: 20px !important;
+    left: 20px !important; z-index: 999 !important;
+    top: auto !important; right: auto !important;
+}
+.elementor-widget.up-arrow-nav {
+    position: fixed !important; bottom: 20px !important;
+    right: 20px !important; z-index: 999 !important;
+    top: auto !important; left: auto !important;
+}
+.elementor-widget.consult-sticker, .elementor-widget.up-arrow-nav {
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+}
+
+/* --- Calendly Widget --- */
+.calendly-inline-widget {
+    width: 100% !important; min-width: 320px !important;
+    height: 900px !important; overflow: hidden !important;
+}
+
+/* --- Help Page SVG Styles --- */
+.help-cursor-area {
+    cursor: url('https://enlitens.com/wp-content/uploads/2025/07/cursor-hand-v2.svg'), auto;
+}
+.help-cursor-area a, #help-buttons-svg a {
+    cursor: pointer;
+}
+#help-buttons-svg #assessments-btn:hover,
+#help-buttons-svg #therapy-btn:hover {
+    opacity: 0.85; transition: opacity 0.2s ease-in-out;
+}
+
+
+/* ==========================================================================
+   6. UTILITIES - Helper and Override Classes
+   ========================================================================== */
+
+/* --- Gentle Bobbing Animation --- */
+@keyframes gentle-bob {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+}
+.gentle-bob-animation {
+    animation: gentle-bob 2.5s infinite ease-in-out alternate;
+    will-change: transform;
+}
+
+/* --- Text & Color --- */
+.text-static-black { color: #1F1F1F !important; }
+.dark-mode-text { color: var(--color-text) !important; }
+.dark-mode-text * { color: inherit !important; }
+
+/* --- Pointer & Click Events --- */
+.no-click-lottie, .no-click-lottie * { pointer-events: none !important; }
+.sidebar-column *, header *, .elementor-location-header * { pointer-events: auto !important; }
+.dark-mode-switch, .consult-sticker, button {
+    pointer-events: auto !important; position: relative !important; z-index: 999999 !important;
+}
+.pin-spacer { pointer-events: none !important; }
+.pin-spacer .page-link { pointer-events: auto !important; }
+
+/* --- GSAP & Loading Fixes --- */
+html.loading * { position: static !important; }
+
+
+/* ==========================================================================
+   7. RESPONSIVE OVERRIDES - Grouped Media Queries
+   ========================================================================== */
+
+/* --- Desktop Small / Laptop (1025px and up) --- */
+@media (min-width: 1025px) {
+    .sidebar-column .dark-mode-switch {
+        background: #F3F4F6 !important; border: 2px solid #E1E1E1 !important;
+    }
+    [data-theme="dark"] .sidebar-column .dark-mode-switch {
+        background: #9A0BBF !important; border: 2px solid #9A0BBF !important;
+    }
+}
+
+/* --- Tablet Landscape (max 1024px) --- */
+@media (max-width: 1024px) {
+  body { padding-left: 0 !important; }
+  .sidebar-column { display: none; }
+}
+
+/* --- Tablet Portrait (max 768px) --- */
+@media (max-width: 768px) {
+    /* Layout */
+    .elementor-popup-modal-145 .dialog-message { padding: 20px !important; }
+
+    /* Components */
+    #gba-cta { width: 90%; max-width: 500px; padding: 0; }
+    .truth-modal { width: 95%; padding: 20px; }
+    .falling-pages-container .page { width: 95%; max-width: none; }
+    .flip-card { width: 90vw; height: 60vw; }
+    .elementor-widget.up-arrow-nav { display: none !important; }
+    .elementor-widget.consult-sticker {
+        left: auto !important; right: 15px !important;
+        transform: none !important; bottom: 15px !important;
+    }
+    .calendly-inline-widget { height: 800px !important; }
+
+    /* Fixes */
+    .falling-pages-container { -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0); }
+    .falling-pages-container .page { -webkit-backface-visibility: hidden; backface-visibility: hidden; will-change: transform; }
+    .falling-pages-container .page-link { -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+}
+
+/* --- Mobile Landscape (max 480px) --- */
+@media (max-width: 480px) {
+    /* Components */
+    .elementor-popup-modal-145 .elementor-nav-menu a {
+        font-size: clamp(1.5rem, 6vw, 2rem) !important; padding: 20px !important;
+    }
+    .elementor-popup-modal-145 .sub-menu a {
+        font-size: clamp(1.2rem, 5vw, 1.8rem) !important; padding: 15px 20px 15px 40px !important;
+    }
+    #gba-cta { max-width: 90vw; }
+    .calendly-inline-widget { height: 750px !important; }
+}
+
+/* --- Mobile Small (max 400px) --- */
+@media (max-width: 400px) {
+    .elementor-popup-modal .elementor-nav-menu a {
+        font-size: clamp(1.2rem, 5vw, 1.8rem) !important; padding: 15px !important;
+        word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;
+    }
+    .elementor-popup-modal .menu-item-has-children > a {
+        display: flex; align-items: center; justify-content: space-between;
+    }
+}
+
+/* --- Mobile Tiny (max 350px) --- */
+@media (max-width: 350px) {
+    .elementor-popup-modal .elementor-nav-menu a {
+        font-size: 1rem !important; letter-spacing: 1px !important;
+    }
+    .elementor-popup-modal .sub-menu a {
+        font-size: 0.9rem !important;
+    }
+}
+/* ================================== */
+/* HERO MP3 PLAYER STYLES (RESPONSIVE) */
+/* ================================== */
+
+/* Container */
+#mp3-hero-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--space-xl);
+    width: 100%;
+}
+
+/* The SVG - responsive sizing */
+#mp3-hero-container svg,
+#enlitens-mp3-player {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 77%;
+    max-width: min(450px, var(--content-width-preferred));
+    height: auto;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: transform var(--transition-base);
+}
+
+#enlitens-mp3-player:hover {
+    transform: scale(1.02);
+}
+
+/* Text inside the MP3 player - using your font size variables */
+#enlitens-mp3-player #Now_Playing {
+    font-family: var(--font-body) !important;
+    fill: var(--color-text) !important;
+    font-weight: 600 !important;
+    /* Font size scales with viewport */
+    font-size: clamp(20px, 4vw, 32px) !important;
+}
+
+/* Force black text regardless of theme */
+[data-theme="light"] #enlitens-mp3-player #Now_Playing,
+[data-theme="dark"] #enlitens-mp3-player #Now_Playing {
+    fill: #1f1f1f !important;
+}
+
+/* Screen text if you add it later */
+#mp3-screen-text-line1, 
+#mp3-screen-text-line2 {
+    font-family: var(--font-pixel);
+    font-weight: bold;
+    fill: var(--color-highlight);
+    font-size: clamp(var(--font-size-lg), 10vw, var(--font-size-xxxl));
+    text-anchor: middle;
+}
+
+/* Caption - using design tokens */
+.mp3-caption {
+    margin-top: var(--space-md);
+    font-family: var(--font-pixel);
+    color: var(--color-text);
+    font-style: italic;
+    text-align: center;
+    font-size: var(--font-size-sm);
+}
+
+/* Tablet Portrait (max 768px) */
+@media (max-width: 768px) {
+    #mp3-hero-container {
+        padding-block: var(--space-lg);
+    }
+    
+    #mp3-hero-container svg,
+    #enlitens-mp3-player {
+        width: 85%;
+    }
+}
+
+/* Mobile (max 480px) */
+@media (max-width: 480px) {
+    #mp3-hero-container {
+        padding-block: var(--space-md);
+    }
+    
+    #mp3-hero-container svg,
+    #enlitens-mp3-player {
+        width: 89%;
+    }
+    
+    #enlitens-mp3-player #Now_Playing {
+        font-size: clamp(16px, 5vw, 24px) !important;
+    }
+}
+
+/* Remove old music modal styles if not using */
+#music-modal-overlay,
+#music-modal-content,
+#music-modal-close {
+    display: none !important;
+}
+/* Scrolling text inside the MP3 player */
+#enlitens-mp3-player #Now_Playing,
+#enlitens-mp3-player #Now_Playing_2 {
+    font-family: var(--font-body) !important;
+    fill: #1f1f1f !important;
+    font-weight: 700 !important;
+    /* Bigger, responsive font size */
+    font-size: clamp(32px, 6vw, 48px) !important;
+}
+
+/* Force black text regardless of theme */
+[data-theme="light"] #enlitens-mp3-player #Now_Playing,
+[data-theme="light"] #enlitens-mp3-player #Now_Playing_2,
+[data-theme="dark"] #enlitens-mp3-player #Now_Playing,
+[data-theme="dark"] #enlitens-mp3-player #Now_Playing_2 {
+    fill: #1f1f1f !important;
+}
+/* Stack the Game Boy and the heart in one grid cell */
+.gba-stack{
+  position: relative;
+  display: grid;
+  overflow: visible;
+}
+
+/* Both children occupy the same grid area */
+.gba-stack > *{ grid-area: 1 / 1; }
+
+/* Game Boy fills the wrapper */
+.gba-stack #gba-cta,
+.gba-stack #gba-cta svg{
+  width: 100%;
+  height: auto;
+  display: block;
+  justify-self: stretch;
+  align-self: stretch;
+}
+
+/* Heart: centered horizontally, bottom-aligned, slight nudge down */
+.sticker-heart{
+  justify-self: center;   /* center X */
+  align-self: end;        /* bottom Y */
+  transform: translateY(12px);  /* push a bit under the Game Boy; tweak as needed */
+  width: clamp(90px, 30%, 180px);
+  z-index: 5;
+  pointer-events: none;   /* optional: let clicks pass through */
+}
+/* --- Body Text Link Styling (Aggressive Override) --- */
+.prose a,
+.prose a:visited {
+  color: #ff4502 !important;
+  -webkit-text-stroke: 1px #1f1f1f !important;
+  text-decoration: none !important;
+  transition: all var(--transition-base);
+}
+
+.prose a:hover {
+  color: #ff4502 !important;
+  -webkit-text-stroke: 1px #1f1f1f !important;
+  text-decoration: underline !important;
+}
+[data-theme="dark"] .dark-mode-text {
+  color: #E1E1E1; /* Your light text color for dark mode */
+}
+/* ==========================================================================
+   FOUC PREVENTION - Hide/Reveal for Rainbow Effect
+   ========================================================================== */
+
+/* Hide elements targeted by the Rainbow Effect while JS is loading */
+/* We target the containers for stability */
+.rainbow-loading .elementor-nav-menu,
+.rainbow-loading .sidebar-column {
+    opacity: 0;
+    visibility: hidden;
+    /* Ensure no transition happens during the loading phase */
+    transition: none !important; 
+}
+
+/* Smoothly reveal elements once JS has finished processing */
+.rainbow-loaded .elementor-nav-menu,
+.rainbow-loaded .sidebar-column {
+    opacity: 1;
+    visibility: visible;
+    /* Smooth fade-in transition (400ms = 0.4 seconds) */
+    transition: opacity 400ms ease-in-out, visibility 400ms ease-in-out;
+}
+/* ==========================================================================
+   Easter Egg Sticker Fix & Enhancement v2
+   ========================================================================== */
+
+/* 1. The parent container holds both and creates the positioning context */
+.easter-egg-container {
+  position: relative;
+  /* Use CSS Grid to perfectly stack and center both items on top of each other */
+  display: grid;
+  place-items: center;
+}
+
+/* 2. This rule tells both the SVG and the sticker to occupy the exact same space */
+.easter-egg-container > * {
+  grid-area: 1 / 1;
+}
+
+/* 3. Control the Game Boy's size relative to the container */
+.easter-egg-container .gameboy-svg {
+  width: 95%; /* Example: takes up 95% of the container's width */
+  max-width: 450px; /* Optional: prevents it from getting too large */
+  z-index: 10; /* Ensure the Game Boy is on top */
+}
+
+/* 4. Control the sticker's size relative to the SAME container */
+.easter-egg-container .easter-egg-sticker {
+  width: 80%; /* Make it proportionally smaller than the Game Boy */
+  max-width: 400px; /* Optional: keeps it proportionally smaller */
+  z-index: 5;  /* Ensure the sticker is behind */
+}
+/* ==========================================================================
+   Easter Egg Sticker - Responsive Hotfix
+   ========================================================================== */
+
+@media (min-width: 1281px) and (max-width: 1339px) {
+  .easter-egg-sticker {
+    /* Slightly reduce the size of the sticker only in the problem range */
+    transform: scale(0.85);
+    /* Nudge the sticker slightly up and to the left to re-center it */
+    top: 48%;
+    left: 48%;
+  }
+}

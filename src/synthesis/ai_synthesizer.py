@@ -55,7 +55,7 @@ class OllamaClient:
     def __init__(
         self,
         base_url: str = "http://localhost:8000/v1",
-        model: str = "qwen2.5-32b-instruct-q4_k_m",
+        model: str = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct",
         *,
         gpu_memory_utilization: float = 0.92,
         system_prompt: Optional[str] = None,
