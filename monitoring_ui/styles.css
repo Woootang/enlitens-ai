@@ -355,6 +355,13 @@ body {
     word-wrap: break-word;
 }
 
+.log-meta {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
 /* Quality Dashboard */
 .quality-dashboard {
     display: grid;
@@ -453,6 +460,16 @@ body {
 
 .message.user .message-content {
     background: var(--primary);
+}
+
+.message.thinking .message-content {
+    background: rgba(102, 126, 234, 0.2);
+    font-style: italic;
+}
+
+.message.error .message-content {
+    background: rgba(245, 101, 101, 0.2);
+    border-left: 3px solid var(--error);
 }
 
 .message-header {

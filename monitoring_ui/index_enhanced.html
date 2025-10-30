@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Enlitens AI Enhanced Monitor - Real-Time Quality Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        /* Enhanced styles for new features */
+        .processing-status {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.3rem;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .pipeline-container {
+            padding: 2rem;
+        }
+
+        .pipeline-node {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-node.running {
+            border-color: var(--warning);
+            box-shadow: 0 0 20px rgba(246, 173, 85, 0.3);
+        }
+
+        .pipeline-node.completed {
+            border-color: var(--success);
+        }
+
+        .pipeline-node.failed {
+            border-color: var(--error);
+        }
+
+        .agent-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .agent-card {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .json-viewer {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-height: 600px;
+            overflow: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .json-tree {
+            color: #f8f8f2;
+        }
+
+        .json-key {
+            color: #f92672;
+        }
+
+        .json-string {
+            color: #a6e22e;
+        }
+
+        .json-number {
+            color: #ae81ff;
+        }
+
+        .json-boolean {
+            color: #66d9ef;
+        }
+
+        .quality-indicator {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .quality-excellent {
+            background: var(--success);
+            color: white;
+        }
+
+        .quality-good {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .quality-fair {
+            background: var(--warning);
+            color: #0f172a;
+        }
+
+        .quality-poor {
+            background: var(--error);
+            color: white;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+        }
+
+        .metric-value-lg {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .time-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">
+                <span class="robot-icon">🤖</span>
+                Enlitens AI Enhanced Monitor
+            </h1>
+            <div class="connection-status">
+                <div class="status-indicator" id="connectionStatus">
+                    <div class="pulse"></div>
+                    <span id="statusText">Connecting...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Processing Status Bar -->
+    <div class="processing-status" id="processingStatus">
+        <h3>📊 Current Processing Status</h3>
+        <div class="status-grid">
+            <div class="status-item">
+                <div class="status-label">Current Document</div>
+                <div class="status-value" id="currentDoc">Initializing...</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Progress</div>
+                <div class="status-value" id="progressPct">0%</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Time on Document</div>
+                <div class="status-value" id="timeOnDoc">--</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Last Update</div>
+                <div class="status-value" id="lastUpdate">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>📊 Views</h3>
+                <nav class="nav-menu">
+                    <button class="nav-item active" data-view="logs">
+                        📋 Live Logs
+                    </button>
+                    <button class="nav-item" data-view="pipeline">
+                        🔄 Agent Pipeline
+                    </button>
+                    <button class="nav-item" data-view="quality">
+                        ✅ Quality Dashboard
+                    </button>
+                    <button class="nav-item" data-view="json">
+                        📄 JSON Viewer
+                    </button>
+                    <button class="nav-item" data-view="foreman">
+                        🏗️ Foreman AI
+                    </button>
+                    <button class="nav-item" data-view="stats">
+                        📈 Statistics
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>🎯 Quick Stats</h3>
+                <div class="stat-card">
+                    <div class="stat-label">Documents</div>
+                    <div class="stat-value" id="docsProcessed">0/0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Logs</div>
+                    <div class="stat-value" id="totalLogs">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Errors</div>
+                    <div class="stat-value error" id="totalErrors">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Warnings</div>
+                    <div class="stat-value warning" id="totalWarnings">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Quality Score</div>
+                    <div class="stat-value success" id="qualityScore">--%</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>🔧 Controls</h3>
+                <button class="control-btn" onclick="clearLogs()">
+                    🗑️ Clear Logs
+                </button>
+                <button class="control-btn" onclick="pauseStream()">
+                    ⏸️ <span id="pauseText">Pause</span>
+                </button>
+                <button class="control-btn" onclick="exportLogs()">
+                    💾 Export
+                </button>
+                <button class="control-btn" onclick="refreshKnowledgeBase()">
+                    🔄 Refresh JSON
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Logs View -->
+            <div class="view active" id="logsView">
+                <div class="view-header">
+                    <h2>📋 Live Processing Logs</h2>
+                    <div class="filter-controls">
+                        <select id="levelFilter" onchange="applyFilters()">
+                            <option value="all">All Levels</option>
+                            <option value="DEBUG">🔍 Debug</option>
+                            <option value="INFO">✅ Info</option>
+                            <option value="WARNING">⚠️ Warning</option>
+                            <option value="ERROR">❌ Error</option>
+                            <option value="CRITICAL">🚨 Critical</option>
+                        </select>
+                        <input type="text" id="searchFilter" placeholder="🔎 Search logs..." oninput="applyFilters()">
+                    </div>
+                </div>
+                <div class="logs-container" id="logsContainer">
+                    <div class="log-entry welcome">
+                        <div class="log-header">
+                            <span class="log-level">INFO</span>
+                            <span class="log-time" id="welcomeLogTime">--:--:--</span>
+                        </div>
+                        <div class="log-message">
+                            🎉 Welcome to Enlitens AI Enhanced Monitor! Waiting for processing to start...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Pipeline View -->
+            <div class="view" id="pipelineView">
+                <div class="view-header">
+                    <h2>🔄 Agent Processing Pipeline</h2>
+                    <p class="subtitle">Real-time monitoring of supervisor and agent hierarchy</p>
+                </div>
+                <div class="pipeline-container" id="pipelineContainer">
+                    <div class="pipeline-node" id="supervisorNode">
+                        <h3>🎯 Supervisor Agent</h3>
+                        <p>Status: <span id="supervisorStatus">Idle</span></p>
+                        <p>Current Stage: <span id="supervisorStage">None</span></p>
+                        <h4>Active Agents:</h4>
+                        <div class="agent-list" id="agentList">
+                            <p class="placeholder">No agents active yet...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality Dashboard View -->
+            <div class="view" id="qualityView">
+                <div class="view-header">
+                    <h2>✅ Quality Dashboard</h2>
+                    <p class="subtitle">Comprehensive quality metrics and analysis</p>
+                </div>
+                <div class="metric-grid" id="qualityMetricsGrid">
+                    <!-- Metrics will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- JSON Viewer -->
+            <div class="view" id="jsonView">
+                <div class="view-header">
+                    <h2>📄 Knowledge Base JSON Viewer</h2>
+                    <p class="subtitle">Review and validate output quality</p>
+                    <button class="control-btn" onclick="refreshKnowledgeBase()">
+                        🔄 Refresh
+                    </button>
+                </div>
+                <div id="jsonViewerContainer">
+                    <div class="json-viewer" id="jsonViewer">
+                        <p class="placeholder">Click "Refresh" to load the knowledge base...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Foreman AI View -->
+            <div class="view" id="foremanView">
+                <div class="view-header">
+                    <h2>🏗️ Chat with Foreman AI</h2>
+                    <p class="subtitle">Intelligent AI assistant powered by Ollama - monitors processing and provides insights</p>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message foreman">
+                            <div class="message-avatar">🏗️</div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <strong>Foreman AI</strong>
+                                    <span class="message-time" id="foremanWelcomeTime">--:--:--</span>
+                                </div>
+                                <div class="message-text">
+                                    Hello! I'm your enhanced AI Foreman, powered by Ollama. I monitor the entire Enlitens knowledge base extraction pipeline in real-time.
+                                    <br><br>
+                                    I can provide:
+                                    <ul>
+                                        <li>🔍 Intelligent log analysis and error diagnosis</li>
+                                        <li>📊 Processing status and progress insights</li>
+                                        <li>⚠️ Quality concerns and recommendations</li>
+                                        <li>🎯 Agent performance analysis</li>
+                                        <li>💡 Troubleshooting suggestions</li>
+                                    </ul>
+                                    Try asking me:
+                                    <ul>
+                                        <li>"What's the current status?"</li>
+                                        <li>"Analyze the latest error"</li>
+                                        <li>"How's the quality looking?"</li>
+                                        <li>"Which agents are running?"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <input
+                            type="text"
+                            id="chatInput"
+                            placeholder="Ask the Foreman AI anything..."
+                            onkeypress="if(event.key === 'Enter') sendMessage()"
+                        >
+                        <button class="send-btn" onclick="sendMessage()">
+                            Send 📤
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats View -->
+            <div class="view" id="statsView">
+                <div class="view-header">
+                    <h2>📈 Detailed Statistics</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <h3>📊 Processing Overview</h3>
+                        <div id="processingStats">
+                            <p class="placeholder">No processing data yet...</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <h3>🤖 Agent Performance</h3>
+                        <div id="agentStats">
+                            <p class="placeholder">Agents not yet active...</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <h3>⏱️ Timing Metrics</h3>
+                        <div id="performanceStats">
+                            <p class="placeholder">No performance data...</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <h3>🎯 Quality Breakdown</h3>
+                        <div id="qualityBreakdown">
+                            <p class="placeholder">No quality metrics yet...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/static/app_enhanced.js" defer></script>
+</body>
+</html>
