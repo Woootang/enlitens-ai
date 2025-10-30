@@ -92,11 +92,13 @@ Return as JSON with these EXACT field names:
 {{"explanations": [list], "examples": [list], "analogies": [list], "definitions": [list], "processes": [list], "comparisons": [list], "visual_aids": [list], "learning_objectives": [list]}}
 """
 
+            cache_kwargs = self._cache_kwargs(context)
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=EducationalContent,
                 temperature=0.6,  # LOWERED from 0.7: Research shows 0.6 optimal for creative but factual content
-                max_retries=3
+                max_retries=3,
+                **cache_kwargs,
             )
 
             if result:

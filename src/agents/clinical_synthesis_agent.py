@@ -94,11 +94,13 @@ Return as JSON with these EXACT field names:
 {{"interventions": [list], "assessments": [list], "outcomes": [list], "protocols": [list], "guidelines": [list], "contraindications": [list], "side_effects": [list], "monitoring": [list]}}
 """
 
+            cache_kwargs = self._cache_kwargs(context)
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ClinicalContent,
                 temperature=0.3,  # LOWERED from 0.7: Research shows 0.3 optimal for factual clinical content
-                max_retries=3
+                max_retries=3,
+                **cache_kwargs,
             )
 
             if result:

@@ -48,10 +48,10 @@ You are a marketing strategist for Enlitens, a neuroscience-based therapy practi
 Your goal is to CREATE compelling marketing messages inspired by (but not limited to) the research themes.
 
 RESEARCH THEMES (inspiration only):
-{research_content.get('key_findings', [])[:5]}
+{research_content.get('findings', [])[:5]}
 
 CLINICAL FOCUS:
-{clinical_content.get('treatment_approaches', [])[:5]}
+{clinical_content.get('interventions', [])[:5]}
 
 CREATE marketing content that positions Enlitens as the neuroscience therapy leader in St. Louis:
 
@@ -87,13 +87,16 @@ Return ONLY valid JSON in this exact format:
 }}
 """
 
-            qwen_client = OllamaClient(default_model="qwen3:32b")
-            marketing_result = await qwen_client.generate_structured_response(
+            marketing_client = self.ollama_client
+            seo_client = self.ollama_client.clone_with_model("qwen3:32b")
+            marketing_cache = self._cache_kwargs(context, suffix="marketing")
+            marketing_result = await marketing_client.generate_structured_response(
                 prompt=marketing_prompt,
                 response_model=MarketingContent,
                 temperature=0.7,  # Higher for creativity
                 max_retries=3,
-                use_cot_prompt=False  # CRITICAL: Disable CoT for creative content
+                use_cot_prompt=False,  # CRITICAL: Disable CoT for creative content
+                **marketing_cache,
             )
 
             # Generate SEO content
@@ -101,7 +104,7 @@ Return ONLY valid JSON in this exact format:
 Generate SEO-optimized content for Enlitens, a neuroscience-based therapy practice in St. Louis.
 
 RESEARCH THEMES (inspiration):
-{research_content.get('key_findings', [])[:5]}
+{research_content.get('findings', [])[:5]}
 
 TARGET AUDIENCE: St. Louis adults with ADHD, anxiety, trauma, autism
 
@@ -138,12 +141,14 @@ Return ONLY valid JSON in this exact format:
 }}
 """
 
-            seo_result = await qwen_client.generate_structured_response(
+            seo_cache = self._cache_kwargs(context, suffix="seo")
+            seo_result = await seo_client.generate_structured_response(
                 prompt=seo_prompt,
                 response_model=SEOContent,
                 temperature=0.6,  # Moderate creativity for SEO
                 max_retries=3,
-                use_cot_prompt=False  # CRITICAL: Disable CoT for creative SEO content
+                use_cot_prompt=False,  # CRITICAL: Disable CoT for creative SEO content
+                **seo_cache,
             )
 
             return {
@@ -164,16 +169,22 @@ Return ONLY valid JSON in this exact format:
         marketing_content = output.get("marketing_content", {})
         seo_content = output.get("seo_content", {})
         
-        has_marketing = any([
-            marketing_content.get("headlines"),
-            marketing_content.get("value_propositions")
-        ])
-        
-        has_seo = any([
-            seo_content.get("meta_titles"),
-            seo_content.get("keywords")
-        ])
-        
+        has_marketing = any(
+            [
+                marketing_content.get("headlines"),
+                marketing_content.get("value_propositions"),
+                marketing_content.get("benefits"),
+            ]
+        )
+
+        has_seo = any(
+            [
+                seo_content.get("meta_descriptions"),
+                seo_content.get("primary_keywords"),
+                seo_content.get("title_tags"),
+            ]
+        )
+
         return has_marketing or has_seo
 
     async def cleanup(self):
