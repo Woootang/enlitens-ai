@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupWebSocket();
     setupEventListeners();
     setupViewSwitching();
+    initializeWelcomeContent();
 });
 
 // WebSocket Connection
@@ -138,6 +139,19 @@ function appendLogToUI(logData) {
     const entries = container.querySelectorAll('.log-entry');
     if (entries.length > 500) {
         entries[0].remove();
+    }
+}
+
+// Initialize dynamic content in static placeholders
+function initializeWelcomeContent() {
+    const welcomeTime = document.getElementById('welcomeLogTime');
+    if (welcomeTime) {
+        welcomeTime.textContent = new Date().toLocaleTimeString();
+    }
+
+    const foremanTime = document.getElementById('foremanWelcomeTime');
+    if (foremanTime) {
+        foremanTime.textContent = new Date().toLocaleTimeString();
     }
 }
 

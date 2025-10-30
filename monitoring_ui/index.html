@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 Enlitens AI Monitor - Real-Time Quality Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <!-- Header -->
@@ -101,7 +101,7 @@
                     <div class="log-entry welcome">
                         <div class="log-header">
                             <span class="log-level">INFO</span>
-                            <span class="log-time">${new Date().toLocaleTimeString()}</span>
+                            <span class="log-time" id="welcomeLogTime">--:--:--</span>
                         </div>
                         <div class="log-message">
                             🎉 Welcome to Enlitens AI Monitor! Waiting for processing to start...
@@ -168,7 +168,7 @@
                             <div class="message-content">
                                 <div class="message-header">
                                     <strong>Foreman AI</strong>
-                                    <span class="message-time">${new Date().toLocaleTimeString()}</span>
+                                    <span class="message-time" id="foremanWelcomeTime">--:--:--</span>
                                 </div>
                                 <div class="message-text">
                                     Hello! I'm your AI Foreman, monitoring the Enlitens knowledge base extraction process.
@@ -237,6 +237,6 @@
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script src="app.js"></script>
+    <script src="/static/app.js" defer></script>
 </body>
 </html>

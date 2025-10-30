@@ -25,6 +25,15 @@ import uvicorn
 
 app = FastAPI(title="Enlitens AI Monitor", version="1.0.0")
 
+
+# Static assets directory
+STATIC_DIR = Path(__file__).parent / "monitoring_ui"
+
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+else:
+    print(f"⚠️ Monitoring UI assets directory not found at {STATIC_DIR}")
+
 # Store active WebSocket connections
 class ConnectionManager:
     def __init__(self):
@@ -127,9 +136,9 @@ async def startup_event():
 @app.get("/")
 async def get_dashboard():
     """Serve the monitoring dashboard."""
-    html_path = Path(__file__).parent / "monitoring_ui" / "index.html"
+    html_path = STATIC_DIR / "index.html"
     if html_path.exists():
-        return HTMLResponse(content=html_path.read_text())
+        return HTMLResponse(content=html_path.read_text(encoding="utf-8"), media_type="text/html")
     else:
         return HTMLResponse(content="""
         <!DOCTYPE html>

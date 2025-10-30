@@ -11,9 +11,12 @@ Features:
 
 import logging
 import json
+import os
+import time
 from typing import Any, Dict, Optional
 from datetime import datetime
 import traceback
+from urllib import request as urllib_request, error as urllib_error
 
 
 # ANSI color codes for terminal output
@@ -92,6 +95,56 @@ class EnhancedFormatter(logging.Formatter):
         # Combine everything
         return f"{timestamp} - {colored_name} - {levelname} - {message}"
 
+
+class RemoteLogHandler(logging.Handler):
+    """Logging handler that forwards records to a remote monitoring endpoint."""
+
+    def __init__(self, endpoint: str, timeout: float = 0.5, retry_interval: float = 15.0):
+        super().__init__()
+        self.endpoint = endpoint
+        self.timeout = timeout
+        self.retry_interval = retry_interval
+        self._suppress_until = 0.0
+
+    def emit(self, record: logging.LogRecord):
+        if time.time() < self._suppress_until:
+            return
+
+        try:
+            message = self.format(record)
+            payload = {
+                "type": "log",
+                "timestamp": datetime.utcnow().isoformat(),
+                "level": record.levelname,
+                "logger": record.name,
+                "message": message,
+                "module": record.module,
+                "funcName": record.funcName,
+                "lineNo": record.lineno
+            }
+
+            if hasattr(record, "document_id"):
+                payload["document_id"] = getattr(record, "document_id")
+            if hasattr(record, "agent_name"):
+                payload["agent_name"] = getattr(record, "agent_name")
+            if hasattr(record, "processing_stage"):
+                payload["processing_stage"] = getattr(record, "processing_stage")
+
+            data = json.dumps(payload).encode("utf-8")
+            request_obj = urllib_request.Request(
+                self.endpoint,
+                data=data,
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+
+            with urllib_request.urlopen(request_obj, timeout=self.timeout):
+                pass
+
+        except (urllib_error.URLError, urllib_error.HTTPError, TimeoutError, ConnectionError):
+            self._suppress_until = time.time() + self.retry_interval
+        except Exception:
+            self._suppress_until = time.time() + self.retry_interval
 
 def create_banner(text: str, char: str = "=", width: int = 80, color: str = Colors.BRIGHT_BLUE) -> str:
     """Create a visual banner for section headers."""
@@ -257,7 +310,8 @@ def log_processing_stage(logger: logging.Logger, stage: int, total_stages: int,
 
 
 def setup_enhanced_logging(log_file: str, console_level: int = logging.INFO,
-                           file_level: int = logging.DEBUG) -> logging.Logger:
+                           file_level: int = logging.DEBUG,
+                           remote_logging_url: Optional[str] = None) -> logging.Logger:
     """Set up enhanced logging with color formatters."""
     # Create logger
     logger = logging.getLogger()
@@ -285,6 +339,17 @@ def setup_enhanced_logging(log_file: str, console_level: int = logging.INFO,
     # Add handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+
+    remote_target = remote_logging_url or os.environ.get("ENLITENS_MONITOR_URL")
+    if remote_target:
+        try:
+            remote_handler = RemoteLogHandler(remote_target)
+            remote_handler.setLevel(logging.INFO)
+            remote_formatter = logging.Formatter('%(message)s')
+            remote_handler.setFormatter(remote_formatter)
+            logger.addHandler(remote_handler)
+        except Exception as exc:
+            print(f"⚠️ Remote logging disabled: {exc}")
 
     return logger
 

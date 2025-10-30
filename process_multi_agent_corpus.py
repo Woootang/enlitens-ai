@@ -39,18 +39,35 @@ from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banne
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 log_filename = "enlitens_complete_processing.log"  # Single comprehensive log
+log_file_path = Path("logs") / log_filename
 
 # Create logs directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
 
+# Determine remote monitoring endpoint (defaults to local monitoring server)
+monitor_endpoint_env = os.getenv("ENLITENS_MONITOR_URL")
+if monitor_endpoint_env is None:
+    monitor_endpoint = "http://localhost:8765/api/broadcast"
+else:
+    monitor_endpoint = monitor_endpoint_env.strip()
+
+if monitor_endpoint and monitor_endpoint.lower() in {"", "none", "disable", "disabled", "false", "0"}:
+    monitor_endpoint = None
+
 # Setup enhanced logging with visual improvements
 setup_enhanced_logging(
-    log_filename=log_filename,
+    log_file=str(log_file_path),
     file_level=logging.INFO,
-    console_level=logging.INFO
+    console_level=logging.INFO,
+    remote_logging_url=monitor_endpoint
 )
 
 logger = logging.getLogger(__name__)
+
+if monitor_endpoint:
+    logger.info(f"📡 Streaming logs to monitoring server at {monitor_endpoint}")
+else:
+    logger.info("📝 Remote monitoring disabled; using local log file only")
 
 # Clean up old logs after logger is configured
 try:
@@ -774,11 +791,7 @@ async def main():
     args = parser.parse_args()
 
     # Display startup banner
-    log_startup_banner(
-        title="ENLITENS AI MULTI-AGENT PROCESSOR",
-        subtitle="Neuroscience Knowledge Base Generator",
-        version="2.0"
-    )
+    log_startup_banner()
 
     # Validate input directory
     if not os.path.exists(args.input_dir):
