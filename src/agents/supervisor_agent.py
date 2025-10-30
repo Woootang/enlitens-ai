@@ -263,6 +263,7 @@ class SupervisorAgent(BaseAgent):
 
             final_output = {
                 "document_id": context.document_id,
+                "document_text": context.document_text,  # CRITICAL: Include for citation verification
                 "processing_timestamp": datetime.now().isoformat(),
                 "processing_time_seconds": processing_time.total_seconds(),
                 "supervisor_status": "completed" if validation_passed else "completed_with_issues",
@@ -305,6 +306,7 @@ class SupervisorAgent(BaseAgent):
 
             return {
                 "document_id": context.document_id,
+                "document_text": context.document_text,  # Include even on failure
                 "processing_timestamp": datetime.now().isoformat(),
                 "processing_time_seconds": processing_time.total_seconds(),
                 "supervisor_status": "failed",

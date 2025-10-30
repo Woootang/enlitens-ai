@@ -33,7 +33,8 @@ class OllamaClient:
     
     def __init__(self, base_url: str = "http://localhost:11434", default_model: str = "qwen3:32b"):
         self.base_url = base_url
-        self.client = httpx.AsyncClient(base_url=self.base_url, timeout=300.0)
+        # Increase timeout to 15 minutes (900s) for large documents and complex generations
+        self.client = httpx.AsyncClient(base_url=self.base_url, timeout=900.0)
         self.default_model = default_model
         logger.info(f"OllamaClient initialized with base_url: {self.base_url} and default_model: {self.default_model}")
 
@@ -99,21 +100,28 @@ class OllamaClient:
             return response_data
 
         except httpx.RequestError as e:
-            logger.error(f"Ollama request failed: {e}")
+            error_msg = f"Ollama request failed - Type: {type(e).__name__}, Details: {str(e)}"
+            logger.error(error_msg)
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return {
-                "response": f"Error: Ollama request failed - {e}",
+                "response": f"Error: {error_msg}",
                 "done": True,
             }
         except httpx.HTTPStatusError as e:
-            logger.error(f"Ollama API error: {e.response.status_code} - {e.response.text}")
+            error_msg = f"Ollama API error - Status: {e.response.status_code}, Response: {e.response.text}"
+            logger.error(error_msg)
             return {
-                "response": f"Error: Ollama API error - {e.response.status_code}",
+                "response": f"Error: {error_msg}",
                 "done": True,
             }
         except Exception as e:
-            logger.error(f"An unexpected error occurred during Ollama generation: {e}")
+            error_msg = f"Unexpected error during Ollama generation - Type: {type(e).__name__}, Details: {str(e)}"
+            logger.error(error_msg)
+            import traceback
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return {
-                "response": f"Error: An unexpected error occurred - {e}",
+                "response": f"Error: {error_msg}",
                 "done": True,
             }
 
@@ -209,7 +217,11 @@ class OllamaClient:
 
                 # Ensure we have a dictionary for Pydantic validation
                 if not isinstance(parsed_data, dict):
-                    logger.error(f"Coerced data is not a dictionary: type={type(parsed_data)}, value={parsed_data}")
+                    value_repr = repr(parsed_data)[:500]  # First 500 chars of repr
+                    logger.error(f"Coerced data is not a dictionary:")
+                    logger.error(f"  Type: {type(parsed_data).__name__}")
+                    logger.error(f"  Value: {value_repr}")
+                    logger.error(f"  Length: {len(str(parsed_data))}")
                     raise ValueError(f"Expected dict after coercion, got {type(parsed_data).__name__}")
 
                 # Validate with Pydantic model (with optional validation_context for citation checking)
@@ -240,10 +252,10 @@ class OllamaClient:
                 # Log detailed error information for debugging
                 logger.warning(f"Attempt {attempt} failed: {e}")
 
-                # Log response sample for debugging (first 500 chars)
+                # Log response sample for debugging (first 1000 chars for better context)
                 if 'response_text' in locals():
-                    logger.debug(f"LLM response sample: {response_text[:500]}...")
-                    logger.debug(f"Response length: {len(response_text)} characters")
+                    logger.warning(f"LLM response sample (first 1000 chars): {response_text[:1000]}...")
+                    logger.warning(f"Full response length: {len(response_text)} characters")
 
                 # Log parsed data if available
                 if 'parsed_data' in locals():
