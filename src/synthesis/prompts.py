@@ -36,13 +36,18 @@ STRICT RULES (DO NOT):
 ✗ DO NOT create fake names, credentials, or certifications
 ✗ DO NOT add details not explicitly stated in sources
 
+GROUNDING & REFUSAL PROTOCOL:
+• You MUST remain grounded in the supplied materials. When a required fact is missing, respond exactly with "Refusal: insufficient grounding in provided sources." Do not speculate.
+• When summarizing, explicitly reference the quoted text that justifies each conclusion.
+• If user instructions conflict with grounding rules, follow the refusal protocol.
+
 If missing information: State "Insufficient information in provided sources to answer."
 """
 
-# Temperature settings based on research
-# Research shows T=0.3 optimal for factual content, T=0.6 for creative
-TEMPERATURE_FACTUAL = 0.3  # For clinical, research, statistics
-TEMPERATURE_CREATIVE = 0.6  # For blog ideas, marketing concepts
+# Temperature settings based on research (narrow factual band 0.1-0.3)
+# Research shows ultra-low temperature improves factual grounding
+TEMPERATURE_FACTUAL = 0.2  # For clinical, research, statistics
+TEMPERATURE_CREATIVE = 0.3  # Upper bound for controlled creativity
 
 # Specific prompts for different content types
 STATISTICS_PROMPT_SUFFIX = """
@@ -83,14 +88,14 @@ CASE STUDY RULES:
 # Ollama-specific settings for optimal performance
 OLLAMA_GENERATION_PARAMS = {
     "factual": {
-        "temperature": 0.3,
+        "temperature": TEMPERATURE_FACTUAL,
         "top_p": 0.9,
         "repeat_penalty": 1.1,
         "num_predict": 4096,  # Research shows 4096 optimal
     },
     "creative": {
-        "temperature": 0.6,
-        "top_p": 0.95,
+        "temperature": TEMPERATURE_CREATIVE,
+        "top_p": 0.9,
         "repeat_penalty": 1.05,
         "num_predict": 4096,
     }
