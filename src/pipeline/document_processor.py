@@ -23,7 +23,7 @@ from src.extraction.quality_validator import ExtractionQualityValidator
 from src.models.specialized_models import NeuroscienceEntityExtractor, ModelManager
 from src.synthesis.ai_synthesizer import NeuroscienceSynthesizer, OllamaClient
 from src.schema.knowledge_schema import (
-    EnlitensKnowledgeDocument, 
+    EnlitensKnowledgeDocument,
     SourceMetadata, 
     ArchivalContent,
     EntityExtraction,
@@ -31,6 +31,9 @@ from src.schema.knowledge_schema import (
     ProcessingMetadata,
     KnowledgeBase
 )
+from src.retrieval.chunker import DocumentChunker
+from src.retrieval.vector_store import QdrantVectorStore
+from src.retrieval.hybrid_retriever import HybridRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +72,9 @@ class DocumentProcessor:
         self.entity_extractor = NeuroscienceEntityExtractor(self.model_manager)
         self.ollama_client = OllamaClient(ollama_url, ollama_model)
         self.synthesizer = NeuroscienceSynthesizer(self.ollama_client)
+        self.chunker = DocumentChunker()
+        self.vector_store = QdrantVectorStore()
+        self.retriever = HybridRetriever(self.vector_store)
         
         # Initialize knowledge base
         self.knowledge_base_path = self.output_dir / "enlitens-knowledge-core.json"
@@ -113,9 +119,18 @@ class DocumentProcessor:
             # Stage 1: PDF Extraction
             logger.info("Stage 1: PDF Extraction")
             extraction_result = self.pdf_extractor.extract(pdf_path)
-            
+
+            chunks = self.chunker.chunk(
+                extraction_result.get('full_text', ''),
+                extraction_result.get('metadata', {}),
+            )
+            extraction_result['chunks'] = chunks
+            self.vector_store.upsert(chunks)
+            self.retriever.index_chunks(chunks)
+
             # Validate extraction quality
             extraction_metrics = self.quality_validator.validate_extraction(extraction_result)
+            extraction_result['quality_score'] = extraction_metrics.overall_score
             if extraction_metrics.overall_score < 0.95:
                 logger.warning(f"Extraction quality below threshold: {extraction_metrics.overall_score:.2f}")
             
@@ -132,8 +147,8 @@ class DocumentProcessor:
             if not self.ollama_client.is_available():
                 logger.error("Ollama is not available")
                 return False, None, "Ollama is not available"
-            
-            synthesis_result = self.synthesizer.synthesize(extraction_result)
+
+            synthesis_result = self.synthesizer.synthesize(extraction_result, retriever=self.retriever)
             
             # Stage 4: Create Knowledge Document
             logger.info("Stage 4: Creating Knowledge Document")
@@ -163,15 +178,16 @@ class DocumentProcessor:
         """Create a complete knowledge document"""
         
         # Extract metadata
+        metadata = extraction_result.get('metadata', {})
         source_metadata = SourceMetadata(
-            title=extraction_result.get('title', 'Unknown Title'),
+            title=extraction_result.get('title') or metadata.get('title', 'Unknown Title'),
             authors=[],  # Would need to extract from PDF
             source_filename=os.path.basename(pdf_path),
-            journal=extraction_result.get('metadata', {}).get('journal', ''),
-            doi=extraction_result.get('metadata', {}).get('doi', ''),
-            keywords=extraction_result.get('metadata', {}).get('keywords', [])
+            journal=metadata.get('journal', ''),
+            doi=extraction_result.get('doi') or metadata.get('doi', ''),
+            keywords=metadata.get('keywords', [])
         )
-        
+
         # Create archival content
         archival_content = ArchivalContent(
             full_document_text_markdown=extraction_result.get('full_text', ''),
@@ -208,13 +224,15 @@ class DocumentProcessor:
             intervention_suggestions=synthesis_result.intervention_suggestions,
             contraindications=synthesis_result.contraindications,
             evidence_strength=synthesis_result.evidence_strength,
-            synthesis_quality_score=synthesis_result.quality_score
+            synthesis_quality_score=synthesis_result.quality_score,
+            powerful_quotes=synthesis_result.powerful_quotes,
+            source_citations=synthesis_result.source_citations
         )
         
         # Create processing metadata
         processing_metadata = ProcessingMetadata(
-            extraction_method="hybrid_docling_marker",
-            synthesis_method="qwen3_32b",
+            extraction_method="pymupdf4llm_marker",
+            synthesis_method="two_stage_qwen3_32b",
             quality_scores={
                 'extraction': extraction_result.get('quality_score', 0.0),
                 'entity_extraction': 0.9,
