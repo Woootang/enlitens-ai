@@ -1,102 +1,77 @@
-#!/bin/bash
-# Stable Execution Script for Enlitens Multi-Agent System
-# This script addresses SSH tunnel stability issues and ensures clean execution
+#!/usr/bin/env bash
+# Stable orchestration script for the Enlitens processing pipeline.
+set -euo pipefail
 
-echo "🚀 Starting Stable Multi-Agent Processing..."
+VLLM_MAIN_MODEL="qwen2.5-32b-instruct-q4_k_m"
+VLLM_MONITOR_MODEL="qwen2.5-3b-instruct-q4_k_m"
+VLLM_GPU_UTIL="0.92"
+MAIN_PORT="8000"
+MONITOR_PORT="8001"
+LOG_DIR="logs"
 
-# Kill any existing processes that might cause conflicts
-echo "🧹 Cleaning up existing processes..."
-pkill -f "process_.*corpus" || true
-pkill -f "python.*process" || true
-pkill -f "ollama" || true
+start_vllm_server() {
+  local model="$1"
+  local port="$2"
+  local log_file="$3"
+  local extra_flags=("--gpu-memory-utilization" "$VLLM_GPU_UTIL" "--max-num-seqs" "24" "--enforce-eager")
 
-# Wait a moment for processes to terminate
-sleep 3
-
-# Clear any stuck terminal state
-stty sane 2>/dev/null || true
-
-# Set environment variables for stability
-export OLLAMA_MAX_LOADED_MODELS=1
-export OLLAMA_MAX_QUEUE=1
-export OLLAMA_RUNNERS_DIR=/tmp/ollama-runners
-export TORCH_USE_CUDA_DSA=1
-export CUDA_LAUNCH_BLOCKING=1
-
-# Check if Ollama is running, start if not
-echo "🔍 Checking Ollama service..."
-if ! pgrep -f "ollama" > /dev/null; then
-    echo "📦 Starting Ollama service..."
-    nohup ollama serve > ollama.log 2>&1 &
+  if ! pgrep -f "vllm.*--port ${port}" >/dev/null 2>&1; then
+    echo "🚀 Starting vLLM server for ${model} on port ${port}"
+    nohup python3 -m vllm.entrypoints.openai.api_server \
+      --model "${model}" \
+      --quantization "q4_k_m" \
+      --dtype "auto" \
+      --tensor-parallel-size 1 \
+      --port "${port}" \
+      --host "0.0.0.0" \
+      --enable-paged-attention \
+      --enable-chunked-prefill \
+      --kv-cache-dtype auto \
+      "${extra_flags[@]}" \
+      > "${log_file}" 2>&1 &
     sleep 5
-
-    # Verify Ollama started
-    if ! pgrep -f "ollama" > /dev/null; then
-        echo "❌ Failed to start Ollama"
-        exit 1
+    if ! pgrep -f "vllm.*--port ${port}" >/dev/null 2>&1; then
+      echo "❌ Failed to start vLLM server for ${model}"
+      exit 1
     fi
-    echo "✅ Ollama service started"
+  else
+    echo "✅ vLLM server already running on port ${port}"
+  fi
+}
+
+mkdir -p "${LOG_DIR}"
+
+echo "🚀 ENLITENS MULTI-AGENT PROCESSING SYSTEM"
+echo "=========================================="
+echo
+
+echo "🧹 Cleaning up old logs and outputs"
+rm -f *.json *.json.temp *.log || true
+rm -f ${LOG_DIR}/*.log || true
+
+start_vllm_server "${VLLM_MAIN_MODEL}" "${MAIN_PORT}" "${LOG_DIR}/vllm-main.log"
+start_vllm_server "${VLLM_MONITOR_MODEL}" "${MONITOR_PORT}" "${LOG_DIR}/vllm-monitor.log"
+
+if command -v nvidia-smi >/dev/null 2>&1; then
+  echo "🔥 GPU Status:"
+  nvidia-smi --query-gpu=name,memory.total,memory.used,temperature.gpu --format=csv,noheader
 else
-    echo "✅ Ollama service already running"
+  echo "⚠️ nvidia-smi not available"
 fi
 
-# Check GPU status
-echo "🔥 Checking GPU status..."
-nvidia-smi || echo "⚠️ NVIDIA drivers not available"
-
-# Check available disk space
-echo "💽 Checking disk space..."
-df -h | grep -E "(Filesystem|/dev/)" || true
-
-# Create output directory if it doesn't exist
-mkdir -p logs
-
-# Generate timestamp for this run
+echo
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-LOG_FILE="enlitens_complete_processing.log"
-TEMP_LOG="logs/temp_processing.log"
+OUTPUT_FILE="enlitens_knowledge_base_complete_${TIMESTAMP}.json"
+TEMP_LOG="${LOG_DIR}/temp_processing.log"
 
-# Clean up old files first
-echo "🧹 Cleaning up old files..."
-rm -f *.log logs/*.log
-rm -f enlitens_knowledge_base*.json*
-
-echo "📊 Starting processing at: $(date)"
-echo "📝 Comprehensive log file: ${LOG_FILE} (all 344 files)"
-echo "🏙️ St. Louis context loaded: ✅"
-echo "🧠 Enhanced multi-agent system with quality validation: ✅"
-echo "🔄 Robust retry mechanisms: ✅"
-echo "📈 Confidence scoring and fact checking: ✅"
-
-# Run the multi-agent processor with nohup to prevent SSH issues
 echo "🎯 Launching enhanced multi-agent processor..."
 nohup python3 process_multi_agent_corpus.py \
-    --input-dir enlitens_corpus/input_pdfs \
-    --output-file "enlitens_knowledge_base_complete_${TIMESTAMP}.json" \
-    --st-louis-report st_louis_health_report.pdf \
-    > "${TEMP_LOG}" 2>&1 &
+  --input-dir enlitens_corpus/input_pdfs \
+  --output-file "${OUTPUT_FILE}" \
+  --st-louis-report st_louis_health_report.pdf \
+  > "${TEMP_LOG}" 2>&1 &
 PROCESS_PID=$!
 
 echo "✅ Process started with PID: ${PROCESS_PID}"
-echo "📋 Monitor progress with: tail -f ${TEMP_LOG}"
-echo "🛑 Stop process with: kill ${PROCESS_PID}"
-echo ""
-echo "💡 The system is now running in the background."
-echo "💡 Check progress: tail -f ${TEMP_LOG}"
-echo "💡 View system status: nvidia-smi"
-echo "💡 Check Ollama: curl http://localhost:11434/api/tags"
-echo ""
-echo "🚀 Multi-agent processing initiated successfully!"
-echo "⏰ Started at: $(date)"
-
-# Optional: Monitor the process briefly
-sleep 2
-if ps -p ${PROCESS_PID} > /dev/null; then
-    echo "✅ Process is running successfully"
-    echo "📊 Process ID: ${PROCESS_PID}"
-    echo "📝 Monitor with: tail -f ${TEMP_LOG}"
-else
-    echo "❌ Process failed to start"
-    echo "📋 Check logs: ${TEMP_LOG}"
-    exit 1
-fi
+echo "📄 Output target: ${OUTPUT_FILE}"
+echo "🪵 Live log: ${TEMP_LOG}"

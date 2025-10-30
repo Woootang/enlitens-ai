@@ -85,7 +85,7 @@ CASE STUDY RULES:
 - Format: "[HYPOTHETICAL EXAMPLE] Client with [condition described in research]..."
 """
 
-# Ollama-specific settings for optimal performance
+# vLLM-specific settings for optimal performance
 OLLAMA_GENERATION_PARAMS = {
     "factual": {
         "temperature": TEMPERATURE_FACTUAL,
@@ -125,7 +125,7 @@ def get_full_system_prompt(content_type: str = "factual", include_testimonial_bl
 
 def get_generation_params(content_type: str = "factual") -> dict:
     """
-    Get Ollama generation parameters for content type.
+    Get vLLM generation parameters for content type.
 
     Args:
         content_type: "factual" or "creative"

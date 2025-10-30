@@ -6,7 +6,7 @@ Features:
 - WebSocket log streaming with agent tracking
 - Real-time processing metrics with document tracking
 - Quality monitoring with detailed breakdown
-- Intelligent Foreman AI using Ollama
+- Intelligent Foreman AI using vLLM with Groq fallback
 - JSON output viewer and validator
 - Agent pipeline visualization
 - Supervisor/Agent hierarchy monitoring
@@ -29,10 +29,17 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 import httpx
 
+from src.synthesis.ollama_client import VLLMClient, MONITORING_MODEL
+
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Enlitens AI Monitor Enhanced", version="2.0.0")
 
 # Configuration
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+VLLM_BASE_URL = os.environ.get("VLLM_BASE_URL", "http://localhost:8000/v1")
+FOREMAN_LOCAL_URL = os.environ.get("FOREMAN_LOCAL_URL", "http://localhost:8001/v1")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 KNOWLEDGE_BASE_PATH = Path("enlitens_knowledge_base_latest.json")
 STATIC_DIR = Path(__file__).parent / "monitoring_ui"
 
@@ -247,23 +254,105 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-# Intelligent Foreman AI
-class ForemanAI:
-    """Intelligent AI assistant that uses Ollama to analyze logs and provide insights."""
 
-    def __init__(self, ollama_url: str = OLLAMA_BASE_URL):
-        self.ollama_url = ollama_url
-        self.client = httpx.AsyncClient(timeout=30.0)
+# Intelligent Foreman AI
+FOREMAN_SYSTEM_PROMPT = (
+    "You are the Foreman AI for the Enlitens AI knowledge base extraction system. "
+    "Provide concise, operational guidance using the monitoring metrics supplied in "
+    "each query. Escalate outages, suggest concrete remediation steps, and cite agent "
+    "names when possible."
+)
+
+
+class ForemanModelRouter:
+    """Route Foreman prompts between local vLLM and Groq fallback."""
+
+    def __init__(self, local_url, groq_api_key):
+        self.local_client = VLLMClient(base_url=local_url, default_model=MONITORING_MODEL) if local_url else None
+        self.local_url = local_url
+        self.groq_api_key = groq_api_key
+        self.groq_client = httpx.AsyncClient(base_url="https://api.groq.com/openai/v1", timeout=30.0) if groq_api_key else None
+
+    async def _ask_local(self, prompt: str):
+        if not self.local_client:
+            return None
+        try:
+            if not await self.local_client.check_connection():
+                logger.warning("Local Foreman vLLM endpoint unavailable: %s", self.local_url)
+                return None
+            response = await self.local_client.generate_text(
+                prompt,
+                model=self.local_client.default_model,
+                temperature=0.4,
+                num_predict=512,
+                system_prompt=FOREMAN_SYSTEM_PROMPT,
+                extra_options={"extra_body": {"cache_prompt": True}},
+            )
+            return response or None
+        except Exception as exc:
+            logger.warning("Local Foreman generation failed: %s", exc)
+            return None
+
+    async def _ask_groq(self, prompt: str):
+        if not self.groq_client or not self.groq_api_key:
+            return None
+        try:
+            response = await self.groq_client.post(
+                "chat/completions",
+                headers={"Authorization": f"Bearer {self.groq_api_key}"},
+                json={
+                    "model": GROQ_MODEL,
+                    "messages": [
+                        {"role": "system", "content": FOREMAN_SYSTEM_PROMPT},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.6,
+                    "max_tokens": 600,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        except Exception as exc:
+            logger.error("Groq fallback failed: %s", exc)
+            return None
+
+    async def generate(self, prompt: str):
+        reply = await self._ask_local(prompt)
+        if reply:
+            return reply
+        return await self._ask_groq(prompt)
+
+    async def availability(self):
+        local_ok = False
+        if self.local_client:
+            try:
+                local_ok = await self.local_client.check_connection()
+            except Exception:
+                local_ok = False
+        groq_ok = bool(self.groq_api_key and self.groq_client)
+        return {
+            "local_url": self.local_url,
+            "local_available": local_ok,
+            "groq_configured": groq_ok,
+        }
+
+    async def close(self):
+        if self.local_client:
+            await self.local_client.cleanup()
+        if self.groq_client:
+            await self.groq_client.aclose()
+
+
+class ForemanAI:
+    """Intelligent AI assistant with routing and heuristic fallback."""
+
+    def __init__(self, router=None):
+        self.router = router or ForemanModelRouter(FOREMAN_LOCAL_URL, GROQ_API_KEY)
 
     async def analyze_query(self, query: str, context: Dict[str, Any]) -> str:
-        """Use Ollama to analyze the query with current context."""
-
-        # Prepare context summary
         status = processing_state.get_current_status()
-
-        context_prompt = f"""You are the Foreman AI for the Enlitens AI knowledge base extraction system.
-
-Current Processing Status:
+        context_prompt = f"""Current Processing Status:
 - Current Document: {status['current_document'] or 'None'}
 - Documents Processed: {status['documents_processed']}/{status['total_documents']}
 - Progress: {status['progress_percentage']:.1f}%
@@ -281,52 +370,68 @@ Agent Pipeline: {' → '.join(status['agent_pipeline'])}
 
 User Query: {query}
 
-Provide a helpful, concise response analyzing the situation and answering the user's question.
-Be direct and actionable. If there are issues, suggest specific solutions."""
+Respond as the monitoring foreman."""
 
-        try:
-            response = await self.client.post(
-                f"{self.ollama_url}/api/generate",
-                json={
-                    "model": "qwen3:32b",
-                    "prompt": context_prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.7,
-                        "num_predict": 500
-                    }
-                }
-            )
+        reply = await self.router.generate(context_prompt)
+        if reply:
+            return reply
+        return self._fallback_response(query, status)
 
-            if response.status_code == 200:
-                result = response.json()
-                return result.get("response", "I'm having trouble analyzing that right now.")
-            else:
-                return f"Ollama service error: {response.status_code}"
+    async def health(self):
+        return await self.router.availability()
 
-        except Exception as e:
-            # Fallback to heuristic response
-            return self._fallback_response(query, status)
+    async def close(self):
+        await self.router.close()
 
     def _fallback_response(self, query: str, status: Dict[str, Any]) -> str:
-        """Fallback heuristic responses when Ollama is unavailable."""
         query_lower = query.lower()
 
-        if any(word in query_lower for word in ['status', 'progress', 'how']):
+        if any(word in query_lower for word in ("status", "progress", "how")):
             progress = status['progress_percentage']
             current = status['current_document'] or 'initializing'
             active = ', '.join(status['active_agents']) or 'waiting'
-            return f"📊 **Processing Status:**\n- Currently on: `{current}`\n- Progress: **{progress:.1f}%** ({status['documents_processed']}/{status['total_documents']})\n- Active agents: {active}\n- Recent errors: {len(status['recent_errors'])}"
+            return (
+                "📊 **Processing Status:**
+"
+                f"- Currently on: `{current}`
+"
+                f"- Progress: **{progress:.1f}%** ({status['documents_processed']}/{status['total_documents']})
+"
+                f"- Active agents: {active}
+"
+                f"- Recent errors: {len(status['recent_errors'])}"
+            )
 
-        elif any(word in query_lower for word in ['error', 'problem', 'issue', 'wrong']):
+        if any(word in query_lower for word in ("error", "problem", "issue", "wrong")):
             if status['recent_errors']:
                 latest = status['recent_errors'][-1]
-                return f"⚠️ **Latest Error:**\n```\n{latest['message']}\n```\nAgent: {latest.get('agent', 'Unknown')}\nTime: {latest['timestamp']}"
-            else:
-                return "✅ No errors detected! System is running smoothly."
+                return (
+                    "⚠️ **Latest Error:**\n```\n"
+                    f"{latest['message']}\n```\n"
+                    f"Agent: {latest.get('agent', 'Unknown')}\n"
+                    f"Time: {latest['timestamp']}"
+                )
+            return "✅ No errors detected! System is running smoothly."
 
-        elif any(word in query_lower for word in ['quality', 'hallucination', 'validation']):
+        if any(word in query_lower for word in ("quality", "hallucination", "validation")):
             metrics = status['quality_metrics']
+            return (
+                "🎯 **Quality Metrics:**
+"
+                f"- ✅ Citations Verified: {metrics['citation_verified']}
+"
+                f"- ❌ Validation Failures: {metrics['validation_failures']}
+"
+                f"- ⚠️ Empty Fields: {metrics['empty_fields']}
+
+"
+                f"Overall: {'Good' if metrics['validation_failures'] < 5 else 'Needs attention'}"
+            )
+
+        return (
+            f"I monitor {status['total_documents']} documents with {len(status['agent_pipeline'])} "
+            "agents in the pipeline. Ask me about status, errors, or quality metrics!"
+        )
             precision = metrics.get('precision_at_3')
             recall = metrics.get('recall_at_3')
             faithfulness = metrics.get('faithfulness')
@@ -344,10 +449,26 @@ Be direct and actionable. If there are issues, suggest specific solutions."""
                 f"{'Excellent' if (precision or 0) >= 0.9 and (hallucinations or 0) < 0.1 else 'Needs review'}"
             )
 
-        else:
-            return f"I monitor {status['total_documents']} documents with {len(status['agent_pipeline'])} agents in the pipeline. Ask me about status, errors, or quality metrics!"
 
 foreman_ai = ForemanAI()
+
+
+@app.on_event("shutdown")
+async def _shutdown_foreman():
+    await foreman_ai.close()
+
+
+@app.get("/api/foreman/health")
+async def foreman_health():
+    data = await foreman_ai.health()
+    return JSONResponse(data)
+
+
+@app.post("/api/foreman/query")
+async def foreman_query(payload: Dict[str, Any]):
+    query = payload.get("query", "")
+    response = await foreman_ai.analyze_query(query, payload.get("context", {}))
+    return JSONResponse({"query": query, "response": response})
 
 # Routes
 @app.get("/", response_class=HTMLResponse)
@@ -458,7 +579,12 @@ if __name__ == "__main__":
     print(f"🔌 WebSocket: ws://{args.host}:{args.port}/ws")
     print(f"📡 Log Endpoint: http://{args.host}:{args.port}/api/log")
     print(f"📈 Stats: http://{args.host}:{args.port}/api/stats")
-    print(f"🤖 Using Ollama at: {OLLAMA_BASE_URL}")
+    print(f"🤖 Primary vLLM endpoint: {VLLM_BASE_URL}")
+    print(f"🛡️ Foreman local model: {FOREMAN_LOCAL_URL or 'disabled'}")
+    if GROQ_API_KEY:
+        print(f"🌐 Groq fallback model: {GROQ_MODEL}")
+    else:
+        print("🌐 Groq fallback model: not configured")
     print("=" * 80)
 
     uvicorn.run(

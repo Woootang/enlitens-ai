@@ -6,7 +6,7 @@
 
 **Current Architecture**:
 - Multi-agent system: Supervisor Agent → 8 Specialized Agents (Science Extraction, Clinical Synthesis, Educational Content, Rebellion Framework, Founder Voice, Context RAG, Marketing/SEO, Validation)
-- LLM: Ollama with qwen3:32b model (18GB VRAM usage)
+- LLM: vLLM with qwen2.5-32b-instruct-q4_k_m (≈18GB VRAM)
 - Processing: ~345 PDF documents with complex scientific content
 - Output: Structured JSON with blog content, marketing copy, clinical insights, statistics with citations
 - Validation: Pydantic models with citation verification validators
@@ -54,7 +54,7 @@ statistics.1.citation
 ### Problem 2: Foreman AI Resource Constraints
 
 **Current State**:
-- Foreman AI uses qwen3:32b (same as processing)
+- Foreman AI uses qwen2.5-3b-instruct-q4_k_m locally with Groq fallback
 - With main processing using ~18GB, Foreman likely can't load properly
 - Responses are poor quality, cut off, don't understand context
 - System has 25GB total VRAM
@@ -73,7 +73,7 @@ statistics.1.citation
    - Comparison of latency, quality, rate limits
 3. **Model swapping strategies**:
    - Unload main model when Foreman needs to respond
-   - Ollama API for model management
+   - vLLM OpenAI-compatible API for model management
    - Performance impact and user experience
 4. **Quantization options**:
    - Q4_K_M vs Q5_K_M vs Q8_0
@@ -418,13 +418,13 @@ Please structure your response as:
 - Temperature optimization (0.3 → 0.7 → 0.8 on retries)
 - Pydantic validators with context passing for citation verification
 - Enhanced error logging with full tracebacks
-- Increased Ollama timeout from 5 to 15 minutes
+- Increased vLLM timeout from 5 to 15 minutes
 - JSON repair for malformed LLM outputs
 
 **Technologies in Stack**:
 - Python 3.8+
 - FastAPI for monitoring server
-- Ollama for LLM inference
+- vLLM for LLM inference
 - Docling for PDF extraction
 - Pydantic for validation
 - WebSockets for real-time updates

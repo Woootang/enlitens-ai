@@ -431,7 +431,8 @@ class QualityValidator:
             'sections': getattr(document.archival_content, 'sections', []),
             'tables': getattr(document.archival_content, 'tables', []),
             'references': getattr(document.archival_content, 'references', [])
-        
+        }
+
         extraction_validation = self.validate_extraction_quality(extraction_result)
         if not extraction_validation.passed:
             issues.extend(extraction_validation.issues)

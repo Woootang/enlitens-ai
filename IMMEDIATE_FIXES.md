@@ -3,7 +3,7 @@
 ## 🚨 Priority 1: Fix Foreman AI (Can Fix NOW)
 
 ### Problem
-Foreman AI using qwen3:32b can't run properly alongside main processing (both need ~18GB, you only have 25GB total).
+Foreman AI using qwen2.5-32b-instruct-q4_k_m can't run properly alongside main processing (both need ~18GB, you only have 25GB total).
 
 ### Quick Solution: Use Groq Free API (Recommended)
 
@@ -36,7 +36,7 @@ class ForemanAI:
         else:
             self.ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
             self.client = httpx.AsyncClient(timeout=30.0)
-            logger.info("🏠 Foreman AI using local Ollama")
+            logger.info("🏠 Foreman AI using local vLLM")
 
     async def analyze_query(self, query: str, context: Dict[str, Any]) -> str:
         status = processing_state.get_current_status()
@@ -69,7 +69,7 @@ You are monitoring the multi-agent pipeline. Provide helpful, concise analysis."
                 logger.error(f"Groq API error: {e}")
                 return f"⚠️ Groq API error: {str(e)}"
         else:
-            # Fallback to Ollama (existing code)
+            # Fallback to local vLLM (existing code)
             try:
                 response = await self.client.post(
                     f"{self.ollama_url}/api/generate",
@@ -83,17 +83,17 @@ You are monitoring the multi-agent pipeline. Provide helpful, concise analysis."
                 )
                 if response.status_code == 200:
                     data = response.json()
-                    return data.get("response", "No response from Ollama")
-                return f"❌ Ollama error: {response.status_code}"
+                    return data.get("response", "No response from vLLM")
+                return f"❌ vLLM error: {response.status_code}"
             except Exception as e:
-                logger.error(f"Ollama error: {e}")
-                return f"❌ Ollama unavailable: {str(e)}"
+                logger.error(f"vLLM error: {e}")
+                return f"❌ vLLM unavailable: {str(e)}"
 ```
 
 **Benefits**:
 - ✅ FREE forever (Groq's free tier is generous)
 - ✅ FAST (~300 tokens/second - instant responses)
-- ✅ HIGH QUALITY (Llama 3.1 70B beats qwen3:32b)
+- ✅ HIGH QUALITY (Llama 3.1 70B beats qwen2.5-32b)
 - ✅ NO VRAM USAGE (all cloud-based)
 - ✅ Fallback to local if API fails
 
@@ -138,7 +138,7 @@ In `src/synthesis/ollama_client.py`, create a new method:
 async def extract_citations_two_stage(
     self,
     document_text: str,
-    model: str = "qwen3:32b",
+    model: str = "qwen2.5-32b-instruct-q4_k_m",
     num_citations: int = 5
 ) -> List[str]:
     """
@@ -304,7 +304,7 @@ async def generate_structured_response_with_feedback(
 
 ## 🚨 Priority 3: Speed Up Processing
 
-### Quick Win: Enable Ollama Parallelization
+### Quick Win: Enable vLLM Parallelization
 
 In your main processing loop, allow multiple documents simultaneously:
 

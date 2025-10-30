@@ -30,7 +30,10 @@ echo ""
 echo -e "${BLUE}WebSocket endpoint:${NC}"
 echo -e "   ${GREEN}ws://localhost:8765/ws${NC}"
 echo ""
+echo -e "${BLUE}Foreman health endpoint:${NC}"
+echo -e "   ${GREEN}http://localhost:8765/api/foreman/health${NC}"
+echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop the server${NC}"
 echo ""
 
-python3 monitoring_server.py --host 0.0.0.0 --port 8765
+python3 monitoring_server_enhanced.py --host 0.0.0.0 --port 8765

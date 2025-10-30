@@ -21,7 +21,7 @@ class ScienceExtractionAgent(BaseAgent):
         super().__init__(
             name="ScienceExtraction",
             role="Scientific Content Extraction",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.ollama_client = None
         self.self_consistency_temperatures = [0.1, 0.2, 0.3]

@@ -57,8 +57,8 @@ class DocumentProcessor:
                  pdf_input_dir: str = "./enlitens_corpus/input_pdfs",
                  output_dir: str = "./enlitens_corpus/output",
                  cache_dir: str = "./enlitens_corpus/cache_markdown",
-                 ollama_url: str = "http://localhost:11434",
-                 ollama_model: str = "qwen3:32b"):
+                 ollama_url: str = "http://localhost:8000/v1",
+                 ollama_model: str = "qwen2.5-32b-instruct-q4_k_m"):
         
         self.pdf_input_dir = Path(pdf_input_dir)
         self.output_dir = Path(output_dir)
@@ -81,6 +81,8 @@ class DocumentProcessor:
         # Initialize knowledge base
         self.knowledge_base_path = self.output_dir / "enlitens-knowledge-core.json"
         self.knowledge_base = self._load_knowledge_base()
+        
+        logger.info("DocumentProcessor initialised with vLLM backend")
 
         # Observability
         self.observability = get_observability()
@@ -237,6 +239,11 @@ class DocumentProcessor:
             synthesis_perf = time.perf_counter()
             logger.info("Stage 3: AI Synthesis", extra={"processing_stage": "synthesis"})
             if not self.ollama_client.is_available():
+                logger.error("vLLM inference service is not available")
+                return False, None, "vLLM inference service is not available"
+            
+            synthesis_result = self.synthesizer.synthesize(extraction_result)
+            
                 self.observability.record_stage_timing(
                     document_id,
                     "AI Synthesis",
@@ -461,7 +468,7 @@ class DocumentProcessor:
         # Create processing metadata
         processing_metadata = ProcessingMetadata(
             extraction_method="hybrid_docling_marker",
-            synthesis_method="qwen3_32b",
+            synthesis_method="qwen2.5_32b_vllm",
             quality_scores={
                 'extraction': extraction_result.get('quality_score', 0.0),
                 'entity_extraction': 0.9,
@@ -643,7 +650,7 @@ class DocumentProcessor:
             'knowledge_base_path': str(self.knowledge_base_path),
             'knowledge_base_exists': self.knowledge_base_path.exists(),
             'total_documents': len(self.knowledge_base.documents),
-            'ollama_available': self.ollama_client.is_available(),
+            'vllm_available': self.ollama_client.is_available(),
             'model_manager_status': {
                 'loaded_models': self.model_manager.list_loaded_models(),
                 'memory_usage': self.model_manager.get_memory_usage()

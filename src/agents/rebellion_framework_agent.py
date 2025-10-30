@@ -17,7 +17,7 @@ class RebellionFrameworkAgent(BaseAgent):
         super().__init__(
             name="RebellionFramework",
             role="Rebellion Framework Application",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.ollama_client = None
 

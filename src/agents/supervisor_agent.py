@@ -47,7 +47,7 @@ class SupervisorAgent(BaseAgent):
         super().__init__(
             name="EnlitensSupervisor",
             role="Multi-Agent System Orchestrator",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.agents: Dict[str, BaseAgent] = {}
         self.processing_history: List[Dict[str, Any]] = []
