@@ -28,14 +28,14 @@ echo "🔥 GPU Status:"
 nvidia-smi --query-gpu=name,memory.total,memory.used,temperature.gpu --format=csv,noheader
 echo ""
 
-# Check Ollama status
-echo "🤖 Checking Ollama..."
-if curl -s http://localhost:11434/api/tags > /dev/null; then
-    echo "✅ Ollama is running"
+# Check vLLM status
+echo "🤖 Checking vLLM API..."
+if curl -s http://localhost:8000/v1/models > /dev/null; then
+    echo "✅ vLLM server is running"
     echo "📦 Available models:"
-    curl -s http://localhost:11434/api/tags | python3 -c "import sys,json; [print(f\"   - {m['name']}\") for m in json.load(sys.stdin)['models']]"
+    curl -s http://localhost:8000/v1/models | python3 -c "import sys,json; [print(f\"   - {m['id']}\") for m in json.load(sys.stdin)['data']]"
 else
-    echo "❌ Ollama is not responding!"
+    echo "❌ vLLM inference service is not responding!"
     exit 1
 fi
 

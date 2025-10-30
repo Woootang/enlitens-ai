@@ -28,7 +28,7 @@ class FounderVoiceAgent(BaseAgent):
         super().__init__(
             name="FounderVoiceAgent",
             role="Liz Wooten Voice and Brand Integration Specialist",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.ollama_client: Optional[OllamaClient] = None
 
@@ -82,6 +82,22 @@ class FounderVoiceAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Failed to initialize Founder Voice Agent: {e}")
             return False
+
+    async def _structured_generation(
+        self,
+        prompt: str,
+        response_model,
+        context: Dict[str, Any],
+        suffix: str,
+        **kwargs,
+    ):
+        cache_kwargs = self._cache_kwargs(context, suffix=suffix)
+        return await self.ollama_client.generate_structured_response(
+            prompt=prompt,
+            response_model=response_model,
+            **kwargs,
+            **cache_kwargs,
+        )
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -212,12 +228,14 @@ Each list must have 3-5 items. Preserve Liz's voice. Content:
 Respond with valid JSON only. DO NOT include social_proof field (removed for FTC compliance).
 """
             try:
-                structured = await self.ollama_client.generate_structured_response(
+                structured = await self._structured_generation(
                     prompt=structuring_prompt,
                     response_model=MarketingContent,
+                    context=context,
+                    suffix="founder_marketing_structured",
                     temperature=0.2,
                     max_retries=3,
-                    use_cot_prompt=False  # Creative marketing content - no CoT
+                    use_cot_prompt=False,  # Creative marketing content - no CoT
                 )
             except Exception as err:
                 logger.error("Founder structured fallback failed: %s", err)
@@ -306,12 +324,14 @@ Position Enlitens as the neuroscience alternative to traditional therapy.
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
-            response = await self.ollama_client.generate_structured_response(
+            response = await self._structured_generation(
                 prompt=prompt,
                 response_model=SEOContent,
+                context=context,
+                suffix="founder_seo",
                 temperature=0.3,
                 max_retries=3,
-                use_cot_prompt=False  # Creative SEO content - no CoT
+                use_cot_prompt=False,
             )
 
             return response or SEOContent()
@@ -385,12 +405,14 @@ Use Liz's direct, authentic voice. Ground everything in neuroscience. Address re
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
-            response = await self.ollama_client.generate_structured_response(
+            response = await self._structured_generation(
                 prompt=prompt,
                 response_model=WebsiteCopy,
+                context=context,
+                suffix="founder_website",
                 temperature=0.6,  # Research optimal for creative content (lowered from 0.7)
                 max_retries=3,
-                use_cot_prompt=False  # Creative website copy - no CoT
+                use_cot_prompt=False,
             )
 
             return response or WebsiteCopy()
@@ -487,13 +509,15 @@ Use Liz's rebellious, direct voice. Ground everything in neuroscience. Make it s
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
-            response = await self.ollama_client.generate_structured_response(
+            response = await self._structured_generation(
                 prompt=prompt,
                 response_model=BlogContent,
+                context=context,
+                suffix="founder_blog",
                 temperature=0.6,  # LOWERED from 0.65: Research optimal for creative content
                 max_retries=3,
-                use_cot_prompt=False,  # Creative blog content - no CoT needed
-                validation_context={'source_text': document_text}  # CRITICAL: Enable citation verification
+                use_cot_prompt=False,
+                validation_context={'source_text': document_text},  # CRITICAL: Enable citation verification
             )
 
             return response or BlogContent()
@@ -571,12 +595,14 @@ Write as Liz - conversational, direct, and caring. Balance education with empath
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
-            response = await self.ollama_client.generate_structured_response(
+            response = await self._structured_generation(
                 prompt=prompt,
                 response_model=SocialMediaContent,
+                context=context,
+                suffix="founder_social",
                 temperature=0.6,  # Higher creativity for social media
                 max_retries=3,
-                use_cot_prompt=False  # Creative social media - no CoT
+                use_cot_prompt=False,
             )
 
             return response or SocialMediaContent()
@@ -656,12 +682,14 @@ Focus on content that directly addresses ADHD, anxiety, trauma challenges and dr
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
 
-            response = await self.ollama_client.generate_structured_response(
+            response = await self._structured_generation(
                 prompt=prompt,
                 response_model=ContentCreationIdeas,
+                context=context,
+                suffix="founder_ideas",
                 temperature=0.6,
                 max_retries=3,
-                use_cot_prompt=False  # Creative content ideas - no CoT
+                use_cot_prompt=False,
             )
 
             return response or ContentCreationIdeas()

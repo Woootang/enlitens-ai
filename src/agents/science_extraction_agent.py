@@ -3,10 +3,14 @@ Science Extraction Agent - Extracts scientific findings and neuroscience content
 """
 
 import logging
-from typing import Dict, Any
+import math
+from collections import Counter
+from typing import Any, Dict, List, Tuple
+
 from .base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient
 from src.models.enlitens_schemas import ResearchContent
+from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
+from src.synthesis.ollama_client import OllamaClient
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +21,11 @@ class ScienceExtractionAgent(BaseAgent):
         super().__init__(
             name="ScienceExtraction",
             role="Scientific Content Extraction",
-            model="qwen3:32b"
+            model="qwen2.5-32b-instruct-q4_k_m"
         )
         self.ollama_client = None
+        self.self_consistency_temperatures = [0.1, 0.2, 0.3]
+        self.vote_threshold_ratio = 0.5
 
     async def initialize(self) -> bool:
         """Initialize the science extraction agent."""
@@ -40,6 +46,17 @@ class ScienceExtractionAgent(BaseAgent):
             # Use more text for better extraction
             text_excerpt = document_text[:8000] if len(document_text) > 8000 else document_text
 
+            few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
+                task="science_extraction",
+                query=text_excerpt,
+                k=2,
+            )
+
+            exemplars = (
+                "FEW-SHOT EXEMPLARS (follow citation style and refusal patterns):\n"
+                f"{few_shot_block}\n\n" if few_shot_block else ""
+            )
+
             prompt = f"""
 You are a neuroscience research analyst extracting comprehensive scientific content from academic papers.
 
@@ -52,10 +69,11 @@ STRICT RULES:
 ✗ DO NOT add information from your training data
 ✗ DO NOT approximate numbers - use exact figures from the text
 
+{exemplars}
 DOCUMENT TEXT:
 {text_excerpt}
 
-Extract ALL research content from this document. Be thorough but accurate - only include what is explicitly stated or can be directly inferred from the text.
+Extract ALL research content from this document. Be thorough but accurate - only include what is explicitly stated or can be directly inferred from the text. If a required field cannot be filled because the evidence is missing, respond "Refusal: insufficient grounding in provided sources."
 
 Generate content for ALL fields below:
 
@@ -93,24 +111,100 @@ Return as JSON with these EXACT field names:
 {{"findings": [list], "statistics": [list], "methodologies": [list], "limitations": [list], "future_directions": [list], "implications": [list], "citations": [list], "references": [list]}}
 """
 
+            cache_kwargs = self._cache_kwargs(context)
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ResearchContent,
                 temperature=0.3,  # LOWERED from 0.6: Research shows 0.3 optimal for factual extraction
-                max_retries=3
+                max_retries=3,
+                **cache_kwargs,
             )
+            samples = await self._run_self_consistency_sampling(prompt)
 
-            if result:
+            if samples:
+                aggregated, vote_stats = self._aggregate_samples(samples)
                 return {
-                    "research_content": result.model_dump(),
-                    "extraction_quality": "high"
+                    "research_content": aggregated,
+                    "extraction_quality": "high",
+                    "self_consistency": vote_stats,
                 }
-            else:
-                return {"research_content": ResearchContent().model_dump()}
+
+            return {"research_content": ResearchContent().model_dump()}
 
         except Exception as e:
             logger.error(f"Science extraction failed: {e}")
             return {"research_content": ResearchContent().model_dump()}
+
+    async def _run_self_consistency_sampling(self, prompt: str) -> List[ResearchContent]:
+        """Sample multiple generations to improve factual reliability."""
+
+        samples: List[ResearchContent] = []
+        for temperature in self.self_consistency_temperatures:
+            result = await self.ollama_client.generate_structured_response(
+                prompt=prompt,
+                response_model=ResearchContent,
+                temperature=temperature,
+                max_retries=3,
+                enforce_grammar=True,
+            )
+            if result:
+                samples.append(result)
+            else:
+                logger.debug(
+                    "ScienceExtraction self-consistency sample failed at temperature %.2f",
+                    temperature,
+                )
+        return samples
+
+    def _aggregate_samples(
+        self, samples: List[ResearchContent]
+    ) -> Tuple[Dict[str, List[str]], Dict[str, Any]]:
+        """Aggregate list outputs using majority voting."""
+
+        if not samples:
+            return ResearchContent().model_dump(), {"num_samples": 0}
+
+        sample_dicts = [sample.model_dump() for sample in samples]
+        vote_threshold = max(1, math.ceil(len(samples) * self.vote_threshold_ratio))
+        aggregated: Dict[str, List[str]] = {key: [] for key in sample_dicts[0].keys()}
+        field_votes: Dict[str, Dict[str, int]] = {}
+
+        for field in aggregated:
+            counter: Counter[str] = Counter()
+            original_map: Dict[str, str] = {}
+            for sample in sample_dicts:
+                for item in sample.get(field, []) or []:
+                    normalized = self._normalize_value(item)
+                    counter[normalized] += 1
+                    original_map.setdefault(normalized, item)
+
+            selected = [
+                original_map[key]
+                for key, count in counter.most_common()
+                if count >= vote_threshold
+            ]
+
+            if not selected:
+                richest_sample = max(
+                    sample_dicts,
+                    key=lambda sample: len(sample.get(field, []) or []),
+                )
+                selected = richest_sample.get(field, []) or []
+
+            aggregated[field] = selected
+            field_votes[field] = dict(counter)
+
+        return aggregated, {
+            "num_samples": len(samples),
+            "vote_threshold": vote_threshold,
+            "field_vote_counts": field_votes,
+        }
+
+    @staticmethod
+    def _normalize_value(value: str) -> str:
+        if not isinstance(value, str):
+            return str(value)
+        return " ".join(value.lower().split())
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the extracted scientific content."""

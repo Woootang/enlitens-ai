@@ -20,6 +20,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+from src.monitoring.observability import get_observability
+
 
 @dataclass
 class SystemMetrics:
@@ -88,14 +90,17 @@ class MetricsCollector:
         self.system_metrics: List[SystemMetrics] = []
         self.processing_metrics: List[ProcessingMetrics] = []
         self.quality_metrics: List[QualityMetrics] = []
-        
+
         # Performance tracking
         self.start_time = None
         self.documents_processed = 0
         self.total_processing_time = 0.0
         self.quality_scores = []
         self.errors = []
-        
+
+        # Observability bridge
+        self.observability = get_observability()
+
         logger.info("MetricsCollector initialized")
     
     def start_monitoring(self):
@@ -155,6 +160,10 @@ class MetricsCollector:
             )
             
             self.system_metrics.append(metrics)
+            try:
+                self.observability.record_system_metrics(asdict(metrics))
+            except Exception as exc:
+                logger.debug(f"Failed to push system metrics to observability: {exc}")
             return metrics
             
         except Exception as e:
@@ -197,7 +206,27 @@ class MetricsCollector:
             error_rate=error_rate,
             processing_time_seconds=processing_time
         )
-        
+
+        try:
+            payload = {"stage": "processing", **asdict(metrics)}
+            self.observability.record_quality_metrics(document_id, payload)
+            if not success and error:
+                self.observability.emit_alert(
+                    "Document processing error",
+                    "error",
+                    error,
+                    {"document_id": document_id},
+                )
+            if error_rate > 0.2 and self.documents_processed >= 3:
+                self.observability.emit_alert(
+                    "Error rate spike",
+                    "warning",
+                    f"Error rate reached {error_rate:.2%}",
+                    {"documents_processed": self.documents_processed},
+                )
+        except Exception as exc:
+            logger.debug(f"Failed to forward processing metrics: {exc}")
+
         self.processing_metrics.append(metrics)
         return metrics
     
@@ -319,7 +348,7 @@ class MetricsCollector:
         if error_types.get('memory', 0) > 0:
             recommendations.append("Consider reducing batch size or model memory usage")
         if error_types.get('ollama', 0) > 0:
-            recommendations.append("Check Ollama service status and restart if needed")
+            recommendations.append("Check vLLM service status and restart if needed")
         if error_types.get('extraction', 0) > 0:
             recommendations.append("Review PDF quality and extraction parameters")
         

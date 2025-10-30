@@ -1,484 +1,796 @@
-// Enlitens AI Monitor - Client-Side Application
+const { useState, useEffect, useMemo, useRef } = React;
 
-// Global State
-let ws = null;
-let isPaused = false;
-let logs = [];
-let stats = {
-    totalLogs: 0,
-    errors: 0,
-    warnings: 0,
-    infos: 0,
-    debugs: 0
+const QUICK_REPLIES = [
+  "Current pipeline health?",
+  "Summarize LangFuse traces",
+  "Any hallucination alerts today?",
+  "Cost outlook for this batch",
+  "Show latest latency anomalies",
+];
+
+const NAV_ITEMS = [
+  { id: "logs", label: "Live Logs", icon: "📋" },
+  { id: "quality", label: "Quality & Timeline", icon: "📊" },
+  { id: "foreman", label: "Foreman AI", icon: "🏗️" },
+];
+
+const LEVEL_CLASS = {
+  DEBUG: "debug",
+  INFO: "info",
+  WARNING: "warning",
+  ERROR: "error",
+  CRITICAL: "error",
 };
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initializing Enlitens AI Monitor...');
-    setupWebSocket();
-    setupEventListeners();
-    setupViewSwitching();
-    initializeWelcomeContent();
-});
+function formatTime(ts) {
+  if (!ts) return "--";
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return ts;
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
 
-// WebSocket Connection
-function setupWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+const Header = ({ theme, onThemeChange, motionReduced, onMotionChange, connection }) => {
+  const connectionLabel =
+    connection === "connected" ? "Streaming" : connection === "error" ? "Error" : "Connecting";
+  return (
+    <header className="dashboard-header">
+      <div className="header-left">
+        <div className="brand-mark">⚡️</div>
+        <div className="brand-title">
+          <h1>Enlitens AI Control Deck</h1>
+          <span>Ops · Observability · Agents</span>
+        </div>
+      </div>
+      <div className="control-cluster">
+        <div className={`connection-indicator ${connection === "connected" ? "connected" : ""}`}>
+          <span className="dot" />
+          <span>{connectionLabel}</span>
+        </div>
+        <div className="toggle-group">
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={theme === "dark"}
+              onChange={() => onThemeChange(theme === "dark" ? "light" : "dark")}
+            />
+            <span>{theme === "dark" ? "🌙 Dark" : "☀️ Light"}</span>
+          </label>
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={motionReduced}
+              onChange={() => onMotionChange(!motionReduced)}
+            />
+            <span>{motionReduced ? "🧘 Reduced Motion" : "⚡ Full Motion"}</span>
+          </label>
+        </div>
+      </div>
+    </header>
+  );
+};
 
-    console.log(`Connecting to WebSocket: ${wsUrl}`);
+const Sidebar = ({
+  currentView,
+  onChangeView,
+  stats,
+  onClearLogs,
+  onTogglePause,
+  isPaused,
+}) => (
+  <aside className="sidebar">
+    <section className="nav-section">
+      <h2>Navigation</h2>
+      <div className="nav-menu">
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.id}
+            className={`nav-button ${currentView === item.id ? "active" : ""}`}
+            onClick={() => onChangeView(item.id)}
+          >
+            <span>{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+    <section className="nav-section">
+      <h2>Pulse</h2>
+      <div className="metric-stack">
+        <div className="metric-card">
+          <div className="label">Total Logs</div>
+          <div className="value">{stats.totalLogs}</div>
+        </div>
+        <div className="metric-card">
+          <div className="label">Errors</div>
+          <div className="value" style={{ color: "var(--color-danger)" }}>{stats.errors}</div>
+        </div>
+        <div className="metric-card">
+          <div className="label">Warnings</div>
+          <div className="value" style={{ color: "var(--color-warning)" }}>{stats.warnings}</div>
+        </div>
+        <div className="metric-card">
+          <div className="label">Quality Score</div>
+          <div className="value" style={{ color: "var(--color-success)" }}>{stats.qualityScore}</div>
+        </div>
+      </div>
+    </section>
+    <section className="nav-section">
+      <h2>Controls</h2>
+      <div className="metric-stack">
+        <button className="control-button" onClick={onClearLogs}>
+          🧹 Clear Logs
+        </button>
+        <button className="control-button" onClick={onTogglePause}>
+          {isPaused ? "▶️ Resume Stream" : "⏸️ Pause Stream"}
+        </button>
+      </div>
+    </section>
+  </aside>
+);
 
-    ws = new WebSocket(wsUrl);
+const LogsView = ({ logs, levelFilter, onLevelChange, searchTerm, onSearchChange }) => {
+  const filteredLogs = useMemo(() => {
+    return logs.filter((entry) => {
+      if (levelFilter !== "all" && entry.level !== levelFilter) {
+        return false;
+      }
+      if (searchTerm && !entry.message.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  }, [logs, levelFilter, searchTerm]);
 
-    ws.onopen = () => {
-        console.log('✅ WebSocket connected');
-        updateConnectionStatus(true);
-        showToast('Connected to monitoring server', 'success');
+  return (
+    <div className="main-panel">
+      <div className="view-toolbar">
+        <h2>Live Processing Stream</h2>
+        <div className="filter-group">
+          <select value={levelFilter} onChange={(e) => onLevelChange(e.target.value)}>
+            <option value="all">All Levels</option>
+            <option value="DEBUG">Debug</option>
+            <option value="INFO">Info</option>
+            <option value="WARNING">Warning</option>
+            <option value="ERROR">Error</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+          <input
+            type="text"
+            value={searchTerm}
+            placeholder="Search logs"
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="log-stream">
+        {filteredLogs.length === 0 ? (
+          <div className="empty-state">Awaiting telemetry…</div>
+        ) : (
+          filteredLogs.map((entry, idx) => (
+            <div key={`${entry.timestamp}-${idx}`} className={`log-entry ${LEVEL_CLASS[entry.level] || "info"}`}>
+              <div className="meta">
+                <span className="level">{entry.level}</span>
+                <span>{formatTime(entry.timestamp)}</span>
+              </div>
+              <div>{entry.message}</div>
+              {entry.document_id && (
+                <div className="meta">Document: {entry.document_id}</div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+const GanttTimeline = ({ events, theme }) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const svgEl = ref.current;
+    if (!svgEl) return;
+    const svg = d3.select(svgEl);
+    svg.selectAll("*").remove();
+    if (!events.length) return;
+
+    const parsed = events
+      .map((event) => ({
+        ...event,
+        startDate: new Date(event.start),
+        endDate: new Date(event.end),
+      }))
+      .filter((event) => !Number.isNaN(event.startDate.getTime()) && !Number.isNaN(event.endDate.getTime()))
+      .sort((a, b) => a.startDate - b.startDate);
+
+    if (!parsed.length) return;
+
+    const width = svgEl.clientWidth || 720;
+    const laneHeight = 28;
+    const margin = { top: 24, right: 24, bottom: 40, left: 180 };
+    const height = Math.max(parsed.length * laneHeight + margin.top + margin.bottom, 220);
+
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const xScale = d3
+      .scaleTime()
+      .domain([d3.min(parsed, (d) => d.startDate), d3.max(parsed, (d) => d.endDate)])
+      .range([0, innerWidth])
+      .nice();
+
+    const yDomain = Array.from(new Set(parsed.map((d) => `${d.agent} · ${d.stage}`)));
+    const yScale = d3.scaleBand().domain(yDomain).range([0, innerHeight]).padding(0.2);
+
+    const chart = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    chart
+      .append("g")
+      .attr("transform", `translate(0, ${innerHeight})`)
+      .call(d3.axisBottom(xScale).ticks(5).tickSizeOuter(0))
+      .call((g) => g.selectAll("path").attr("stroke", "var(--color-border)"))
+      .call((g) => g.selectAll("line").attr("stroke", "var(--color-gridline)"));
+
+    chart
+      .append("g")
+      .call(d3.axisLeft(yScale).tickSize(0))
+      .selectAll("text")
+      .attr("fill", "var(--color-text-muted)")
+      .style("font-size", "0.7rem");
+
+    chart
+      .selectAll("rect")
+      .data(parsed)
+      .enter()
+      .append("rect")
+      .attr("x", (d) => xScale(d.startDate))
+      .attr("y", (d) => yScale(`${d.agent} · ${d.stage}`))
+      .attr("width", (d) => Math.max(2, xScale(d.endDate) - xScale(d.startDate)))
+      .attr("height", yScale.bandwidth())
+      .attr("rx", 6)
+      .attr("fill", (d) => {
+        if (d.status === "error") return "var(--color-danger)";
+        if (d.status === "warning") return "var(--color-warning)";
+        return "var(--color-primary)";
+      })
+      .attr("opacity", 0.85);
+
+    chart
+      .selectAll("text.duration")
+      .data(parsed)
+      .enter()
+      .append("text")
+      .attr("class", "duration")
+      .attr("x", (d) => xScale(d.endDate) + 6)
+      .attr("y", (d) => (yScale(`${d.agent} · ${d.stage}`) || 0) + yScale.bandwidth() / 1.4)
+      .text((d) => `${((d.endDate - d.startDate) / 1000).toFixed(1)}s`)
+      .attr("fill", "var(--color-text-muted)")
+      .style("font-size", "0.65rem");
+  }, [events, theme]);
+
+  return <svg className="gantt-chart" ref={ref} />;
+};
+
+const CitationGraph = ({ data }) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const svgEl = ref.current;
+    if (!svgEl) return;
+    const svg = d3.select(svgEl);
+    svg.selectAll("*").remove();
+
+    const nodes = (data.nodes || []).map((node) => ({ ...node }));
+    const links = (data.edges || []).map((edge) => ({ ...edge }));
+    if (!nodes.length) return;
+
+    const width = svgEl.clientWidth || 720;
+    const height = svgEl.clientHeight || 320;
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+    const colorByType = {
+      document: "var(--color-primary)",
+      concept: "var(--color-success)",
+      finding: "var(--color-accent)",
     };
 
-    ws.onmessage = (event) => {
-        try {
-            const message = JSON.parse(event.data);
-            handleMessage(message);
-        } catch (error) {
-            console.error('Error parsing message:', error);
-        }
-    };
+    const simulation = d3
+      .forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id((d) => d.id).distance(120).strength(0.4))
+      .force("charge", d3.forceManyBody().strength(-240))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(48));
 
-    ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
-        updateConnectionStatus(false);
-        showToast('Connection error', 'error');
-    };
+    const link = svg
+      .append("g")
+      .attr("stroke", "var(--color-border)")
+      .attr("stroke-width", 1.2)
+      .selectAll("line")
+      .data(links)
+      .enter()
+      .append("line")
+      .attr("stroke-opacity", 0.6);
 
-    ws.onclose = () => {
-        console.log('🔌 WebSocket disconnected');
-        updateConnectionStatus(false);
-        showToast('Disconnected from server', 'warning');
+    const node = svg
+      .append("g")
+      .selectAll("g")
+      .data(nodes)
+      .enter()
+      .append("g")
+      .call(
+        d3
+          .drag()
+          .on("start", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on("drag", (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on("end", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          })
+      );
 
-        // Attempt reconnection after 3 seconds
+    node
+      .append("circle")
+      .attr("r", (d) => (d.type === "document" ? 16 : 12))
+      .attr("fill", (d) => colorByType[d.type] || "var(--color-primary)")
+      .attr("fill-opacity", 0.85);
+
+    node
+      .append("text")
+      .text((d) => d.label || d.id)
+      .attr("x", 20)
+      .attr("y", 5)
+      .attr("fill", "var(--color-text)")
+      .style("font-size", "0.65rem");
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", (d) => d.source.x)
+        .attr("y1", (d) => d.source.y)
+        .attr("x2", (d) => d.target.x)
+        .attr("y2", (d) => d.target.y);
+
+      node.attr("transform", (d) => `translate(${d.x}, ${d.y})`);
+    });
+
+    return () => simulation.stop();
+  }, [data]);
+
+  return <svg className="citation-network" ref={ref} />;
+};
+
+const QualityView = ({ qualityLog, timeline, citationGraph, ragEvents, systemStats, theme }) => {
+  const latestQuality = qualityLog.length ? qualityLog[qualityLog.length - 1] : null;
+  const latestRag = ragEvents.length ? ragEvents[ragEvents.length - 1] : null;
+  const qualityScore = latestQuality?.metrics?.quality_score ?? latestQuality?.metrics?.overall_score;
+  const synthesisScore = latestQuality?.metrics?.synthesis_quality;
+  const extractionScore = latestQuality?.metrics?.extraction_quality;
+  const ragScore = latestRag?.score;
+
+  return (
+    <div className="main-panel">
+      <div className="view-toolbar">
+        <h2>Quality Metrics & RAG Oversight</h2>
+      </div>
+      <div className="metrics-grid">
+        <div className="metrics-card">
+          <div className="heading">Document Quality</div>
+          <div className="stat">{qualityScore ? qualityScore.toFixed(2) : "--"}</div>
+          <p>Latest aggregate score across extraction, entities, and synthesis.</p>
+        </div>
+        <div className="metrics-card">
+          <div className="heading">Synthesis Confidence</div>
+          <div className="stat">{synthesisScore ? synthesisScore.toFixed(2) : "--"}</div>
+          <p>LangFuse-aligned trace quality from the last span.</p>
+        </div>
+        <div className="metrics-card">
+          <div className="heading">Extraction Fidelity</div>
+          <div className="stat">{extractionScore ? extractionScore.toFixed(2) : "--"}</div>
+          <p>Docling + Marker extraction quality indicator.</p>
+        </div>
+        <div className="metrics-card">
+          <div className="heading">RAG Grounding</div>
+          <div className="stat">{ragScore ? ragScore.toFixed(2) : "--"}</div>
+          <p>Phoenix RAG precision score from most recent synthesis.</p>
+        </div>
+        <div className="metrics-card">
+          <div className="heading">CPU Utilization</div>
+          <div className="stat">
+            {systemStats?.cpu_percent !== undefined ? `${systemStats.cpu_percent.toFixed(0)}%` : "--"}
+          </div>
+          <p>Realtime system load from the metrics collector.</p>
+        </div>
+        <div className="metrics-card">
+          <div className="heading">GPU Memory</div>
+          <div className="stat">
+            {systemStats?.gpu_memory_used_gb !== undefined
+              ? `${systemStats.gpu_memory_used_gb.toFixed(2)} GB`
+              : "--"}
+          </div>
+          <p>NVML-reported usage on the primary accelerator.</p>
+        </div>
+      </div>
+
+      <section className="gantt-wrapper">
+        <div className="section-heading">
+          <h3>Agent Gantt Timeline</h3>
+          <span>{timeline.length ? `${timeline.length} spans` : "Idle"}</span>
+        </div>
+        {timeline.length ? (
+          <GanttTimeline events={timeline.slice(-60)} theme={theme} />
+        ) : (
+          <div className="empty-state">Timeline will populate once the pipeline begins processing.</div>
+        )}
+      </section>
+
+      <section className="citation-graph">
+        <div className="section-heading">
+          <h3>Citation Network Graph</h3>
+          <span>
+            {citationGraph.nodes?.length ? `${citationGraph.nodes.length} nodes` : "Waiting for synthesis"}
+          </span>
+        </div>
+        {citationGraph.nodes?.length ? (
+          <CitationGraph data={citationGraph} />
+        ) : (
+          <div className="empty-state">Synthesis citations will appear after the first document completes.</div>
+        )}
+      </section>
+    </div>
+  );
+};
+
+const ForemanView = ({ messages, onSend, alerts }) => {
+  const [draft, setDraft] = useState("");
+  const streamRef = useRef(null);
+
+  useEffect(() => {
+    const el = streamRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!draft.trim()) return;
+    onSend(draft.trim());
+    setDraft("");
+  };
+
+  const latestAlerts = alerts.slice(-4).reverse();
+
+  return (
+    <div className="main-panel">
+      <div className="view-toolbar">
+        <h2>Foreman Ops Chat</h2>
+      </div>
+      <div className="foreman-console">
+        <div className="chat-panel">
+          <div className="chat-stream" ref={streamRef}>
+            {messages.length ? (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`chat-message ${message.role} ${message.streaming ? "streaming" : ""}`}
+                >
+                  {message.content || "…"}
+                </div>
+              ))
+            ) : (
+              <div className="empty-state">No chat yet. Ask Foreman for a situational update.</div>
+            )}
+          </div>
+          <div className="quick-replies">
+            {QUICK_REPLIES.map((reply) => (
+              <button key={reply} className="quick-reply" onClick={() => onSend(reply)}>
+                {reply}
+              </button>
+            ))}
+          </div>
+          <form className="chat-input" onSubmit={handleSubmit}>
+            <textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Ask Foreman for an ops update…"
+            />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+        <aside className="alert-panel">
+          <h3>Proactive Alerts</h3>
+          {latestAlerts.length ? (
+            latestAlerts.map((alert) => (
+              <div key={alert.id} className="alert-item">
+                <div>{alert.title}</div>
+                <div>{alert.details?.description || alert.details?.message || ""}</div>
+              </div>
+            ))
+          ) : (
+            <div className="empty-state">No active alerts. Foreman will surface them here.</div>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+};
+
+const AlertStack = ({ alerts }) => (
+  <div className="alert-stack">
+    {alerts.map((alert) => (
+      <div key={alert.id} className={`alert-card ${alert.severity || "info"}`}>
+        <div className="title">{alert.title}</div>
+        <div>{alert.details?.description || alert.details?.message || ""}</div>
+      </div>
+    ))}
+  </div>
+);
+
+const App = () => {
+  const [currentView, setCurrentView] = useState("logs");
+  const [logs, setLogs] = useState([]);
+  const [timeline, setTimeline] = useState([]);
+  const [qualityLog, setQualityLog] = useState([]);
+  const [ragEvents, setRagEvents] = useState([]);
+  const [citationGraph, setCitationGraph] = useState({ nodes: [], edges: [] });
+  const [alerts, setAlerts] = useState([]);
+  const [connection, setConnection] = useState("connecting");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
+  const [systemStats, setSystemStats] = useState(null);
+  const [foremanMessages, setForemanMessages] = useState([]);
+  const [theme, setTheme] = useState(() => localStorage.getItem("enlitens-theme") || "dark");
+  const [motionReduced, setMotionReduced] = useState(
+    () => (localStorage.getItem("enlitens-motion") || "full") === "reduced"
+  );
+
+  const wsRef = useRef(null);
+  const isPausedRef = useRef(isPaused);
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("enlitens-theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-motion", motionReduced ? "reduced" : "full");
+    localStorage.setItem("enlitens-motion", motionReduced ? "reduced" : "full");
+  }, [motionReduced]);
+
+  useEffect(() => {
+    const connect = () => {
+      const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
+      wsRef.current = socket;
+
+      socket.onopen = () => {
+        setConnection("connected");
+      };
+
+      socket.onclose = () => {
+        setConnection("disconnected");
         setTimeout(() => {
-            console.log('🔄 Attempting to reconnect...');
-            setupWebSocket();
-        }, 3000);
-    };
-}
+          if (wsRef.current === socket) {
+            connect();
+          }
+        }, 2000);
+      };
 
-// Handle incoming messages
-function handleMessage(message) {
-    if (message.type === 'log') {
-        handleLogMessage(message);
-    } else if (message.type === 'foreman_response') {
-        handleForemanResponse(message);
-    } else if (message.type === 'quality_update') {
-        handleQualityUpdate(message);
-    }
-}
+      socket.onerror = () => {
+        setConnection("error");
+      };
 
-// Handle log messages
-function handleLogMessage(logData) {
-    if (isPaused) return;
-
-    logs.push(logData);
-    stats.totalLogs++;
-
-    // Update stats based on level
-    switch (logData.level) {
-        case 'ERROR':
-        case 'CRITICAL':
-            stats.errors++;
-            break;
-        case 'WARNING':
-            stats.warnings++;
-            break;
-        case 'INFO':
-            stats.infos++;
-            break;
-        case 'DEBUG':
-            stats.debugs++;
-            break;
-    }
-
-    updateStats();
-    appendLogToUI(logData);
-
-    // Auto-scroll to bottom
-    const container = document.getElementById('logsContainer');
-    if (container.scrollHeight - container.scrollTop < container.clientHeight + 100) {
-        container.scrollTop = container.scrollHeight;
-    }
-}
-
-// Append log to UI
-function appendLogToUI(logData) {
-    const container = document.getElementById('logsContainer');
-
-    const logEntry = document.createElement('div');
-    logEntry.className = `log-entry ${logData.level}`;
-
-    const timestamp = new Date(logData.timestamp).toLocaleTimeString();
-
-    logEntry.innerHTML = `
-        <div class="log-header">
-            <span class="log-level ${logData.level}">${getLogIcon(logData.level)} ${logData.level}</span>
-            <span class="log-time">${timestamp}</span>
-        </div>
-        <div class="log-message">${escapeHtml(logData.message)}</div>
-        ${logData.agent_name ? `<div class="log-meta">Agent: ${logData.agent_name}</div>` : ''}
-    `;
-
-    // Remove welcome message if it exists
-    const welcome = container.querySelector('.log-entry.welcome');
-    if (welcome && stats.totalLogs > 0) {
-        welcome.remove();
-    }
-
-    container.appendChild(logEntry);
-
-    // Keep only last 500 logs in DOM
-    const entries = container.querySelectorAll('.log-entry');
-    if (entries.length > 500) {
-        entries[0].remove();
-    }
-}
-
-// Initialize dynamic content in static placeholders
-function initializeWelcomeContent() {
-    const welcomeTime = document.getElementById('welcomeLogTime');
-    if (welcomeTime) {
-        welcomeTime.textContent = new Date().toLocaleTimeString();
-    }
-
-    const foremanTime = document.getElementById('foremanWelcomeTime');
-    if (foremanTime) {
-        foremanTime.textContent = new Date().toLocaleTimeString();
-    }
-}
-
-// Get log level icon
-function getLogIcon(level) {
-    const icons = {
-        'DEBUG': '🔍',
-        'INFO': '✅',
-        'WARNING': '⚠️',
-        'ERROR': '❌',
-        'CRITICAL': '🚨'
-    };
-    return icons[level] || '•';
-}
-
-// Update connection status
-function updateConnectionStatus(connected) {
-    const statusIndicator = document.getElementById('connectionStatus');
-    const statusText = document.getElementById('statusText');
-    const pulse = statusIndicator.querySelector('.pulse');
-
-    if (connected) {
-        statusText.textContent = 'Connected';
-        pulse.classList.add('connected');
-    } else {
-        statusText.textContent = 'Disconnected';
-        pulse.classList.remove('connected');
-    }
-}
-
-// Update stats display
-function updateStats() {
-    document.getElementById('totalLogs').textContent = stats.totalLogs;
-    document.getElementById('totalErrors').textContent = stats.errors;
-    document.getElementById('totalWarnings').textContent = stats.warnings;
-
-    // Calculate quality score (simple heuristic)
-    const qualityScore = calculateQualityScore();
-    document.getElementById('qualityScore').textContent = `${qualityScore}%`;
-}
-
-// Calculate quality score
-function calculateQualityScore() {
-    if (stats.totalLogs === 0) return '--';
-
-    const errorWeight = 10;
-    const warningWeight = 5;
-
-    const deductions = (stats.errors * errorWeight) + (stats.warnings * warningWeight);
-    const score = Math.max(0, 100 - deductions);
-
-    return Math.round(score);
-}
-
-// Clear logs
-function clearLogs() {
-    if (confirm('Clear all logs? This cannot be undone.')) {
-        logs = [];
-        stats = {
-            totalLogs: 0,
-            errors: 0,
-            warnings: 0,
-            infos: 0,
-            debugs: 0
-        };
-
-        const container = document.getElementById('logsContainer');
-        container.innerHTML = `
-            <div class="log-entry welcome">
-                <div class="log-header">
-                    <span class="log-level">INFO</span>
-                    <span class="log-time">${new Date().toLocaleTimeString()}</span>
-                </div>
-                <div class="log-message">
-                    ✨ Logs cleared. Waiting for new messages...
-                </div>
-            </div>
-        `;
-
-        updateStats();
-        showToast('Logs cleared', 'info');
-    }
-}
-
-// Pause/Resume stream
-function pauseStream() {
-    isPaused = !isPaused;
-    const pauseText = document.getElementById('pauseText');
-    pauseText.textContent = isPaused ? 'Resume' : 'Pause';
-    showToast(isPaused ? 'Stream paused' : 'Stream resumed', 'info');
-}
-
-// Export logs
-function exportLogs() {
-    const dataStr = JSON.stringify(logs, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `enlitens_logs_${new Date().toISOString()}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-
-    showToast('Logs exported', 'success');
-}
-
-// Apply filters
-function applyFilters() {
-    const levelFilter = document.getElementById('levelFilter').value;
-    const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
-
-    const entries = document.querySelectorAll('.log-entry:not(.welcome)');
-    entries.forEach(entry => {
-        const level = entry.classList.contains('DEBUG') ? 'DEBUG' :
-                     entry.classList.contains('INFO') ? 'INFO' :
-                     entry.classList.contains('WARNING') ? 'WARNING' :
-                     entry.classList.contains('ERROR') ? 'ERROR' :
-                     entry.classList.contains('CRITICAL') ? 'CRITICAL' : '';
-
-        const text = entry.textContent.toLowerCase();
-
-        const levelMatch = levelFilter === 'all' || level === levelFilter;
-        const searchMatch = searchFilter === '' || text.includes(searchFilter);
-
-        entry.style.display = (levelMatch && searchMatch) ? 'block' : 'none';
-    });
-}
-
-// Send message to Foreman AI
-function sendMessage() {
-    const input = document.getElementById('chatInput');
-    const query = input.value.trim();
-
-    if (!query) return;
-
-    // Add user message to chat
-    addChatMessage('user', query);
-
-    // Send to server
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-            type: 'foreman_query',
-            query: query
-        }));
-    }
-
-    // Add thinking message
-    addChatMessage('foreman', '🤔 Analyzing your question...', true);
-
-    input.value = '';
-
-    // Simulate Foreman AI response (to be replaced with real AI)
-    setTimeout(() => {
-        generateForemanResponse(query);
-    }, 1500);
-}
-
-// Generate Foreman AI response
-function generateForemanResponse(query) {
-    // Remove thinking message
-    const messages = document.getElementById('chatMessages');
-    const thinking = messages.lastElementChild;
-    if (thinking && thinking.querySelector('.message-text').textContent.includes('Analyzing')) {
-        thinking.remove();
-    }
-
-    // Generate intelligent response based on query
-    let response = '';
-
-    if (query.toLowerCase().includes('status')) {
-        response = `Current processing status:\n\n` +
-                  `• Total logs: ${stats.totalLogs}\n` +
-                  `• Errors: ${stats.errors}\n` +
-                  `• Warnings: ${stats.warnings}\n` +
-                  `• Quality score: ${calculateQualityScore()}%\n\n` +
-                  `The system is ${stats.errors > 5 ? 'experiencing some issues' : 'running smoothly'}. ` +
-                  `${stats.errors > 0 ? 'I recommend checking the error logs for details.' : ''}`;
-    } else if (query.toLowerCase().includes('error')) {
-        const recentErrors = logs.filter(l => l.level === 'ERROR' || l.level === 'CRITICAL').slice(-3);
-        if (recentErrors.length > 0) {
-            response = `Recent errors detected:\n\n`;
-            recentErrors.forEach((err, i) => {
-                response += `${i + 1}. ${err.message}\n`;
-            });
-            response += `\nThese errors might indicate issues with data extraction or validation. Check the logs for more details.`;
-        } else {
-            response = `Good news! No errors have been detected in the recent processing. The system is operating cleanly.`;
+      socket.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          switch (payload.type) {
+            case "log":
+              if (isPausedRef.current) break;
+              setLogs((prev) => {
+                const next = [...prev, payload];
+                if (next.length > 600) next.shift();
+                return next;
+              });
+              break;
+            case "timeline":
+              setTimeline((prev) => [...prev.slice(-240), payload]);
+              break;
+            case "quality_metrics":
+              setQualityLog((prev) => [...prev.slice(-240), payload]);
+              break;
+            case "rag_metrics":
+              setRagEvents((prev) => [...prev.slice(-120), payload]);
+              break;
+            case "citation_graph":
+              setCitationGraph({ nodes: payload.nodes || [], edges: payload.edges || [] });
+              break;
+            case "system_metrics":
+              setSystemStats(payload.metrics || {});
+              break;
+            case "alert":
+              addAlert(payload);
+              break;
+            case "foreman_token":
+              setForemanMessages((prev) => {
+                const streamId = payload.stream_id || "foreman-stream";
+                const existingIndex = prev.findIndex((msg) => msg.stream_id === streamId);
+                if (existingIndex === -1) {
+                  return [
+                    ...prev,
+                    {
+                      id: streamId,
+                      role: "assistant",
+                      content: payload.token || "",
+                      streaming: true,
+                      stream_id: streamId,
+                    },
+                  ];
+                }
+                const next = [...prev];
+                next[existingIndex] = {
+                  ...next[existingIndex],
+                  content: (next[existingIndex].content || "") + (payload.token || ""),
+                  streaming: true,
+                };
+                return next;
+              });
+              break;
+            case "foreman_response":
+              setForemanMessages((prev) => {
+                const streamId = payload.stream_id || `foreman-${Date.now()}`;
+                const existingIndex = prev.findIndex((msg) => msg.stream_id === streamId);
+                if (existingIndex === -1) {
+                  return [
+                    ...prev,
+                    {
+                      id: streamId,
+                      role: "assistant",
+                      content: payload.response,
+                      streaming: false,
+                      stream_id: streamId,
+                      timestamp: payload.timestamp,
+                    },
+                  ];
+                }
+                const next = [...prev];
+                next[existingIndex] = {
+                  ...next[existingIndex],
+                  content: payload.response,
+                  streaming: false,
+                  timestamp: payload.timestamp,
+                };
+                return next;
+              });
+              break;
+            default:
+              break;
+          }
+        } catch (error) {
+          console.error("Failed to parse message", error);
         }
-    } else if (query.toLowerCase().includes('quality') || query.toLowerCase().includes('hallucination')) {
-        response = `Quality and hallucination prevention status:\n\n` +
-                  `• Citation verification: Active\n` +
-                  `• Chain-of-Thought prompts: Enabled\n` +
-                  `• Temperature optimization: 0.3 (factual) / 0.6 (creative)\n` +
-                  `• FTC compliance: Enforced\n` +
-                  `• Overall quality score: ${calculateQualityScore()}%\n\n` +
-                  `The hallucination prevention system is working as designed. All statistics require proper citations, and creative content is separated from factual extraction.`;
-    } else if (query.toLowerCase().includes('help')) {
-        response = `I can help you with:\n\n` +
-                  `• Checking processing status and metrics\n` +
-                  `• Analyzing errors and warnings\n` +
-                  `• Reviewing quality and hallucination prevention\n` +
-                  `• Explaining agent performance\n` +
-                  `• Troubleshooting issues\n\n` +
-                  `Try asking specific questions like:\n` +
-                  `"What's causing the errors?"\n` +
-                  `"How is quality looking?"\n` +
-                  `"Show me the processing stats"`;
-    } else {
-        response = `Based on the current processing data:\n\n` +
-                  `The system has processed ${stats.totalLogs} log entries with ${stats.errors} errors and ${stats.warnings} warnings. ` +
-                  `The quality score is ${calculateQualityScore()}%.\n\n` +
-                  `Is there something specific you'd like me to analyze?`;
-    }
+      };
+    };
 
-    addChatMessage('foreman', response);
-}
+    const addAlert = (alert) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const enriched = { ...alert, id };
+      setAlerts((prev) => [...prev, enriched]);
+      setTimeout(() => {
+        setAlerts((prev) => prev.filter((item) => item.id !== id));
+      }, 12000);
+    };
 
-// Add message to chat
-function addChatMessage(sender, text, isThinking = false) {
-    const messages = document.getElementById('chatMessages');
+    connect();
 
-    const message = document.createElement('div');
-    message.className = `message ${sender}`;
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
-    const avatar = sender === 'foreman' ? '🏗️' : '👤';
-    const name = sender === 'foreman' ? 'Foreman AI' : 'You';
-    const timestamp = new Date().toLocaleTimeString();
-
-    message.innerHTML = `
-        <div class="message-avatar">${avatar}</div>
-        <div class="message-content">
-            <div class="message-header">
-                <strong>${name}</strong>
-                <span class="message-time">${timestamp}</span>
-            </div>
-            <div class="message-text">${escapeHtml(text).replace(/\n/g, '<br>')}</div>
-        </div>
-    `;
-
-    messages.appendChild(message);
-    messages.scrollTop = messages.scrollHeight;
-}
-
-// Handle Foreman response from server
-function handleForemanResponse(data) {
-    // Remove thinking message
-    const messages = document.getElementById('chatMessages');
-    const thinking = messages.lastElementChild;
-    if (thinking && thinking.querySelector('.message-text').textContent.includes('Analyzing')) {
-        thinking.remove();
-    }
-
-    addChatMessage('foreman', data.response);
-}
-
-// Handle quality updates
-function handleQualityUpdate(data) {
-    // Update quality metrics in the Quality view
-    console.log('Quality update received:', data);
-    // TODO: Implement quality metrics visualization
-}
-
-// Setup event listeners
-function setupEventListeners() {
-    // Chat input enter key
-    const chatInput = document.getElementById('chatInput');
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-}
-
-// Setup view switching
-function setupViewSwitching() {
-    const navItems = document.querySelectorAll('.nav-item');
-    const views = document.querySelectorAll('.view');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            // Remove active class from all nav items
-            navItems.forEach(nav => nav.classList.remove('active'));
-
-            // Add active class to clicked item
-            item.classList.add('active');
-
-            // Hide all views
-            views.forEach(view => view.classList.remove('active'));
-
-            // Show selected view
-            const viewName = item.getAttribute('data-view') + 'View';
-            const targetView = document.getElementById(viewName);
-            if (targetView) {
-                targetView.classList.add('active');
-            }
-        });
-    });
-}
-
-// Show toast notification
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-
-    container.appendChild(toast);
-
-    // Auto-remove after 3 seconds
+  const addAlert = (alert) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const enriched = { ...alert, id };
+    setAlerts((prev) => [...prev, enriched]);
     setTimeout(() => {
-        toast.style.animation = 'slideInRight 0.3s ease reverse';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+      setAlerts((prev) => prev.filter((item) => item.id !== id));
+    }, 12000);
+  };
 
-// Escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+  const stats = useMemo(() => {
+    const errors = logs.filter((log) => log.level === "ERROR" || log.level === "CRITICAL").length;
+    const warnings = logs.filter((log) => log.level === "WARNING").length;
+    const totalLogs = logs.length;
+    const latestQuality = qualityLog.length ? qualityLog[qualityLog.length - 1] : null;
+    const qualityScore = latestQuality?.metrics?.quality_score ?? latestQuality?.metrics?.overall_score;
+    return {
+      totalLogs,
+      errors,
+      warnings,
+      qualityScore: qualityScore ? qualityScore.toFixed(2) : "--",
+    };
+  }, [logs, qualityLog]);
 
-// Export functions for inline onclick handlers
-window.clearLogs = clearLogs;
-window.pauseStream = pauseStream;
-window.exportLogs = exportLogs;
-window.applyFilters = applyFilters;
-window.sendMessage = sendMessage;
+  const handleClearLogs = () => setLogs([]);
+  const handleTogglePause = () => setIsPaused((prev) => !prev);
+
+  const sendForemanMessage = (message) => {
+    const trimmed = message.trim();
+    if (!trimmed) return;
+    const timestamp = new Date().toISOString();
+    setForemanMessages((prev) => [
+      ...prev,
+      { id: `user-${timestamp}`, role: "user", content: trimmed, streaming: false, timestamp },
+    ]);
+
+    const socket = wsRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "foreman_query", query: trimmed }));
+    } else {
+      addAlert({
+        title: "WebSocket disconnected",
+        severity: "warning",
+        details: { description: "Unable to send message to Foreman. Reconnecting…" },
+      });
+    }
+  };
+
+  return (
+    <div className="dashboard-shell">
+      <Header
+        theme={theme}
+        onThemeChange={setTheme}
+        motionReduced={motionReduced}
+        onMotionChange={setMotionReduced}
+        connection={connection}
+      />
+      <Sidebar
+        currentView={currentView}
+        onChangeView={setCurrentView}
+        stats={stats}
+        onClearLogs={handleClearLogs}
+        onTogglePause={handleTogglePause}
+        isPaused={isPaused}
+      />
+      {currentView === "logs" && (
+        <LogsView
+          logs={logs}
+          levelFilter={levelFilter}
+          onLevelChange={setLevelFilter}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+      )}
+      {currentView === "quality" && (
+        <QualityView
+          qualityLog={qualityLog}
+          timeline={timeline}
+          citationGraph={citationGraph}
+          ragEvents={ragEvents}
+          systemStats={systemStats}
+          theme={theme}
+        />
+      )}
+      {currentView === "foreman" && (
+        <ForemanView messages={foremanMessages} onSend={sendForemanMessage} alerts={alerts} />
+      )}
+      <AlertStack alerts={alerts} />
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
