@@ -34,6 +34,7 @@ from src.agents.supervisor_agent import SupervisorAgent, ProcessingContext
 from src.models.enlitens_schemas import EnlitensKnowledgeBase, EnlitensKnowledgeEntry
 from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
+from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
 
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -42,15 +43,11 @@ log_filename = "enlitens_complete_processing.log"  # Single comprehensive log
 # Create logs directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(log_filename),
-        logging.FileHandler(f"logs/{log_filename}"),  # Also save in logs directory
-        logging.StreamHandler()
-    ],
-    force=True
+# Setup enhanced logging with visual improvements
+setup_enhanced_logging(
+    log_filename=log_filename,
+    file_level=logging.INFO,
+    console_level=logging.INFO
 )
 
 logger = logging.getLogger(__name__)
@@ -775,6 +772,13 @@ async def main():
     parser.add_argument("--st-louis-report", help="Path to St. Louis health report PDF")
 
     args = parser.parse_args()
+
+    # Display startup banner
+    log_startup_banner(
+        title="ENLITENS AI MULTI-AGENT PROCESSOR",
+        subtitle="Neuroscience Knowledge Base Generator",
+        version="2.0"
+    )
 
     # Validate input directory
     if not os.path.exists(args.input_dir):
