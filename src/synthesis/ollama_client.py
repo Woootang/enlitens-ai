@@ -153,8 +153,15 @@ class VLLMClient:
         cache_prefix: Optional[str] = None,
         cache_chunk_id: Optional[str] = None,
         enforce_grammar: bool = False,
+        fallback_to_unstructured: bool = True,
     ) -> Optional[BaseModel]:
-        """Generate a structured response and validate it against a model."""
+        """Generate a structured response and validate it against a model.
+
+        Args:
+            fallback_to_unstructured: If True, falls back to plain completion without
+                grammar enforcement when structured generation fails (useful for models
+                that don't support JSON schema constraints).
+        """
 
         system_prompt = (
             get_full_system_prompt("factual" if temperature <= 0.4 else "creative")
@@ -182,6 +189,8 @@ class VLLMClient:
         attempts = 0
         current_temperature = temperature
         grammar: Optional[str] = None
+        http_errors = 0  # Track HTTP 400/500 errors
+
         if enforce_grammar:
             try:
                 grammar = self._build_grammar_for_model(response_model)
@@ -227,6 +236,32 @@ class VLLMClient:
                     self.prompt_cache.set(cache_namespace, cache_chunk, full_prompt, data_dict)
 
                 return validated
+
+            except httpx.HTTPStatusError as exc:
+                attempts += 1
+                http_errors += 1
+                status_code = exc.response.status_code
+                logger.warning(
+                    "HTTP %s error on attempt %s: %s",
+                    status_code,
+                    attempts,
+                    exc.response.text[:200] if hasattr(exc.response, 'text') else str(exc)
+                )
+
+                # If we get repeated HTTP errors, disable grammar and structured constraints
+                if http_errors >= 2 and fallback_to_unstructured:
+                    logger.info("🔄 Falling back to unstructured generation due to repeated HTTP errors")
+                    grammar = None
+                    enforce_grammar = False
+                    # Simplify the prompt for plain completion
+                    base_num_predict = min(base_num_predict, 2048)
+
+                if attempts >= max_retries:
+                    logger.error("All %s structured generations failed with HTTP errors", max_retries)
+                    return None
+
+                # Add backoff delay for server errors
+                await asyncio.sleep(2 ** attempts)
 
             except Exception as exc:
                 attempts += 1

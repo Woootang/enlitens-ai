@@ -66,6 +66,9 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 OUTPUT_FILE="enlitens_knowledge_base_complete_${TIMESTAMP}.json"
 TEMP_LOG="${LOG_DIR}/temp_processing.log"
 
+# Force Docling to use CPU to avoid GPU OOM while vLLM is running
+export DOCLING_FORCE_CPU=true
+
 echo "🎯 Launching enhanced multi-agent processor..."
 nohup python3 process_multi_agent_corpus.py \
   --input-dir enlitens_corpus/input_pdfs \
