@@ -541,14 +541,6 @@ class MultiAgentProcessor:
                     if hasattr(website_copy, field) and isinstance(value, list):
                         setattr(website_copy, field, value)
 
-            # Get blog content
-            blog_data = agent_outputs.get("blog_content", {})
-            blog_content = BlogContent()
-            if blog_data:
-                for field, value in blog_data.items():
-                    if hasattr(blog_content, field) and isinstance(value, list):
-                        setattr(blog_content, field, value)
-
             # Get social media content
             social_data = agent_outputs.get("social_media_content", {})
             social_media_content = SocialMediaContent()
@@ -568,6 +560,21 @@ class MultiAgentProcessor:
             # Get full document text for citation verification
             full_document_text = result.get("document_text", "")
             logger.info(f"📄 Storing full document text: {len(full_document_text)} characters")
+
+            # Get blog content with validation context for statistics verification
+            blog_data = agent_outputs.get("blog_content", {})
+            blog_context = {"source_text": full_document_text} if full_document_text else {}
+            try:
+                blog_content = BlogContent.model_validate(blog_data or {}, context=blog_context)
+            except Exception as exc:
+                logger.warning(
+                    "⚠️ Failed to validate blog content for %s: %s", document_id, exc
+                )
+                blog_content = BlogContent()
+                if blog_data:
+                    for field, value in blog_data.items():
+                        if hasattr(blog_content, field) and isinstance(value, list):
+                            setattr(blog_content, field, value)
 
             return EnlitensKnowledgeEntry(
                 metadata=metadata,
