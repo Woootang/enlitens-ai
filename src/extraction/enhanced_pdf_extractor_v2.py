@@ -9,8 +9,10 @@ This extractor fixes the issues identified:
 """
 
 import os
+import io
 import json
 import hashlib
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import logging
@@ -18,10 +20,18 @@ from datetime import datetime
 import re
 import html
 
-import docling
+import fitz  # PyMuPDF
+import pdfplumber
 from docling.document_converter import DocumentConverter
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 import torch
+
+try:
+    import pytesseract
+    from PIL import Image
+except Exception:  # pragma: no cover - optional dependency
+    pytesseract = None
+    Image = None
 
 logger = logging.getLogger(__name__)
 
@@ -75,54 +85,193 @@ class EnhancedPDFExtractorV2:
 
         self.docling_converter = DocumentConverter(**converter_config)
         self.device = device
-    
+
     def extract(self, pdf_path: str) -> Dict[str, Any]:
-        """
-        Extract content from PDF with proper structure.
-        
-        Args:
-            pdf_path: Path to PDF file
-            
-        Returns:
-            Structured extraction result
-        """
+        """Extract content from PDF with structured fallbacks."""
+
+        logger.info(f"Starting enhanced extraction for {pdf_path}")
+
+        # Check cache first
+        cache_key = self._get_cache_key(pdf_path)
+        cached_result = self._load_from_cache(cache_key)
+        if cached_result:
+            logger.info(f"Using cached extraction for {pdf_path}")
+            return cached_result
+
+        fallback_errors: List[str] = []
+        docling_document = None
+        full_text = ""
+
         try:
-            logger.info(f"Starting enhanced extraction for {pdf_path}")
-            
-            # Check cache first
-            cache_key = self._get_cache_key(pdf_path)
-            cached_result = self._load_from_cache(cache_key)
-            if cached_result:
-                logger.info(f"Using cached extraction for {pdf_path}")
-                return cached_result
-            
-            # Convert PDF using Docling
             result = self.docling_converter.convert(pdf_path)
             docling_document = result.document
-            
-            # Extract structured content
-            extraction_result = {
-                'source_metadata': self._extract_source_metadata(pdf_path, docling_document),
-                'archival_content': self._extract_archival_content(docling_document),
-                'quality_metrics': self._calculate_quality_metrics(docling_document),
-                'extraction_timestamp': datetime.now().isoformat(),
-                'extraction_method': 'enhanced_docling_v2'
-            }
-            
-            # Cache the result
-            self._save_to_cache(cache_key, extraction_result)
-            
-            logger.info(f"Enhanced extraction completed for {pdf_path}")
-            return extraction_result
-            
-        except Exception as e:
-            logger.error(f"Enhanced extraction failed for {pdf_path}: {str(e)}")
-            raise
+            full_text = html.unescape(docling_document.export_to_markdown())
+        except Exception as exc:
+            fallback_errors.append(f"docling: {exc}")
+
+        if not full_text.strip():
+            full_text, backend, fallback_errors = self._extract_plain_text_with_fallbacks(
+                pdf_path,
+                fallback_errors,
+            )
+            extraction_method = f"enhanced_docling_v2_{backend}"
+            source_metadata = self._extract_source_metadata(
+                pdf_path,
+                document=None,
+                full_text=full_text,
+            )
+            archival_content = self._extract_archival_content(
+                document=None,
+                full_text=full_text,
+            )
+            quality_metrics = self._calculate_quality_metrics(full_text)
+        else:
+            extraction_method = 'enhanced_docling_v2'
+            source_metadata = self._extract_source_metadata(pdf_path, document=docling_document)
+            archival_content = self._extract_archival_content(docling_document)
+            quality_metrics = self._calculate_quality_metrics(docling_document)
+
+        if fallback_errors:
+            quality_metrics.setdefault('fallback_errors', fallback_errors)
+
+        extraction_result = {
+            'source_metadata': source_metadata,
+            'archival_content': archival_content,
+            'quality_metrics': quality_metrics,
+            'extraction_timestamp': datetime.now().isoformat(),
+            'extraction_method': extraction_method
+        }
+
+        # Cache the result
+        self._save_to_cache(cache_key, extraction_result)
+
+        logger.info(f"Enhanced extraction completed for {pdf_path}")
+        return extraction_result
+
+    def _extract_plain_text_with_fallbacks(
+        self,
+        pdf_path: str,
+        fallback_errors: Optional[List[str]] = None,
+    ) -> Tuple[str, str, List[str]]:
+        """Extract plain text using progressive fallbacks."""
+
+        errors = list(fallback_errors or [])
+        backend = "docling"
+        text = ""
+
+        try:
+            text = self._fallback_with_marker(pdf_path)
+            backend = "marker"
+        except Exception as exc:
+            errors.append(f"marker: {exc}")
+
+        if not text.strip():
+            try:
+                text = self._fallback_with_pymupdf(pdf_path)
+                backend = "pymupdf"
+            except Exception as exc:
+                errors.append(f"pymupdf: {exc}")
+
+        if not text.strip():
+            try:
+                text = self._fallback_with_pdfplumber(pdf_path)
+                backend = "pdfplumber"
+            except Exception as exc:
+                errors.append(f"pdfplumber: {exc}")
+
+        if not text.strip():
+            try:
+                text = self._fallback_with_ocr(pdf_path)
+                backend = "ocr"
+            except Exception as exc:
+                errors.append(f"ocr: {exc}")
+
+        if not text.strip():
+            combined = "; ".join(errors) or "unknown error"
+            raise RuntimeError(f"All fallback extractors failed: {combined}")
+
+        return text, backend, errors
+
+    def _fallback_with_pymupdf(self, pdf_path: str) -> str:
+        logger.info("Enhanced extractor v2 falling back to PyMuPDF for %s", pdf_path)
+        text_chunks: List[str] = []
+        with fitz.open(str(pdf_path)) as doc:
+            for page in doc:
+                text = page.get_text("markdown") or page.get_text("text")
+                if text:
+                    text_chunks.append(text)
+        return "\n\n".join(text_chunks)
+
+    def _fallback_with_marker(self, pdf_path: str) -> str:
+        logger.info("Enhanced extractor v2 falling back to Marker for %s", pdf_path)
+        marker_dir = self.cache_dir / "marker"
+        marker_dir.mkdir(exist_ok=True)
+        output_md = marker_dir / f"{Path(pdf_path).stem}.md"
+
+        try:
+            subprocess.run(
+                [
+                    "marker",
+                    "convert",
+                    str(pdf_path),
+                    "--output",
+                    str(output_md),
+                    "--markdown",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("Marker CLI not found; ensure marker-pdf is installed") from exc
+        except subprocess.CalledProcessError as exc:
+            stderr = exc.stderr.decode("utf-8", errors="ignore") if exc.stderr else ""
+            raise RuntimeError(f"Marker conversion failed: {stderr.strip()}") from exc
+
+        if not output_md.exists():
+            raise RuntimeError("Marker did not produce an output file")
+
+        return output_md.read_text(encoding="utf-8")
+
+    def _fallback_with_pdfplumber(self, pdf_path: str) -> str:
+        logger.info("Enhanced extractor v2 falling back to pdfplumber for %s", pdf_path)
+        text_chunks: List[str] = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                text = page.extract_text() or ""
+                if text:
+                    text_chunks.append(text)
+        return "\n\n".join(text_chunks)
+
+    def _fallback_with_ocr(self, pdf_path: str) -> str:
+        if pytesseract is None or Image is None:
+            raise RuntimeError("pytesseract or Pillow not available for OCR fallback")
+
+        logger.info("Enhanced extractor v2 falling back to OCR for %s", pdf_path)
+        ocr_text: List[str] = []
+        with fitz.open(str(pdf_path)) as doc:
+            for page in doc:
+                pix = page.get_pixmap(dpi=300)
+                image_stream = io.BytesIO(pix.tobytes("png"))
+                with Image.open(image_stream) as image:
+                    text = pytesseract.image_to_string(image)
+                    if text:
+                        ocr_text.append(text)
+        return "\n\n".join(ocr_text)
     
-    def _extract_source_metadata(self, pdf_path: str, document) -> Dict[str, Any]:
-        """Extract clean source metadata"""
-        full_text = document.export_to_markdown()
-        
+    def _extract_source_metadata(
+        self,
+        pdf_path: str,
+        document: Optional[Any] = None,
+        full_text: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Extract clean source metadata from a document or raw text."""
+
+        if full_text is None:
+            if document is None:
+                raise ValueError("Either document or full_text must be provided")
+            full_text = document.export_to_markdown()
+
         # Clean HTML entities
         full_text = html.unescape(full_text)
         
@@ -348,45 +497,108 @@ class EnhancedPDFExtractorV2:
                     not line.startswith('Data were drawn')):
                     abstract_lines.append(line)
                     break
-        
+
         return ' '.join(abstract_lines).strip()
+
+    def _looks_like_heading(self, text: str) -> bool:
+        """Heuristic to determine if a line is a heading."""
+
+        if not text or len(text) > 200:
+            return False
+        if text.startswith('#'):
+            return True
+        if text.isupper() and len(text.split()) <= 12:
+            return True
+        if re.match(r'^\d+(?:\.\d+)*\s+', text):
+            return True
+        return text.endswith((':', '?')) and len(text.split()) <= 10
     
-    def _extract_archival_content(self, document) -> Dict[str, Any]:
-        """Extract archival content with proper structure"""
-        full_text = document.export_to_markdown()
-        
-        # Clean HTML entities
-        full_text = html.unescape(full_text)
-        
+    def _extract_archival_content(
+        self,
+        document: Optional[Any] = None,
+        full_text: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Extract archival content with proper structure."""
+
+        sections: List[Dict[str, Any]]
+        tables: List[Dict[str, Any]]
+        figures: List[Dict[str, Any]]
+        references: List[Any]
+
+        if document is not None:
+            full_text = html.unescape(document.export_to_markdown())
+            sections = self._extract_sections(document)
+            tables = self._extract_tables(document)
+            figures = self._extract_figures(document)
+            references = self._extract_references(document)
+        else:
+            if full_text is None:
+                raise ValueError("Either document or full_text must be provided")
+            full_text = html.unescape(full_text)
+            sections = self._derive_sections_from_text(full_text)
+            tables = []
+            figures = []
+            references = self._extract_references_from_text(full_text)
+
         return {
             'full_document_text_markdown': full_text,
             'abstract_markdown': self._extract_abstract(full_text),
-            'sections': self._extract_sections(document),
-            'tables': self._extract_tables(document),
-            'figures': self._extract_figures(document),
-            'references': self._extract_references(document)
+            'sections': sections,
+            'tables': tables,
+            'figures': figures,
+            'references': references
         }
     
     def _extract_sections(self, document) -> List[Dict[str, str]]:
         """Extract document sections"""
         sections = []
         current_section = None
-        
+
         for element in document.iterate_items():
             if hasattr(element, 'label') and element.label and 'heading' in element.label.lower():
                 if current_section:
                     sections.append(current_section)
-                
+
                 current_section = {
                     'title': element.text_content.strip(),
                     'content': ''
                 }
             elif current_section and hasattr(element, 'text_content'):
                 current_section['content'] += element.text_content + '\n'
-        
+
         if current_section:
             sections.append(current_section)
-        
+
+        return sections
+
+    def _derive_sections_from_text(self, full_text: str) -> List[Dict[str, str]]:
+        """Approximate sections from plain text when structured data is unavailable."""
+
+        sections: List[Dict[str, str]] = []
+        current_title: Optional[str] = None
+        current_content: List[str] = []
+
+        def flush_section():
+            if current_title:
+                sections.append({
+                    'title': current_title,
+                    'content': '\n'.join(current_content).strip()
+                })
+
+        for line in full_text.splitlines():
+            stripped = line.strip()
+            if self._looks_like_heading(stripped):
+                flush_section()
+                current_title = stripped
+                current_content = []
+            elif current_title:
+                current_content.append(line)
+
+        flush_section()
+
+        if not sections and full_text.strip():
+            sections.append({'title': 'Document', 'content': full_text.strip()})
+
         return sections
     
     def _extract_tables(self, document) -> List[Dict[str, Any]]:
@@ -424,6 +636,35 @@ class EnhancedPDFExtractorV2:
                 tables.append(table_data)
         
         return tables
+
+    def _extract_references_from_text(self, full_text: str) -> List[str]:
+        """Extract references heuristically from plain text."""
+
+        references: List[str] = []
+        capture = False
+        buffer: List[str] = []
+        for line in full_text.splitlines():
+            stripped = line.strip()
+            if not capture and stripped.lower().startswith('references'):
+                capture = True
+                continue
+            if capture:
+                if not stripped:
+                    if buffer:
+                        references.append(' '.join(buffer))
+                        buffer = []
+                    continue
+                if re.match(r'^\d+\.?\s', stripped):
+                    if buffer:
+                        references.append(' '.join(buffer))
+                    buffer = [stripped]
+                else:
+                    buffer.append(stripped)
+
+        if buffer:
+            references.append(' '.join(buffer))
+
+        return references
     
     def _extract_figures(self, document) -> List[Dict[str, str]]:
         """Extract figure information"""
@@ -460,10 +701,14 @@ class EnhancedPDFExtractorV2:
         
         return references
     
-    def _calculate_quality_metrics(self, document) -> Dict[str, float]:
+    def _calculate_quality_metrics(self, document_or_text: Any) -> Dict[str, float]:
         """Calculate quality metrics"""
-        full_text = document.export_to_markdown()
-        
+
+        if hasattr(document_or_text, 'export_to_markdown'):
+            full_text = document_or_text.export_to_markdown()
+        else:
+            full_text = str(document_or_text)
+
         # Completeness score
         completeness_score = min(1.0, len(full_text) / 10000)
         

@@ -34,6 +34,7 @@ from src.agents.supervisor_agent import SupervisorAgent
 from src.models.enlitens_schemas import EnlitensKnowledgeBase, EnlitensKnowledgeEntry
 from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
+from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
 
 # Configure comprehensive logging - single log file for all processing
@@ -98,6 +99,7 @@ class MultiAgentProcessor:
         self.supervisor = SupervisorAgent()
         self.pdf_extractor = EnhancedPDFExtractor()
         self.extraction_tools = EnhancedExtractionTools()
+        self.extraction_team = ExtractionTeam()
         self.knowledge_base = EnlitensKnowledgeBase()
 
         # St. Louis regional context
@@ -357,9 +359,15 @@ class MultiAgentProcessor:
 
             logger.info(f"✅ Text extracted successfully: {len(text)} characters")
 
+            # Entity enrichment via ExtractionTeam
+            logger.info(f"🧬 Running entity extraction for {document_id}")
+            entities = await self.extraction_team.extract_entities(extraction_result)
+            logger.info(f"✅ Entity extraction complete: {sum(len(v) for v in entities.values())} entities")
+
             # Create processing context
             logger.info(f"🔧 Creating processing context for {document_id}")
             context = await self._create_processing_context(text, document_id)
+            context["extracted_entities"] = entities
             logger.info(f"✅ Processing context created")
 
             # Process through supervisor (multi-agent system)
@@ -371,6 +379,7 @@ class MultiAgentProcessor:
             logger.info(f"⏱️ Supervisor processing completed in {processing_time:.2f}s")
 
             if result and result.get("supervisor_status") == "completed":
+                result.setdefault("agent_outputs", {})["extracted_entities"] = entities
                 # Convert result to EnlitensKnowledgeEntry format
                 logger.info(f"🔄 Converting result to knowledge entry for {document_id}")
                 knowledge_entry = await self._convert_to_knowledge_entry(result, document_id, processing_time)
@@ -407,11 +416,26 @@ class MultiAgentProcessor:
                 word_count=len(result.get("document_text", "").split())
             )
 
-            # Extract entities (simplified for now)
-            entities = ExtractedEntities()
-
             # Extract content from agent outputs
             agent_outputs = result.get("agent_outputs", {})
+
+            # Extract entities (simplified for now)
+            extracted_entities_payload = agent_outputs.get("extracted_entities", {})
+            entities = ExtractedEntities()
+            if extracted_entities_payload:
+                biomedical = [e.get('text', '') for e in extracted_entities_payload.get('biomedical', []) if e.get('text')]
+                neuroscience = [e.get('text', '') for e in extracted_entities_payload.get('neuroscience', []) if e.get('text')]
+                clinical = [e.get('text', '') for e in extracted_entities_payload.get('clinical', []) if e.get('text')]
+                statistical = [e.get('text', '') for e in extracted_entities_payload.get('statistical', []) if e.get('text')]
+
+                entities.biomedical_entities = biomedical
+                entities.neuroscience_entities = neuroscience
+                entities.clinical_entities = clinical
+                entities.statistical_entities = statistical
+                entities.total_entities = sum(
+                    len(bucket)
+                    for bucket in (biomedical, neuroscience, clinical, statistical)
+                )
 
             # Get rebellion framework
             rebellion_data = agent_outputs.get("rebellion_framework", {})

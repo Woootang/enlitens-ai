@@ -12,18 +12,26 @@ This module provides intelligent extraction that works across all paper types:
 """
 
 import os
+import io
 import json
 import re
 import hashlib
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import logging
 from datetime import datetime
 
-import docling
 import fitz  # PyMuPDF
 import pdfplumber
 from docling.document_converter import DocumentConverter
+
+try:
+    import pytesseract
+    from PIL import Image
+except Exception:  # pragma: no cover - optional dependency for OCR
+    pytesseract = None
+    Image = None
 
 logger = logging.getLogger(__name__)
 
@@ -85,22 +93,8 @@ class EnhancedPDFExtractor:
             
             logger.info(f"Starting enhanced extraction for {pdf_path}")
             
-            # Convert PDF using Docling
-            result = self.docling_converter.convert(pdf_path)
-            full_text = result.document.export_to_markdown()
-            
-            # Extract all components
-            extracted_content = {
-                'source_metadata': self._extract_source_metadata(pdf_path, full_text),
-                'archival_content': self._extract_archival_content(full_text),
-                'research_findings': self._extract_research_findings(full_text),
-                'clinical_implications': self._extract_clinical_implications(full_text),
-                'methodology_details': self._extract_methodology(full_text),
-                'quality_metrics': self._calculate_quality_metrics(full_text),
-                'extraction_timestamp': datetime.now().isoformat(),
-                'extraction_method': 'enhanced_docling'
-            }
-            
+            extracted_content = self._extract_with_fallbacks(pdf_path)
+
             # Cache the result
             self._save_to_cache(cache_key, extracted_content)
             
@@ -110,6 +104,151 @@ class EnhancedPDFExtractor:
         except Exception as e:
             logger.error(f"Enhanced extraction failed for {pdf_path}: {str(e)}")
             raise
+
+    def _extract_with_fallbacks(self, pdf_path: str) -> Dict[str, Any]:
+        """Run docling extraction with progressive fallbacks."""
+
+        fallback_errors: List[str] = []
+        extraction_backend = "docling"
+
+        try:
+            result = self.docling_converter.convert(pdf_path)
+            full_text = result.document.export_to_markdown()
+            if not full_text.strip():
+                raise ValueError("Docling returned empty content")
+        except Exception as exc:
+            logger.warning(
+                "Docling conversion failed for %s: %s", pdf_path, exc,
+            )
+            fallback_errors.append(f"docling: {exc}")
+            full_text = ""
+
+        if not full_text.strip():
+            try:
+                full_text = self._fallback_with_marker(pdf_path)
+                extraction_backend = "marker"
+            except Exception as exc:
+                fallback_errors.append(f"marker: {exc}")
+                full_text = ""
+
+        if not full_text.strip():
+            try:
+                full_text = self._fallback_with_pymupdf(pdf_path)
+                extraction_backend = "pymupdf"
+            except Exception as exc:
+                fallback_errors.append(f"pymupdf: {exc}")
+                full_text = ""
+
+        if not full_text.strip():
+            try:
+                full_text = self._fallback_with_pdfplumber(pdf_path)
+                extraction_backend = "pdfplumber"
+            except Exception as exc:
+                fallback_errors.append(f"pdfplumber: {exc}")
+                full_text = ""
+
+        if not full_text.strip():
+            try:
+                full_text = self._fallback_with_ocr(pdf_path)
+                extraction_backend = "ocr"
+            except Exception as exc:
+                fallback_errors.append(f"ocr: {exc}")
+                full_text = ""
+
+        if not full_text.strip():
+            errors = "; ".join(fallback_errors) or "Unknown extraction failure"
+            raise RuntimeError(f"All extraction strategies failed: {errors}")
+
+        structured_output = {
+            'source_metadata': self._extract_source_metadata(pdf_path, full_text),
+            'archival_content': self._extract_archival_content(full_text),
+            'research_findings': self._extract_research_findings(full_text),
+            'clinical_implications': self._extract_clinical_implications(full_text),
+            'methodology_details': self._extract_methodology(full_text),
+            'quality_metrics': self._calculate_quality_metrics(full_text),
+            'extraction_timestamp': datetime.now().isoformat(),
+            'extraction_method': f'enhanced_docling_{extraction_backend}'
+        }
+
+        if fallback_errors:
+            structured_output.setdefault('quality_metrics', {})['fallback_errors'] = fallback_errors
+
+        return structured_output
+
+    def _fallback_with_pymupdf(self, pdf_path: str) -> str:
+        """Fallback extraction using PyMuPDF plain text."""
+
+        logger.info("Falling back to PyMuPDF extraction for %s", pdf_path)
+        text_chunks: List[str] = []
+        with fitz.open(str(pdf_path)) as doc:
+            for page in doc:
+                text = page.get_text("markdown") or page.get_text("text")
+                if text:
+                    text_chunks.append(text)
+        return "\n\n".join(text_chunks)
+
+    def _fallback_with_marker(self, pdf_path: str) -> str:
+        """Fallback extraction using Marker CLI."""
+
+        logger.info("Falling back to Marker extraction for %s", pdf_path)
+        marker_dir = self.cache_dir / "marker"
+        marker_dir.mkdir(exist_ok=True)
+        output_md = marker_dir / f"{Path(pdf_path).stem}.md"
+
+        try:
+            subprocess.run(
+                [
+                    "marker",
+                    "convert",
+                    str(pdf_path),
+                    "--output",
+                    str(output_md),
+                    "--markdown",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("Marker CLI not found; ensure marker-pdf is installed") from exc
+        except subprocess.CalledProcessError as exc:
+            stderr = exc.stderr.decode("utf-8", errors="ignore") if exc.stderr else ""
+            raise RuntimeError(f"Marker conversion failed: {stderr.strip()}") from exc
+
+        if not output_md.exists():
+            raise RuntimeError("Marker did not produce an output file")
+
+        return output_md.read_text(encoding="utf-8")
+
+    def _fallback_with_pdfplumber(self, pdf_path: str) -> str:
+        """Fallback extraction using pdfplumber page-by-page."""
+
+        logger.info("Falling back to pdfplumber extraction for %s", pdf_path)
+        text_chunks: List[str] = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                text = page.extract_text() or ""
+                if text:
+                    text_chunks.append(text)
+        return "\n\n".join(text_chunks)
+
+    def _fallback_with_ocr(self, pdf_path: str) -> str:
+        """Fallback extraction using OCR on rendered pages."""
+
+        if pytesseract is None or Image is None:
+            raise RuntimeError("pytesseract or Pillow not available for OCR fallback")
+
+        logger.info("Falling back to OCR extraction for %s", pdf_path)
+        ocr_text: List[str] = []
+        with fitz.open(str(pdf_path)) as doc:
+            for page in doc:
+                pix = page.get_pixmap(dpi=300)
+                image_stream = io.BytesIO(pix.tobytes("png"))
+                with Image.open(image_stream) as image:
+                    text = pytesseract.image_to_string(image)
+                    if text:
+                        ocr_text.append(text)
+        return "\n\n".join(ocr_text)
 
     async def cleanup(self):
         """Clean up extractor resources."""
