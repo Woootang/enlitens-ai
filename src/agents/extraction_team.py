@@ -9,11 +9,62 @@ This team uses specialized biomedical models to extract entities from research p
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+import os
+from typing import Dict, List, Any, Optional, Callable
 import asyncio
+
+import torch
 from transformers import pipeline
 
 logger = logging.getLogger(__name__)
+
+
+class LazyPipelineLoader:
+    """Lazy loader that caches Hugging Face pipelines with device awareness."""
+
+    def __init__(
+        self,
+        pipeline_factory: Callable[..., Any] = pipeline,
+        force_cpu: Optional[bool] = None,
+    ) -> None:
+        self._pipeline_factory = pipeline_factory
+        self._cache: Dict[str, Any] = {}
+        if force_cpu is None:
+            force_cpu = os.getenv("EXTRACTION_FORCE_CPU", "false").lower() in {"1", "true", "yes"}
+        self._force_cpu = force_cpu
+
+    def get(
+        self,
+        cache_key: str,
+        task: str,
+        model_name: str,
+        **pipeline_kwargs: Any,
+    ) -> Any:
+        """Return a cached pipeline, creating it if necessary."""
+
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        device = pipeline_kwargs.pop("device", None)
+        if device is None:
+            if self._force_cpu:
+                device = -1
+            else:
+                device = 0 if torch.cuda.is_available() else -1
+
+        logger.info(
+            "ExtractionTeam: loading pipeline %s on %s",
+            model_name,
+            "CPU" if device == -1 else f"device {device}",
+        )
+
+        self._cache[cache_key] = self._pipeline_factory(
+            task,
+            model=model_name,
+            device=device,
+            **pipeline_kwargs,
+        )
+        return self._cache[cache_key]
 
 
 class ExtractionTeam:
@@ -27,7 +78,15 @@ class ExtractionTeam:
     - GatorTron: Clinical entities
     """
     
-    def __init__(self):
+    def __init__(
+        self,
+        pipeline_factory: Callable[..., Any] = pipeline,
+        force_cpu: Optional[bool] = None,
+    ):
+        self.pipeline_loader = LazyPipelineLoader(
+            pipeline_factory=pipeline_factory,
+            force_cpu=force_cpu,
+        )
         self.models = {}
         self.entity_types = {
             'biomedical': ['DISEASE', 'CHEMICAL', 'GENE', 'PROTEIN', 'CELL_LINE'],
@@ -96,10 +155,11 @@ class ExtractionTeam:
         try:
             # Load BiomedBERT model
             if 'biomedbert' not in self.models:
-                self.models['biomedbert'] = pipeline(
+                self.models['biomedbert'] = self.pipeline_loader.get(
+                    'biomedbert',
                     "ner",
-                    model="dmis-lab/biobert-base-cased-v1.1",
-                    aggregation_strategy="simple"
+                    "dmis-lab/biobert-base-cased-v1.1",
+                    aggregation_strategy="simple",
                 )
             
             # Extract entities
@@ -128,10 +188,11 @@ class ExtractionTeam:
         try:
             # Load NeuroBERT model
             if 'neurobert' not in self.models:
-                self.models['neurobert'] = pipeline(
+                self.models['neurobert'] = self.pipeline_loader.get(
+                    'neurobert',
                     "ner",
-                    model="allenai/scibert_scivocab_uncased",
-                    aggregation_strategy="simple"
+                    "allenai/scibert_scivocab_uncased",
+                    aggregation_strategy="simple",
                 )
             
             # Extract entities
@@ -160,10 +221,11 @@ class ExtractionTeam:
         try:
             # Load PsychBERT model
             if 'psychbert' not in self.models:
-                self.models['psychbert'] = pipeline(
+                self.models['psychbert'] = self.pipeline_loader.get(
+                    'psychbert',
                     "ner",
-                    model="mental/mental-bert-base-uncased",
-                    aggregation_strategy="simple"
+                    "mental/mental-bert-base-uncased",
+                    aggregation_strategy="simple",
                 )
             
             # Extract entities
@@ -192,10 +254,11 @@ class ExtractionTeam:
         try:
             # Load GatorTron model
             if 'gator' not in self.models:
-                self.models['gator'] = pipeline(
+                self.models['gator'] = self.pipeline_loader.get(
+                    'gator',
                     "ner",
-                    model="emilyalsentzer/Bio_ClinicalBERT",
-                    aggregation_strategy="simple"
+                    "emilyalsentzer/Bio_ClinicalBERT",
+                    aggregation_strategy="simple",
                 )
             
             # Extract entities
