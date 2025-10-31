@@ -36,6 +36,7 @@ from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
+from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
 
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -101,6 +102,24 @@ class MultiAgentProcessor:
         self.extraction_tools = EnhancedExtractionTools()
         self.extraction_team = ExtractionTeam()
         self.knowledge_base = EnlitensKnowledgeBase()
+
+        # Vector store ingestion pipeline (optional)
+        disable_vector_ingestion = os.getenv("ENLITENS_DISABLE_VECTOR_INGESTION", "").lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        self.embedding_ingestion: Optional[EmbeddingIngestionPipeline] = None
+        if disable_vector_ingestion:
+            logger.info("🔌 Vector store ingestion disabled via environment toggle")
+        else:
+            try:
+                self.embedding_ingestion = EmbeddingIngestionPipeline()
+                logger.info("🧠 Vector store ingestion pipeline initialized")
+            except Exception as exc:
+                logger.warning("⚠️ Failed to initialize vector ingestion pipeline: %s", exc)
+                self.embedding_ingestion = None
 
         # St. Louis regional context
         self.st_louis_context = self._load_st_louis_context()
@@ -388,6 +407,27 @@ class MultiAgentProcessor:
 
             if result and result.get("supervisor_status") == "completed":
                 result.setdefault("agent_outputs", {})["extracted_entities"] = entities
+
+                if self.embedding_ingestion:
+                    try:
+                        ingestion_metadata = {
+                            "document_id": document_id,
+                            "filename": pdf_path.name,
+                            "doc_type": context.get("doc_type"),
+                            "processing_timestamp": datetime.utcnow().isoformat(),
+                            "quality_score": result.get("quality_score"),
+                            "confidence_score": result.get("confidence_score"),
+                        }
+                        self.embedding_ingestion.ingest_document(
+                            document_id=document_id,
+                            full_text=result.get("document_text", text),
+                            agent_outputs=result.get("agent_outputs", {}),
+                            metadata=ingestion_metadata,
+                            rebuild=True,
+                        )
+                    except Exception as exc:
+                        logger.warning("⚠️ Vector ingestion failed for %s: %s", document_id, exc)
+
                 # Convert result to EnlitensKnowledgeEntry format
                 logger.info(f"🔄 Converting result to knowledge entry for {document_id}")
                 knowledge_entry = await self._convert_to_knowledge_entry(result, document_id, processing_time)
