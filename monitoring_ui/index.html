@@ -3,20 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enlitens AI Dashboard | Vibrant Monitoring</title>
-  <meta name="description" content="Modern, colorful monitoring dashboard for Enlitens AI processing pipeline" />
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  
-  <!-- Stylesheets -->
+  <title>Enlitens AI Command Center</title>
+  <meta name="description" content="Live analytics dashboard for the Enlitens multi-agent knowledge pipeline." />
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/static/dashboard.css" />
-  
-  <!-- Chart.js for visualizations -->
+
+  <!-- Chart.js for analytics visualisations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  
+  <!-- GSAP for motion design -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
   <!-- React & Babel -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -25,24 +22,12 @@
 <body>
   <div id="root"></div>
   <noscript>
-    <div style="padding: 2rem; text-align: center; color: white;">
-      <h1>⚡ Enlitens AI Dashboard</h1>
-      <p>This dashboard requires JavaScript to display live processing data.</p>
-      <p>Please enable JavaScript in your browser to continue.</p>
+    <div style="padding: 2rem; text-align: center;">
+      <h1>Enlitens AI Command Center</h1>
+      <p>This experience requires JavaScript for live telemetry and Foreman AI chat.</p>
     </div>
   </noscript>
-  
-  <!-- SVG gradient definitions for charts -->
-  <svg width="0" height="0" style="position: absolute;">
-    <defs>
-      <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" style="stop-color:#7CFC00;stop-opacity:1" />
-        <stop offset="50%" style="stop-color:#FBBF24;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#F87171;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-  </svg>
-  
+
   <script type="text/babel" src="/static/app_vibrant.js"></script>
 </body>
 </html>
