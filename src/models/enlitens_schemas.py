@@ -104,6 +104,32 @@ class RebellionFramework(BaseModel):
     rebellion_themes: List[str] = Field(default_factory=list, description="Rebellion themes")
     aha_moments: List[str] = Field(default_factory=list, description="Aha moments for clients")
 
+    @staticmethod
+    def _coerce_list(values: List[Any]) -> List[str]:
+        coerced: List[str] = []
+        for v in values or []:
+            if isinstance(v, list):
+                coerced.append(" ".join(str(x) for x in v))
+            else:
+                coerced.append(str(v))
+        return coerced
+
+    @field_validator(
+        "narrative_deconstruction",
+        "sensory_profiling",
+        "executive_function",
+        "social_processing",
+        "strengths_synthesis",
+        "rebellion_themes",
+        "aha_moments",
+        mode="before",
+    )
+    @classmethod
+    def _flatten_nested_lists(cls, v):
+        if isinstance(v, list) and any(isinstance(x, list) for x in v):
+            return cls._coerce_list(v)
+        return v
+
 
 class MarketingContent(BaseModel):
     """Marketing content extracted from research papers.
@@ -210,6 +236,7 @@ class ClinicalContent(BaseModel):
     monitoring: List[str] = Field(default_factory=list, description="Monitoring approaches")
 
 
+
 class ResearchContent(BaseModel):
     """Research content extracted from research papers."""
     findings: List[str] = Field(default_factory=list, description="Research findings")
@@ -220,6 +247,42 @@ class ResearchContent(BaseModel):
     implications: List[str] = Field(default_factory=list, description="Clinical implications")
     citations: List[str] = Field(default_factory=list, description="Citation information")
     references: List[str] = Field(default_factory=list, description="Reference information")
+
+    @field_validator("citations", "references", mode="before")
+    @classmethod
+    def _normalize_reference_items(cls, value):
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            return value
+        normalized = []
+        for item in value:
+            if isinstance(item, str):
+                normalized.append(item.strip())
+            elif isinstance(item, dict):
+                author = item.get("author") or item.get("authors") or "Unknown author"
+                year = item.get("year")
+                title = item.get("title")
+                journal = item.get("journal")
+                doi = item.get("doi")
+                pages = item.get("pages")
+                parts = []
+                if author:
+                    parts.append(str(author).strip())
+                if year:
+                    parts.append(f"({year})")
+                if title:
+                    parts.append(str(title).strip())
+                if journal:
+                    parts.append(str(journal).strip())
+                if pages:
+                    parts.append(f"pp. {pages}")
+                if doi:
+                    parts.append(f"doi:{doi}")
+                normalized.append(" ".join(parts))
+            else:
+                normalized.append(str(item))
+        return normalized
 
 
 class ContentCreationIdeas(BaseModel):

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<h1>Testing Dashboard Files</h1>
+<script>
+fetch('/api/stats')
+  .then(r => r.json())
+  .then(d => {
+    document.body.innerHTML += '<pre>' + JSON.stringify(d, null, 2) + '</pre>';
+    document.body.innerHTML += '<p>✅ API is working!</p>';
+  })
+  .catch(e => {
+    document.body.innerHTML += '<p>❌ Error: ' + e + '</p>';
+  });
+</script>
+</body>
+</html>

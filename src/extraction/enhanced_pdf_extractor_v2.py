@@ -64,7 +64,7 @@ class EnhancedPDFExtractorV2:
                 "do_use_table_structure": True,
             },
             # Force CPU for layout model to avoid GPU OOM
-            images_scale=1.0 if device == "cpu" else 2.0,  # Reduce image processing on CPU
+            images_scale=0.9,  # keep resolution modest on both CPU/GPU to avoid VRAM spikes
         )
 
         # Create converter with device configuration

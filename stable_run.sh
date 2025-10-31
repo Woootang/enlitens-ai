@@ -4,7 +4,7 @@ set -euo pipefail
 
 VLLM_MAIN_MODEL="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
 VLLM_MONITOR_MODEL=""
-VLLM_GPU_UTIL="0.92"
+VLLM_GPU_UTIL="0.70"
 MAIN_PORT="8000"
 MONITOR_PORT="8001"
 LOG_DIR="logs"
@@ -17,7 +17,7 @@ start_vllm_server() {
 
   if ! pgrep -f "vllm.*--port ${port}" >/dev/null 2>&1; then
     echo "🚀 Starting vLLM server for ${model} on port ${port}"
-    nohup .venv_vllm/bin/python -m vllm.entrypoints.openai.api_server \
+    PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True nohup .venv_vllm/bin/python -m vllm.entrypoints.openai.api_server \
       --model "${model}" \
       --dtype "auto" \
       --trust-remote-code \

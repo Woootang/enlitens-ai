@@ -17,6 +17,59 @@ def _keep_last_value(existing: Any, new: Any) -> Any:
     return new
 
 
+def _merge_intermediate_results(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+    """Reducer function that merges intermediate results dictionaries.
+
+    This allows multiple agents to contribute to intermediate_results
+    without triggering InvalidUpdateError. New values override existing ones.
+    """
+    if existing is None:
+        return new or {}
+    if new is None:
+        return existing
+    return {**existing, **new}
+
+
+def _merge_completed_nodes(existing: Dict[str, str], new: Dict[str, str]) -> Dict[str, str]:
+    """Reducer function that merges completed nodes dictionaries.
+
+    This allows multiple agents to mark themselves as completed
+    without triggering InvalidUpdateError. New values override existing ones.
+    """
+    if existing is None:
+        return new or {}
+    if new is None:
+        return existing
+    return {**existing, **new}
+
+
+def _merge_attempt_counters(existing: Dict[str, int], new: Dict[str, int]) -> Dict[str, int]:
+    """Reducer function that merges attempt counters dictionaries."""
+    if existing is None:
+        return new or {}
+    if new is None:
+        return existing
+    return {**existing, **new}
+
+
+def _merge_errors(existing: Dict[str, str], new: Dict[str, str]) -> Dict[str, str]:
+    """Reducer function that merges errors dictionaries."""
+    if existing is None:
+        return new or {}
+    if new is None:
+        return existing
+    return {**existing, **new}
+
+
+def _merge_sets(existing: Set[str], new: Set[str]) -> Set[str]:
+    """Reducer function that merges sets."""
+    if existing is None:
+        return new or set()
+    if new is None:
+        return existing
+    return existing | new
+
+
 class WorkflowState(TypedDict, total=False):
     """TypedDict holding the shared workflow state across nodes.
 
@@ -39,11 +92,11 @@ class WorkflowState(TypedDict, total=False):
 
     # Shared orchestration metadata - use Annotated to allow multiple updates
     stage: Annotated[str, _keep_last_value]
-    skip_nodes: Set[str]
-    completed_nodes: Dict[str, str]
-    attempt_counters: Dict[str, int]
-    errors: Dict[str, str]
-    intermediate_results: Dict[str, Any]
+    skip_nodes: Annotated[Set[str], _merge_sets]
+    completed_nodes: Annotated[Dict[str, str], _merge_completed_nodes]
+    attempt_counters: Annotated[Dict[str, int], _merge_attempt_counters]
+    errors: Annotated[Dict[str, str], _merge_errors]
+    intermediate_results: Annotated[Dict[str, Any], _merge_intermediate_results]
     cache_prefix: str
     cache_chunk_id: str
     metadata: Dict[str, Any]

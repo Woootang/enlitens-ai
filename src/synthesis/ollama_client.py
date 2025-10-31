@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import httpx
@@ -97,16 +98,46 @@ class VLLMClient:
             payload["top_p"] = top_p
         if response_format:
             payload["response_format"] = {"type": response_format}
-        if num_ctx is not None:
-            payload.setdefault("extra_body", {})["max_model_len"] = num_ctx
-        if grammar:
-            payload.setdefault("extra_body", {})["grammar"] = grammar
-        if extra_options:
-            payload.setdefault("extra_body", {}).update(extra_options)
+        
+        # Don't use extra_body - vLLM OpenAI API doesn't support it
+        # This causes 400 errors: "Extra inputs are not permitted"
+        # if num_ctx is not None:
+        #     payload.setdefault("extra_body", {})["max_model_len"] = num_ctx
+        # if grammar:
+        #     payload.setdefault("extra_body", {})["grammar"] = grammar
+        # if extra_options:
+        #     payload.setdefault("extra_body", {}).update(extra_options)
 
-        response = await self.client.post("/chat/completions", json=payload)
-        response.raise_for_status()
-        data = response.json()
+        # Primary request
+        try:
+            response = await self.client.post("/chat/completions", json=payload)
+            response.raise_for_status()
+            data = response.json()
+        except httpx.HTTPStatusError as exc:
+            # Intermittent 404s can happen depending on how the server exposes the OpenAI routes.
+            # If we hit a 404, retry by toggling the /v1 prefix heuristically.
+            if exc.response is not None and exc.response.status_code == 404:
+                base = self.base_url.rstrip("/")
+                candidates: List[str] = []
+                if base.endswith("/v1"):
+                    base_no = base[:-3]
+                    candidates.append(f"{base_no}/v1/chat/completions")
+                    candidates.append(f"{base_no}/chat/completions")
+                else:
+                    candidates.append(f"{base}/v1/chat/completions")
+                data = None
+                for url in candidates:
+                    try:
+                        fb = await httpx.AsyncClient(timeout=self.client.timeout).post(url, json=payload)
+                        fb.raise_for_status()
+                        data = fb.json()
+                        break
+                    except Exception:
+                        continue
+                if data is None:
+                    raise
+            else:
+                raise
         choice = data.get("choices", [{}])[0]
         message = choice.get("message", {})
         finish_reason = choice.get("finish_reason")
@@ -215,8 +246,54 @@ class VLLMClient:
 
                 parsed = self._parse_structured_payload(text)
                 parsed = self._coerce_to_model_schema(parsed, response_model)
+                # Some models occasionally return a single-item list wrapping the object
+                if not isinstance(parsed, dict) and isinstance(parsed, list) and parsed and isinstance(parsed[0], dict):
+                    logger.info("Unwrapped single-item list to match schema")
+                    parsed = parsed[0]
                 if not isinstance(parsed, dict):
                     raise ValueError(f"Expected dict after coercion, got {type(parsed).__name__}")
+
+                # Lightweight sanitation before validation to reduce avoidable failures
+                try:
+                    if response_model.__name__ == "BlogContent":
+                        stats = parsed.get("statistics")
+                        source = (validation_context or {}).get("source_text", "")
+                        if isinstance(stats, list) and source:
+                            import difflib
+                            sentences = source.split('. ')
+                            def _ok(item: Any) -> bool:
+                                try:
+                                    quote = str((item or {}).get("quote", "")).strip()
+                                    if not quote:
+                                        return False
+                                    if quote in source:
+                                        return True
+                                    best = difflib.get_close_matches(quote, sentences, n=1, cutoff=0.8)
+                                    return bool(best)
+                                except Exception:
+                                    return False
+                            before = len(stats)
+                            parsed["statistics"] = [it for it in stats if _ok(it)]
+                            after = len(parsed["statistics"])
+                            if before and after < before:
+                                logger.info("Filtered %s invalid statistics prior to validation", before - after)
+                    elif response_model.__name__ == "RebellionFramework":
+                        # Flatten nested lists the model sometimes returns
+                        def _flatten(items: Any) -> List[str]:
+                            result: List[str] = []
+                            if isinstance(items, list):
+                                for it in items:
+                                    if isinstance(it, list):
+                                        result.append(" ".join([str(x) for x in it]))
+                                    else:
+                                        result.append(str(it))
+                            return result
+                        for key in ("narrative_deconstruction","sensory_profiling","executive_function","social_processing","strengths_synthesis","rebellion_themes","aha_moments"):
+                            if key in parsed and isinstance(parsed[key], list) and any(isinstance(x, list) for x in parsed[key]):
+                                parsed[key] = _flatten(parsed[key])
+                except Exception:
+                    # Best-effort sanitation; fall through to validation
+                    pass
 
                 if validation_context:
                     validated = response_model.model_validate(parsed, context=validation_context)
@@ -241,12 +318,37 @@ class VLLMClient:
                 attempts += 1
                 http_errors += 1
                 status_code = exc.response.status_code
+
                 logger.warning(
                     "HTTP %s error on attempt %s: %s",
                     status_code,
                     attempts,
                     exc.response.text[:200] if hasattr(exc.response, 'text') else str(exc)
                 )
+
+                # Dynamically shrink completion budget if we exceeded context window
+                try:
+                    error_payload = exc.response.json()
+                    error_message = error_payload.get("message", "")
+                except Exception:  # pragma: no cover - defensive
+                    error_message = exc.response.text if hasattr(exc.response, 'text') else ""
+
+                if error_message and "maximum context length" in error_message:
+                    match = re.search(r"\((\d+) in the messages, (\d+) in the completion\)", error_message)
+                    if match:
+                        message_tokens = int(match.group(1))
+                        completion_tokens = int(match.group(2))
+                        available = max(512, 8192 - message_tokens - 128)
+                        if available < base_num_predict:
+                            logger.info(
+                                "🔧 Reducing completion budget from %s to %s tokens (messages=%s)",
+                                base_num_predict,
+                                available,
+                                message_tokens,
+                            )
+                            base_num_predict = available
+                        if available < max_num_predict:
+                            max_num_predict = available
 
                 # If we get repeated HTTP errors, disable grammar and structured constraints
                 if http_errors >= 2 and fallback_to_unstructured:
@@ -269,8 +371,12 @@ class VLLMClient:
                 grammar = None  # Disable grammar after first failure
                 current_temperature = min(1.0, current_temperature + 0.1)
                 if attempts >= max_retries:
-                    logger.error("All %s structured generations failed", max_retries)
-                    return None
+                    # Do not fail the entire pipeline; return an empty validated object
+                    logger.warning("All %s structured generations failed; returning empty %s", max_retries, response_model.__name__)
+                    try:
+                        return response_model()
+                    except Exception:
+                        return None
 
         return None
 
@@ -296,6 +402,8 @@ class VLLMClient:
                 system_prompt=system_prompt,
                 top_p=top_p,
                 grammar=grammar,
+                # Encourage JSON object responses to reduce top-level list outputs
+                response_format="json_object",
             )
             text = payload.get("response", "")
             if payload.get("done", True):

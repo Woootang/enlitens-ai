@@ -26,6 +26,7 @@ from collections import defaultdict, deque
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import httpx
 
@@ -35,13 +36,29 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Enlitens AI Monitor Enhanced", version="2.0.0")
 
+# Add CORS middleware to allow cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Configuration
 VLLM_BASE_URL = os.environ.get("VLLM_BASE_URL", "http://localhost:8000/v1")
 FOREMAN_LOCAL_URL = os.environ.get("FOREMAN_LOCAL_URL", "http://localhost:8001/v1")
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-70b-versatile")
 KNOWLEDGE_BASE_PATH = Path("enlitens_knowledge_base_latest.json")
 STATIC_DIR = Path(__file__).parent / "monitoring_ui"
+
+# Initialize Groq client if API key is available
+GROQ_CLIENT = httpx.AsyncClient(
+    base_url="https://api.groq.com/openai/v1",
+    headers={"Authorization": f"Bearer {GROQ_API_KEY}"} if GROQ_API_KEY else {},
+    timeout=30.0
+) if GROQ_API_KEY else None
 
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -445,6 +462,26 @@ async def foreman_query(payload: Dict[str, Any]):
     return JSONResponse({"query": query, "response": response})
 
 # Routes
+@app.get("/test", response_class=HTMLResponse)
+async def get_test():
+    """Serve the minimal test page for debugging."""
+    test_file = STATIC_DIR / "test_minimal.html"
+    if test_file.exists():
+        return FileResponse(test_file)
+    # Try minimal.html as fallback
+    minimal_file = STATIC_DIR / "minimal.html"
+    if minimal_file.exists():
+        return FileResponse(minimal_file)
+    return HTMLResponse("<h1>Test page not found</h1>", status_code=404)
+
+@app.get("/minimal", response_class=HTMLResponse)
+async def get_minimal():
+    """Serve the absolute minimal test page."""
+    minimal_file = STATIC_DIR / "minimal.html"
+    if minimal_file.exists():
+        return FileResponse(minimal_file)
+    return HTMLResponse("<h1>Minimal page not found</h1>", status_code=404)
+
 @app.get("/", response_class=HTMLResponse)
 async def get_dashboard():
     """Serve the enhanced monitoring dashboard."""
@@ -537,6 +574,79 @@ async def get_agent_pipeline():
         pipeline["supervisor"]["agents"].append(agent_info)
 
     return JSONResponse(pipeline)
+
+@app.post("/api/chat")
+async def chat_with_assistant(request: Request):
+    """AI chat assistant endpoint using Groq API."""
+    try:
+        body = await request.json()
+        user_message = body.get("message", "")
+        context = body.get("context", {})
+        
+        if not user_message:
+            return JSONResponse({"response": "Please provide a message."})
+        
+        # Build context-aware system prompt
+        stats = context.get("stats", {})
+        logs = context.get("logs", [])
+        
+        system_prompt = f"""You are an AI assistant monitoring the Enlitens AI processing pipeline.
+
+Current Status:
+- Documents processed: {stats.get('docs', 0)} of {stats.get('total', 0)}
+- Errors: {stats.get('errors', 0)}
+- Warnings: {stats.get('warnings', 0)}
+- Quality score: {stats.get('quality', 0)}%
+- Progress: {stats.get('progress', 0)}%
+
+Recent logs show: {len(logs)} recent events.
+
+Answer questions about the processing status, quality metrics, errors, and provide insights.
+Be concise and helpful. If you see issues, suggest solutions."""
+
+        # Use Groq API if available, otherwise use local fallback
+        if GROQ_CLIENT and GROQ_API_KEY:
+            try:
+                response = await GROQ_CLIENT.post(
+                    "/chat/completions",
+                    json={
+                        "model": GROQ_MODEL,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_message}
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 500
+                    }
+                )
+                response.raise_for_status()
+                data = response.json()
+                ai_response = data["choices"][0]["message"]["content"]
+                return JSONResponse({"response": ai_response})
+            except Exception as groq_error:
+                logger.error(f"Groq API error: {groq_error}")
+                # Fall through to local fallback
+        
+        # Fallback response without API
+        fallback_responses = {
+            "status": f"Currently processing document {stats.get('docs', 0)} of {stats.get('total', 0)}. {stats.get('errors', 0)} errors detected. Quality score: {stats.get('quality', 0)}%.",
+            "error": f"Found {stats.get('errors', 0)} errors. Check the logs for details about what went wrong.",
+            "quality": f"Current quality score is {stats.get('quality', 0)}%. {'Excellent!' if stats.get('quality', 0) >= 90 else 'There is room for improvement.' if stats.get('quality', 0) >= 60 else 'Quality needs attention.'}",
+            "help": "I can help you with: current status, error analysis, quality metrics, and processing suggestions. What would you like to know?"
+        }
+        
+        message_lower = user_message.lower()
+        for key, response in fallback_responses.items():
+            if key in message_lower:
+                return JSONResponse({"response": response})
+        
+        return JSONResponse({
+            "response": f"I see you're asking about: '{user_message}'. Currently {stats.get('docs', 0)} documents processed with {stats.get('errors', 0)} errors. For detailed AI analysis, please set the GROQ_API_KEY environment variable (free API at https://console.groq.com)."
+        })
+        
+    except Exception as e:
+        logger.error(f"Chat endpoint error: {e}")
+        return JSONResponse({"response": "Sorry, I encountered an error processing your request."})
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Enlitens AI Enhanced Monitoring Server")
