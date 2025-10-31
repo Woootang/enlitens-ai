@@ -312,6 +312,8 @@ class MultiAgentProcessor:
                 "challenges": self.st_louis_context["demographics"]["mental_health_challenges"],
                 "priorities": self.st_louis_context["clinical_priorities"],
                 "enhanced_analysis": client_analysis,
+                "topic_modeling": client_analysis.get("topic_modeling", {}),
+                "sentiment_analysis": client_analysis.get("sentiment_analysis", {}),
                 "pain_points": client_analysis.get("pain_points", []),
                 "key_themes": client_analysis.get("key_themes", []),
             },
@@ -324,10 +326,16 @@ class MultiAgentProcessor:
                     "Executive function neuroscience support",
                 ],
                 "enhanced_analysis": founder_analysis,
+                "topic_modeling": founder_analysis.get("topic_modeling", {}),
+                "sentiment_analysis": founder_analysis.get("sentiment_analysis", {}),
                 "voice_profile": founder_analysis.get("voice_characteristics", {}),
                 "key_messages": founder_analysis.get("key_messages", []),
             },
             "st_louis_context": self.st_louis_context["demographics"],
+            "insight_registry": {
+                "client": client_analysis,
+                "founder": founder_analysis,
+            },
             "processing_stage": "initial",
         }
 

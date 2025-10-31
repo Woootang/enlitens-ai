@@ -6,12 +6,25 @@ extraction, VADER for sentiment analysis, and BERTopic for topic modeling.
 """
 
 import logging
-import numpy as np
-from typing import List, Dict, Any, Optional, Tuple
+from dataclasses import dataclass, field
 from datetime import datetime
-from keybert import KeyBERT
-from sentence_transformers import SentenceTransformer
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from typing import Any, Dict, List, Optional, Tuple
+
+from statistics import mean, pstdev
+try:
+    from keybert import KeyBERT
+except Exception:  # pragma: no cover - optional dependency
+    KeyBERT = None
+
+try:
+    from sentence_transformers import SentenceTransformer
+except Exception:  # pragma: no cover - optional dependency
+    SentenceTransformer = None
+
+try:
+    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+except Exception:  # pragma: no cover - optional dependency
+    SentimentIntensityAnalyzer = None
 try:
     from bertopic import BERTopic
     import cuml
@@ -19,12 +32,36 @@ try:
     from cuml.manifold import UMAP
     _GPU_TOPIC_STACK_AVAILABLE = True
 except Exception:
-    # If RAPIDS stack is unavailable, we will fall back later
-    from bertopic import BERTopic
-    _GPU_TOPIC_STACK_AVAILABLE = False
-import pandas as pd
+    try:
+        from bertopic import BERTopic  # type: ignore
+        _GPU_TOPIC_STACK_AVAILABLE = False
+    except Exception:  # pragma: no cover - optional dependency
+        BERTopic = None
+        _GPU_TOPIC_STACK_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TopicDiscoveryResult:
+    """Structured result returned from topic discovery."""
+
+    topics: List[int] = field(default_factory=list)
+    topic_keywords: Dict[int, List[str]] = field(default_factory=dict)
+    enhanced_analysis: Dict[str, Any] = field(default_factory=dict)
+    probabilities: Optional[List[List[float]]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the result to a serialisable dictionary."""
+
+        return {
+            "topics": self.topics,
+            "topic_keywords": self.topic_keywords,
+            "enhanced_analysis": self.enhanced_analysis,
+            "probabilities": self.probabilities,
+            "metadata": self.metadata,
+        }
 
 class EnhancedExtractionTools:
     """
@@ -33,7 +70,21 @@ class EnhancedExtractionTools:
     
     def __init__(self, device: str = "cuda"):
         self.device = device
-        self.sentiment_analyzer = SentimentIntensityAnalyzer()
+        if SentimentIntensityAnalyzer is not None:
+            try:
+                self.sentiment_analyzer = SentimentIntensityAnalyzer()
+            except Exception as sentiment_error:
+                logger.warning(
+                    "Failed to initialise VADER sentiment analyzer",
+                    extra={"event": "sentiment_initialisation_error", "error": str(sentiment_error)},
+                )
+                self.sentiment_analyzer = None
+        else:
+            logger.warning(
+                "VADER sentiment analyzer not available, falling back to neutral scores",
+                extra={"event": "sentiment_dependency_missing"},
+            )
+            self.sentiment_analyzer = None
         self.keybert_model = None
         self.sentence_transformer = None
         self.bertopic_model = None
@@ -43,6 +94,8 @@ class EnhancedExtractionTools:
         """Load KeyBERT model if not already loaded."""
         if self.keybert_model is None:
             try:
+                if KeyBERT is None or SentenceTransformer is None:
+                    raise RuntimeError("KeyBERT dependencies are unavailable")
                 # Use a smaller, efficient model for better performance
                 self.sentence_transformer = SentenceTransformer('all-mpnet-base-v2', device=self.device)
                 self.keybert_model = KeyBERT(model=self.sentence_transformer)
@@ -55,6 +108,10 @@ class EnhancedExtractionTools:
         """Load BERTopic model with GPU acceleration if not already loaded."""
         if self.bertopic_model is None:
             try:
+                if BERTopic is None:
+                    raise RuntimeError("BERTopic dependency is unavailable")
+                if SentenceTransformer is None:
+                    raise RuntimeError("SentenceTransformer dependency is unavailable")
                 if _GPU_TOPIC_STACK_AVAILABLE and self.device == "cuda":
                     # Configure BERTopic with GPU-accelerated components
                     self.bertopic_model = BERTopic(
@@ -104,67 +161,137 @@ class EnhancedExtractionTools:
         return self._fallback_keyword_extraction(text, top_n)
 
     def analyze_sentiment(self, text: str) -> Dict[str, float]:
-        """
-        Analyze sentiment using VADER (fast fallback).
-        
-        Args:
-            text: Input text to analyze
-            
-        Returns:
-            Dictionary with sentiment scores
-        """
-        # Fast fallback for speed
-        logger.info("Sentiment analysis completed: using fast neutral fallback")
-        return {"compound": 1.0, "pos": 0.0, "neu": 1.0, "neg": 0.0}
+        """Analyze sentiment using VADER with graceful fallback."""
 
-    def discover_topics(self, texts: List[str], 
-                       min_topic_size: int = 10,
-                       nr_topics: Optional[int] = None) -> Tuple[List[int], Dict[int, List[str]]]:
-        """
-        Discover topics using BERTopic with GPU acceleration.
-        
-        Args:
-            texts: List of texts to analyze
-            min_topic_size: Minimum size for a topic cluster
-            nr_topics: Number of topics to find (None for automatic)
-            
-        Returns:
-            Tuple of (topic_labels, topic_keywords)
-        """
         try:
-            # Guard: BERTopic requires >1 sample
+            if not text or not text.strip():
+                logger.info(
+                    "Sentiment analysis skipped for empty text",
+                    extra={"event": "sentiment_skipped", "text_length": len(text or "")},
+                )
+                return {"compound": 0.0, "pos": 0.0, "neu": 1.0, "neg": 0.0}
+
+            if self.sentiment_analyzer is None:
+                if SentimentIntensityAnalyzer is None:
+                    logger.warning(
+                        "Sentiment analyzer dependency missing, returning neutral scores",
+                        extra={"event": "sentiment_dependency_missing"},
+                    )
+                    return {"compound": 0.0, "pos": 0.0, "neu": 1.0, "neg": 0.0}
+                try:
+                    self.sentiment_analyzer = SentimentIntensityAnalyzer()
+                except Exception as load_error:
+                    logger.warning(
+                        "Sentiment analyzer unavailable, returning neutral scores",
+                        extra={"event": "sentiment_fallback", "error": str(load_error)},
+                    )
+                    return {"compound": 0.0, "pos": 0.0, "neu": 1.0, "neg": 0.0}
+
+            scores = self.sentiment_analyzer.polarity_scores(text)
+            logger.info(
+                "Sentiment analysis completed",
+                extra={
+                    "event": "sentiment_completed",
+                    "compound": scores.get("compound"),
+                    "text_length": len(text),
+                },
+            )
+            return scores
+
+        except Exception as e:
+            logger.error(
+                "Error during sentiment analysis, returning neutral scores",
+                extra={"event": "sentiment_error", "error": str(e)},
+            )
+            return {"compound": 0.0, "pos": 0.0, "neu": 1.0, "neg": 0.0}
+
+    def discover_topics(
+        self,
+        texts: List[str],
+        min_topic_size: int = 10,
+        nr_topics: Optional[int] = None,
+    ) -> TopicDiscoveryResult:
+        """Discover topics using BERTopic with GPU acceleration."""
+
+        try:
             valid_texts = [t for t in texts if t and t.strip()]
             if not valid_texts:
-                logger.warning("No valid texts provided for topic discovery")
-                return [], {}, {}
+                logger.warning(
+                    "No valid texts provided for topic discovery",
+                    extra={"event": "topic_discovery_skipped", "text_count": len(texts)},
+                )
+                return TopicDiscoveryResult(
+                    metadata={
+                        "reason": "no_valid_texts",
+                        "requested_text_count": len(texts),
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                )
             if len(valid_texts) < 2:
-                logger.warning(f"Topic discovery requires at least 2 samples, but only {len(valid_texts)} provided. Skipping topic analysis.")
-                return [], {}, {}
+                logger.warning(
+                    "Topic discovery requires at least 2 samples, skipping",
+                    extra={"event": "topic_discovery_skipped", "text_count": len(valid_texts)},
+                )
+                return TopicDiscoveryResult(
+                    metadata={
+                        "reason": "insufficient_samples",
+                        "valid_text_count": len(valid_texts),
+                        "timestamp": datetime.utcnow().isoformat(),
+                    }
+                )
 
             self._load_bertopic()
 
-            # Fit the model
-            topics, probs = self.bertopic_model.fit_transform(texts)
+            topics, probs = self.bertopic_model.fit_transform(valid_texts)
 
-            # Get topic information
             topic_info = self.bertopic_model.get_topic_info()
-            topic_keywords = {}
+            topic_keywords: Dict[int, List[str]] = {}
 
-            for topic_id in topic_info['Topic']:
-                if topic_id != -1:  # Skip outlier topic
+            for topic_id in topic_info["Topic"]:
+                if topic_id != -1:
                     keywords = self.bertopic_model.get_topic(topic_id)
                     topic_keywords[topic_id] = [word for word, _ in keywords[:10]]
 
-            logger.info(f"Discovered {len(topic_keywords)} topics from {len(texts)} texts")
+            enhanced_analysis = self._enhance_topic_analysis(valid_texts, topics, topic_keywords)
 
-            # Enhance with additional analysis
-            enhanced_analysis = self._enhance_topic_analysis(texts, topics, topic_keywords)
+            metadata = {
+                "text_count": len(valid_texts),
+                "topic_count": len(topic_keywords),
+                "timestamp": datetime.utcnow().isoformat(),
+                "backend": "gpu" if _GPU_TOPIC_STACK_AVAILABLE and self.device == "cuda" else "cpu",
+                "min_topic_size": min_topic_size,
+                "nr_topics": nr_topics,
+            }
 
-            return topics, topic_keywords, enhanced_analysis
+            logger.info(
+                "Discovered topics",
+                extra={
+                    "event": "topic_discovery_completed",
+                    "topic_count": metadata["topic_count"],
+                    "text_count": metadata["text_count"],
+                },
+            )
+
+            return TopicDiscoveryResult(
+                topics=list(topics),
+                topic_keywords=topic_keywords,
+                enhanced_analysis=enhanced_analysis,
+                probabilities=probs.tolist() if hasattr(probs, "tolist") else probs,
+                metadata=metadata,
+            )
 
         except Exception as e:
-            logger.error(f"Error discovering topics: {e}")
-            return [], {}, {}
+            logger.error(
+                "Error discovering topics",
+                extra={"event": "topic_discovery_error", "error": str(e)},
+            )
+            return TopicDiscoveryResult(
+                metadata={
+                    "reason": "exception",
+                    "error": str(e),
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            )
 
     def _enhance_topic_analysis(self, texts: List[str], topics: List[int],
                               topic_keywords: Dict[int, List[str]]) -> Dict[str, Any]:
@@ -232,9 +359,7 @@ class EnhancedExtractionTools:
             logger.info(f"Analyzing {len(intake_texts)} client intakes")
 
             # Discover topics in intakes
-            topics, topic_keywords, enhanced_analysis = self.discover_topics(
-                intake_texts, min_topic_size=3
-            )
+            topic_result = self.discover_topics(intake_texts, min_topic_size=3)
 
             # Analyze sentiment patterns
             sentiment_analysis = self._analyze_sentiment_patterns(intake_texts)
@@ -247,9 +372,11 @@ class EnhancedExtractionTools:
 
             return {
                 "topic_modeling": {
-                    "topics": topic_keywords,
-                    "topic_distribution": enhanced_analysis.get("topic_distribution", {}),
-                    "enhanced_analysis": enhanced_analysis
+                    "topic_assignments": topic_result.topics,
+                    "topic_keywords": topic_result.topic_keywords,
+                    "topic_distribution": topic_result.enhanced_analysis.get("topic_distribution", {}),
+                    "enhanced_analysis": topic_result.enhanced_analysis,
+                    "metadata": topic_result.metadata,
                 },
                 "sentiment_analysis": sentiment_analysis,
                 "key_themes": key_themes,
@@ -276,9 +403,7 @@ class EnhancedExtractionTools:
             logger.info(f"Analyzing {len(transcript_texts)} founder transcripts")
 
             # Discover topics in transcripts
-            topics, topic_keywords, enhanced_analysis = self.discover_topics(
-                transcript_texts, min_topic_size=3
-            )
+            topic_result = self.discover_topics(transcript_texts, min_topic_size=3)
 
             # Analyze sentiment and tone
             sentiment_analysis = self._analyze_sentiment_patterns(transcript_texts)
@@ -291,8 +416,10 @@ class EnhancedExtractionTools:
 
             return {
                 "topic_modeling": {
-                    "topics": topic_keywords,
-                    "enhanced_analysis": enhanced_analysis
+                    "topic_assignments": topic_result.topics,
+                    "topic_keywords": topic_result.topic_keywords,
+                    "enhanced_analysis": topic_result.enhanced_analysis,
+                    "metadata": topic_result.metadata,
                 },
                 "sentiment_analysis": sentiment_analysis,
                 "voice_characteristics": voice_characteristics,
@@ -442,10 +569,47 @@ class EnhancedExtractionTools:
             for text in intake_texts:
                 scores = self.analyze_sentiment(text)
                 sentiment_scores.append(scores['compound'])
-            
-            # Identify high-priority intakes (most negative sentiment)
-            high_priority_indices = np.argsort(sentiment_scores)[:len(sentiment_scores)//4]  # Top 25%
+
+            if not sentiment_scores:
+                logger.info(
+                    "No sentiment scores calculated for pain point extraction",
+                    extra={"event": "pain_point_skipped"},
+                )
+                return {}
+
+            mean_score = float(mean(sentiment_scores))
+            std_score = float(pstdev(sentiment_scores)) if len(sentiment_scores) > 1 else 0.0
+
+            if std_score < 1e-6:
+                if mean_score < -0.2:
+                    high_priority_indices = list(range(len(sentiment_scores)))
+                else:
+                    high_priority_indices = []
+            else:
+                z_scores = [
+                    (score - mean_score) / std_score for score in sentiment_scores
+                ]
+                high_priority_indices = [
+                    idx for idx, z in enumerate(z_scores) if z <= -1.0
+                ]
+
+            if not high_priority_indices and len(sentiment_scores) > 0:
+                min_score = min(sentiment_scores)
+                high_priority_indices = [
+                    idx for idx, score in enumerate(sentiment_scores) if score == min_score
+                ]
+
             high_priority_texts = [intake_texts[i] for i in high_priority_indices]
+
+            logger.info(
+                "Identified high priority intakes",
+                extra={
+                    "event": "pain_point_prioritised",
+                    "high_priority_count": len(high_priority_indices),
+                    "mean_score": mean_score,
+                    "std_score": std_score,
+                },
+            )
             
             # Extract keywords from high-priority intakes
             pain_point_keywords = []
@@ -458,13 +622,18 @@ class EnhancedExtractionTools:
                 pain_point_keywords.extend([kw[0] for kw in keywords])
             
             # Discover topics in high-priority intakes
-            topics, topic_keywords = self.discover_topics(high_priority_texts)
-            
+            topic_result = (
+                self.discover_topics(high_priority_texts)
+                if high_priority_texts
+                else TopicDiscoveryResult()
+            )
+
             return {
                 "sentiment_scores": sentiment_scores,
                 "high_priority_count": len(high_priority_indices),
                 "pain_point_keywords": pain_point_keywords,
-                "topic_keywords": topic_keywords,
+                "topic_keywords": topic_result.topic_keywords,
+                "topic_metadata": topic_result.metadata,
                 "high_priority_texts": high_priority_texts
             }
             
@@ -494,14 +663,15 @@ class EnhancedExtractionTools:
                 founder_keywords.extend([kw[0] for kw in keywords])
             
             # Discover topics in transcripts
-            topics, topic_keywords = self.discover_topics(transcript_texts)
+            topic_result = self.discover_topics(transcript_texts)
             
             # Analyze sentiment patterns
             sentiment_scores = [self.analyze_sentiment(text)['compound'] for text in transcript_texts]
             
             return {
                 "founder_keywords": founder_keywords,
-                "topic_keywords": topic_keywords,
+                "topic_keywords": topic_result.topic_keywords,
+                "topic_metadata": topic_result.metadata,
                 "sentiment_scores": sentiment_scores,
                 "total_transcripts": len(transcript_texts)
             }
