@@ -30,6 +30,7 @@ from rich.text import Text
 from src.pipeline.document_processor import DocumentProcessor
 from src.pipeline.checkpoint_manager import CheckpointManager, ResumeProcessor
 from src.monitoring.metrics import MetricsCollector
+from src.utils.settings import get_settings
 
 # Setup logging
 logging.basicConfig(
@@ -324,6 +325,7 @@ class EnlitensCLI:
 
 def main():
     """Main CLI entry point"""
+    settings = get_settings()
     parser = argparse.ArgumentParser(description="Enlitens PDF Processing Pipeline")
     parser.add_argument("--input-dir", default="./enlitens_corpus/input_pdfs", 
                        help="Input directory containing PDFs")
@@ -331,9 +333,9 @@ def main():
                        help="Output directory for processed data")
     parser.add_argument("--cache-dir", default="./enlitens_corpus/cache_markdown", 
                        help="Cache directory for intermediate files")
-    parser.add_argument("--ollama-url", default="http://localhost:8000/v1",
+    parser.add_argument("--ollama-url", default=settings.llm.base_url,
                        help="vLLM OpenAI-compatible URL")
-    parser.add_argument("--ollama-model", default="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct",
+    parser.add_argument("--ollama-model", default=settings.llm.default_model,
                        help="vLLM model to use")
     parser.add_argument("--batch-size", type=int, default=5, 
                        help="Batch size for processing")

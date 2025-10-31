@@ -5,12 +5,14 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import httpx
 from json_repair import repair_json
 from pydantic import BaseModel
+from tenacity import AsyncRetrying, retry_if_exception, stop_after_attempt, wait_exponential
 
 from .prompts import (
     TEMPERATURE_FACTUAL,
@@ -18,6 +20,7 @@ from .prompts import (
     get_full_system_prompt,
 )
 from src.utils.prompt_cache import PromptCache
+from src.utils.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +43,23 @@ class VLLMClient:
         enable_prefix_caching: bool = True,
         continuous_batch_sizes: Optional[Iterable[int]] = None,
         prompt_cache: Optional[PromptCache] = None,
+        headers: Optional[Dict[str, str]] = None,
+        max_retries: int = 3,
+        transport: Optional[httpx.AsyncBaseTransport] = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
-        self.client = httpx.AsyncClient(base_url=self.base_url, timeout=timeout_seconds)
         self.default_model = default_model
         self.enable_prefix_caching = enable_prefix_caching
         self.prompt_cache = prompt_cache or self._shared_prompt_cache
         self.continuous_batch_sizes = list(continuous_batch_sizes or (8, 16, 24))
+        self.headers = dict(headers or {})
+        self.max_retries = max_retries
+        self.client = httpx.AsyncClient(
+            base_url=self.base_url,
+            timeout=timeout_seconds,
+            headers=self.headers or None,
+            transport=transport,
+        )
 
     def clone_with_model(self, model: str) -> "VLLMClient":
         """Create a lightweight clone that reuses the underlying HTTP client."""
@@ -58,10 +71,35 @@ class VLLMClient:
         clone.enable_prefix_caching = self.enable_prefix_caching
         clone.prompt_cache = self.prompt_cache
         clone.continuous_batch_sizes = list(self.continuous_batch_sizes)
+        clone.headers = dict(self.headers)
+        clone.max_retries = self.max_retries
         return clone
 
     def _resolve_model(self, model: Optional[str]) -> str:
         return model or self.default_model
+
+    @staticmethod
+    def _should_retry_exception(exc: BaseException) -> bool:
+        if isinstance(exc, httpx.RequestError):
+            return True
+        if isinstance(exc, httpx.HTTPStatusError):
+            status = exc.response.status_code
+            return status >= 500 or status in {408, 429}
+        return False
+
+    async def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response:
+        async for attempt in AsyncRetrying(
+            stop=stop_after_attempt(self.max_retries),
+            wait=wait_exponential(multiplier=0.5, min=0.5, max=10),
+            retry=retry_if_exception(self._should_retry_exception),
+            reraise=True,
+        ):
+            with attempt:
+                response = await self.client.request(method, url, **kwargs)
+                if response.status_code >= 400:
+                    response.raise_for_status()
+                return response
+        raise RuntimeError("Retry loop exited unexpectedly")
 
     async def generate_response(
         self,
@@ -110,8 +148,7 @@ class VLLMClient:
 
         # Primary request
         try:
-            response = await self.client.post("/chat/completions", json=payload)
-            response.raise_for_status()
+            response = await self._request_with_retry("POST", "/chat/completions", json=payload)
             data = response.json()
         except httpx.HTTPStatusError as exc:
             # Intermittent 404s can happen depending on how the server exposes the OpenAI routes.
@@ -128,7 +165,10 @@ class VLLMClient:
                 data = None
                 for url in candidates:
                     try:
-                        fb = await httpx.AsyncClient(timeout=self.client.timeout).post(url, json=payload)
+                        fb = await httpx.AsyncClient(
+                            timeout=self.client.timeout,
+                            headers=self.headers or None,
+                        ).post(url, json=payload)
                         fb.raise_for_status()
                         data = fb.json()
                         break
@@ -482,8 +522,7 @@ class VLLMClient:
         """Verify the backing server is reachable."""
 
         try:
-            response = await self.client.get("/models")
-            response.raise_for_status()
+            await self._request_with_retry("GET", "/models")
             return True
         except Exception as exc:
             logger.error("LLM connection failed: %s", exc)
@@ -491,8 +530,7 @@ class VLLMClient:
 
     async def list_models(self) -> List[Dict[str, Any]]:
         try:
-            response = await self.client.get("/models")
-            response.raise_for_status()
+            response = await self._request_with_retry("GET", "/models")
             data = response.json()
             return data.get("data", data.get("models", []))
         except Exception as exc:
@@ -506,8 +544,123 @@ class VLLMClient:
         await self.close()
 
 
-# Backwards compatibility for existing imports.
-OllamaClient = VLLMClient
+class OllamaAPIClient(VLLMClient):
+    """Specialised client for Ollama's OpenAI-compatible bridge."""
+
+    async def check_connection(self) -> bool:
+        if await super().check_connection():
+            return True
+        try:
+            await self._request_with_retry("GET", "/api/tags")
+            return True
+        except Exception as exc:
+            logger.error("Ollama health check failed: %s", exc)
+            return False
+
+
+class OpenAIClient(VLLMClient):
+    """Client targeting OpenAI's native API."""
+
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        base_url: Optional[str] = None,
+        default_model: str = "gpt-4o-mini",
+        **kwargs: Any,
+    ) -> None:
+        if not api_key:
+            raise ValueError("OpenAI API key is required when using the OpenAI provider")
+
+        headers = dict(kwargs.pop("headers", {}))
+        headers.setdefault("Authorization", f"Bearer {api_key}")
+        headers.setdefault("Content-Type", "application/json")
+
+        resolved_base = (base_url or "https://api.openai.com/v1").rstrip("/")
+        super().__init__(
+            base_url=resolved_base,
+            default_model=default_model,
+            headers=headers,
+            **kwargs,
+        )
+
+
+class OllamaClient:
+    """Provider-aware wrapper that returns the appropriate backend client."""
+
+    _PROVIDERS = {
+        "vllm": VLLMClient,
+        "ollama": OllamaAPIClient,
+        "openai": OpenAIClient,
+    }
+
+    def __init__(
+        self,
+        base_url: Optional[str] = None,
+        default_model: Optional[str] = None,
+        *,
+        provider: Optional[str] = None,
+        transport: Optional[httpx.AsyncBaseTransport] = None,
+        **kwargs: Any,
+    ) -> None:
+        settings = get_settings()
+        self._settings = settings
+        provider_name = (provider or settings.llm.provider or "vllm").lower()
+        resolved_model = default_model or settings.llm.default_model
+        resolved_url = base_url or settings.llm.endpoint_for(provider_name) or settings.llm.base_url
+
+        client_kwargs: Dict[str, Any] = dict(kwargs)
+        if transport is not None:
+            client_kwargs["transport"] = transport
+
+        client_cls = self._PROVIDERS.get(provider_name, VLLMClient)
+
+        if client_cls is OpenAIClient:
+            api_key = client_kwargs.pop("api_key", None) or settings.llm.api_key or os.environ.get("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OpenAI API key is required when provider=openai")
+            resolved_base = (resolved_url or "https://api.openai.com/v1").rstrip("/")
+            self._client = client_cls(
+                api_key=api_key,
+                base_url=resolved_base,
+                default_model=resolved_model or "gpt-4o-mini",
+                **client_kwargs,
+            )
+            resolved_url = resolved_base
+        else:
+            resolved_url = resolved_url or (
+                "http://localhost:11434/v1" if provider_name == "ollama" else VLLM_DEFAULT_URL
+            )
+            self._client = client_cls(
+                base_url=resolved_url,
+                default_model=resolved_model or VLLM_DEFAULT_MODEL,
+                **client_kwargs,
+            )
+
+        self.provider = provider_name
+        self.base_url = getattr(self._client, "base_url", resolved_url)
+        self.default_model = getattr(self._client, "default_model", resolved_model)
+
+    def __getattr__(self, item: str) -> Any:
+        return getattr(self._client, item)
+
+    def clone_with_model(self, model: str) -> "OllamaClient":
+        cloned = self._client.clone_with_model(model)
+        wrapper = object.__new__(OllamaClient)
+        wrapper._client = cloned
+        wrapper.provider = self.provider
+        wrapper.base_url = getattr(cloned, "base_url", self.base_url)
+        wrapper.default_model = getattr(cloned, "default_model", model)
+        wrapper._settings = self._settings
+        return wrapper
+
+    async def close(self) -> None:
+        if hasattr(self._client, "close"):
+            await self._client.close()
+
+    async def cleanup(self) -> None:
+        if hasattr(self._client, "cleanup"):
+            await self._client.cleanup()
 
 
 class _GBNFBuilder:

@@ -17,7 +17,6 @@ class ValidationAgent(BaseAgent):
         super().__init__(
             name="Validation",
             role="Content Validation and Quality Assurance",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.chain_of_verification = ChainOfVerification()
 

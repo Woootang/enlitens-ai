@@ -10,6 +10,8 @@ from typing import Dict, List, Any, Optional
 from abc import ABC, abstractmethod
 from datetime import datetime
 
+from src.utils.settings import get_settings
+
 logger = logging.getLogger(__name__)
 
 class BaseAgent(ABC):
@@ -17,12 +19,24 @@ class BaseAgent(ABC):
     Base class for all agents in the Enlitens multi-agent system.
     """
 
-    def __init__(self, name: str, role: str, model: str = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"):
+    def __init__(self, name: str, role: str, model: Optional[str] = None):
+        settings = get_settings()
+        agent_key = self.__class__.__name__
+        resolved_model = model or settings.model_for_agent(agent_key)
+        if not resolved_model:
+            raise ValueError(f"No model configured for agent '{agent_key}'")
+
         self.name = name
         self.role = role
-        self.model = model
+        self.model = resolved_model
         self.created_at = datetime.now()
         self.is_initialized = False
+        self.settings = settings
+        self.llm_provider = settings.llm.provider
+        self.connection_info = {
+            "base_url": settings.llm.endpoint_for(agent_key),
+            "provider": settings.llm.provider,
+        }
         logger.info(f"Initializing agent: {name} ({role})")
 
     @abstractmethod

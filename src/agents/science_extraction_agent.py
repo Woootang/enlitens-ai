@@ -21,7 +21,6 @@ class ScienceExtractionAgent(BaseAgent):
         super().__init__(
             name="ScienceExtraction",
             role="Scientific Content Extraction",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
         self.self_consistency_temperatures = [0.1, 0.2, 0.3]

@@ -19,7 +19,6 @@ class ClinicalSynthesisAgent(BaseAgent):
         super().__init__(
             name="ClinicalSynthesis",
             role="Clinical Application Synthesis",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
 

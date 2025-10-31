@@ -19,7 +19,6 @@ class EducationalContentAgent(BaseAgent):
         super().__init__(
             name="EducationalContent",
             role="Client Education Material Generation",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
 

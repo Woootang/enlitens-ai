@@ -20,7 +20,6 @@ class MarketingSEOAgent(BaseAgent):
         super().__init__(
             name="MarketingSEO",
             role="Marketing and SEO Content Generation",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"  # Local instruct model for marketing content
         )
         self.ollama_client = None
 
@@ -124,7 +123,8 @@ Return ONLY valid JSON in this exact format:
 """
 
             marketing_client = self.ollama_client
-            seo_client = self.ollama_client.clone_with_model("/home/antons-gs/enlitens-ai/models/mistral-7b-instruct")
+            seo_model = self.settings.llm.model_for("marketing-seo") or self.model
+            seo_client = self.ollama_client.clone_with_model(seo_model)
 
             marketing_cache = self._cache_kwargs(context, suffix="marketing")
             marketing_result = await marketing_client.generate_structured_response(
