@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 
 from src.synthesis.prompts import StructuredSynthesisPrompts
 from src.validation.citation_verifier import CitationVerifier
+from src.utils.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +55,17 @@ class OllamaClient:
 
     def __init__(
         self,
-        base_url: str = "http://localhost:8000/v1",
-        model: str = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct",
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
         *,
         gpu_memory_utilization: float = 0.92,
         system_prompt: Optional[str] = None,
     ):
-        self.base_url = base_url.rstrip("/")
-        self.model = model
+        settings = get_settings()
+        resolved_model = model or settings.llm.default_model
+        resolved_base = base_url or settings.llm.base_url or "http://localhost:8000/v1"
+        self.base_url = resolved_base.rstrip("/")
+        self.model = resolved_model
         self.session = requests.Session()
         self.gpu_memory_utilization = gpu_memory_utilization
         self.system_prompt = system_prompt or (

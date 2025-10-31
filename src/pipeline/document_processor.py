@@ -39,6 +39,7 @@ from src.retrieval.vector_store import QdrantVectorStore
 from src.retrieval.hybrid_retriever import HybridRetriever
 from src.utils.retry import IntelligentRetryManager
 from src.validation.layered_validation import LayeredValidationPipeline
+from src.utils.settings import get_settings
 
 from src.monitoring.observability import get_observability
 
@@ -57,13 +58,17 @@ class DocumentProcessor:
     - Checkpointing for resume capability
     """
     
-    def __init__(self, 
+    def __init__(self,
                  pdf_input_dir: str = "./enlitens_corpus/input_pdfs",
                  output_dir: str = "./enlitens_corpus/output",
                  cache_dir: str = "./enlitens_corpus/cache_markdown",
-                 ollama_url: str = "http://localhost:8000/v1",
-                 ollama_model: str = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"):
-        
+                 ollama_url: Optional[str] = None,
+                 ollama_model: Optional[str] = None):
+
+        settings = get_settings()
+        resolved_model = ollama_model or settings.llm.default_model
+        resolved_url = ollama_url or settings.llm.base_url
+
         self.pdf_input_dir = Path(pdf_input_dir)
         self.output_dir = Path(output_dir)
         self.cache_dir = Path(cache_dir)
@@ -77,7 +82,7 @@ class DocumentProcessor:
         self.quality_validator = ExtractionQualityValidator()
         self.model_manager = ModelManager()
         self.entity_extractor = NeuroscienceEntityExtractor(self.model_manager)
-        self.ollama_client = OllamaClient(ollama_url, ollama_model)
+        self.ollama_client = OllamaClient(resolved_url, resolved_model)
         self.synthesizer = NeuroscienceSynthesizer(self.ollama_client)
         self.chunker = DocumentChunker()
         self.vector_store = QdrantVectorStore()

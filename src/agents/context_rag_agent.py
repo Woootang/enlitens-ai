@@ -15,7 +15,6 @@ class ContextRAGAgent(BaseAgent):
         super().__init__(
             name="ContextRAG",
             role="Contextual Enhancement with RAG",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
 
     async def initialize(self) -> bool:

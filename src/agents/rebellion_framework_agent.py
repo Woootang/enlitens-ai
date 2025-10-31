@@ -17,7 +17,6 @@ class RebellionFrameworkAgent(BaseAgent):
         super().__init__(
             name="RebellionFramework",
             role="Rebellion Framework Application",
-            model="/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
         )
         self.ollama_client = None
 

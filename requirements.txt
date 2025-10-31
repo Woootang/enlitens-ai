@@ -37,6 +37,8 @@ vadersentiment==3.3.2
 
 # JSON repair and validation
 json-repair==0.30.2
+PyYAML==6.0.2
+httpx==0.27.2
 
 # Database and storage
 neo4j==5.25.0
