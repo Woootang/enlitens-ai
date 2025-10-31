@@ -162,126 +162,6 @@ function formatPercent(value) {
   return `${Math.max(0, Math.min(100, value)).toFixed(1)}%`;
 }
 
-function normaliseStatsPayload(data = {}) {
-  const documentsProcessed = data.documentsProcessed ?? data.documents_processed ?? data.docs ?? 0;
-  const totalDocuments = data.totalDocuments ?? data.total_documents ?? data.total ?? 0;
-  const recentErrors = Array.isArray(data.recent_errors) ? data.recent_errors : [];
-  const recentWarnings = Array.isArray(data.recent_warnings) ? data.recent_warnings : [];
-
-  const knowledgeBase = data.knowledgeBase || data.kb || {
-    processed: documentsProcessed,
-    remaining: Math.max(totalDocuments - documentsProcessed, 0),
-    averageLatency: data.average_latency || data.avg_time_per_doc || 0
-  };
-
-  const currentDocument = data.currentDocument || (data.current_document
-    ? {
-        title: data.current_document,
-        stage: (Array.isArray(data.active_agents) && data.active_agents.length > 0)
-          ? `Agent ${data.active_agents[0]}`
-          : data.status || (documentsProcessed === 0 ? 'idle' : 'processing'),
-        progress: data.progress_percentage || 0,
-        elapsedSeconds: data.time_on_document_seconds || 0,
-        lastUpdate: data.last_log_seconds_ago
-          ? new Date(Date.now() - data.last_log_seconds_ago * 1000).toISOString()
-          : null
-      }
-    : {});
-
-  const systemHealth = data.systemHealth || data.health || data.system_health || defaultStats.systemHealth;
-  const qualityMetrics = data.qualityMetrics || data.quality_metrics || {};
-
-  return {
-    documentsProcessed,
-    totalDocuments,
-    errors: data.errors ?? recentErrors.length ?? 0,
-    warnings: data.warnings ?? recentWarnings.length ?? 0,
-    qualityScore: data.qualityScore
-      ?? data.quality
-      ?? qualityMetrics.avg_quality_score
-      ?? 0,
-    successRate: data.successRate ?? data.success ?? 0,
-    avgTimePerDoc: data.avgTimePerDoc ?? data.averageDocumentTime ?? data.avg_time_per_doc ?? 0,
-    queueDepth: data.queueDepth ?? data.queue_depth ?? data.pending ?? 0,
-    throughputHistory: data.throughputHistory ?? data.throughput ?? [],
-    currentDocument,
-    knowledgeBase,
-    systemHealth
-  };
-}
-
-function normaliseQualityMetrics(metrics = {}) {
-  const source = metrics.qualityMetrics || metrics.quality_metrics || metrics;
-  if (!source || typeof source !== 'object') return {};
-  return {
-    citationAccuracy: source.citationAccuracy ?? source.citation_accuracy ?? source.precision_at_3 ?? 0,
-    validationPassRate: source.validationPassRate ?? source.validation_pass_rate ?? 0,
-    hallucinationRate: source.hallucinationRate ?? source.hallucination_rate ?? 0,
-    faithfulness: source.faithfulness ?? 0,
-    factualDrift: source.factualDrift ?? source.factual_drift ?? 0,
-    flaggedFindings:
-      source.flaggedFindings
-      ?? source.validation_failures
-      ?? (Array.isArray(source.layer_failures) ? source.layer_failures.length : 0)
-  };
-}
-
-function normaliseAgentPipeline(pipeline) {
-  if (!pipeline) return [];
-  if (Array.isArray(pipeline)) {
-    return pipeline.map((entry) =>
-      typeof entry === 'string'
-        ? { agent: entry, status: 'running', start: null, end: null, retries: 0 }
-        : entry
-    );
-  }
-  if (pipeline.supervisor && Array.isArray(pipeline.supervisor.agents)) {
-    return pipeline.supervisor.agents.map((agent) => ({
-      agent: agent.name,
-      status: agent.status,
-      duration: agent.performance?.avg_time,
-      retries: agent.performance?.failures || 0
-    }));
-  }
-  return [];
-}
-
-function normaliseAgentPerformance(performance) {
-  if (!performance) return [];
-  if (Array.isArray(performance)) return performance;
-  return Object.entries(performance).map(([name, stats]) => ({
-    name,
-    success: stats.successes ?? stats.executions ?? 0,
-    failed: stats.failures ?? 0
-  }));
-}
-
-function normaliseIncidents(data = {}) {
-  if (Array.isArray(data.incidents)) return data.incidents;
-  const incidents = [];
-  if (Array.isArray(data.recent_errors)) {
-    data.recent_errors.forEach((item) => {
-      incidents.push({
-        id: `error-${item.timestamp || Math.random()}`,
-        level: 'ERROR',
-        title: item.message,
-        timestamp: item.timestamp
-      });
-    });
-  }
-  if (Array.isArray(data.recent_warnings)) {
-    data.recent_warnings.forEach((item) => {
-      incidents.push({
-        id: `warn-${item.timestamp || Math.random()}`,
-        level: 'WARNING',
-        title: item.message,
-        timestamp: item.timestamp
-      });
-    });
-  }
-  return incidents;
-}
-
 // -------------------------------------
 // Charts
 // -------------------------------------
@@ -1037,7 +917,7 @@ const ForemanConsole = () => {
 
 const LogsDrawer = () => {
   const { state, drawerOpen, setDrawerOpen } = useContext(DashboardContext);
-  const [filters, setFilters] = useState({ INFO: true, WARNING: true, ERROR: true });
+  const [filters, setFilters] = useState({ INFO: true, WARN: true, ERROR: true });
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -1047,14 +927,10 @@ const LogsDrawer = () => {
   }, [state.logs.length, drawerOpen]);
 
   const toggleFilter = (level) => {
-    const key = (level || '').toUpperCase();
-    setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
+    setFilters((prev) => ({ ...prev, [level]: !prev[level] }));
   };
 
-  const filteredLogs = state.logs.filter((entry) => {
-    const level = (entry.level || 'INFO').toUpperCase();
-    return filters[level] ?? true;
-  });
+  const filteredLogs = state.logs.filter((entry) => filters[entry.level || 'INFO']);
 
   return (
     <aside className={`log-drawer ${drawerOpen ? 'open' : 'collapsed'}`}>
@@ -1062,7 +938,7 @@ const LogsDrawer = () => {
         {drawerOpen ? 'Close logs' : 'Open logs'}
       </button>
       <div className="log-filters">
-        {['INFO', 'WARNING', 'ERROR'].map((level) => (
+        {['INFO', 'WARN', 'ERROR'].map((level) => (
           <button
             key={level}
             className={`filter-chip ${filters[level] ? 'active' : ''}`}
@@ -1073,17 +949,13 @@ const LogsDrawer = () => {
         ))}
       </div>
       <div className="log-stream">
-        {filteredLogs.map((log) => {
-          const level = (log.level || 'INFO').toUpperCase();
-          const timestamp = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '—';
-          return (
-            <div key={log.id || `${level}-${timestamp}-${log.message}`} className={`log-line level-${level}`}>
-              <span className="timestamp">{timestamp}</span>
-              <span className="level">{level}</span>
-              <span className="message">{log.message}</span>
-            </div>
-          );
-        })}
+        {filteredLogs.map((log) => (
+          <div key={log.id} className={`log-line level-${log.level || 'INFO'}`}>
+            <span className="timestamp">{new Date(log.timestamp).toLocaleTimeString()}</span>
+            <span className="level">{log.level || 'INFO'}</span>
+            <span className="message">{log.message}</span>
+          </div>
+        ))}
         <div ref={endRef} />
       </div>
     </aside>
@@ -1202,24 +1074,38 @@ const DashboardApp = () => {
         if (!response.ok) throw new Error('Failed to fetch stats');
         const data = await response.json();
         if (!isMounted) return;
-
-        const statsPayload = normaliseStatsPayload(data);
-        dispatch({ type: 'SET_STATS', payload: statsPayload });
-
-        const pipelinePayload = normaliseAgentPipeline(data.agentPipeline || data.agent_pipeline);
-        dispatch({ type: 'SET_PIPELINE', payload: pipelinePayload });
-
-        const agentPerformancePayload = normaliseAgentPerformance(data.agentPerformance || data.agent_performance);
-        dispatch({ type: 'SET_AGENT_PERFORMANCE', payload: agentPerformancePayload });
-
-        const qualityPayload = normaliseQualityMetrics(data.qualityMetrics || data.quality_metrics);
-        dispatch({ type: 'SET_QUALITY_METRICS', payload: qualityPayload });
-
-        const incidentsPayload = normaliseIncidents(data);
-        dispatch({ type: 'SET_INCIDENTS', payload: incidentsPayload });
-
-        const documentsPayload = data.documents || data.recent_documents || [];
-        dispatch({ type: 'SET_DOCUMENTS', payload: documentsPayload });
+        dispatch({
+          type: 'SET_STATS',
+          payload: {
+            documentsProcessed: data.documentsProcessed || 0,
+            totalDocuments: data.totalDocuments || data.total || 0,
+            errors: data.errors || 0,
+            warnings: data.warnings || 0,
+            qualityScore: data.qualityScore || data.quality || 0,
+            successRate: data.successRate || data.success || 0,
+            avgTimePerDoc: data.avgTimePerDoc || data.averageDocumentTime || 0,
+            queueDepth: data.queueDepth || data.pending || 0,
+            throughputHistory: data.throughputHistory || data.throughput || [],
+            currentDocument: data.currentDocument || {},
+            knowledgeBase: data.knowledgeBase || data.kb || {},
+            systemHealth: data.systemHealth || data.health || {}
+          }
+        });
+        if (data.agentPipeline) {
+          dispatch({ type: 'SET_PIPELINE', payload: data.agentPipeline });
+        }
+        if (data.agentPerformance) {
+          dispatch({ type: 'SET_AGENT_PERFORMANCE', payload: data.agentPerformance });
+        }
+        if (data.qualityMetrics) {
+          dispatch({ type: 'SET_QUALITY_METRICS', payload: data.qualityMetrics });
+        }
+        if (data.incidents) {
+          dispatch({ type: 'SET_INCIDENTS', payload: data.incidents });
+        }
+        if (data.documents) {
+          dispatch({ type: 'SET_DOCUMENTS', payload: data.documents });
+        }
         if (data.suggestedActions) {
           dispatch({ type: 'SET_SUGGESTED_ACTIONS', payload: data.suggestedActions });
         }
@@ -1235,49 +1121,49 @@ const DashboardApp = () => {
     };
   }, []);
 
-    useEffect(() => {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
-      ws.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          if (payload.type === 'log') {
-            dispatch({
-              type: 'APPEND_LOG',
-              payload: {
-                id: payload.id || `${Date.now()}-${Math.random()}`,
-                timestamp: payload.timestamp || new Date().toISOString(),
-                level: (payload.level || 'INFO').toUpperCase(),
-                message: payload.message || ''
-              }
-            });
-          }
-          if (payload.type === 'stats' && payload.stats) {
-            dispatch({ type: 'SET_STATS', payload: normaliseStatsPayload(payload.stats) });
-          }
-          if (payload.type === 'pipeline') {
-            dispatch({ type: 'SET_PIPELINE', payload: normaliseAgentPipeline(payload.data) });
-          }
-          if (payload.type === 'quality') {
-            dispatch({ type: 'SET_QUALITY_METRICS', payload: normaliseQualityMetrics(payload.data) });
-          }
-          if (payload.type === 'agentPerformance') {
-            dispatch({ type: 'SET_AGENT_PERFORMANCE', payload: normaliseAgentPerformance(payload.data) });
-          }
-          if (payload.type === 'documents') {
-            dispatch({ type: 'SET_DOCUMENTS', payload: payload.data || [] });
-          }
-          if (payload.type === 'incidents') {
-            dispatch({ type: 'SET_INCIDENTS', payload: payload.data || [] });
-          }
-        } catch (err) {
-          console.error('Failed to process websocket message', err);
+    ws.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.type === 'log') {
+          dispatch({
+            type: 'APPEND_LOG',
+            payload: {
+              id: payload.id || `${Date.now()}-${Math.random()}`,
+              timestamp: payload.timestamp || new Date().toISOString(),
+              level: payload.level || 'INFO',
+              message: payload.message || ''
+            }
+          });
         }
-      };
+        if (payload.type === 'stats' && payload.stats) {
+          dispatch({ type: 'SET_STATS', payload: payload.stats });
+        }
+        if (payload.type === 'pipeline') {
+          dispatch({ type: 'SET_PIPELINE', payload: payload.data });
+        }
+        if (payload.type === 'quality') {
+          dispatch({ type: 'SET_QUALITY_METRICS', payload: payload.data });
+        }
+        if (payload.type === 'agentPerformance') {
+          dispatch({ type: 'SET_AGENT_PERFORMANCE', payload: payload.data });
+        }
+        if (payload.type === 'documents') {
+          dispatch({ type: 'SET_DOCUMENTS', payload: payload.data });
+        }
+        if (payload.type === 'incidents') {
+          dispatch({ type: 'SET_INCIDENTS', payload: payload.data });
+        }
+      } catch (err) {
+        console.error('Failed to process websocket message', err);
+      }
+    };
 
-      return () => ws.close();
-    }, []);
+    return () => ws.close();
+  }, []);
 
   const contextValue = useMemo(
     () => ({
