@@ -510,6 +510,7 @@ class SupervisorAgent(BaseAgent):
             "quality_score": quality_score,
             "confidence_score": confidence_score,
             "validation_passed": validation_passed,
+            "retry_metadata": state.get("validation_result", {}).get("retry_metadata", {}),
             "retry_counts": state.get("attempt_counters", {}),
             "completed_nodes": state.get("completed_nodes", {}),
             "metadata": as_dict(state).get("metadata", {}),
