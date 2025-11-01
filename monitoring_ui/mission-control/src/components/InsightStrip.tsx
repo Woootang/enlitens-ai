@@ -1,50 +1,46 @@
-import { Chip, Paper, Stack, Typography } from '@mui/material';
+import { Card, CardBody, Heading, Tag, Text, Wrap, WrapItem } from '@chakra-ui/react';
 import { DashboardInsight } from '../types';
 
 interface InsightStripProps {
   insights: DashboardInsight[];
 }
 
-const severityColor: Record<DashboardInsight['severity'], 'default' | 'warning' | 'error' | 'info' | 'success'> = {
-  info: 'info',
-  normal: 'success',
-  warning: 'warning',
-  critical: 'error',
+const severityColor: Record<DashboardInsight['severity'], string> = {
+  info: 'blue',
+  normal: 'green',
+  warning: 'yellow',
+  critical: 'red',
 };
 
 export const InsightStrip = ({ insights }: InsightStripProps) => {
   return (
-    <Paper
-      sx={{
-        p: 2.5,
-        borderRadius: 3,
-        border: '1px solid rgba(148,163,184,0.3)',
-        background: 'rgba(15,23,42,0.6)',
-      }}
-    >
-      <Stack spacing={1.5}>
-        <Typography variant="overline" color="primary.light" letterSpacing={2}>
+    <Card borderRadius="xl" borderColor="whiteAlpha.200">
+      <CardBody display="flex" flexDirection="column" gap={4}>
+        <Heading as="h3" size="xs" textTransform="uppercase" letterSpacing="0.3em" color="brand.200">
           Insights
-        </Typography>
+        </Heading>
         {insights.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
+          <Text fontSize="sm" color="slate.300">
             System nominal. No anomalies detected.
-          </Typography>
+          </Text>
         ) : (
-          <Stack direction="row" flexWrap="wrap" gap={1.25}>
+          <Wrap spacing={2}>
             {insights.map((insight) => (
-              <Chip
-                key={insight.id}
-                label={insight.message}
-                color={severityColor[insight.severity]}
-                variant="filled"
-                size="small"
-                sx={{ fontSize: 12, px: 1 }}
-              />
+              <WrapItem key={insight.id}>
+                <Tag
+                  size="lg"
+                  borderRadius="full"
+                  colorScheme={severityColor[insight.severity] ?? 'blue'}
+                  px={3}
+                  py={1}
+                >
+                  {insight.message}
+                </Tag>
+              </WrapItem>
             ))}
-          </Stack>
+          </Wrap>
         )}
-      </Stack>
-    </Paper>
+      </CardBody>
+    </Card>
   );
 };

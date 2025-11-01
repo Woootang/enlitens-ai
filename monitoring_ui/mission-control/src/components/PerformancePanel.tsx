@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography } from '@mui/material';
+import { Box, Card, CardBody, Stack, Text } from '@chakra-ui/react';
 import { useMemo, type ReactNode } from 'react';
 import {
   Area,
@@ -58,27 +58,27 @@ export const PerformancePanel = ({ stats, trend }: PerformancePanelProps) => {
   }, [trend]);
 
   return (
-    <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'rgba(13,19,33,0.75)' }}>
-      <Stack spacing={3}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <div>
-            <Typography variant="overline" letterSpacing={2} color="primary.light">
+    <Card borderRadius="xl" borderColor="whiteAlpha.200">
+      <CardBody as={Stack} spacing={6}>
+        <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+          <Box>
+            <Text textTransform="uppercase" letterSpacing="0.3em" fontSize="xs" color="brand.200">
               Agent Performance
-            </Typography>
-            <Typography variant="subtitle2" color="text.secondary">
+            </Text>
+            <Text fontSize="sm" color="slate.300">
               Execution velocity and reliability by agent
-            </Typography>
-          </div>
-          <Typography variant="h6" color="text.primary">
+            </Text>
+          </Box>
+          <Text fontWeight="semibold" fontSize="lg" color="slate.100">
             Aggregate latency: {formatSeconds(aggregateLatency)}
-          </Typography>
+          </Text>
         </Stack>
 
-        <Stack spacing={1}>
-          <Typography variant="caption" color="text.secondary">
+        <Stack spacing={2}>
+          <Text fontSize="xs" color="slate.400">
             Latency trend (most recent)
-          </Typography>
-          <BoxWithChart minHeight={120}>
+          </Text>
+          <ChartContainer minH={120}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={sparkData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
                 <defs>
@@ -87,20 +87,20 @@ export const PerformancePanel = ({ stats, trend }: PerformancePanelProps) => {
                     <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="time" hide tickLine={false} interval={sparkData.length > 8 ? 'preserveEnd' : 0} />
+                <XAxis dataKey="time" hide interval={sparkData.length > 8 ? 'preserveEnd' : 0} />
                 <YAxis hide domain={['auto', 'auto']} />
                 <Tooltip formatter={(value: number) => `${value.toFixed(2)}s`} />
                 <Area type="monotone" dataKey="latency" stroke="#38bdf8" strokeWidth={2} fill="url(#latencyGradient)" />
               </AreaChart>
             </ResponsiveContainer>
-          </BoxWithChart>
+          </ChartContainer>
         </Stack>
 
-        <Stack spacing={3} direction={{ xs: 'column', md: 'row' }}>
-          <BoxWithChart flex={1} minHeight={260}>
-            <Typography variant="subtitle2" color="text.secondary" mb={2}>
+        <Stack direction={{ base: 'column', md: 'row' }} spacing={4}>
+          <ChartContainer flex={1} minH={260}>
+            <Text fontSize="sm" color="slate.300" mb={2}>
               Average execution time (s)
-            </Typography>
+            </Text>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={latencyData} layout="vertical" margin={{ left: 60, right: 16, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -110,12 +110,12 @@ export const PerformancePanel = ({ stats, trend }: PerformancePanelProps) => {
                 <Bar dataKey="avgTime" fill="#60a5fa" radius={[4, 4, 4, 4]} />
               </BarChart>
             </ResponsiveContainer>
-          </BoxWithChart>
+          </ChartContainer>
 
-          <BoxWithChart flex={1} minHeight={260}>
-            <Typography variant="subtitle2" color="text.secondary" mb={2}>
+          <ChartContainer flex={1} minH={260}>
+            <Text fontSize="sm" color="slate.300" mb={2}>
               Success vs failure counts
-            </Typography>
+            </Text>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={successFailureData} margin={{ left: 16, right: 16, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
@@ -127,27 +127,21 @@ export const PerformancePanel = ({ stats, trend }: PerformancePanelProps) => {
                 <Bar dataKey="failures" name="Failures" fill="#f87171" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </BoxWithChart>
+          </ChartContainer>
         </Stack>
-      </Stack>
-    </Paper>
+      </CardBody>
+    </Card>
   );
 };
 
-type BoxWithChartProps = {
+type ChartContainerProps = {
   children: ReactNode;
-  minHeight?: number;
+  minH?: number;
   flex?: number;
 };
 
-const BoxWithChart = ({ children, minHeight = 200, flex }: BoxWithChartProps) => (
-  <div
-    style={{
-      position: 'relative',
-      minHeight,
-      flex: flex ?? 1,
-    }}
-  >
+const ChartContainer = ({ children, minH = 200, flex }: ChartContainerProps) => (
+  <Box position="relative" minH={minH} flex={flex ?? 1}>
     {children}
-  </div>
+  </Box>
 );

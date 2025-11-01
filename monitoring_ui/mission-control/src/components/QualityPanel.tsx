@@ -1,4 +1,4 @@
-import { Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material';
+import { Card, CardBody, Progress, Stack, Tag, Text, Wrap, WrapItem } from '@chakra-ui/react';
 import { QualityMetric } from '../types';
 
 interface QualityPanelProps {
@@ -37,60 +37,54 @@ const normalizeValue = (metric: QualityMetric) => {
 
 export const QualityPanel = ({ metrics, layerFailures }: QualityPanelProps) => {
   return (
-    <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'rgba(17,24,39,0.78)' }}>
-      <Stack spacing={3}>
+    <Card borderRadius="xl" borderColor="whiteAlpha.200">
+      <CardBody as={Stack} spacing={5}>
         <Stack spacing={0.5}>
-          <Typography variant="overline" letterSpacing={2} color="primary.light">
+          <Text textTransform="uppercase" letterSpacing="0.3em" fontSize="xs" color="brand.200">
             Quality Metrics
-          </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
+          </Text>
+          <Text fontSize="sm" color="slate.300">
             Faithfulness, alignment, and citation integrity checks
-          </Typography>
+          </Text>
         </Stack>
 
-        <Stack spacing={2}>
+        <Stack spacing={3}>
           {metrics.length === 0 && (
-            <Typography variant="body2" color="text.secondary">
+            <Text fontSize="sm" color="slate.300">
               Awaiting quality telemetry…
-            </Typography>
+            </Text>
           )}
           {metrics.map((metric) => {
             const palette = severityPalette[metric.severity];
             const baseline = formatBaseline(metric);
             return (
-              <Stack key={metric.id} spacing={1.25}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Stack spacing={0.5}>
-                    <Typography variant="subtitle2" color="text.primary">
+              <Stack key={metric.id} spacing={2}>
+                <Stack direction="row" justify="space-between" align="flex-start">
+                  <Stack spacing={0}>
+                    <Text fontSize="sm" fontWeight="semibold">
                       {metric.label}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    </Text>
+                    <Text fontSize="xs" color="slate.400">
                       {metric.orientation === 'lower_is_better' ? 'Lower is better' : 'Higher is better'}
-                    </Typography>
+                    </Text>
                   </Stack>
-                  <Stack spacing={0.25} alignItems="flex-end">
-                    <Typography variant="h6" color={palette.text}>
+                  <Stack spacing={0} align="flex-end">
+                    <Text fontSize="lg" fontWeight="bold" color={palette.text}>
                       {metric.displayValue}
-                    </Typography>
+                    </Text>
                     {baseline && (
-                      <Typography variant="caption" color="text.secondary">
+                      <Text fontSize="xs" color="slate.400">
                         Baseline {metric.orientation === 'lower_is_better' ? '≤' : '≥'} {baseline}
-                      </Typography>
+                      </Text>
                     )}
                   </Stack>
                 </Stack>
-                <LinearProgress
-                  variant="determinate"
+                <Progress
                   value={normalizeValue(metric)}
-                  sx={{
-                    height: 10,
-                    borderRadius: 999,
-                    backgroundColor: palette.background,
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 999,
-                      backgroundColor: palette.bar,
-                    },
-                  }}
+                  height="10px"
+                  borderRadius="full"
+                  bg={palette.background}
+                  sx={{ '& > div': { backgroundColor: palette.bar } }}
                 />
               </Stack>
             );
@@ -98,18 +92,22 @@ export const QualityPanel = ({ metrics, layerFailures }: QualityPanelProps) => {
         </Stack>
 
         {layerFailures.length > 0 && (
-          <Stack spacing={1}>
-            <Typography variant="subtitle2" color="text.secondary">
+          <Stack spacing={2}>
+            <Text fontSize="sm" color="slate.300">
               Validation findings
-            </Typography>
-            <Stack direction="row" flexWrap="wrap" gap={1}>
+            </Text>
+            <Wrap spacing={2}>
               {layerFailures.map((failure, index) => (
-                <Chip key={`${failure}-${index}`} label={failure} color="warning" variant="outlined" size="small" />
+                <WrapItem key={`${failure}-${index}`}>
+                  <Tag colorScheme="yellow" variant="outline" borderRadius="full" px={3} py={1} fontSize="xs">
+                    {failure}
+                  </Tag>
+                </WrapItem>
               ))}
-            </Stack>
+            </Wrap>
           </Stack>
         )}
-      </Stack>
-    </Paper>
+      </CardBody>
+    </Card>
   );
 };

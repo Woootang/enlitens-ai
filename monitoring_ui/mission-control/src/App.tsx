@@ -1,4 +1,4 @@
-import { Box, Container, Stack } from '@mui/material';
+import { Box, Container, SimpleGrid, Stack } from '@chakra-ui/react';
 import { AlertBanner } from './components/AlertBanner';
 import { InsightStrip } from './components/InsightStrip';
 import { PipelineGraph } from './components/PipelineGraph';
@@ -22,46 +22,22 @@ function App() {
   const layout = useDashboardStore((state) => state.layout);
 
   return (
-    <Box
-      minHeight="100vh"
-      sx={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1a365d 60%, #0b1120 100%)',
-        color: 'text.primary',
-        py: { xs: 6, md: 10 },
-      }}
-    >
-      <Container maxWidth="xl">
-        <Stack spacing={4}>
+    <Box minH="100vh" bgGradient="linear(135deg, #0f172a 0%, #1a365d 60%, #0b1120 100%)" py={{ base: 10, md: 14 }}>
+      <Container maxW="7xl">
+        <Stack spacing={8}>
           <AlertBanner severity={summary.severity} messages={summary.alertMessages} connectionStatus={connection} />
           <SummaryPanel summary={summary} />
           <InsightStrip insights={insights} />
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: layout.showPlan ? { xs: '1fr', xl: '2fr 1fr' } : '1fr',
-              gap: 4,
-              alignItems: 'stretch',
-            }}
-          >
-            <Box>
-              <PipelineGraph agents={agents} highlightAgentId={highlightAgentId} />
-            </Box>
-            {layout.showPlan && (
-              <Box>
-                <PlanPanel steps={plan} visible={layout.showPlan} />
-              </Box>
-            )}
-          </Box>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', xl: '1fr 1fr' },
-              gap: 4,
-            }}
-          >
+
+          <SimpleGrid columns={{ base: 1, xl: layout.showPlan ? 2 : 1 }} spacing={6} alignItems="stretch">
+            <PipelineGraph agents={agents} highlightAgentId={highlightAgentId} />
+            {layout.showPlan && <PlanPanel steps={plan} visible={layout.showPlan} />}
+          </SimpleGrid>
+
+          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={6} alignItems="stretch">
             <PerformancePanel stats={performance.stats} trend={performance.trend} />
             <QualityPanel metrics={quality.metrics} layerFailures={quality.layerFailures} />
-          </Box>
+          </SimpleGrid>
         </Stack>
       </Container>
     </Box>

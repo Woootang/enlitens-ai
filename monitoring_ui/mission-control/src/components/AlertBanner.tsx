@@ -1,10 +1,10 @@
-import { Alert, AlertTitle, Typography } from '@mui/material';
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Flex, Text } from '@chakra-ui/react';
 import { SeverityLevel } from '../types';
 
-const severityMap: Record<SeverityLevel, { severity: 'info' | 'warning' | 'error'; title: string }> = {
-  normal: { severity: 'info', title: 'Nominal' },
-  warning: { severity: 'warning', title: 'Attention' },
-  critical: { severity: 'error', title: 'Action Required' },
+const severityMap: Record<SeverityLevel, { status: 'info' | 'warning' | 'error' | 'success'; title: string }> = {
+  normal: { status: 'success', title: 'Nominal' },
+  warning: { status: 'warning', title: 'Attention' },
+  critical: { status: 'error', title: 'Action Required' },
 };
 
 interface AlertBannerProps {
@@ -14,20 +14,34 @@ interface AlertBannerProps {
 }
 
 export const AlertBanner = ({ severity, messages, connectionStatus }: AlertBannerProps) => {
-  const config = severityMap[severity];
+  const config = severityMap[severity] ?? severityMap.normal;
   const message = messages[0] ?? 'System stable and awaiting new tasks.';
 
   return (
-    <Alert severity={config.severity} variant="outlined" sx={{ borderRadius: 3, borderColor: 'primary.main' }}>
-      <AlertTitle sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <Typography component="span" fontWeight={700} textTransform="uppercase" fontSize={12} letterSpacing={2} color="primary.light">
+    <Alert
+      status={config.status}
+      variant="subtle"
+      borderRadius="xl"
+      borderWidth="1px"
+      borderColor="whiteAlpha.200"
+      bg="whiteAlpha.100"
+      backdropFilter="blur(12px)"
+      alignItems="flex-start"
+    >
+      <AlertIcon boxSize="24px" mr={3} />
+      <Flex direction="column" gap={1} flex={1}>
+        <AlertTitle textTransform="uppercase" letterSpacing="0.3em" fontSize="xs" color="brand.200">
           {config.title}
-        </Typography>
-        <Typography component="span" fontSize={12} color="text.secondary">
-          Link: {connectionStatus}
-        </Typography>
-      </AlertTitle>
-      <Typography fontSize={14}>{message}</Typography>
+        </AlertTitle>
+        <AlertDescription>
+          <Text fontSize="sm" mb={1} color="slate.100">
+            {message}
+          </Text>
+          <Text fontSize="xs" color="slate.300">
+            Link: {connectionStatus}
+          </Text>
+        </AlertDescription>
+      </Flex>
     </Alert>
   );
 };

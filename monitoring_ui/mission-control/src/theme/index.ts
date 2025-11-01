@@ -1,36 +1,46 @@
-import { createTheme } from '@mui/material/styles';
+import { extendTheme, type ThemeConfig } from '@chakra-ui/react';
 
-export const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#63b3ed',
-    },
-    background: {
-      default: '#0f172a',
-      paper: 'rgba(17, 25, 40, 0.8)',
-    },
-    text: {
-      primary: '#f8fafc',
-      secondary: '#cbd5f5',
+const config: ThemeConfig = {
+  initialColorMode: 'dark',
+  useSystemColorMode: false,
+};
+
+export const theme = extendTheme({
+  config,
+  fonts: {
+    heading: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    body: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  },
+  styles: {
+    global: {
+      body: {
+        bg: 'gray.900',
+        color: 'slate.100',
+      },
     },
   },
-  typography: {
-    fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    button: {
-      textTransform: 'none',
-      fontWeight: 600,
+  colors: {
+    brand: {
+      50: '#e4f0ff',
+      100: '#bed4ff',
+      200: '#96b9ff',
+      300: '#6e9efe',
+      400: '#467ffd',
+      500: '#2d65e4',
+      600: '#1f4db2',
+      700: '#153580',
+      800: '#0b1f4f',
+      900: '#050d27',
     },
-  },
-  shape: {
-    borderRadius: 16,
   },
   components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          backdropFilter: 'blur(10px)',
+    Card: {
+      baseStyle: {
+        container: {
+          bg: 'rgba(15, 23, 42, 0.8)',
+          borderWidth: '1px',
+          borderColor: 'whiteAlpha.200',
+          backdropFilter: 'blur(12px)',
         },
       },
     },

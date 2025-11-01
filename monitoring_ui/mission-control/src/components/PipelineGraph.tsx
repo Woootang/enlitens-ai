@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import ReactFlow, { Background, Controls, Edge, Node } from 'reactflow';
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Badge, Box, Card, CardBody, Text, VStack } from '@chakra-ui/react';
 import 'reactflow/dist/style.css';
 import { PipelineAgent } from '../types';
 
@@ -41,35 +41,38 @@ const PipelineNode = ({ data }: { data: { agent: PipelineAgent; highlight?: bool
   const { agent, highlight } = data;
   const statusColor = STATUS_COLORS[agent.status] ?? STATUS_COLORS.unknown;
   return (
-    <Paper
-      elevation={highlight ? 8 : 3}
-      sx={{
-        width: NODE_WIDTH,
-        p: 2,
-        borderRadius: 3,
-        border: highlight ? '2px solid rgba(99,179,237,0.8)' : '1px solid rgba(255,255,255,0.15)',
-        backgroundColor: 'rgba(15, 23, 42, 0.85)',
-      }}
+    <Card
+      variant="elevated"
+      borderRadius="xl"
+      borderWidth={highlight ? '2px' : '1px'}
+      borderColor={highlight ? 'brand.400' : 'whiteAlpha.200'}
+      bg="rgba(15, 23, 42, 0.85)"
+      w={`${NODE_WIDTH}px`}
+      boxShadow={highlight ? 'xl' : 'md'}
     >
-      <Stack spacing={1}>
-        <Typography fontWeight={600} fontSize={14} color="text.primary" sx={{ wordBreak: 'break-word' }}>
-          {agent.name}
-        </Typography>
-        <Chip
-          label={agent.status.toUpperCase()}
-          size="small"
-          sx={{
-            backgroundColor: `${statusColor}22`,
-            color: statusColor,
-            fontWeight: 600,
-            width: 'fit-content',
-          }}
-        />
-        <Typography fontSize={12} color="text.secondary">
-          Execs: {agent.executions ?? 0} • Avg: {agent.avgTimeSeconds ? `${agent.avgTimeSeconds.toFixed(2)}s` : 'n/a'}
-        </Typography>
-      </Stack>
-    </Paper>
+      <CardBody>
+        <VStack align="stretch" spacing={2}>
+          <Text fontWeight="semibold" fontSize="sm" color="slate.100" noOfLines={2}>
+            {agent.name}
+          </Text>
+          <Badge
+            alignSelf="flex-start"
+            color={statusColor}
+            bg={`${statusColor}22`}
+            px={2.5}
+            py={1}
+            fontSize="0.65rem"
+            fontWeight="bold"
+            borderRadius="full"
+          >
+            {agent.status.toUpperCase()}
+          </Badge>
+          <Text fontSize="xs" color="slate.300">
+            Execs: {agent.executions ?? 0} • Avg: {agent.avgTimeSeconds ? `${agent.avgTimeSeconds.toFixed(2)}s` : 'n/a'}
+          </Text>
+        </VStack>
+      </CardBody>
+    </Card>
   );
 };
 
@@ -87,14 +90,22 @@ export const PipelineGraph = ({ agents, highlightAgentId }: PipelineGraphProps) 
 
   if (agents.length === 0) {
     return (
-      <Box p={6} textAlign="center" color="text.secondary" borderRadius={3} border="1px dashed rgba(255,255,255,0.2)">
+      <Box
+        p={8}
+        textAlign="center"
+        color="slate.400"
+        borderWidth="1px"
+        borderStyle="dashed"
+        borderRadius="xl"
+        borderColor="whiteAlpha.300"
+      >
         Awaiting pipeline activity…
       </Box>
     );
   }
 
   return (
-    <Box height={280} width="100%" borderRadius={3} overflow="hidden" border="1px solid rgba(255,255,255,0.2)">
+    <Box h="280px" w="100%" borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="whiteAlpha.200">
       <ReactFlow
         nodes={nodes as unknown as Node[]}
         edges={edges}

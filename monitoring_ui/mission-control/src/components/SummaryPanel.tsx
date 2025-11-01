@@ -1,5 +1,15 @@
-import { Box, IconButton, LinearProgress, Paper, Stack, Tooltip, Typography } from '@mui/material';
-import ViewSidebarIcon from '@mui/icons-material/ViewSidebar';
+import { MdViewSidebar } from 'react-icons/md';
+import {
+  Card,
+  CardBody,
+  Flex,
+  IconButton,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Text,
+  Tooltip,
+} from '@chakra-ui/react';
 import { DashboardSummary } from '../types';
 import { useDashboardStore } from '../state/useDashboardStore';
 
@@ -20,81 +30,85 @@ export const SummaryPanel = ({ summary }: SummaryPanelProps) => {
   const layout = useDashboardStore((state) => state.layout);
 
   return (
-    <Paper sx={{ p: 4, borderRadius: 3, border: '1px solid rgba(255,255,255,0.2)', backgroundColor: 'rgba(17,25,40,0.65)' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} mb={3}>
-        <Stack spacing={0.5}>
-          <Typography variant="overline" color="text.secondary" letterSpacing={2}>
-            Active Document
-          </Typography>
-          <Typography variant="h6" color="text.primary">
-            {summary.currentDocument ?? 'Idle'}
-          </Typography>
-        </Stack>
-        <Tooltip title={layout.showPlan ? 'Collapse plan panel' : 'Show plan panel'}>
-          <IconButton color="primary" onClick={actions.togglePlanVisibility} size="small">
-            <ViewSidebarIcon />
-          </IconButton>
-        </Tooltip>
-      </Stack>
-      <Stack spacing={3}>
-        <Box>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-            <Typography variant="body2" color="text.secondary">
+    <Card borderRadius="xl" borderColor="whiteAlpha.200">
+      <CardBody as={Stack} spacing={6}>
+        <Flex justify="space-between" align="flex-start">
+          <Stack spacing={1}>
+            <Text textTransform="uppercase" letterSpacing="0.3em" fontSize="xs" color="brand.200">
+              Active Document
+            </Text>
+            <Text fontSize="lg" fontWeight="semibold" color="slate.100">
+              {summary.currentDocument ?? 'Idle'}
+            </Text>
+          </Stack>
+          <Tooltip label={layout.showPlan ? 'Collapse plan panel' : 'Show plan panel'}>
+            <IconButton
+              aria-label="Toggle plan panel"
+              icon={<MdViewSidebar />}
+              onClick={actions.togglePlanVisibility}
+              variant="ghost"
+              colorScheme="blue"
+              size="sm"
+            />
+          </Tooltip>
+        </Flex>
+
+        <Stack spacing={2}>
+          <Flex justify="space-between" align="center">
+            <Text fontSize="sm" color="slate.300">
               Pipeline progress
-            </Typography>
-            <Typography variant="body2" fontWeight={600}>
+            </Text>
+            <Text fontSize="sm" fontWeight="semibold" color="slate.100">
               {summary.progressPercentage.toFixed(1)}%
-            </Typography>
-          </Stack>
-          <LinearProgress
-            variant="determinate"
+            </Text>
+          </Flex>
+          <Progress
             value={summary.progressPercentage}
-            sx={{ height: 8, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.12)' }}
-            color="primary"
+            height="10px"
+            borderRadius="full"
+            bg="whiteAlpha.200"
+            colorScheme="blue"
           />
-        </Box>
-        <Box
-          sx={{
-            display: 'grid',
-            gap: 3,
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' },
-          }}
-        >
+        </Stack>
+
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
           <Stack spacing={0.5}>
-            <Typography variant="subtitle2" color="text.secondary">
+            <Text fontSize="sm" color="slate.300">
               Processed
-            </Typography>
-            <Typography variant="h5" color="text.primary">
+            </Text>
+            <Text fontSize="2xl" fontWeight="bold" color="slate.100">
               {summary.documentsProcessed}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </Text>
+            <Text fontSize="xs" color="slate.400">
               of {summary.totalDocuments || '—'} documents
-            </Typography>
+            </Text>
           </Stack>
+
           <Stack spacing={0.5}>
-            <Typography variant="subtitle2" color="text.secondary">
+            <Text fontSize="sm" color="slate.300">
               Time on document
-            </Typography>
-            <Typography variant="h5" color="text.primary">
+            </Text>
+            <Text fontSize="2xl" fontWeight="bold" color="slate.100">
               {formatSeconds(summary.timeOnDocumentSeconds)}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </Text>
+            <Text fontSize="xs" color="slate.400">
               Last log {formatSeconds(summary.lastLogSecondsAgo)} ago
-            </Typography>
+            </Text>
           </Stack>
+
           <Stack spacing={0.5}>
-            <Typography variant="subtitle2" color="text.secondary">
+            <Text fontSize="sm" color="slate.300">
               Alerts
-            </Typography>
-            <Typography variant="h5" color="text.primary">
+            </Text>
+            <Text fontSize="2xl" fontWeight="bold" color="slate.100">
               {summary.errors}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </Text>
+            <Text fontSize="xs" color="slate.400">
               Warnings: {summary.warnings}
-            </Typography>
+            </Text>
           </Stack>
-        </Box>
-      </Stack>
-    </Paper>
+        </SimpleGrid>
+      </CardBody>
+    </Card>
   );
 };

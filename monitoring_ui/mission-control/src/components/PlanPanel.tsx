@@ -1,23 +1,28 @@
-import { Card, CardContent, List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import PendingIcon from '@mui/icons-material/Pending';
+import {
+  Card,
+  CardBody,
+  Flex,
+  Icon,
+  Stack,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+import { CheckCircleIcon, RepeatClockIcon, TimeIcon, WarningIcon } from '@chakra-ui/icons';
 import { PlanStep } from '../types';
 import { useDashboardStore } from '../state/useDashboardStore';
 
 const iconMap = (status: PlanStep['status']) => {
   switch (status) {
     case 'completed':
-      return { icon: CheckCircleIcon, color: 'success.main', label: 'Completed' };
+      return { icon: CheckCircleIcon, color: 'green.300', label: 'Completed' };
     case 'in_progress':
-      return { icon: AutorenewIcon, color: 'warning.main', label: 'In Progress' };
+      return { icon: RepeatClockIcon, color: 'yellow.300', label: 'In Progress' };
     case 'failed':
-      return { icon: WarningAmberIcon, color: 'error.main', label: 'Failed' };
+      return { icon: WarningIcon, color: 'red.300', label: 'Failed' };
     case 'skipped':
-      return { icon: PendingIcon, color: 'info.main', label: 'Skipped' };
+      return { icon: TimeIcon, color: 'cyan.300', label: 'Skipped' };
     default:
-      return { icon: PendingIcon, color: 'text.secondary', label: 'Pending' };
+      return { icon: TimeIcon, color: 'slate.400', label: 'Pending' };
   }
 };
 
@@ -32,58 +37,63 @@ export const PlanPanel = ({ steps, visible }: PlanPanelProps) => {
 
   if (!visible) {
     return (
-      <Card sx={{ border: '1px dashed rgba(255,255,255,0.3)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CardContent>
-          <Typography align="center" color="text.secondary">
+      <Card
+        borderStyle="dashed"
+        borderColor="whiteAlpha.300"
+        h="100%"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <CardBody>
+          <Text textAlign="center" color="slate.300" fontSize="sm">
             Plan view collapsed — toggle from the summary panel to monitor orchestration.
-          </Typography>
-        </CardContent>
+          </Text>
+        </CardBody>
       </Card>
     );
   }
 
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: '1px solid rgba(255,255,255,0.2)' }}>
-      <CardContent sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
+    <Card h="100%" borderColor="whiteAlpha.200">
+      <CardBody overflowY="auto" display="flex" flexDirection="column" gap={3}>
         {steps.length === 0 ? (
-          <Typography align="center" color="text.secondary" sx={{ py: 8 }}>
-            Waiting for supervisor plan…
-          </Typography>
+          <Flex justify="center" align="center" py={12}>
+            <Text color="slate.300">Waiting for supervisor plan…</Text>
+          </Flex>
         ) : (
-          <List dense sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <VStack spacing={2} align="stretch">
             {steps.map((step) => {
-              const { icon: IconComponent, color, label } = iconMap(step.status);
+              const { icon, color, label } = iconMap(step.status);
               const isLinked = step.relatedAgentId && step.relatedAgentId === highlightAgentId;
               return (
-                <ListItem
+                <Flex
                   key={step.id}
+                  gap={3}
+                  align="center"
+                  px={3}
+                  py={2}
+                  borderRadius="lg"
+                  borderWidth="1px"
+                  borderColor={isLinked ? 'brand.400' : 'transparent'}
+                  bg={isLinked ? 'rgba(99, 179, 237, 0.1)' : 'transparent'}
                   onMouseEnter={() => actions.setHighlightPlanStep(step.id, step.relatedAgentId)}
                   onMouseLeave={() => actions.setHighlightPlanStep(undefined, undefined)}
-                  sx={{
-                    borderRadius: 2,
-                    border: isLinked ? '1px solid rgba(99,179,237,0.6)' : '1px solid transparent',
-                    backgroundColor: isLinked ? 'rgba(99, 179, 237, 0.15)' : 'transparent',
-                  }}
                 >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: `${color}22`, color }}>
-                      <IconComponent fontSize="small" />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={<Typography fontWeight={600}>{step.title}</Typography>}
-                    secondary={
-                      <Typography variant="caption" color="text.secondary">
-                        {label}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
+                  <Icon as={icon} boxSize={4} color={color} />
+                  <Stack spacing={0} flex={1}>
+                    <Text fontWeight="semibold" fontSize="sm">
+                      {step.title}
+                    </Text>
+                    <Text fontSize="xs" color="slate.300">
+                      {label}
+                    </Text>
+                  </Stack>
+                </Flex>
               );
             })}
-          </List>
+          </VStack>
         )}
-      </CardContent>
+      </CardBody>
     </Card>
   );
 };
