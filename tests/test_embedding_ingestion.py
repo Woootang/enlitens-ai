@@ -119,3 +119,10 @@ def test_context_rag_agent_returns_results():
     rag = result["rag_retrieval"]
     assert rag["top_passages"], "Expected retrieval results"
     assert entry.metadata.document_id in rag["related_documents"]
+    first_passage = rag["top_passages"][0]
+    assert "alignment" in first_passage
+    assert "combined_score" in first_passage
+    assert isinstance(first_passage["alignment"].get("score"), float)
+    summary = rag["alignment_summary"]
+    assert summary["count"] == len(rag["top_passages"])
+    assert summary["average_alignment"] <= summary["average_combined_score"] + 1  # sanity bound

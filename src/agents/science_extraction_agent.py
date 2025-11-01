@@ -11,6 +11,7 @@ from .base_agent import BaseAgent
 from src.models.enlitens_schemas import ResearchContent
 from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
 from src.synthesis.ollama_client import OllamaClient
+from src.utils.enlitens_constitution import EnlitensConstitution
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,8 @@ class ScienceExtractionAgent(BaseAgent):
         self.ollama_client = None
         self.self_consistency_temperatures = [0.1, 0.2, 0.3]
         self.vote_threshold_ratio = 0.5
+        self.constitution = EnlitensConstitution()
+        self._prompt_principles = ["ENL-001", "ENL-002", "ENL-003", "ENL-009"]
 
     async def initialize(self) -> bool:
         """Initialize the science extraction agent."""
@@ -60,74 +63,55 @@ class ScienceExtractionAgent(BaseAgent):
                 f"{few_shot_block}\n\n" if few_shot_block else ""
             )
 
-            prompt = f"""
-You are a neuroscience research analyst extracting comprehensive scientific content from academic papers.
+            constitution_block = self.constitution.render_prompt_section(
+                self._prompt_principles,
+                include_exemplars=True,
+                header="APPLY THESE ENLITENS PRINCIPLES DURING EXTRACTION",
+            )
 
-STRICT RULES:
-✓ Extract ONLY information explicitly stated in the source document
-✓ Quote exact statistics and data points - NO approximations
-✓ Include source context for all citations (author, year, page if available)
-✓ Mark any inferred implications as "Potential implication:" to distinguish from stated findings
-✗ DO NOT fabricate statistics, citations, or research findings
-✗ DO NOT add information from your training data
-✗ DO NOT approximate numbers - use exact figures from the text
+            prompt = f"""
+You are the Enlitens Science Extraction Agent.
+
+Mission: surface research facts that advance a neurodiversity-affirming analysis while dismantling pathology-first language.
+
+{constitution_block}
+
+STRICT EXTRACTION RULES:
+• Pull ONLY evidence stated in the excerpt. Quote or paraphrase with precision and cite as given.
+• Highlight context, systems, and environment anywhere a finding could be misread as individual deficit.
+• When legacy terminology (DSM/ADOS/"disorder") appears, reframe it using constitution-approved language and note the legacy frame.
+• Never invent statistics, citations, or references. If evidence is missing respond with "Refusal: insufficient grounding".
 
 {exemplars}
-DOCUMENT TEXT:
+
+DOCUMENT TEXT (truncated to relevant span):
 {text_excerpt}
 
-Extract ALL research content from this document. Be thorough but accurate - only include what is explicitly stated or can be directly inferred from the text. If a required field cannot be filled because the evidence is missing, respond "Refusal: insufficient grounding in provided sources."
+Return JSON with these EXACT fields:
+{{"findings": [str], "statistics": [str], "methodologies": [str], "limitations": [str], "future_directions": [str], "implications": [str], "citations": [str], "references": [str]}}
 
-Generate content for ALL fields below:
-
-1. FINDINGS: List 5-15 key research findings, discoveries, or conclusions. Include main results, secondary findings, interesting observations, and supporting evidence. Be comprehensive!
-
-2. STATISTICS: List 5-15 statistical data points, numbers, percentages, effect sizes, sample sizes, p-values, confidence intervals, or quantitative results. Include any numerical data mentioned.
-
-3. METHODOLOGIES: List 5-15 research methods, study designs, experimental procedures, data collection methods, analysis techniques, participant selection methods, or measurement approaches used.
-
-4. LIMITATIONS: List 3-10 study limitations, weaknesses, potential confounds, sample restrictions, methodological concerns, or areas needing further research. If not stated, infer reasonable limitations.
-
-5. FUTURE_DIRECTIONS: List 3-10 suggestions for future research, unanswered questions, areas needing investigation, or next steps mentioned or implied by the research.
-
-6. IMPLICATIONS: List 5-15 clinical implications, practical applications, therapeutic relevance, real-world applications, or how this research informs practice. Be creative in inferring applications!
-
-7. CITATIONS: List 5-15 key papers cited, author names mentioned, referenced studies, or important sources. Extract any citation information present.
-
-8. REFERENCES: List 5-15 bibliographic details, reference list entries, or source materials. Extract any reference information present.
-
-IMPORTANT EXTRACTION RULES:
-- Extract only what is explicitly stated in the source document
-- Quote exact statistics with context - NO rounding or approximation
-- For citations, include exact author names and years as stated in document
-- For implications, distinguish between stated conclusions and potential applications
-- Each list should have AT LEAST 3 items from the source document
-- Use clear, complete sentences with exact quotes where appropriate
-- No numbering or bullet points in strings
-- Quality over quantity - accuracy is critical!
-
-STATISTICS FORMAT:
-- "According to [Author] ([Year]), [exact quoted statistic with numbers]"
-- Include context: sample size, methodology, significance levels as stated
-
-Return as JSON with these EXACT field names:
-{{"findings": [list], "statistics": [list], "methodologies": [list], "limitations": [list], "future_directions": [list], "implications": [list], "citations": [list], "references": [list]}}
+Tone: factual, precise, and constitutionally aligned from the start.
 """
 
             cache_kwargs = self._cache_kwargs(context)
-            result = await self.ollama_client.generate_structured_response(
+            primary_result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ResearchContent,
                 temperature=0.3,  # LOWERED from 0.6: Research shows 0.3 optimal for factual extraction
                 max_retries=3,
                 **cache_kwargs,
             )
-            samples = await self._run_self_consistency_sampling(prompt)
+            samples: List[ResearchContent] = []
+            if primary_result:
+                samples.append(primary_result)
+
+            samples.extend(await self._run_self_consistency_sampling(prompt))
 
             if samples:
                 aggregated, vote_stats = self._aggregate_samples(samples)
+                sanitized = self._apply_constitutional_filters(aggregated)
                 return {
-                    "research_content": aggregated,
+                    "research_content": sanitized,
                     "extraction_quality": "high",
                     "self_consistency": vote_stats,
                 }
@@ -202,6 +186,16 @@ Return as JSON with these EXACT field names:
             "vote_threshold": vote_threshold,
             "field_vote_counts": field_votes,
         }
+
+    def _apply_constitutional_filters(
+        self, aggregated: Dict[str, List[str]]
+    ) -> Dict[str, List[str]]:
+        """Apply constitution sanitation to every extracted list."""
+
+        cleaned: Dict[str, List[str]] = {}
+        for field, values in aggregated.items():
+            cleaned[field] = self.constitution.sanitize_list(values)
+        return cleaned
 
     @staticmethod
     def _normalize_value(value: str) -> str:
