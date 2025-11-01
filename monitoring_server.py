@@ -14,6 +14,7 @@ import asyncio
 import json
 import logging
 import time
+import re
 from collections import Counter, deque
 from datetime import datetime
 from pathlib import Path
@@ -172,6 +173,180 @@ class ConnectionManager:
 
 quality_aggregator = QualityMetricsAggregator()
 manager = ConnectionManager()
+
+ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+knowledge_base_snapshot: Dict[str, Any] = {}
+
+
+dashboard_state: Dict[str, Any] = {}
+
+
+def reset_dashboard_state(start_time: Optional[datetime] = None) -> None:
+    """Reset aggregated dashboard metrics to their initial state."""
+
+    dashboard_state.clear()
+    dashboard_state.update(
+        {
+            "total_documents": 0,
+            "documents_processed": 0,
+            "current_document": None,
+            "current_doc_index": 0,
+            "current_doc_started": None,
+            "start_time": start_time,
+            "last_update": None,
+            "recent_errors": deque(maxlen=50),
+            "recent_warnings": deque(maxlen=50),
+            "quality_scores": deque(maxlen=100),
+            "recent_documents": deque(maxlen=20),
+            "_processed_documents": set(),
+            "_failed_documents": set(),
+            "failed_documents": 0,
+        }
+    )
+
+
+reset_dashboard_state()
+
+
+def strip_ansi(value: str) -> str:
+    return ANSI_ESCAPE_RE.sub("", value)
+
+
+def _extract_log_text(message: Dict[str, Any]) -> str:
+    raw = message.get("message", "")
+    cleaned = strip_ansi(raw)
+    parts = cleaned.split(" - ", 3)
+    if len(parts) >= 4:
+        return parts[3].strip()
+    return cleaned.strip()
+
+
+def update_dashboard_from_log(message: Dict[str, Any]) -> None:
+    if message.get("type") != "log":
+        return
+
+    logger_name = message.get("logger", "")
+    if not (logger_name.startswith("__main__") or logger_name.startswith("src.")):
+        return
+
+    log_text = _extract_log_text(message)
+    level = message.get("level", "").upper()
+    timestamp = datetime.utcnow()
+    dashboard_state["last_update"] = timestamp
+
+    if "🚀 Starting MULTI-AGENT" in log_text or "📁 Input directory" in log_text:
+        reset_dashboard_state(start_time=timestamp)
+
+    if dashboard_state.get("start_time") is None:
+        dashboard_state["start_time"] = timestamp
+
+    if level == "ERROR":
+        dashboard_state["recent_errors"].appendleft({
+            "timestamp": message.get("timestamp"),
+            "message": log_text,
+        })
+    elif level in {"WARN", "WARNING"}:
+        dashboard_state["recent_warnings"].appendleft({
+            "timestamp": message.get("timestamp"),
+            "message": log_text,
+        })
+
+    total_match = re.search(r"Found\s+(\d+)\s+PDF files", log_text)
+    if total_match:
+        dashboard_state["total_documents"] = int(total_match.group(1))
+
+    current_match = re.search(r"Processing file\s+(\d+)/(\d+):\s+(.+)", log_text)
+    if current_match:
+        dashboard_state["current_doc_index"] = int(current_match.group(1))
+        dashboard_state["total_documents"] = int(current_match.group(2))
+        dashboard_state["current_document"] = current_match.group(3).strip()
+        dashboard_state["current_doc_started"] = timestamp
+        return
+
+    success_match = re.search(r"Document\s+(.+?) processed successfully", log_text)
+    if success_match:
+        doc_id = success_match.group(1).strip()
+        dashboard_state["_processed_documents"].add(doc_id)
+        dashboard_state["documents_processed"] = len(dashboard_state["_processed_documents"])
+
+        duration = None
+        if dashboard_state.get("current_doc_started"):
+            duration = (timestamp - dashboard_state["current_doc_started"]).total_seconds()
+
+        entry = {
+            "document_id": doc_id,
+            "timestamp": message.get("timestamp"),
+            "duration": duration,
+        }
+
+        quality_match = re.search(r"Quality\s+([0-9.]+)", log_text)
+        if quality_match:
+            score = float(quality_match.group(1))
+            dashboard_state["quality_scores"].append(score)
+            entry["quality"] = score
+
+        confidence_match = re.search(r"Confidence\s+([0-9.]+)", log_text)
+        if confidence_match:
+            entry["confidence"] = float(confidence_match.group(1))
+
+        dashboard_state["recent_documents"].appendleft(entry)
+        dashboard_state["current_document"] = None
+        dashboard_state["current_doc_started"] = None
+        return
+
+    if "document" in log_text.lower() and "failed" in log_text.lower():
+        failed_match = re.search(r"Document\s+(.+?)(?:\s|$)", log_text)
+        if failed_match:
+            dashboard_state["_failed_documents"].add(failed_match.group(1).strip())
+            dashboard_state["failed_documents"] = len(dashboard_state["_failed_documents"])
+
+
+def update_dashboard_from_payload(payload: Dict[str, Any]) -> None:
+    if not payload:
+        return
+
+    timestamp = datetime.utcnow()
+    dashboard_state["last_update"] = timestamp
+
+    if "total_documents" in payload:
+        dashboard_state["total_documents"] = payload["total_documents"]
+
+    if "documents_processed" in payload:
+        dashboard_state["documents_processed"] = payload["documents_processed"]
+
+    if "documents_failed" in payload:
+        dashboard_state["failed_documents"] = payload["documents_failed"]
+
+    if "current_document" in payload:
+        dashboard_state["current_document"] = payload["current_document"]
+        dashboard_state["current_doc_index"] = payload.get("current_index", dashboard_state.get("current_doc_index", 0))
+        dashboard_state["current_doc_started"] = timestamp
+
+    if payload.get("status") in {"completed", "idle"}:
+        dashboard_state["current_document"] = None
+        dashboard_state["current_doc_started"] = None
+
+    if "last_document" in payload:
+        entry = {
+            "document_id": payload["last_document"],
+            "timestamp": timestamp.isoformat(),
+        }
+        if "last_duration" in payload:
+            entry["duration"] = payload["last_duration"]
+        if "last_quality" in payload:
+            entry["quality"] = payload["last_quality"]
+        if "last_error" in payload:
+            entry["error"] = payload["last_error"]
+        dashboard_state["recent_documents"].appendleft(entry)
+
+    if "runtime_seconds" in payload:
+        dashboard_state["runtime_seconds"] = payload["runtime_seconds"]
+
+
+def serialize_recent(deq: deque) -> List[Dict[str, Any]]:
+    if not deq:
+        return []
+    return list(deq)
 
 
 class ForemanResponder:
@@ -386,11 +561,47 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/api/stats")
 async def get_stats():
     """Get current processing statistics."""
+    state = dashboard_state
+    now = datetime.utcnow()
+
+    total = state.get("total_documents", 0)
+    processed = state.get("documents_processed", 0)
+    failed = state.get("failed_documents", len(state.get("_failed_documents", set())))
+    current_document = state.get("current_document")
+    start_time = state.get("start_time")
+    current_started = state.get("current_doc_started")
+
+    runtime_seconds = (now - start_time).total_seconds() if start_time else 0
+    time_on_document = (now - current_started).total_seconds() if current_started else 0
+    progress_pct = int((processed / total) * 100) if total else 0
+    queue_depth = max(0, (total - processed - (1 if current_document else 0))) if total else 0
+    success_base = processed + failed
+    success_rate = (processed / success_base) * 100 if success_base else 0
+
+    quality_scores = state.get("quality_scores", deque())
+    avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0.0
+
     return {
         "connected_clients": len(manager.active_connections),
         "total_logs": len(manager.message_history),
-        "server_uptime": "N/A",
-        "status": "running"
+        "status": "running" if processed or current_document else "idle",
+        "documents_processed": processed,
+        "total_documents": total,
+        "progress_percentage": progress_pct,
+        "queue_depth": queue_depth,
+        "current_document": current_document,
+        "time_on_document_seconds": round(time_on_document, 2),
+        "runtime_seconds": round(runtime_seconds, 2),
+        "success_rate": round(success_rate, 2),
+        "recent_errors": serialize_recent(state.get("recent_errors", deque())),
+        "recent_warnings": serialize_recent(state.get("recent_warnings", deque())),
+        "recent_documents": serialize_recent(state.get("recent_documents", deque())),
+        "quality_metrics": {
+            "avg_quality_score": round(avg_quality, 2),
+            "samples": len(quality_scores),
+        },
+        "quality_summary": quality_aggregator.summary(),
+        "knowledge_base": knowledge_base_snapshot,
     }
 
 
@@ -400,9 +611,24 @@ async def get_quality_dashboard():
     return quality_aggregator.summary()
 
 
+@app.get("/api/knowledge-base")
+async def get_knowledge_base():
+    """Return the most recent knowledge base snapshot (if available)."""
+    return knowledge_base_snapshot or {"status": "pending"}
+
+
 @app.post("/api/broadcast")
 async def broadcast_message(message: Dict[str, Any]):
     """API endpoint to broadcast custom messages."""
+    message_type = message.get("type")
+
+    if message_type == "knowledge_base":
+        knowledge_base_snapshot.update(message.get("payload", {}))
+    elif message_type == "stats":
+        update_dashboard_from_payload(message.get("payload", {}))
+    else:
+        update_dashboard_from_log(message)
+
     await manager.broadcast(message)
     return {"status": "broadcasted"}
 

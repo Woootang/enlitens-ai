@@ -1,22 +1,20 @@
-# Core ML and AI frameworks
-torch==2.5.1+cu130
-torchvision==0.20.1+cu130
-torchaudio==2.5.1+cu130
---index-url https://download.pytorch.org/whl/cu130
+# Core ML and AI frameworks (pipeline venv uses cu124)
+torch==2.6.0+cu124
+torchvision==0.21.0+cu124
+torchaudio==2.6.0+cu124
 
 # Document processing
 docling==2.58.0
-marker-pdf==1.10.1
-pymupdf==1.24.0
+pymupdf==1.24.4
 pymupdf4llm==0.0.5
 pdfplumber==0.11.0
 pytesseract==0.3.13
 Pillow==10.4.0
 
 # Transformers and specialized models
-transformers==4.44.2
+transformers==4.46.2
 sentence-transformers==3.0.1
-accelerate==0.30.1
+accelerate>=1.0.0,<2
 bitsandbytes==0.43.1
 FlagEmbedding==1.2.9
 
@@ -29,8 +27,8 @@ langgraph==0.2.59
 # Data processing and validation
 pydantic==2.9.2
 pandas==2.2.3
-numpy==2.0.2
-scikit-learn==1.5.2
+numpy==1.26.4
+scikit-learn==1.6.1
 
 # Enhanced NLP and topic modeling
 bertopic==0.16.4
@@ -47,11 +45,11 @@ neo4j==5.25.0
 chromadb==0.5.15
 qdrant-client==1.12.0
 rank-bm25==0.2.2
-sqlalchemy==2.0.36
+sqlalchemy==2.0.35
 psycopg2-binary==2.9.10
 
 # Monitoring and utilities
-pynvml==11.5.1
+pynvml==11.5.3
 psutil==5.9.8
 tqdm==4.66.4
 structlog==24.1.0
@@ -65,7 +63,7 @@ phoenix==0.9.0
 sentry-sdk==1.39.2
 
 # CLI and interface
-click==8.1.7
+click>=8.2.0,<9
 rich==13.7.1
 streamlit==1.39.0
 
@@ -73,5 +71,5 @@ streamlit==1.39.0
 pytest==8.2.2
 black==24.4.2
 flake8==7.0.0
-openai==1.52.2
-anthropic==0.39.0
+openai>=1.65.2,<2
+anthropic==0.46.0

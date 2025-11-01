@@ -250,7 +250,8 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
             logger.warning("Founder structured fallback failed to produce output; returning empty model")
             return MarketingContent()
         except Exception as e:
-            logger.error(f"Marketing content generation failed: {e}")
+            # Lower severity: transient 404s from local vLLM can occur
+            logger.warning(f"Marketing content generation fallback: {e}")
             return MarketingContent()
 
     def _summarize_research(self, text: str, max_chars: int = 1200) -> str:

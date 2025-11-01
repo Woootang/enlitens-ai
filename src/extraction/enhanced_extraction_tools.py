@@ -228,7 +228,8 @@ class EnhancedExtractionTools:
                     }
                 )
             if len(valid_texts) < 2:
-                logger.warning(
+                # Lower severity: this is expected when only one sample exists
+                logger.info(
                     "Topic discovery requires at least 2 samples, skipping",
                     extra={"event": "topic_discovery_skipped", "text_count": len(valid_texts)},
                 )

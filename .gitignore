@@ -28,3 +28,14 @@ logs/
 
 # Broader temp JSON artifacts
 *.json.temp*
+
+# CI/CD
+.circleci/
+.github/
+
+# VSCode
+.vscode/
+
+# Custom
+.venv_proc/
+cloudflared

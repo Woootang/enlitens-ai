@@ -16,6 +16,11 @@ import asyncio
 import torch
 from transformers import pipeline
 
+try:  # pragma: no cover - optional dependency
+    from packaging import version
+except ImportError:  # pragma: no cover - fallback when packaging is missing
+    version = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -94,6 +99,7 @@ class ExtractionTeam:
             'psychology': ['PSYCHOLOGICAL_CONCEPT', 'BEHAVIOR', 'EMOTION', 'MENTAL_STATE'],
             'clinical': ['SYMPTOM', 'TREATMENT', 'DIAGNOSIS', 'INTERVENTION', 'OUTCOME']
         }
+        self.hf_models_enabled = self._resolve_hf_support()
         
     async def extract_entities(self, extraction_result: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -117,21 +123,30 @@ class ExtractionTeam:
             # Extract entities using different models
             entities = {}
             
-            # Biomedical entities
-            biomedical_entities = await self._extract_biomedical_entities(text_content)
-            entities['biomedical'] = biomedical_entities
-            
-            # Neuroscience entities
-            neuro_entities = await self._extract_neuroscience_entities(text_content)
-            entities['neuroscience'] = neuro_entities
-            
-            # Psychology entities
-            psych_entities = await self._extract_psychology_entities(text_content)
-            entities['psychology'] = psych_entities
-            
-            # Clinical entities
-            clinical_entities = await self._extract_clinical_entities(text_content)
-            entities['clinical'] = clinical_entities
+            if self.hf_models_enabled:
+                # Biomedical entities
+                biomedical_entities = await self._extract_biomedical_entities(text_content)
+                entities['biomedical'] = biomedical_entities
+
+                # Neuroscience entities
+                neuro_entities = await self._extract_neuroscience_entities(text_content)
+                entities['neuroscience'] = neuro_entities
+
+                # Psychology entities
+                psych_entities = await self._extract_psychology_entities(text_content)
+                entities['psychology'] = psych_entities
+
+                # Clinical entities
+                clinical_entities = await self._extract_clinical_entities(text_content)
+                entities['clinical'] = clinical_entities
+            else:
+                logger.debug("Extraction Team: Hugging Face models disabled; returning empty entity sets")
+                entities.update({
+                    'biomedical': [],
+                    'neuroscience': [],
+                    'psychology': [],
+                    'clinical': [],
+                })
             
             # Statistical entities
             statistical_entities = await self._extract_statistical_entities(text_content)
@@ -152,6 +167,8 @@ class ExtractionTeam:
     
     async def _extract_biomedical_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract biomedical entities using BiomedBERT"""
+        if not self.hf_models_enabled:
+            return []
         try:
             # Load BiomedBERT model
             if 'biomedbert' not in self.models:
@@ -185,6 +202,8 @@ class ExtractionTeam:
     
     async def _extract_neuroscience_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract neuroscience entities using NeuroBERT"""
+        if not self.hf_models_enabled:
+            return []
         try:
             # Load NeuroBERT model
             if 'neurobert' not in self.models:
@@ -218,6 +237,8 @@ class ExtractionTeam:
     
     async def _extract_psychology_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract psychology entities using PsychBERT"""
+        if not self.hf_models_enabled:
+            return []
         try:
             # Load PsychBERT model
             if 'psychbert' not in self.models:
@@ -251,6 +272,8 @@ class ExtractionTeam:
     
     async def _extract_clinical_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract clinical entities using GatorTron"""
+        if not self.hf_models_enabled:
+            return []
         try:
             # Load GatorTron model
             if 'gator' not in self.models:
@@ -312,3 +335,38 @@ class ExtractionTeam:
                 })
         
         return statistical_entities
+
+    def _resolve_hf_support(self) -> bool:
+        """Determine whether heavyweight HF models should be enabled."""
+
+        toggle = os.getenv("EXTRACTION_ENABLE_HF_MODELS")
+        if toggle is not None:
+            enabled = toggle.lower() in {"1", "true", "yes"}
+            if not enabled:
+                logger.info("Extraction Team: HF entity models disabled via environment toggle")
+            return enabled
+
+        min_version = "2.6.0"
+        if version is None:
+            logger.warning(
+                "Extraction Team: 'packaging' not available; disabling HF entity models by default"
+            )
+            return False
+
+        try:
+            current_version = version.parse(torch.__version__.split("+")[0])
+            if current_version < version.parse(min_version):
+                logger.warning(
+                    "Extraction Team: Torch %s detected (<%s); skipping HF entity models to avoid load errors",
+                    torch.__version__,
+                    min_version,
+                )
+                return False
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning(
+                "Extraction Team: Unable to determine torch version (%s); disabling HF entity models",
+                exc,
+            )
+            return False
+
+        return True

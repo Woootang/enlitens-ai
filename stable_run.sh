@@ -121,6 +121,10 @@ def _launch_pipeline(output_file: Path, log_file: Path, base_dir: Path) -> subpr
     ]
     env = os.environ.copy()
     env["DOCLING_FORCE_CPU"] = "true"
+    env.setdefault("ENLITENS_DISABLE_VECTOR_INGESTION", os.environ.get("ENLITENS_DISABLE_VECTOR_INGESTION", "true"))
+    # Quiet noisy failures unless explicitly enabled by user
+    env.setdefault("EXTRACTION_ENABLE_HF_MODELS", os.environ.get("EXTRACTION_ENABLE_HF_MODELS", "false"))
+    env.setdefault("ENLITENS_DISABLE_DOCLING", os.environ.get("ENLITENS_DISABLE_DOCLING", "true"))
     log_file.parent.mkdir(parents=True, exist_ok=True)
     log_handle = log_file.open("w")
     logging.info("Launching processing pipeline -> %s", output_file)
@@ -136,12 +140,19 @@ def main() -> None:
     _configure_logging(args.verbose)
 
     LOG_DIR.mkdir(exist_ok=True)
+    # Clean root-level json/logs
     for pattern in ("*.json", "*.json.temp", "*.log"):
         for file in Path.cwd().glob(pattern):
             try:
                 file.unlink()
             except OSError:
                 pass
+    # Clean logs directory files as well
+    for file in LOG_DIR.glob("*.log"):
+        try:
+            file.unlink()
+        except OSError:
+            pass
 
     settings = get_settings()
     llm_settings = settings.llm

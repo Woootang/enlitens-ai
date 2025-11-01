@@ -37,6 +37,7 @@ from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
 from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
+from src.utils.terminology import sanitize_structure, contains_banned_terms
 
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -70,6 +71,56 @@ if monitor_endpoint:
     logger.info(f"📡 Streaming logs to monitoring server at {monitor_endpoint}")
 else:
     logger.info("📝 Remote monitoring disabled; using local log file only")
+
+# ---------------------------------------------------------------------------
+# Monitoring helpers
+# ---------------------------------------------------------------------------
+
+
+def post_monitor_stats(payload: Dict[str, Any]) -> None:
+    """Send structured progress updates to the monitoring dashboard."""
+
+    if not monitor_endpoint:
+        return
+
+    try:
+        import httpx
+        from urllib.parse import urlparse
+
+        # Parse the URL to get the scheme, netloc, and path
+        parsed_url = urlparse(monitor_endpoint)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        path = parsed_url.path
+
+        # Construct the full URL for the request
+        full_url = f"{base_url}{path}"
+
+        # Ensure the path ends with a slash if it's a directory
+        if full_url.endswith('/'):
+            full_url = full_url[:-1]
+
+        # Add query parameters if any
+        if parsed_url.query:
+            full_url += f"?{parsed_url.query}"
+
+        # Add fragment if any
+        if parsed_url.fragment:
+            full_url += f"#{parsed_url.fragment}"
+
+        # Use httpx to send the request
+        with httpx.Client() as client:
+            response = client.post(
+                full_url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10.0, # Increased timeout for monitoring
+            )
+            response.raise_for_status() # Raise an exception for bad status codes
+
+    except (httpx.RequestError, httpx.HTTPStatusError, TimeoutError, ConnectionError) as e:
+        logger.warning(f"Could not send stats to monitoring server: {e}")
+    except Exception as e:
+        logger.warning(f"An unexpected error occurred during monitoring stats: {e}")
 
 # Clean up old logs after logger is configured
 try:
@@ -576,7 +627,7 @@ class MultiAgentProcessor:
                         if hasattr(blog_content, field) and isinstance(value, list):
                             setattr(blog_content, field, value)
 
-            return EnlitensKnowledgeEntry(
+            entry = EnlitensKnowledgeEntry(
                 metadata=metadata,
                 extracted_entities=entities,
                 rebellion_framework=rebellion_framework,
@@ -591,6 +642,25 @@ class MultiAgentProcessor:
                 content_creation_ideas=content_creation_ideas,
                 full_document_text=full_document_text  # CRITICAL: Store for citation verification
             )
+
+            # Enforce terminology policy across all text fields
+            try:
+                sanitized = sanitize_structure(entry.model_dump())
+                if sanitized != entry.model_dump():
+                    entry = EnlitensKnowledgeEntry.model_validate(sanitized)
+                    logger.info("🔧 Applied terminology sanitizer to knowledge entry: %s", document_id)
+            except Exception as _san_exc:
+                logger.warning("Terminology sanitizer failed for %s: %s", document_id, _san_exc)
+
+            # Log if any banned terms remain
+            try:
+                dump_text = json.dumps(entry.model_dump(), ensure_ascii=False)
+                if contains_banned_terms(dump_text):
+                    logger.warning("⚠️ Banned terminology detected post-sanitize for %s", document_id)
+            except Exception:
+                pass
+
+            return entry
 
         except Exception as e:
             logger.error(f"Error converting to knowledge entry: {e}")
@@ -619,6 +689,7 @@ class MultiAgentProcessor:
     async def process_corpus(self):
         """Process the entire corpus using the multi-agent system."""
         start_time = time.time()  # Track processing start time
+        failed_count = 0
         try:
             logger.info("🚀 Starting MULTI-AGENT Enlitens Corpus Processing")
             logger.info(f"📁 Input directory: {self.input_dir}")
@@ -646,9 +717,15 @@ class MultiAgentProcessor:
                     logger.error("❌ Supervisor initialization failed; aborting corpus processing")
                     return
 
-            # Load existing progress
             self.knowledge_base = await self._load_progress()
             processed_docs = {doc.metadata.document_id for doc in self.knowledge_base.documents}
+
+            post_monitor_stats({
+                "status": "running",
+                "total_documents": total_files,
+                "documents_processed": len(self.knowledge_base.documents),
+                "documents_failed": failed_count,
+            })
 
             # Process documents with multi-agent system
             for i, pdf_path in enumerate(pdf_files):
@@ -658,13 +735,40 @@ class MultiAgentProcessor:
 
                 logger.info(f"📖 Processing file {i+1}/{total_files}: {pdf_path.name}")
 
+                post_monitor_stats({
+                    "status": "processing",
+                    "current_document": pdf_path.name,
+                    "current_index": i + 1,
+                    "total_documents": total_files,
+                    "documents_processed": len(self.knowledge_base.documents),
+                    "documents_failed": failed_count,
+                })
+
+                doc_start_time = time.time()
+
                 # Process document with multi-agent system
                 knowledge_entry = await self.process_document(pdf_path)
+                doc_duration = time.time() - doc_start_time
                 if knowledge_entry:
                     self.knowledge_base.documents.append(knowledge_entry)
                     logger.info(f"✅ Successfully processed: {pdf_path.name}")
+                    post_monitor_stats({
+                        "status": "processing",
+                        "documents_processed": len(self.knowledge_base.documents),
+                        "documents_failed": failed_count,
+                        "last_document": pdf_path.name,
+                        "last_duration": round(doc_duration, 2),
+                    })
                 else:
                     logger.error(f"❌ Failed to process: {pdf_path.name}")
+                    failed_count += 1
+                    post_monitor_stats({
+                        "status": "processing",
+                        "documents_processed": len(self.knowledge_base.documents),
+                        "documents_failed": failed_count,
+                        "last_document": pdf_path.name,
+                        "last_error": "processing_failed",
+                    })
 
                 # Save progress after each document
                 await self._save_progress(self.knowledge_base, i+1, total_files)
@@ -711,12 +815,22 @@ class MultiAgentProcessor:
             for category, stats in quality_breakdown.items():
                 logger.info(f"   - {category}: {stats['avg']:.2f} (min: {stats['min']:.2f}, max: {stats['max']:.2f})")
 
+            post_monitor_stats({
+                "status": "completed",
+                "documents_processed": len(self.knowledge_base.documents),
+                "documents_failed": failed_count,
+                "total_documents": total_files,
+                "runtime_seconds": round(processing_duration, 2),
+            })
+
         except Exception as e:
             logger.error(f"❌ Error processing corpus: {e}")
+            post_monitor_stats({"status": "error", "error": str(e)})
             raise
         finally:
             # Clean up resources
             await self._cleanup()
+            post_monitor_stats({"status": "idle"})
 
     async def _check_system_resources(self):
         """Check system resources and provide recommendations."""

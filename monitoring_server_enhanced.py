@@ -199,6 +199,15 @@ class ProcessingState:
         if self.last_log_time:
             time_since_log = (datetime.now() - self.last_log_time).total_seconds()
 
+        # Ensure JSON-serializable structures (e.g., convert deque to list)
+        agent_performance_serializable: Dict[str, Any] = {}
+        for agent_name, performance in self.agent_performance.items():
+            perf_dict = dict(performance)
+            times = perf_dict.get("times")
+            if isinstance(times, deque):
+                perf_dict["times"] = list(times)
+            agent_performance_serializable[agent_name] = perf_dict
+
         return {
             "current_document": self.current_document,
             "time_on_document_seconds": time_on_doc,
@@ -213,7 +222,7 @@ class ProcessingState:
             "recent_errors": self.errors[-5:],
             "recent_warnings": self.warnings[-5:],
             "quality_metrics": self.quality_metrics,
-            "agent_performance": {k: dict(v) for k, v in self.agent_performance.items()}
+            "agent_performance": agent_performance_serializable,
         }
 
 # Global state

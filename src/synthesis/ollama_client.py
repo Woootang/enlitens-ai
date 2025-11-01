@@ -113,7 +113,7 @@ class VLLMClient:
         extra_options: Optional[Dict[str, Any]] = None,
         top_p: Optional[float] = 0.9,
         grammar: Optional[str] = None,
-        response_format: Optional[str] = None,
+        response_format: Optional[object] = None,
     ) -> Dict[str, Any]:
         """Generate a completion from the serving endpoint."""
 
@@ -135,7 +135,10 @@ class VLLMClient:
         if top_p is not None:
             payload["top_p"] = top_p
         if response_format:
-            payload["response_format"] = {"type": response_format}
+            if isinstance(response_format, dict):
+                payload["response_format"] = response_format
+            else:
+                payload["response_format"] = {"type": response_format}
         
         # Don't use extra_body - vLLM OpenAI API doesn't support it
         # This causes 400 errors: "Extra inputs are not permitted"
@@ -217,13 +220,13 @@ class VLLMClient:
         model: Optional[str] = None,
         temperature: float = TEMPERATURE_FACTUAL,
         max_retries: int = 3,
-        base_num_predict: int = 4096,
+        base_num_predict: int = 2048,
         max_num_predict: int = 8192,
         use_cot_prompt: bool = True,
         validation_context: Optional[Dict[str, Any]] = None,
         cache_prefix: Optional[str] = None,
         cache_chunk_id: Optional[str] = None,
-        enforce_grammar: bool = False,
+        enforce_grammar: bool = True,
         fallback_to_unstructured: bool = True,
     ) -> Optional[BaseModel]:
         """Generate a structured response and validate it against a model.
@@ -260,9 +263,26 @@ class VLLMClient:
         attempts = 0
         current_temperature = temperature
         grammar: Optional[str] = None
+        use_json_schema: bool = True
+        json_schema_rf: Optional[Dict[str, Any]] = None
         http_errors = 0  # Track HTTP 400/500 errors
 
         if enforce_grammar:
+            # Prefer JSON Schema response_format when supported by the backend
+            try:
+                schema = response_model.model_json_schema()
+                json_schema_rf = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": response_model.__name__,
+                        "schema": schema,
+                    },
+                }
+            except Exception as exc:  # pragma: no cover - defensive guard
+                logger.warning("Failed to build JSON schema for %s: %s", response_model.__name__, exc)
+                json_schema_rf = None
+                use_json_schema = False
+            # Keep grammar build available for future backends that accept grammars
             try:
                 grammar = self._build_grammar_for_model(response_model)
             except Exception as exc:  # pragma: no cover - defensive guard
@@ -280,6 +300,7 @@ class VLLMClient:
                     max_num_predict=max_num_predict,
                     top_p=0.9,
                     grammar=grammar,
+                    response_format=(json_schema_rf if use_json_schema and json_schema_rf else "json_object"),
                 )
                 if truncated:
                     raise ValueError("LLM response truncated after dynamic retries")
@@ -390,11 +411,12 @@ class VLLMClient:
                         if available < max_num_predict:
                             max_num_predict = available
 
-                # If we get repeated HTTP errors, disable grammar and structured constraints
+                # If we get repeated HTTP errors, disable schema/grammar constraints
                 if http_errors >= 2 and fallback_to_unstructured:
                     logger.info("🔄 Falling back to unstructured generation due to repeated HTTP errors")
                     grammar = None
                     enforce_grammar = False
+                    use_json_schema = False
                     # Simplify the prompt for plain completion
                     base_num_predict = min(base_num_predict, 2048)
 
@@ -410,6 +432,30 @@ class VLLMClient:
                 logger.warning("Structured generation attempt %s failed: %s", attempts, exc)
                 grammar = None  # Disable grammar after first failure
                 current_temperature = min(1.0, current_temperature + 0.1)
+                # If we are still failing due to truncation, fall back to incremental field assembly
+                if (
+                    (isinstance(exc, ValueError) and "truncated" in str(exc).lower())
+                    or (attempts >= max_retries and "truncated" in str(exc).lower())
+                    or (attempts >= max_retries - 1)
+                ):
+                    try:
+                        logger.info("🧩 Falling back to incremental field assembly for %s", response_model.__name__)
+                        partial = await self._generate_fields_incrementally(
+                            base_prompt=prompt,
+                            system_prompt=system_prompt,
+                            model=self._resolve_model(model),
+                            response_model=response_model,
+                            temperature=current_temperature,
+                            validation_context=validation_context,
+                        )
+                        if partial is not None:
+                            if self.enable_prefix_caching:
+                                self.prompt_cache.set(cache_namespace, cache_chunk, full_prompt, partial)
+                            if validation_context:
+                                return response_model.model_validate(partial, context=validation_context)
+                            return response_model.model_validate(partial)
+                    except Exception as inc_exc:  # pragma: no cover - best effort fallback
+                        logger.warning("Incremental assembly failed: %s", inc_exc)
                 if attempts >= max_retries:
                     # Do not fail the entire pipeline; return an empty validated object
                     logger.warning("All %s structured generations failed; returning empty %s", max_retries, response_model.__name__)
@@ -419,6 +465,82 @@ class VLLMClient:
                         return None
 
         return None
+
+    async def _generate_fields_incrementally(
+        self,
+        *,
+        base_prompt: str,
+        system_prompt: Optional[str],
+        model: str,
+        response_model: Type[BaseModel],
+        temperature: float,
+        validation_context: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Build large JSON outputs by requesting one field at a time.
+
+        This avoids long single-turn completions that hit context/length limits.
+        """
+
+        assembled: Dict[str, Any] = {}
+        expected_fields = list(response_model.model_fields.keys())
+
+        for field_name in expected_fields:
+            field_prompt = (
+                "You are generating a JSON object one field at a time to avoid truncation."\
+                " Return ONLY a valid JSON object containing the single key '" + field_name + "'"\
+                " with its best-value for this task. Do not include any other keys.\n\n"\
+                + "Task: " + base_prompt + "\n\n"\
+                + ("Existing fields already collected: " + json.dumps(assembled) + "\n\n" if assembled else "")\
+                + "Respond strictly as a JSON object."
+            )
+
+            try:
+                payload = await self.generate_response(
+                    field_prompt,
+                    model=model,
+                    temperature=temperature,
+                    num_predict=1024,
+                    system_prompt=system_prompt,
+                    top_p=0.9,
+                    grammar=None,
+                    response_format="json_object",
+                )
+                text = payload.get("response", "")
+                part = self._parse_structured_payload(text)
+                if not isinstance(part, dict):
+                    raise ValueError("Incremental field response was not a JSON object")
+                # Coerce and unwrap if needed
+                part = self._coerce_to_model_schema(part, response_model)
+                if field_name in part:
+                    assembled[field_name] = part[field_name]
+                else:
+                    # Some models wrap under 'data'/'result'
+                    for wrapper_key in ("data", "result", "output"):
+                        wrapper = part.get(wrapper_key)
+                        if isinstance(wrapper, dict) and field_name in wrapper:
+                            assembled[field_name] = wrapper[field_name]
+                            break
+                    if field_name not in assembled:
+                        # As a last resort, accept the entire dict if it's a single-key object
+                        if len(part.keys()) == 1:
+                            assembled[field_name] = next(iter(part.values()))
+                        else:
+                            logger.warning("Field '%s' missing in incremental step; inserting null", field_name)
+                            assembled[field_name] = None
+            except Exception as exc:
+                logger.warning("Incremental generation for field '%s' failed: %s", field_name, exc)
+                assembled[field_name] = None
+
+        # Final validation
+        try:
+            if validation_context:
+                validated = response_model.model_validate(assembled, context=validation_context)
+            else:
+                validated = response_model.model_validate(assembled)
+            return validated.model_dump()
+        except Exception as exc:  # pragma: no cover
+            logger.warning("Final validation after incremental assembly failed: %s", exc)
+            return assembled
 
     async def _generate_text_with_dynamic_predict(
         self,
@@ -431,6 +553,7 @@ class VLLMClient:
         max_num_predict: int,
         top_p: float,
         grammar: Optional[str],
+        response_format: Optional[object],
     ) -> Tuple[str, bool]:
         current = num_predict
         while True:
@@ -442,8 +565,8 @@ class VLLMClient:
                 system_prompt=system_prompt,
                 top_p=top_p,
                 grammar=grammar,
-                # Encourage JSON object responses to reduce top-level list outputs
-                response_format="json_object",
+                # Encourage JSON outputs; prefer stricter schema when available
+                response_format=response_format or "json_object",
             )
             text = payload.get("response", "")
             if payload.get("done", True):

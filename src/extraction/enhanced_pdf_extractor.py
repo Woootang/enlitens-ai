@@ -51,8 +51,9 @@ class EnhancedPDFExtractor:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
         
-        # Initialize Docling
-        self.docling_converter = DocumentConverter()
+        # Initialize Docling (allow disabling via env to reduce noisy failures)
+        self.disable_docling = os.getenv("ENLITENS_DISABLE_DOCLING", "false").lower() in {"1", "true", "yes"}
+        self.docling_converter = None if self.disable_docling else DocumentConverter()
         
         # Common patterns for academic papers
         self.title_patterns = [
@@ -111,16 +112,20 @@ class EnhancedPDFExtractor:
         fallback_errors: List[str] = []
         extraction_backend = "docling"
 
-        try:
-            result = self.docling_converter.convert(pdf_path)
-            full_text = result.document.export_to_markdown()
-            if not full_text.strip():
-                raise ValueError("Docling returned empty content")
-        except Exception as exc:
-            logger.warning(
-                "Docling conversion failed for %s: %s", pdf_path, exc,
-            )
-            fallback_errors.append(f"docling: {exc}")
+        if not self.disable_docling:
+            try:
+                result = self.docling_converter.convert(pdf_path)
+                full_text = result.document.export_to_markdown()
+                if not full_text.strip():
+                    raise ValueError("Docling returned empty content")
+            except Exception as exc:
+                logger.warning(
+                    "Docling conversion failed for %s: %s", pdf_path, exc,
+                )
+                fallback_errors.append(f"docling: {exc}")
+                full_text = ""
+        else:
+            logger.info("Docling disabled via ENLITENS_DISABLE_DOCLING; skipping Docling and using fallbacks")
             full_text = ""
 
         if not full_text.strip():
