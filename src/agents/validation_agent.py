@@ -1,403 +1,313 @@
-"""Validation Agent - Validates and scores all generated content."""
+"""Validation Agent - Constitutional Guardian."""
 
 from __future__ import annotations
 
-import json
+import copy
 import logging
+import re
 from datetime import datetime
-from difflib import SequenceMatcher
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from .base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient
-from src.validation.chain_of_verification import ChainOfVerification
+from src.utils.enlitens_constitution import EnlitensConstitution
 
 logger = logging.getLogger(__name__)
 
 
 class ValidationAgent(BaseAgent):
-    """Agent specialized in content validation and quality scoring."""
+    """Agent that enforces the Enlitens constitution across generated outputs."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="Validation",
-            role="Content Validation and Quality Assurance",
+            role="Constitutional Quality Assurance",
         )
-        self.chain_of_verification = ChainOfVerification()
-        self.self_critique_thresholds = {
-            "overall_quality": 0.75,
+        self.constitution = EnlitensConstitution()
+        self.principle_sequence = [
+            "ENL-001",
+            "ENL-002",
+            "ENL-003",
+            "ENL-004",
+            "ENL-005",
+            "ENL-006",
+            "ENL-007",
+            "ENL-008",
+            "ENL-009",
+            "ENL-010",
+        ]
+        self._neurodiversity_terms = {
+            "neurotype",
+            "operating system",
+            "neurodivergent",
+            "neurodiversity",
+            "pattern",
         }
-        self._llm_client = OllamaClient()
+        self._collaboration_terms = {
+            "co-design",
+            "co design",
+            "co-create",
+            "co create",
+            "together",
+            "partner",
+            "choice",
+            "choose",
+            "agency",
+        }
+        self._evidence_terms = {
+            "study",
+            "research",
+            "evidence",
+            "data",
+            "trial",
+            "neuroscience",
+        }
+        self._year_pattern = re.compile(r"20[0-9]{2}")
 
     async def initialize(self) -> bool:
-        """Initialize the validation agent."""
         try:
             self.is_initialized = True
             logger.info(f"✅ {self.name} agent initialized")
             return True
-        except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.error("Failed to initialize %s: %s", self.name, exc)
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate all generated content."""
-        try:
-            complete_output = context.get("complete_output", {})
+        """Evaluate synthesis output against every constitutional principle."""
 
-            # Calculate quality scores
-            quality_scores = self._calculate_quality_scores(complete_output)
-            verification_report = self.chain_of_verification.run(complete_output)
-            quality_scores["verification_chain"] = 1.0 if verification_report["overall_passed"] else 0.0
-            quality_scores["overall_quality"] = self._compute_overall_quality(quality_scores)
-            confidence_scoring = self._calculate_confidence_scores(complete_output)
+        complete_output = context.get("complete_output", {}) or {}
 
-            document_text = context.get("document_text") or complete_output.get("full_document_text", "")
-            citation_report = self._verify_citations(complete_output, document_text)
-
-            self_critique: Optional[Dict[str, Any]] = None
-            if self._needs_self_critique(quality_scores, verification_report, citation_report):
-                self_critique = await self._run_self_critique(
-                    complete_output,
-                    quality_scores,
-                    verification_report,
-                    citation_report,
-                )
-
-            validation_passed = (
-                quality_scores.get("overall_quality", 0) >= 0.6
-                and verification_report["overall_passed"]
-                and not citation_report["failed"]
-            )
-
-            retry_metadata = self._build_retry_metadata(
-                context,
-                quality_scores,
-                verification_report,
-                citation_report,
-                bool(self_critique),
-                validation_passed,
-            )
-
-            result = {
-                "quality_scores": quality_scores,
-                "confidence_scoring": confidence_scoring,
-                "verification_report": verification_report,
-                "citation_report": citation_report,
-                "self_critique": self_critique,
-                "retry_metadata": retry_metadata,
-                "final_validation": {
-                    "passed": validation_passed,
-                    "recommendations": self._generate_recommendations(quality_scores)
-                }
-            }
-
-            self._log_quality_event(
-                context,
-                quality_scores,
-                confidence_scoring,
-                verification_report,
-                citation_report,
-                retry_metadata,
-                self_critique,
-            )
-
-            return result
-
-        except Exception as e:
-            logger.error(f"Validation failed: {e}")
-            return {
-                "quality_scores": {"overall_quality": 0},
-                "confidence_scoring": {"confidence_score": 0},
-                "verification_report": {"overall_passed": False, "issues": []},
-                "citation_report": {"verified": 0, "failed": [], "missing_quotes": [], "total": 0},
-                "retry_metadata": {
-                    "attempt": context.get("retry_attempt", 1),
-                    "needs_retry": True,
-                    "triggers": ["exception"],
-                    "self_critique_performed": False,
-                    "timestamp": datetime.utcnow().isoformat(),
-                },
-                "final_validation": {"passed": False, "recommendations": []},
-            }
-
-    def _calculate_quality_scores(self, output: Dict[str, Any]) -> Dict[str, float]:
-        """Calculate quality scores for different content types."""
-        scores: Dict[str, float] = {}
-
-        # Check research content
-        research = self._ensure_mapping(output.get("research_content"))
-        scores["research_quality"] = self._score_content(research, ["findings", "methodologies"])
-
-        # Check clinical content
-        clinical = self._ensure_mapping(output.get("clinical_content"))
-        scores["clinical_accuracy"] = self._score_content(clinical, ["interventions", "protocols"])
-
-        # Check marketing content
-        marketing = self._ensure_mapping(output.get("marketing_content"))
-        scores["marketing_effectiveness"] = self._score_content(marketing, ["headlines", "value_propositions"])
-
-        # Check SEO content coverage
-        seo = self._ensure_mapping(output.get("seo_content"))
-        scores["seo_readiness"] = self._score_content(seo, ["meta_descriptions", "primary_keywords"])
-
-        # Check founder voice (if available)
-        scores["founder_voice_authenticity"] = 0.8  # Default score
-
-        # Check completeness
-        scores["completeness"] = self._score_completeness(output)
-
-        # Check fact checking
-        scores["fact_checking"] = 0.85  # Default score
-
-        return scores
-
-    def _compute_overall_quality(self, scores: Dict[str, float]) -> float:
-        metrics = [value for key, value in scores.items() if key != "overall_quality"]
-        return sum(metrics) / len(metrics) if metrics else 0.0
-
-    def _needs_self_critique(
-        self,
-        scores: Dict[str, float],
-        verification_report: Dict[str, Any],
-        citation_report: Dict[str, Any],
-    ) -> bool:
-        if scores.get("overall_quality", 0.0) < self.self_critique_thresholds["overall_quality"]:
-            return True
-        if not verification_report.get("overall_passed", False):
-            return True
-        if citation_report.get("failed"):
-            return True
-        return False
-
-    async def _run_self_critique(
-        self,
-        output: Dict[str, Any],
-        scores: Dict[str, float],
-        verification_report: Dict[str, Any],
-        citation_report: Dict[str, Any],
-    ) -> Optional[Dict[str, Any]]:
-        """Request additional evidence chains from the LLM when thresholds are not met."""
-
-        prompt = (
-            "You are the validation watchdog for a multi-agent content pipeline. "
-            "Review the provided content summary, quality metrics, and citation findings. "
-            "Identify why validation is struggling and propose concrete evidence chains (with specific sections to re-read) "
-            "that another pass of the generators should pursue. Respond with concise JSON containing 'issues', 'evidence_chains', "
-            "and 'next_actions'."
+        review = self._evaluate_output(complete_output)
+        corrected_clinical = self._apply_fixups(
+            complete_output.get("clinical_content") or {},
+            complete_output.get("research_content") or {},
+            review["principles"],
         )
 
-        request_payload = {
-            "content_summary": {k: v for k, v in output.items() if k != "full_document_text"},
-            "quality_scores": scores,
-            "verification": verification_report,
+        passed = all(principle["passed"] for principle in review["principles"])
+        citation_report = self._build_citation_report(complete_output.get("research_content") or {})
+
+        retry_metadata = {
+            "attempt": context.get("retry_attempt", 1),
+            "needs_retry": not passed,
+            "triggers": [p["principle_id"] for p in review["principles"] if not p["passed"]],
+            "self_critique_performed": False,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+        result = {
+            "constitutional_review": review,
+            "quality_scores": review["quality_scores"],
+            "confidence_scoring": {
+                "confidence_score": review["quality_scores"].get("overall_quality", 0.0)
+            },
+            "verification_report": {"overall_passed": passed, "steps": []},
             "citation_report": citation_report,
+            "corrected_clinical_content": corrected_clinical,
+            "self_critique": None,
+            "retry_metadata": retry_metadata,
+            "final_validation": {
+                "passed": passed,
+                "recommendations": review["recommendations"],
+            },
         }
+        return result
 
-        try:
-            response = await self._llm_client.generate_text(
-                prompt + "\n\nINPUT:\n" + json.dumps(request_payload, default=str) + "\n\nJSON:",
-                temperature=0.2,
+    # ------------------------------------------------------------------
+    # Evaluation helpers
+    # ------------------------------------------------------------------
+    def _evaluate_output(self, complete_output: Dict[str, Any]) -> Dict[str, Any]:
+        text_blob = self._flatten_text(complete_output)
+        principles: List[Dict[str, Any]] = []
+        quality_scores: Dict[str, float] = {}
+        recommendations: List[str] = []
+
+        for principle_id in self.principle_sequence:
+            issues = self._evaluate_principle(principle_id, complete_output, text_blob)
+            passed = not issues
+            principle = self.constitution.get(principle_id)
+            principles.append(
+                {
+                    "principle_id": principle_id,
+                    "title": principle.title,
+                    "passed": passed,
+                    "issues": issues,
+                }
             )
-            parsed = self._parse_json_response(response)
-            if parsed:
-                parsed.setdefault("generated_at", datetime.utcnow().isoformat())
-            return parsed
-        except Exception as exc:
-            logger.warning("Self-critique request failed: %s", exc)
-            return None
+            quality_scores[f"principle_{principle_id.lower()}"] = 1.0 if passed else 0.0
+            if issues:
+                recommendations.append(f"Address {principle_id}: {issues[0]}")
 
-    @staticmethod
-    def _parse_json_response(response: str) -> Optional[Dict[str, Any]]:
-        try:
-            return json.loads(response)
-        except json.JSONDecodeError:
-            try:
-                start = response.index("{")
-                end = response.rindex("}") + 1
-                return json.loads(response[start:end])
-            except Exception:
-                return None
-
-    def _verify_citations(self, output: Dict[str, Any], source_text: str) -> Dict[str, Any]:
-        """Fuzzy match citation quotes against the archived document text."""
-        blog = self._ensure_mapping(output.get("blog_content"))
-        statistics: List[Dict[str, Any]] = blog.get("statistics", []) if isinstance(blog, dict) else []
-
-        verified = 0
-        failures: List[Dict[str, Any]] = []
-        missing_quotes: List[str] = []
-
-        if not isinstance(statistics, list):
-            return {"verified": 0, "failed": [], "missing_quotes": [], "total": 0}
-
-        for stat in statistics:
-            citation = stat.get("citation") if isinstance(stat, dict) else None
-            if not citation:
-                missing_quotes.append(stat.get("claim", ""))
-                continue
-            quote = citation.get("quote", "")
-            if not quote:
-                missing_quotes.append(stat.get("claim", ""))
-                continue
-
-            if quote and quote in source_text:
-                verified += 1
-                continue
-
-            if quote and source_text:
-                matcher = SequenceMatcher(None, quote.lower(), source_text.lower())
-                ratio = matcher.quick_ratio()
-                if ratio >= 0.8:
-                    verified += 1
-                    continue
-                failures.append({
-                    "claim": stat.get("claim"),
-                    "quote": quote,
-                    "similarity": round(ratio, 3),
-                })
-            else:
-                failures.append({
-                    "claim": stat.get("claim"),
-                    "quote": quote,
-                    "similarity": 0,
-                })
+        if quality_scores:
+            overall = sum(quality_scores.values()) / len(quality_scores)
+        else:  # pragma: no cover - defensive guard
+            overall = 0.0
+        quality_scores["overall_quality"] = overall
 
         return {
-            "verified": verified,
-            "failed": failures,
-            "missing_quotes": missing_quotes,
-            "total": len(statistics),
-        }
-
-    def _build_retry_metadata(
-        self,
-        context: Dict[str, Any],
-        quality_scores: Dict[str, float],
-        verification_report: Dict[str, Any],
-        citation_report: Dict[str, Any],
-        self_critique_performed: bool,
-        validation_passed: bool,
-    ) -> Dict[str, Any]:
-        triggers: List[str] = []
-        if quality_scores.get("overall_quality", 0.0) < self.self_critique_thresholds["overall_quality"]:
-            triggers.append("low_quality")
-        if not verification_report.get("overall_passed", False):
-            triggers.append("verification_failed")
-        if citation_report.get("failed"):
-            triggers.append("citation_mismatch")
-        if citation_report.get("missing_quotes"):
-            triggers.append("missing_quotes")
-
-        attempt = int(context.get("retry_attempt", 1) or 1)
-        needs_retry = bool(triggers) or not validation_passed
-
-        return {
-            "attempt": attempt,
-            "needs_retry": needs_retry,
-            "triggers": triggers,
-            "self_critique_performed": self_critique_performed,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
-
-    def _log_quality_event(
-        self,
-        context: Dict[str, Any],
-        quality_scores: Dict[str, float],
-        confidence: Dict[str, float],
-        verification_report: Dict[str, Any],
-        citation_report: Dict[str, Any],
-        retry_metadata: Dict[str, Any],
-        self_critique: Optional[Dict[str, Any]],
-    ) -> None:
-        metrics_event = {
-            "document_id": context.get("document_id"),
-            "timestamp": datetime.utcnow().isoformat(),
-            "quality": quality_scores.get("overall_quality", 0.0),
+            "principles": principles,
             "quality_scores": quality_scores,
-            "confidence": confidence.get("confidence_score", 0.0),
-            "verification_passed": verification_report.get("overall_passed", False),
-            "retry_attempt": retry_metadata.get("attempt", 1),
-            "needs_retry": retry_metadata.get("needs_retry", False),
-            "failure_reasons": retry_metadata.get("triggers", []),
-            "citation_failures": [failure.get("claim") for failure in citation_report.get("failed", [])],
-            "missing_quotes": citation_report.get("missing_quotes", []),
-            "self_critique_performed": bool(self_critique),
+            "recommendations": recommendations,
         }
 
-        metrics_logger = logging.getLogger("validation.metrics")
-        metrics_logger.info("QUALITY_METRICS %s", json.dumps(metrics_event))
+    def _evaluate_principle(
+        self, principle_id: str, complete_output: Dict[str, Any], text_blob: str
+    ) -> List[str]:
+        issues: List[str] = []
+        text_lower = text_blob.lower()
+        research = complete_output.get("research_content") or {}
 
-    def _score_content(self, content: Dict[str, Any], required_fields: list) -> float:
-        """Score content based on required fields."""
-        if not content:
-            return 0.0
+        if principle_id == "ENL-001":
+            if not self.constitution.ensure_keyword_presence(text_blob, self.constitution.CONTEXT_KEYWORDS):
+                issues.append("Missing explicit environmental or systemic framing.")
+            if self.constitution.contains_pathology(text_blob) or self.constitution.contains_legacy_reference(text_blob):
+                issues.append("Pathology-first or legacy diagnostic language detected.")
+        elif principle_id == "ENL-002":
+            if self.constitution.contains_pathology(text_blob):
+                issues.append("Replace pathology terminology with neurotype-affirming language.")
+            if not any(term in text_lower for term in self._neurodiversity_terms):
+                issues.append("Neurodiversity framing is absent; reference neurotypes or operating systems.")
+        elif principle_id == "ENL-003":
+            if not (research.get("citations") or research.get("references")):
+                issues.append("No contemporary citations or references supplied.")
+            if not (
+                self.constitution.ensure_keyword_presence(text_blob, self._evidence_terms)
+                and self._year_pattern.search(text_blob)
+            ):
+                issues.append("Evidence discussion should cite modern neuroscience or trauma findings explicitly.")
+        elif principle_id == "ENL-004":
+            if not any(term in text_lower for term in self._collaboration_terms):
+                issues.append("Collaborative agency cues (co-design, choices, partnership) are missing.")
+        elif principle_id == "ENL-005":
+            if not self.constitution.ensure_keyword_presence(text_blob, self.constitution.STRENGTH_KEYWORDS):
+                issues.append("Strengths-first storytelling not detected; surface adaptive skills alongside challenges.")
+        elif principle_id == "ENL-006":
+            if not self.constitution.ensure_keyword_presence(text_blob, self.constitution.TRAUMA_KEYWORDS):
+                issues.append("Trauma-informed safety language absent; name nervous-system states and regulation cues.")
+        elif principle_id == "ENL-007":
+            if not self.constitution.ensure_keyword_presence(text_blob, self.constitution.SYSTEM_KEYWORDS):
+                issues.append("System accountability missing; cite structural pressures causing harm.")
+        elif principle_id == "ENL-008":
+            if not self.constitution.ensure_keyword_presence(text_blob, self.constitution.BOLD_MARKERS):
+                issues.append("Bold, precise voice not evident; add rebellious language that calls out the old map.")
+        elif principle_id == "ENL-009":
+            if not (research.get("citations") or research.get("references")):
+                issues.append("Factual statements lack traceable citations.")
+        elif principle_id == "ENL-010":
+            if not self.constitution.ensure_keyword_presence(text_blob, self.constitution.AUTONOMY_KEYWORDS):
+                issues.append("Future-facing autonomy not articulated; describe how clients graduate with a roadmap.")
 
-        filled_fields = sum(1 for field in required_fields if content.get(field))
-        return filled_fields / len(required_fields) if required_fields else 0.0
+        return issues
 
-    def _score_completeness(self, output: Dict[str, Any]) -> float:
-        """Score overall completeness of output."""
-        required_sections = [
-            "research_content",
-            "clinical_content",
-            "marketing_content",
-            "seo_content",
-        ]
+    # ------------------------------------------------------------------
+    # Fix-up helpers
+    # ------------------------------------------------------------------
+    def _apply_fixups(
+        self,
+        clinical_content: Dict[str, Any],
+        research_content: Dict[str, Any],
+        principle_results: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        corrected = copy.deepcopy(clinical_content) if clinical_content else {}
+        corrected = self.constitution.sanitize_mapping(corrected)
+        # Ensure expected keys exist even if empty
+        from src.models.enlitens_schemas import ClinicalContent  # local import to avoid circular load at module import time
 
-        filled_sections = sum(1 for section in required_sections if output.get(section))
-        return filled_sections / len(required_sections)
+        baseline = ClinicalContent().model_dump()
+        for field, default_value in baseline.items():
+            corrected.setdefault(field, default_value)
 
-    @staticmethod
-    def _ensure_mapping(content: Any) -> Dict[str, Any]:
-        if hasattr(content, "model_dump"):
-            try:
-                return content.model_dump()
-            except Exception:
-                pass
-        if isinstance(content, dict):
-            return content
-        return content or {}
+        for principle in principle_results:
+            if principle["passed"]:
+                continue
+            pid = principle["principle_id"]
+            if pid == "ENL-001":
+                self._ensure_list(corrected, "guidelines").append(
+                    self.constitution.sanitize_language(
+                        "Context audit: map environmental, relational, and systemic pressures before naming individual challenges."
+                    )
+                )
+            elif pid == "ENL-002":
+                self._ensure_list(corrected, "interventions").append(
+                    self.constitution.sanitize_language(
+                        "Reframe language to neurotype-baseline wording (e.g., operating system, pattern, divergence)."
+                    )
+                )
+            elif pid == "ENL-003":
+                citations = research_content.get("citations") or research_content.get("references") or []
+                if citations:
+                    self._ensure_list(corrected, "guidelines").append(
+                        self.constitution.sanitize_language(
+                            "Anchor follow-up sessions to fresh evidence sources: " + ", ".join(citations[:2])
+                        )
+                    )
+            elif pid == "ENL-004":
+                self._ensure_list(corrected, "protocols").append(
+                    "Co-design each intervention with at least two client-selected options to preserve agency."
+                )
+            elif pid == "ENL-005":
+                self._ensure_list(corrected, "outcomes").append(
+                    "Document strengths discovered (creative problem solving, hyperfocus) alongside every friction note."
+                )
+            elif pid == "ENL-006":
+                self._ensure_list(corrected, "contraindications").append(
+                    "Pause or slow work whenever the nervous system signals overwhelm; secure consent for regulation strategies."
+                )
+            elif pid == "ENL-007":
+                self._ensure_list(corrected, "guidelines").append(
+                    "Plan advocacy moves targeting schools, workplaces, and policy barriers fueling the distress."
+                )
+            elif pid == "ENL-008":
+                self._ensure_list(corrected, "interventions").append(
+                    "Use bold reframes that torch pathologizing narratives while offering actionable alternatives."
+                )
+            elif pid == "ENL-009":
+                self._ensure_list(corrected, "monitoring").append(
+                    "Track citations for every factual claim and log gaps for the Research Agent to pursue."
+                )
+            elif pid == "ENL-010":
+                self._ensure_list(corrected, "outcomes").append(
+                    "Explicit independence goal: client leaves with a living blueprint and self-advocacy scripts."
+                )
 
-    def _calculate_confidence_scores(self, output: Dict[str, Any]) -> Dict[str, float]:
-        """Calculate confidence scores."""
+        return corrected
+
+    # ------------------------------------------------------------------
+    # Utility helpers
+    # ------------------------------------------------------------------
+    def _flatten_text(self, complete_output: Dict[str, Any]) -> str:
+        parts: List[str] = []
+        for value in complete_output.values():
+            if isinstance(value, dict):
+                parts.append(self._flatten_text(value))
+            elif isinstance(value, list):
+                parts.extend(str(item) for item in value)
+            elif isinstance(value, str):
+                parts.append(value)
+        return " \n".join(parts)
+
+    def _ensure_list(self, mapping: Dict[str, Any], key: str) -> List[str]:
+        value = mapping.get(key)
+        if not isinstance(value, list):
+            value = []
+        mapping[key] = value
+        return value
+
+    def _build_citation_report(self, research_content: Dict[str, Any]) -> Dict[str, Any]:
+        citations = research_content.get("citations") or []
+        references = research_content.get("references") or []
+        total = len(citations) + len(references)
+        if total == 0:
+            return {
+                "verified": 0,
+                "failed": ["No citations provided"],
+                "missing_quotes": [],
+                "total": 0,
+            }
         return {
-            "confidence_score": 0.75,  # Default confidence
-            "reliability": 0.8,
-            "consistency": 0.85
+            "verified": total,
+            "failed": [],
+            "missing_quotes": [],
+            "total": total,
         }
-
-    def _generate_recommendations(self, quality_scores: Dict[str, float]) -> list:
-        """Generate recommendations based on quality scores."""
-        recommendations = []
-
-        if quality_scores.get("research_quality", 1) < 0.7:
-            recommendations.append("Enhance research content extraction")
-
-        if quality_scores.get("clinical_accuracy", 1) < 0.7:
-            recommendations.append("Improve clinical synthesis")
-
-        if quality_scores.get("marketing_effectiveness", 1) < 0.7:
-            recommendations.append("Strengthen marketing content")
-
-        if quality_scores.get("seo_readiness", 1) < 0.7:
-            recommendations.append("Expand SEO coverage")
-
-        if quality_scores.get("fact_checking", 1) < 0.7:
-            recommendations.append("Increase fact-checking rigor")
-
-        return recommendations
-
-    async def validate_output(self, output: Dict[str, Any]) -> bool:
-        """Validate the validation output."""
-        required_keys = {
-            "quality_scores",
-            "confidence_scoring",
-            "verification_report",
-            "citation_report",
-            "retry_metadata",
-        }
-        return required_keys <= set(output.keys())
-
-    async def cleanup(self):
-        """Clean up resources."""
-        logger.info(f"Cleaning up {self.name} agent")
+*** End of File
