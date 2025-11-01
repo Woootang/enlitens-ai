@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional, Callable, Iterable
 
 from langgraph.graph import StateGraph, END
 
@@ -21,6 +22,17 @@ from .rebellion_framework_agent import RebellionFrameworkAgent
 from .workflow_state import WorkflowState, create_initial_state, record_attempt, as_dict
 
 logger = logging.getLogger(__name__)
+
+PIPELINE_AGENTS: List[str] = [
+    "context_rag",
+    "science_extraction",
+    "clinical_synthesis",
+    "educational_content",
+    "rebellion_framework",
+    "founder_voice",
+    "marketing_seo",
+    "validation",
+]
 
 
 class SupervisorAgent(BaseAgent):
@@ -169,6 +181,9 @@ class SupervisorAgent(BaseAgent):
 
     async def process_document(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         logger.info("🎯 Supervisor starting document processing: %s", payload.get("document_id"))
+
+        plan_data = self._generate_execution_plan(payload)
+
         state = create_initial_state(
             document_id=payload["document_id"],
             document_text=payload["document_text"],
@@ -180,7 +195,20 @@ class SupervisorAgent(BaseAgent):
             cache_chunk_id=payload.get("cache_chunk_id", f"{payload.get('document_id', 'doc')}:root"),
         )
 
+        state["skip_nodes"].update(plan_data["skip_nodes"])
+        metadata = state.get("metadata", {})
+        metadata.update(
+            {
+                "execution_plan": plan_data["plan"],
+                "plan_created_at": datetime.utcnow().isoformat(),
+                "plan_notes": plan_data["notes"],
+                "plan_status": "pending",
+            }
+        )
+        state["metadata"] = metadata
+
         final_state = await self.workflow_graph.ainvoke(state)
+        final_state = await self._ensure_plan_completion(final_state)
         return self._finalize_output(final_state)
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -226,20 +254,27 @@ class SupervisorAgent(BaseAgent):
             "doc_type": state.get("doc_type"),
             "shortcut_applied": bool(shortcut),
         }
+        if skip_nodes:
+            state["skip_nodes"].update(skip_nodes)
+            for node in skip_nodes:
+                self._mark_plan_step(state, node, "skipped", "doc_type shortcut applied")
+        self._mark_plan_started(state)
         return {
             "stage": "entry",
             "start_timestamp": datetime.utcnow(),
             "skip_nodes": skip_nodes,
-            "metadata": {**state.get("metadata", {}), **metadata},
+            "metadata": self._metadata_with_plan(state, metadata),
         }
 
     async def _science_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "science_extraction" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping science extraction due to doc_type route")
+            self._mark_plan_step(state, "science_extraction", "skipped", "Skip flag detected")
             return {
                 "stage": "science_extraction_skipped",
                 "science_result": state.get("science_result") or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), "science_extraction": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         payload = {"document_text": state["document_text"]}
@@ -249,10 +284,12 @@ class SupervisorAgent(BaseAgent):
     async def _context_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "context_rag" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping context retrieval due to doc_type route")
+            self._mark_plan_step(state, "context_rag", "skipped", "Skip flag detected")
             return {
                 "stage": "context_skipped",
                 "context_result": state.get("context_result") or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), "context_rag": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         payload = {
@@ -265,10 +302,12 @@ class SupervisorAgent(BaseAgent):
     async def _clinical_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "clinical_synthesis" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping clinical synthesis due to doc_type route")
+            self._mark_plan_step(state, "clinical_synthesis", "skipped", "Skip flag detected")
             return {
                 "stage": "clinical_skipped",
                 "clinical_result": state.get("clinical_result") or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), "clinical_synthesis": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         if state.get("science_result") is None and "science_extraction" not in state.get("skip_nodes", set()):
@@ -286,10 +325,12 @@ class SupervisorAgent(BaseAgent):
     async def _education_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "educational_content" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping educational content due to doc_type route")
+            self._mark_plan_step(state, "educational_content", "skipped", "Skip flag detected")
             return {
                 "stage": "education_skipped",
                 "educational_result": state.get("educational_result") or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), "educational_content": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         if state.get("clinical_result") is None and "clinical_synthesis" not in state.get("skip_nodes", set()):
@@ -307,10 +348,12 @@ class SupervisorAgent(BaseAgent):
     async def _rebellion_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "rebellion_framework" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping rebellion framework due to doc_type route")
+            self._mark_plan_step(state, "rebellion_framework", "skipped", "Skip flag detected")
             return {
                 "stage": "rebellion_skipped",
                 "rebellion_result": state.get("rebellion_result") or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), "rebellion_framework": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         if state.get("clinical_result") is None and "clinical_synthesis" not in state.get("skip_nodes", set()):
@@ -328,10 +371,12 @@ class SupervisorAgent(BaseAgent):
     async def _founder_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "founder_voice" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping founder voice due to doc_type route")
+            self._mark_plan_step(state, "founder_voice", "skipped", "Skip flag detected")
             return {
                 "stage": "founder_skipped",
                 "founder_voice_result": state.get("founder_voice_result") or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), "founder_voice": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         if state.get("clinical_result") is None and "clinical_synthesis" not in state.get("skip_nodes", set()):
@@ -351,11 +396,13 @@ class SupervisorAgent(BaseAgent):
         if "marketing_seo" in state.get("skip_nodes", set()):
             if not state.get("marketing_completed", False):
                 logger.info("⏭️ Skipping marketing due to doc_type route")
+            self._mark_plan_step(state, "marketing_seo", "skipped", "Skip flag detected")
             return {
                 "stage": "marketing_skipped",
                 "marketing_result": state.get("marketing_result") or {},
                 "marketing_completed": True,
                 "completed_nodes": {**state.get("completed_nodes", {}), "marketing_seo": "skipped"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         required = [
@@ -380,12 +427,14 @@ class SupervisorAgent(BaseAgent):
         if "validation" in state.get("skip_nodes", set()):
             if not state.get("validation_completed", False):
                 logger.info("⏭️ Skipping validation due to doc_type route")
+            self._mark_plan_step(state, "validation", "skipped", "Skip flag detected")
             return {
                 "stage": "validation_skipped",
                 "validation_result": state.get("validation_result") or {},
                 "validation_completed": True,
                 "completed_nodes": {**state.get("completed_nodes", {}), "validation": "skipped"},
                 "end_timestamp": datetime.utcnow(),
+                "metadata": self._metadata_with_plan(state),
             }
 
         marketing_needed = "marketing_seo" not in state.get("skip_nodes", set())
@@ -413,18 +462,22 @@ class SupervisorAgent(BaseAgent):
     ) -> Dict[str, Any]:
         if not result:
             logger.warning("⚠️ %s returned empty results", node_name)
+            self._mark_plan_step(state, node_name, "needs_follow_up", "Empty result returned")
             return {
                 "stage": f"{node_name}_empty",
                 target_field: state.get(target_field) or {},
                 "completed_nodes": {**state.get("completed_nodes", {}), node_name: "empty"},
+                "metadata": self._metadata_with_plan(state),
             }
 
         merged_results = {**state.get("intermediate_results", {}), **result}
+        self._mark_plan_step(state, node_name, "completed")
         return {
             "stage": f"{node_name}_completed",
             target_field: result,
             "intermediate_results": merged_results,
             "completed_nodes": {**state.get("completed_nodes", {}), node_name: "done"},
+            "metadata": self._metadata_with_plan(state),
         }
 
     async def _run_agent_with_retry(
@@ -444,6 +497,7 @@ class SupervisorAgent(BaseAgent):
         factor = self.retry_policy["backoff_factor"]
 
         last_result: Dict[str, Any] = {}
+        self._mark_plan_step(state, agent_name, "in_progress")
         for attempt in range(1, max_attempts + 1):
             agent_context = self._build_agent_context(state, payload, agent_name, attempt)
             logger.info("🔄 Executing %s attempt %d/%d", agent_name, attempt, max_attempts)
@@ -459,6 +513,7 @@ class SupervisorAgent(BaseAgent):
                 delay *= factor
 
         logger.warning("⚠️ %s exhausted retries", agent_name)
+        self._mark_plan_step(state, agent_name, "failed", "Retries exhausted")
         return last_result
 
     def _build_agent_context(
@@ -480,6 +535,13 @@ class SupervisorAgent(BaseAgent):
             "cache_chunk_id": state.get("cache_chunk_id"),
             "retry_attempt": attempt,
         }
+        plan_step = None
+        for step in state.get("metadata", {}).get("execution_plan", []):
+            if step.get("agent") == agent_name:
+                plan_step = step
+                break
+        if plan_step:
+            base_context["plan_step"] = plan_step
         base_context.update(payload)
         return base_context
 
@@ -534,3 +596,194 @@ class SupervisorAgent(BaseAgent):
             confidence_score,
         )
         return final_output
+
+    # ----- Planning helpers ---------------------------------------------------------------
+
+    def _generate_execution_plan(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        doc_type = payload.get("doc_type") or "default"
+        shortcut_skips = set(self.doc_type_shortcuts.get(doc_type, {}).get("skip", set()))
+        plan: List[Dict[str, Any]] = []
+        notes: Dict[str, Any] = {}
+
+        def add_step(agent: str, description: str) -> None:
+            if agent in shortcut_skips or agent not in PIPELINE_AGENTS:
+                return
+            plan.append(
+                {
+                    "step": len(plan) + 1,
+                    "agent": agent,
+                    "description": description,
+                    "status": "pending",
+                }
+            )
+
+        is_complex = self._is_complex_query(payload)
+        notes["complexity_reason"] = self._complexity_reason(payload, is_complex)
+
+        if is_complex or payload.get("st_louis_context") or payload.get("client_insights"):
+            add_step(
+                "context_rag",
+                "Gather constitution-aligned context and supporting research",
+            )
+
+        add_step("science_extraction", "Extract constitution-filtered scientific facts")
+        add_step("clinical_synthesis", "Compose constitution-aligned clinical synthesis")
+
+        creative_needed = doc_type not in {"science_only", "validation_only"}
+        if creative_needed:
+            add_step("educational_content", "Translate findings into educational framing")
+            add_step("rebellion_framework", "Map insights to rebellion framework guidance")
+            add_step("founder_voice", "Apply founder voice tone and narrative")
+            add_step("marketing_seo", "Craft marketing-forward summary and SEO hooks")
+
+        add_step("validation", "Run constitutional validation and quality checks")
+
+        planned_agents = {step["agent"] for step in plan}
+        skip_nodes = (set(PIPELINE_AGENTS) - planned_agents) | shortcut_skips
+
+        notes["planned_agents"] = sorted(planned_agents)
+        notes["skipped_agents"] = sorted(skip_nodes)
+
+        return {"plan": plan, "skip_nodes": skip_nodes, "notes": notes}
+
+    def _is_complex_query(self, payload: Dict[str, Any]) -> bool:
+        document_text = payload.get("document_text") or ""
+        word_count = len(document_text.split())
+        question_count = document_text.count("?")
+        has_multiple_sections = "\n\n" in document_text or "###" in document_text
+        return (
+            word_count > 400
+            or question_count > 1
+            or has_multiple_sections
+            or bool(payload.get("client_insights"))
+        )
+
+    def _complexity_reason(self, payload: Dict[str, Any], is_complex: bool) -> str:
+        if not is_complex:
+            return "baseline_plan"
+        reasons: List[str] = []
+        document_text = payload.get("document_text") or ""
+        if len(document_text.split()) > 400:
+            reasons.append("lengthy_source")
+        if document_text.count("?") > 1:
+            reasons.append("multi_question")
+        if "\n\n" in document_text or "###" in document_text:
+            reasons.append("multi_section")
+        if payload.get("client_insights"):
+            reasons.append("client_context_present")
+        if not reasons:
+            reasons.append("heuristic_complexity")
+        return ",".join(reasons)
+
+    def _mark_plan_started(self, state: WorkflowState) -> None:
+        metadata = state.get("metadata", {})
+        if metadata.get("plan_status") == "pending":
+            metadata = copy.deepcopy(metadata)
+            metadata["plan_status"] = "in_progress"
+            state["metadata"] = metadata
+
+    def _mark_plan_step(
+        self,
+        state: WorkflowState,
+        agent_name: str,
+        status: str,
+        note: Optional[str] = None,
+    ) -> None:
+        if not agent_name:
+            return
+        metadata = state.get("metadata", {})
+        plan = metadata.get("execution_plan")
+        if not plan:
+            return
+        updated = False
+        new_plan: List[Dict[str, Any]] = []
+        for step in plan:
+            if step.get("agent") == agent_name:
+                if step.get("status") == status and not note:
+                    new_plan.append(step)
+                    continue
+                step_copy = copy.deepcopy(step)
+                step_copy["status"] = status
+                if note:
+                    step_copy["note"] = note
+                step_copy["updated_at"] = datetime.utcnow().isoformat()
+                new_plan.append(step_copy)
+                updated = True
+            else:
+                new_plan.append(step)
+        if updated:
+            new_metadata = copy.deepcopy(metadata)
+            new_metadata["execution_plan"] = new_plan
+            state["metadata"] = new_metadata
+
+    def _metadata_with_plan(
+        self, state: WorkflowState, extra: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        metadata = copy.deepcopy(state.get("metadata", {}))
+        if extra:
+            metadata.update(extra)
+        return metadata
+
+    async def _ensure_plan_completion(self, state: WorkflowState) -> WorkflowState:
+        unfinished_agents = self._unfinished_plan_agents(state)
+        if unfinished_agents:
+            logger.info("🔁 Executing follow-up tasks for incomplete plan steps: %s", unfinished_agents)
+        for agent_name in unfinished_agents:
+            follow_up_result = await self._execute_follow_up(agent_name, state)
+            if follow_up_result:
+                self._apply_node_result(state, follow_up_result)
+        metadata = state.get("metadata", {})
+        plan = metadata.get("execution_plan") or []
+        remaining = [step for step in plan if step.get("status") not in {"completed", "skipped"}]
+        metadata = copy.deepcopy(metadata)
+        metadata["plan_status"] = "completed" if not remaining else "incomplete"
+        metadata["plan_completed_at"] = datetime.utcnow().isoformat()
+        if remaining:
+            metadata["plan_remaining_agents"] = [step.get("agent") for step in remaining]
+        state["metadata"] = metadata
+        return state
+
+    def _unfinished_plan_agents(self, state: WorkflowState) -> List[str]:
+        metadata = state.get("metadata", {})
+        plan = metadata.get("execution_plan") or []
+        return [step.get("agent") for step in plan if step.get("status") not in {"completed", "skipped"}]
+
+    async def _execute_follow_up(
+        self, agent_name: str, state: WorkflowState
+    ) -> Optional[Dict[str, Any]]:
+        handlers: Dict[str, Callable[[WorkflowState], Any]] = {
+            "context_rag": self._context_node,
+            "science_extraction": self._science_node,
+            "clinical_synthesis": self._clinical_node,
+            "educational_content": self._education_node,
+            "rebellion_framework": self._rebellion_node,
+            "founder_voice": self._founder_node,
+            "marketing_seo": self._marketing_node,
+            "validation": self._validation_node,
+        }
+        handler = handlers.get(agent_name)
+        if not handler:
+            logger.warning("No follow-up handler registered for %s", agent_name)
+            return None
+        try:
+            result = await handler(state)
+            if result and result.get("stage", "").endswith("completed"):
+                self._mark_plan_step(state, agent_name, "completed", "Follow-up execution")
+            return result
+        except Exception as exc:
+            logger.error("Follow-up execution for %s failed: %s", agent_name, exc)
+            self._mark_plan_step(state, agent_name, "failed", f"Follow-up error: {exc}")
+            return None
+
+    def _apply_node_result(self, state: WorkflowState, result: Dict[str, Any]) -> None:
+        if not result:
+            return
+        for key, value in result.items():
+            if key == "skip_nodes" and isinstance(value, Iterable):
+                state["skip_nodes"].update(value)
+            elif key == "completed_nodes" and isinstance(value, dict):
+                state.setdefault("completed_nodes", {}).update(value)
+            elif key == "intermediate_results" and isinstance(value, dict):
+                state.setdefault("intermediate_results", {}).update(value)
+            else:
+                state[key] = value

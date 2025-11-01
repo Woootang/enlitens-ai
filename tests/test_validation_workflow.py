@@ -1,6 +1,7 @@
 import pytest
 
 pydantic = pytest.importorskip("pydantic")
+import pytest
 from pydantic import ValidationError
 
 from src.models.enlitens_schemas import BlogContent
@@ -75,10 +76,30 @@ async def test_validation_agent_end_to_end():
             "methodologies": ["Randomized controlled trial"],
             "statistics": ["According to Doe et al. (2022) [Source: Journal]"] ,
             "implications": ["Cognitive training improves executive regulation"],
+            "citations": ["Doe et al., 2022"],
+            "references": ["Doe, J. (2022). Journal of Executive Function."],
         },
         "clinical_content": {
-            "interventions": ["Cognitive training protocol"],
-            "protocols": ["Eight-week executive coaching"],
+            "interventions": [
+                "Co-design rebellious routines with the client—torch the bullshit deficit story and map environmental triggers.",
+                "Polyvagal regulation practice so the nervous system feels safe before cognitive work.",
+            ],
+            "assessments": ["Context-and-strengths inventory co-created with the client."],
+            "protocols": [
+                "Eight-week executive coaching arc with choice-driven sessions and collaborative checkpoints."
+            ],
+            "guidelines": [
+                "Context audit: analyse workplace system pressures and burn the old metrics that ignore environment.",
+                "Plan advocacy moves targeting school and workplace ableism."
+            ],
+            "outcomes": [
+                "Client graduates with an autonomy blueprint and self-advocacy scripts for real-world labs."
+            ],
+            "contraindications": [
+                "Pause immediately if the nervous system signals overwhelm; consent-driven pacing only."
+            ],
+            "side_effects": ["Possible fatigue when systems refuse to adapt—monitor and adjust the water, not the fish."],
+            "monitoring": ["Track evidence citations and log gaps for future research pulls."],
         },
         "marketing_content": {
             "headlines": ["Rewire executive function with neuroscience"],
@@ -110,3 +131,6 @@ async def test_validation_agent_end_to_end():
     assert result["citation_report"]["failed"] == []
     assert result["retry_metadata"]["needs_retry"] is False
     assert result["self_critique"] is None
+    review = result["constitutional_review"]
+    assert all(principle["passed"] for principle in review["principles"])
+    assert result["quality_scores"]["overall_quality"] == pytest.approx(1.0)
