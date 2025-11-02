@@ -178,6 +178,9 @@ def _build_settings() -> Settings:
     if not provider_settings.base_url:
         provider_settings.base_url = "http://localhost:8000/v1"
 
+    if provider_settings.base_url:
+        provider_settings.base_url = provider_settings.base_url.rstrip("/")
+
     if not provider_settings.local_weights_path:
         provider_settings.local_weights_path = provider_settings.default_model
 

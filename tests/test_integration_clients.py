@@ -6,7 +6,7 @@ import pytest
 httpx = pytest.importorskip("httpx")
 
 from src.agents.base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient
+from src.synthesis.ollama_client import OllamaClient, VLLMClient
 from src.utils.settings import get_settings, reset_settings_cache
 
 
@@ -63,3 +63,37 @@ async def test_client_handles_offline_backend(monkeypatch: pytest.MonkeyPatch) -
         assert healthy is False
     finally:
         await client.close()
+
+
+@pytest.mark.asyncio
+async def test_vllm_client_targets_versioned_route(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: Dict[str, Any] = {"count": 0, "path": None}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["count"] += 1
+        calls["path"] = request.url.path
+        assert request.url.path == "/v1/chat/completions"
+        payload = {
+            "choices": [
+                {
+                    "message": {"content": "ok"},
+                    "finish_reason": "stop",
+                }
+            ]
+        }
+        return httpx.Response(200, json=payload)
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setenv("LLM_BASE_URL", "http://router.local/v1")
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "test-model")
+    reset_settings_cache()
+
+    client = VLLMClient(transport=transport)
+    try:
+        result = await client.generate_response("ping")
+    finally:
+        await client.close()
+
+    assert result["response"] == "ok"
+    assert calls["count"] == 1
+    assert calls["path"] == "/v1/chat/completions"

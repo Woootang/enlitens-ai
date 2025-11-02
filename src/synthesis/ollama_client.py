@@ -24,9 +24,35 @@ from src.utils.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
-VLLM_DEFAULT_URL = "http://localhost:8000/v1"
-VLLM_DEFAULT_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
-MONITORING_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
+_FALLBACK_BASE_URL = "http://localhost:8000/v1"
+_FALLBACK_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
+
+
+def _resolve_default_base_url() -> str:
+    """Return the best-effort default base URL respecting configuration."""
+
+    try:
+        settings = get_settings()
+        base_url = settings.llm.base_url
+    except Exception:  # pragma: no cover - defensive during import time
+        base_url = None
+    return (base_url or _FALLBACK_BASE_URL).rstrip("/")
+
+
+def _resolve_default_model() -> str:
+    """Return the default model path, allowing configuration overrides."""
+
+    try:
+        settings = get_settings()
+        model = settings.llm.default_model
+    except Exception:  # pragma: no cover - defensive during import time
+        model = None
+    return model or _FALLBACK_MODEL
+
+
+VLLM_DEFAULT_URL = _resolve_default_base_url()
+VLLM_DEFAULT_MODEL = _resolve_default_model()
+MONITORING_MODEL = _FALLBACK_MODEL
 
 
 class VLLMClient:
@@ -36,8 +62,8 @@ class VLLMClient:
 
     def __init__(
         self,
-        base_url: str = VLLM_DEFAULT_URL,
-        default_model: str = VLLM_DEFAULT_MODEL,
+        base_url: Optional[str] = None,
+        default_model: Optional[str] = None,
         *,
         timeout_seconds: float = 900.0,
         enable_prefix_caching: bool = True,
@@ -47,8 +73,10 @@ class VLLMClient:
         max_retries: int = 3,
         transport: Optional[httpx.AsyncBaseTransport] = None,
     ) -> None:
-        self.base_url = base_url.rstrip("/")
-        self.default_model = default_model
+        resolved_base = (base_url or _resolve_default_base_url()).rstrip("/")
+        resolved_model = default_model or _resolve_default_model()
+        self.base_url = resolved_base
+        self.default_model = resolved_model
         self.enable_prefix_caching = enable_prefix_caching
         self.prompt_cache = prompt_cache or self._shared_prompt_cache
         self.continuous_batch_sizes = list(continuous_batch_sizes or (8, 16, 24))
@@ -151,7 +179,7 @@ class VLLMClient:
 
         # Primary request
         try:
-            response = await self._request_with_retry("POST", "/chat/completions", json=payload)
+            response = await self._request_with_retry("POST", "chat/completions", json=payload)
             data = response.json()
         except httpx.HTTPStatusError as exc:
             # Intermittent 404s can happen depending on how the server exposes the OpenAI routes.
@@ -645,7 +673,7 @@ class VLLMClient:
         """Verify the backing server is reachable."""
 
         try:
-            await self._request_with_retry("GET", "/models")
+            await self._request_with_retry("GET", "models")
             return True
         except Exception as exc:
             logger.error("LLM connection failed: %s", exc)
@@ -653,7 +681,7 @@ class VLLMClient:
 
     async def list_models(self) -> List[Dict[str, Any]]:
         try:
-            response = await self._request_with_retry("GET", "/models")
+            response = await self._request_with_retry("GET", "models")
             data = response.json()
             return data.get("data", data.get("models", []))
         except Exception as exc:
@@ -674,7 +702,7 @@ class OllamaAPIClient(VLLMClient):
         if await super().check_connection():
             return True
         try:
-            await self._request_with_retry("GET", "/api/tags")
+            await self._request_with_retry("GET", "api/tags")
             return True
         except Exception as exc:
             logger.error("Ollama health check failed: %s", exc)
@@ -751,12 +779,11 @@ class OllamaClient:
             )
             resolved_url = resolved_base
         else:
-            resolved_url = resolved_url or (
-                "http://localhost:11434/v1" if provider_name == "ollama" else VLLM_DEFAULT_URL
-            )
+            default_url = "http://localhost:11434/v1" if provider_name == "ollama" else _resolve_default_base_url()
+            resolved_url = (resolved_url or default_url).rstrip("/")
             self._client = client_cls(
                 base_url=resolved_url,
-                default_model=resolved_model or VLLM_DEFAULT_MODEL,
+                default_model=resolved_model or _resolve_default_model(),
                 **client_kwargs,
             )
 
