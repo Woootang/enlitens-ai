@@ -3,15 +3,15 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-import numpy as np
-
 from .base_agent import BaseAgent
 from src.retrieval.vector_store import BaseVectorStore, QdrantVectorStore, SearchResult
 from src.utils.enlitens_constitution import EnlitensConstitution
+from src.utils.vector_math import ensure_float_list, mean as vector_mean
 
 logger = logging.getLogger(__name__)
 
@@ -179,23 +179,24 @@ class ContextRAGAgent(BaseAgent):
                 else:
                     record["sources"].add(source)
 
-        query_vectors: List[np.ndarray] = []
+        query_vectors: List[List[float]] = []
         for component_name, component_text in query_components.items():
             if not component_text:
                 continue
-            vector = self.vector_store.embedding_model.encode(component_text, normalize_embeddings=True)
-            query_vectors.append(vector)
+            vector_raw = self.vector_store.embedding_model.encode(
+                component_text,
+                normalize_embeddings=True,
+            )
+            query_vectors.append(ensure_float_list(vector_raw))
             partial_results = self.vector_store.search(component_text, limit=self.top_k)
             register_results(partial_results, component_name or "component")
 
-        combined_vector: Optional[np.ndarray] = None
+        combined_vector: Optional[List[float]] = None
         if query_vectors:
-            combined_vector = np.mean(query_vectors, axis=0)
-            norm = np.linalg.norm(combined_vector)
-            if norm:
-                combined_vector = combined_vector / norm
-            else:
-                combined_vector = None
+            averaged_vector = vector_mean(query_vectors)
+            norm = math.sqrt(sum(value * value for value in averaged_vector))
+            if norm > 0:
+                combined_vector = [value / norm for value in averaged_vector]
 
         if combined_vector is not None:
             vector_results = self.vector_store.search(combined_vector, limit=self.top_k)
@@ -375,9 +376,11 @@ class ContextRAGAgent(BaseAgent):
         alignment_scores = [item["alignment"]["score"] for item in results]
         combined_scores = [item["combined_score"] for item in results]
         high_alignment = sum(1 for score in alignment_scores if score >= 0.1)
+        average_alignment = sum(alignment_scores) / float(len(alignment_scores)) if alignment_scores else 0.0
+        average_combined = sum(combined_scores) / float(len(combined_scores)) if combined_scores else 0.0
         return {
-            "average_alignment": float(np.mean(alignment_scores)) if alignment_scores else 0.0,
-            "average_combined_score": float(np.mean(combined_scores)) if combined_scores else 0.0,
+            "average_alignment": average_alignment,
+            "average_combined_score": average_combined,
             "high_alignment_ratio": high_alignment / float(len(results)),
             "count": len(results),
         }
