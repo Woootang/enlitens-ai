@@ -51,6 +51,45 @@ def _resolve_default_model() -> str:
     return model or _FALLBACK_MODEL
 
 
+_DEFAULT_COMPLETION_TOKENS = 4096
+_MAX_COMPLETION_TOKENS = 8192
+_MAX_AUTO_CONTINUATIONS = 3
+
+
+def _resolve_default_completion_tokens() -> int:
+    """Determine the default ``max_tokens`` budget for chat completions."""
+
+    try:
+        settings = get_settings()
+        extra = getattr(settings.llm, "extra", {}) or {}
+        env_override = os.environ.get("LLM_MAX_COMPLETION_TOKENS")
+        candidate = env_override or extra.get("max_completion_tokens")
+        if candidate is not None:
+            value = int(candidate)
+            if value > 0:
+                return max(512, min(value, _MAX_COMPLETION_TOKENS))
+    except Exception:  # pragma: no cover - defensive guard
+        pass
+    return _DEFAULT_COMPLETION_TOKENS
+
+
+def _resolve_max_completion_tokens(default: int) -> int:
+    """Return the hard upper bound for continuation attempts."""
+
+    try:
+        settings = get_settings()
+        extra = getattr(settings.llm, "extra", {}) or {}
+        env_override = os.environ.get("LLM_MAX_AUTO_TOKENS")
+        candidate = env_override or extra.get("max_completion_limit")
+        if candidate is not None:
+            value = int(candidate)
+            if value > 0:
+                return max(default, min(value, _MAX_COMPLETION_TOKENS))
+    except Exception:  # pragma: no cover - defensive guard
+        pass
+    return max(default, _MAX_COMPLETION_TOKENS)
+
+
 VLLM_DEFAULT_URL = _resolve_default_base_url()
 VLLM_DEFAULT_MODEL = _resolve_default_model()
 MONITORING_MODEL = _FALLBACK_MODEL
@@ -83,6 +122,8 @@ class VLLMClient:
         self.continuous_batch_sizes = list(continuous_batch_sizes or (8, 16, 24))
         self.headers = dict(headers or {})
         self.max_retries = max_retries
+        self.default_max_tokens = _resolve_default_completion_tokens()
+        self.max_completion_tokens = _resolve_max_completion_tokens(self.default_max_tokens)
         self.client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=timeout_seconds,
@@ -102,6 +143,8 @@ class VLLMClient:
         clone.continuous_batch_sizes = list(self.continuous_batch_sizes)
         clone.headers = dict(self.headers)
         clone.max_retries = self.max_retries
+        clone.default_max_tokens = self.default_max_tokens
+        clone.max_completion_tokens = self.max_completion_tokens
         return clone
 
     def _resolve_model(self, model: Optional[str]) -> str:
@@ -153,70 +196,140 @@ class VLLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
-        payload: Dict[str, Any] = {
-            "model": model_name,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": num_predict or 2048,
-            "stream": False,
-        }
+        if num_predict is not None and num_predict > self.max_completion_tokens:
+            logger.info(
+                "Requested num_predict %s exceeds max completion budget %s; clamping",
+                num_predict,
+                self.max_completion_tokens,
+            )
 
-        if top_p is not None:
-            payload["top_p"] = top_p
-        if response_format:
-            if isinstance(response_format, dict):
-                payload["response_format"] = response_format
-            else:
-                payload["response_format"] = {"type": response_format}
-        
-        # Don't use extra_body - vLLM OpenAI API doesn't support it
-        # This causes 400 errors: "Extra inputs are not permitted"
-        # if num_ctx is not None:
-        #     payload.setdefault("extra_body", {})["max_model_len"] = num_ctx
-        # if grammar:
-        #     payload.setdefault("extra_body", {})["grammar"] = grammar
-        # if extra_options:
-        #     payload.setdefault("extra_body", {}).update(extra_options)
+        total_budget = min(self.max_completion_tokens, num_predict or self.max_completion_tokens)
+        chunk_budget = min(num_predict or self.default_max_tokens, total_budget)
+        chunk_budget = max(256, chunk_budget)
+        remaining_budget = total_budget
 
-        # Primary request
-        try:
-            response = await self._request_with_retry("POST", "chat/completions", json=payload)
-            data = response.json()
-        except httpx.HTTPStatusError as exc:
-            # Intermittent 404s can happen depending on how the server exposes the OpenAI routes.
-            # If we hit a 404, retry by toggling the /v1 prefix heuristically.
-            if exc.response is not None and exc.response.status_code == 404:
-                base = self.base_url.rstrip("/")
-                candidates: List[str] = []
-                if base.endswith("/v1"):
-                    base_no = base[:-3]
-                    candidates.append(f"{base_no}/v1/chat/completions")
-                    candidates.append(f"{base_no}/chat/completions")
+        base_messages = list(messages)
+        conversation = list(base_messages)
+        aggregated_chunks: List[str] = []
+        attempts = 0
+        truncated = False
+        last_data: Optional[Dict[str, Any]] = None
+
+        while remaining_budget > 0:
+            payload: Dict[str, Any] = {
+                "model": model_name,
+                "messages": conversation,
+                "temperature": temperature,
+                "max_tokens": min(chunk_budget, remaining_budget),
+                "stream": False,
+            }
+
+            if top_p is not None:
+                payload["top_p"] = top_p
+            if response_format:
+                if isinstance(response_format, dict):
+                    payload["response_format"] = response_format
                 else:
-                    candidates.append(f"{base}/v1/chat/completions")
-                data = None
-                for url in candidates:
-                    try:
-                        fb = await httpx.AsyncClient(
-                            timeout=self.client.timeout,
-                            headers=self.headers or None,
-                        ).post(url, json=payload)
-                        fb.raise_for_status()
-                        data = fb.json()
-                        break
-                    except Exception:
-                        continue
-                if data is None:
+                    payload["response_format"] = {"type": response_format}
+
+            # Don't use extra_body - vLLM OpenAI API doesn't support it
+            # This causes 400 errors: "Extra inputs are not permitted"
+            # if num_ctx is not None:
+            #     payload.setdefault("extra_body", {})["max_model_len"] = num_ctx
+            # if grammar:
+            #     payload.setdefault("extra_body", {})["grammar"] = grammar
+            # if extra_options:
+            #     payload.setdefault("extra_body", {}).update(extra_options)
+
+            # Primary request
+            try:
+                response = await self._request_with_retry("POST", "chat/completions", json=payload)
+                data = response.json()
+            except httpx.HTTPStatusError as exc:
+                # Intermittent 404s can happen depending on how the server exposes the OpenAI routes.
+                # If we hit a 404, retry by toggling the /v1 prefix heuristically.
+                if exc.response is not None and exc.response.status_code == 404:
+                    base = self.base_url.rstrip("/")
+                    candidates: List[str] = []
+                    if base.endswith("/v1"):
+                        base_no = base[:-3]
+                        candidates.append(f"{base_no}/v1/chat/completions")
+                        candidates.append(f"{base_no}/chat/completions")
+                    else:
+                        candidates.append(f"{base}/v1/chat/completions")
+                    data = None
+                    for url in candidates:
+                        try:
+                            fb = await httpx.AsyncClient(
+                                timeout=self.client.timeout,
+                                headers=self.headers or None,
+                            ).post(url, json=payload)
+                            fb.raise_for_status()
+                            data = fb.json()
+                            break
+                        except Exception:
+                            continue
+                    if data is None:
+                        raise
+                else:
                     raise
-            else:
-                raise
-        choice = data.get("choices", [{}])[0]
-        message = choice.get("message", {})
-        finish_reason = choice.get("finish_reason")
+
+            choice = data.get("choices", [{}])[0]
+            message = choice.get("message", {})
+            finish_reason = choice.get("finish_reason")
+            chunk_text = message.get("content", "")
+            aggregated_chunks.append(chunk_text)
+            last_data = data
+
+            usage = data.get("usage") or {}
+            completion_tokens = usage.get("completion_tokens")
+            if completion_tokens is None:
+                completion_tokens = payload["max_tokens"]
+            remaining_budget = max(0, remaining_budget - int(completion_tokens))
+
+            if finish_reason == "length" and num_predict is None and attempts < _MAX_AUTO_CONTINUATIONS and remaining_budget > 0:
+                attempts += 1
+                truncated = True
+                next_chunk_budget = max(chunk_budget + 512, int(chunk_budget * 1.5))
+                chunk_budget = min(max(256, next_chunk_budget), self.max_completion_tokens)
+                chunk_budget = min(chunk_budget, remaining_budget)
+                conversation = list(base_messages)
+                conversation.append({"role": "assistant", "content": "".join(aggregated_chunks)})
+                conversation.append(
+                    {
+                        "role": "user",
+                        "content": "Please continue the previous response without repeating yourself. Continue exactly where you left off.",
+                    }
+                )
+                logger.info(
+                    "🔁 Continuing truncated response (attempt %s, remaining budget %s)",
+                    attempts,
+                    remaining_budget,
+                )
+                continue
+
+            truncated = finish_reason == "length"
+            break
+
+        aggregated_text = "".join(aggregated_chunks)
+        if last_data is None:
+            last_data = {}
+        else:
+            try:
+                last_choice = last_data.setdefault("choices", [{}])[0]
+                last_message = last_choice.setdefault("message", {})
+                last_message["content"] = aggregated_text
+                if truncated:
+                    last_choice["finish_reason"] = "length"
+                else:
+                    last_choice["finish_reason"] = last_choice.get("finish_reason", "stop")
+            except Exception:  # pragma: no cover - defensive guard
+                pass
+
         return {
-            "response": message.get("content", ""),
-            "raw": data,
-            "done": finish_reason != "length",
+            "response": aggregated_text,
+            "raw": last_data,
+            "done": not truncated,
         }
 
     async def generate_text(

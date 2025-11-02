@@ -1,5 +1,6 @@
 import asyncio
-from typing import Any, Dict
+import json
+from typing import Any, Dict, List
 
 import pytest
 
@@ -97,3 +98,55 @@ async def test_vllm_client_targets_versioned_route(monkeypatch: pytest.MonkeyPat
     assert result["response"] == "ok"
     assert calls["count"] == 1
     assert calls["path"] == "/v1/chat/completions"
+
+
+@pytest.mark.asyncio
+async def test_vllm_client_auto_continuation(monkeypatch: pytest.MonkeyPatch) -> None:
+    responses: List[Dict[str, Any]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content.decode("utf-8"))
+        call_index = len(responses)
+        responses.append(payload)
+        if call_index == 0:
+            assert payload["max_tokens"] >= 256
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {
+                            "message": {"content": "chunk-1"},
+                            "finish_reason": "length",
+                        }
+                    ],
+                    "usage": {"completion_tokens": payload["max_tokens"] - 128},
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "choices": [
+                    {
+                        "message": {"content": "chunk-2"},
+                        "finish_reason": "stop",
+                    }
+                ],
+                "usage": {"completion_tokens": 512},
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setenv("LLM_BASE_URL", "http://router.local/v1")
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "test-model")
+    reset_settings_cache()
+
+    client = VLLMClient(transport=transport)
+    try:
+        result = await client.generate_response("long prompt")
+    finally:
+        await client.close()
+
+    assert result["response"] == "chunk-1chunk-2"
+    assert result["done"] is True
+    assert len(responses) == 2
+    assert responses[1]["messages"][-2]["role"] == "assistant"
