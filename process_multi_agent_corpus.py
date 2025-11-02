@@ -38,6 +38,7 @@ from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
 from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
 from src.utils.terminology import sanitize_structure, contains_banned_terms
+from src.pipeline.optional_context_loader import analyze_optional_context
 
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -145,6 +146,7 @@ class MultiAgentProcessor:
         self.input_dir = Path(input_dir)
         self.output_file = Path(output_file)
         self.st_louis_report = Path(st_louis_report) if st_louis_report else None
+        self.context_dir = Path(__file__).parent
         self.temp_file = Path(f"{output_file}.temp")
 
         # Initialize components
@@ -233,20 +235,15 @@ class MultiAgentProcessor:
     def _analyze_client_insights(self) -> Dict[str, Any]:
         """Analyze client intake data for enhanced context."""
         try:
-            intakes_path = Path(__file__).parent / "intakes.txt"
-            if intakes_path.exists():
-                with open(intakes_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-
-                # Use extraction tools to analyze intakes
-                if hasattr(self, 'extraction_tools'):
-                    intake_analysis = self.extraction_tools.analyze_client_intakes([content])
-                    return intake_analysis
-                else:
-                    return {"raw_content": content[:1000]}
-            else:
-                logger.warning("Client intakes file not found")
-                return {}
+            intakes_path = self.context_dir / "intakes.txt"
+            analyzer = None
+            if hasattr(self, 'extraction_tools') and hasattr(self.extraction_tools, 'analyze_client_intakes'):
+                analyzer = self.extraction_tools.analyze_client_intakes
+            return analyze_optional_context(
+                intakes_path,
+                description="client intake insights",
+                analyzer=analyzer,
+            )
         except Exception as e:
             logger.error(f"Error analyzing client insights: {e}")
             return {}
@@ -254,20 +251,15 @@ class MultiAgentProcessor:
     def _analyze_founder_insights(self) -> Dict[str, Any]:
         """Analyze founder transcripts for voice patterns."""
         try:
-            transcripts_path = Path(__file__).parent / "transcripts.txt"
-            if transcripts_path.exists():
-                with open(transcripts_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-
-                # Use extraction tools to analyze transcripts
-                if hasattr(self, 'extraction_tools'):
-                    founder_analysis = self.extraction_tools.analyze_founder_transcripts([content])
-                    return founder_analysis
-                else:
-                    return {"raw_content": content[:1000]}
-            else:
-                logger.warning("Founder transcripts file not found")
-                return {}
+            transcripts_path = self.context_dir / "transcripts.txt"
+            analyzer = None
+            if hasattr(self, 'extraction_tools') and hasattr(self.extraction_tools, 'analyze_founder_transcripts'):
+                analyzer = self.extraction_tools.analyze_founder_transcripts
+            return analyze_optional_context(
+                transcripts_path,
+                description="founder transcript insights",
+                analyzer=analyzer,
+            )
         except Exception as e:
             logger.error(f"Error analyzing founder insights: {e}")
             return {}
