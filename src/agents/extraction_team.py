@@ -1,20 +1,26 @@
-"""
-Extraction Team - Specialized Entity Recognition
+"""Extraction Team - Specialized Entity Recognition with optional deps."""
 
-This team uses specialized biomedical models to extract entities from research papers:
-- BiomedBERT for general biomedical entities
-- NeuroBERT for neuroscience-specific entities  
-- PsychBERT for psychology entities
-- GatorTron for clinical entities
-"""
-
+import asyncio
 import logging
 import os
-from typing import Dict, List, Any, Optional, Callable
-import asyncio
+import types
+from typing import Any, Callable, Dict, List, Optional
 
-import torch
-from transformers import pipeline
+try:  # pragma: no cover - allow runtime without PyTorch installed
+    import torch  # type: ignore
+except Exception:  # pragma: no cover - provide minimal stub implementation
+    class _CudaStub:
+        @staticmethod
+        def is_available() -> bool:
+            return False
+
+    torch = types.SimpleNamespace(cuda=_CudaStub())  # type: ignore
+
+try:  # pragma: no cover - transformers optional in lightweight environments
+    from transformers import pipeline  # type: ignore
+except Exception:  # pragma: no cover - provide stub pipeline helper
+    def pipeline(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("transformers is not installed")
 
 try:  # pragma: no cover - optional dependency
     from packaging import version
@@ -347,25 +353,29 @@ class ExtractionTeam:
             return enabled
 
         min_version = "2.6.0"
-        if version is None:
-            logger.warning(
-                "Extraction Team: 'packaging' not available; disabling HF entity models by default"
+        torch_version = getattr(torch, "__version__", None)
+
+        if torch_version is None or version is None:
+            logger.debug(
+                "Extraction Team: Torch version metadata unavailable; enabling HF models with safe defaults",
             )
-            return False
+            return True
 
         try:
-            current_version = version.parse(torch.__version__.split("+")[0])
-            if current_version < version.parse(min_version):
-                logger.warning(
-                    "Extraction Team: Torch %s detected (<%s); skipping HF entity models to avoid load errors",
-                    torch.__version__,
-                    min_version,
-                )
-                return False
+            current_version = version.parse(str(torch_version).split("+")[0])
         except Exception as exc:  # pragma: no cover - defensive
-            logger.warning(
-                "Extraction Team: Unable to determine torch version (%s); disabling HF entity models",
+            logger.debug(
+                "Extraction Team: Unable to parse torch version %s (%s); defaulting to HF models enabled",
+                torch_version,
                 exc,
+            )
+            return True
+
+        if current_version < version.parse(min_version):
+            logger.warning(
+                "Extraction Team: Torch %s detected (<%s); skipping HF entity models to avoid load errors",
+                torch_version,
+                min_version,
             )
             return False
 
