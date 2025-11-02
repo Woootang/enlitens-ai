@@ -110,7 +110,7 @@ Return JSON with fields {{"thesis": str, "sections": [str], "client_strengths": 
                     rallying_cry="We torch the lie that clients are broken and re-engineer the water they swim in.",
                 )
 
-            outline_json = outline.model_dump_json(indent=2, ensure_ascii=False)
+            outline_json = json.dumps(outline.model_dump(), indent=2, ensure_ascii=False)
             exemplars = (
                 "FEW-SHOT EXEMPLARS (mirror structure, mark speculation clearly):\n"
                 f"{few_shot_block}\n\n" if few_shot_block else ""

@@ -113,6 +113,22 @@ class ValidationAgent(BaseAgent):
         }
         return result
 
+    async def validate_output(self, output: Dict[str, Any]) -> bool:
+        """Minimal validator ensuring outputs meet a baseline quality bar."""
+        try:
+            final = output.get("final_validation") or {}
+            if isinstance(final, dict) and final.get("passed") is True:
+                return True
+            scores = output.get("quality_scores") or {}
+            overall = 0.0
+            try:
+                overall = float(scores.get("overall_quality", 0.0))
+            except Exception:
+                overall = 0.0
+            return overall >= 0.6
+        except Exception:
+            return False
+
     # ------------------------------------------------------------------
     # Evaluation helpers
     # ------------------------------------------------------------------
@@ -310,4 +326,3 @@ class ValidationAgent(BaseAgent):
             "missing_quotes": [],
             "total": total,
         }
-*** End of File

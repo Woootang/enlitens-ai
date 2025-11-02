@@ -1,4 +1,4 @@
-import { DashboardSummary, PipelineAgent, PlanStep, SnapshotPayload, SeverityLevel } from '../types';
+import { DashboardSummary, PipelineAgent, PlanStep, QualityMetrics, SnapshotPayload, SeverityLevel } from '../types';
 
 const STATUS_PRIORITY: Record<SeverityLevel, number> = {
   normal: 0,
@@ -104,6 +104,28 @@ export function buildPlan(payload: SnapshotPayload, agents: PipelineAgent[]): Pl
   });
 }
 
+const coerceNumber = (value: unknown): number | undefined => {
+  if (value === null || value === undefined) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+export function buildQualityMetrics(payload: SnapshotPayload): QualityMetrics {
+  const raw = (payload.quality_metrics ?? {}) as Record<string, unknown>;
+  const layerFailuresRaw = raw.layer_failures ?? raw.layerFailures ?? [];
+  return {
+    precisionAt3: coerceNumber(raw.precision_at_3 ?? raw.precisionAt3),
+    recallAt3: coerceNumber(raw.recall_at_3 ?? raw.recallAt3),
+    hallucinationRate: coerceNumber(raw.hallucination_rate ?? raw.hallucinationRate),
+    faithfulness: coerceNumber(raw.faithfulness),
+    citationVerified: coerceNumber(raw.citation_verified ?? raw.citationVerified),
+    validationFailures: coerceNumber(raw.validation_failures ?? raw.validationFailures),
+    emptyFields: coerceNumber(raw.empty_fields ?? raw.emptyFields),
+    layerFailures: Array.isArray(layerFailuresRaw) ? (layerFailuresRaw as string[]) : [],
+    lastEvaluatedAt: typeof raw.evaluated_at === 'string' ? (raw.evaluated_at as string) : null,
+  };
+}
+
 export function reduceSeverityFromAgents(agents: PipelineAgent[], seed: SeverityLevel): SeverityLevel {
   return agents.reduce((acc, agent) => {
     const candidate = AGENT_STATUS_ORDER[agent.status] ?? 'normal';
@@ -111,15 +133,22 @@ export function reduceSeverityFromAgents(agents: PipelineAgent[], seed: Severity
   }, seed);
 }
 
-export function normalizeSnapshot(payload: SnapshotPayload): { summary: DashboardSummary; agents: PipelineAgent[]; plan: PlanStep[] } {
+export function normalizeSnapshot(payload: SnapshotPayload): {
+  summary: DashboardSummary;
+  agents: PipelineAgent[];
+  plan: PlanStep[];
+  quality: QualityMetrics;
+} {
   const summary = buildSummary(payload);
   const agents = buildPipelineAgents(payload);
   const plan = buildPlan(payload, agents);
   const severity = reduceSeverityFromAgents(agents, summary.severity);
+  const quality = buildQualityMetrics(payload);
 
   return {
     summary: { ...summary, severity },
     agents,
     plan,
+    quality,
   };
 }

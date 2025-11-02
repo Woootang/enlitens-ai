@@ -27,6 +27,9 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import httpx
 
@@ -96,6 +99,8 @@ class ProcessingState:
             "times": deque(maxlen=10)
         })
         self.supervisor_stack = []
+        self.verbose_logging_enabled = False
+        self.retry_requests: deque = deque(maxlen=20)
 
     def update_from_log(self, log_data: Dict[str, Any]):
         """Update state from incoming log message."""
@@ -223,7 +228,20 @@ class ProcessingState:
             "recent_warnings": self.warnings[-5:],
             "quality_metrics": self.quality_metrics,
             "agent_performance": agent_performance_serializable,
+            "verbose_logging": self.verbose_logging_enabled,
+            "recent_retry_requests": list(self.retry_requests),
         }
+
+    def record_retry_request(self):
+        if self.current_document:
+            self.retry_requests.append({
+                "document": self.current_document,
+                "requested_at": datetime.utcnow().isoformat(),
+            })
+
+    def toggle_verbose(self) -> bool:
+        self.verbose_logging_enabled = not self.verbose_logging_enabled
+        return self.verbose_logging_enabled
 
 # Global state
 processing_state = ProcessingState()
@@ -656,6 +674,40 @@ Be concise and helpful. If you see issues, suggest solutions."""
     except Exception as e:
         logger.error(f"Chat endpoint error: {e}")
         return JSONResponse({"response": "Sorry, I encountered an error processing your request."})
+
+
+@app.post("/api/actions/retry-document")
+async def retry_document_action():
+    """Operator-triggered request to retry the active document."""
+    document = processing_state.current_document
+    if not document:
+        return JSONResponse({"success": False, "message": "No active document to retry."}, status_code=400)
+
+    processing_state.record_retry_request()
+    await manager.broadcast({
+        "type": "log",
+        "timestamp": datetime.utcnow().isoformat(),
+        "level": "INFO",
+        "message": f"Operator requested retry for document '{document}'.",
+        "agent_name": "operator",
+    })
+    logger.info("Retry requested for document %s", document)
+    return JSONResponse({"success": True, "message": f"Retry request acknowledged for {document}."})
+
+
+@app.post("/api/actions/toggle-verbose")
+async def toggle_verbose_action():
+    """Toggle verbose logging flag for downstream processors."""
+    new_state = processing_state.toggle_verbose()
+    await manager.broadcast({
+        "type": "log",
+        "timestamp": datetime.utcnow().isoformat(),
+        "level": "INFO",
+        "message": f"Verbose logging {'enabled' if new_state else 'disabled'} by operator.",
+        "agent_name": "operator",
+    })
+    logger.info("Verbose logging state changed to %s", new_state)
+    return JSONResponse({"success": True, "verbose": new_state})
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Enlitens AI Enhanced Monitoring Server")

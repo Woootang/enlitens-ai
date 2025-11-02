@@ -1,4 +1,4 @@
-import { Card, CardContent, List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography } from '@mui/material';
+import { Card, CardContent, List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
@@ -28,6 +28,7 @@ type PlanPanelProps = {
 
 export const PlanPanel = ({ steps, visible }: PlanPanelProps) => {
   const highlightAgentId = useDashboardStore((state) => state.highlightAgentId);
+  const highlightPlanStepId = useDashboardStore((state) => state.highlightPlanStepId);
   const actions = useDashboardStore((state) => state.actions);
 
   if (!visible) {
@@ -51,34 +52,56 @@ export const PlanPanel = ({ steps, visible }: PlanPanelProps) => {
           </Typography>
         ) : (
           <List dense sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {steps.map((step) => {
+            {steps.map((step, index) => {
               const { icon: IconComponent, color, label } = iconMap(step.status);
               const isLinked = step.relatedAgentId && step.relatedAgentId === highlightAgentId;
+              const isFocused = step.id === highlightPlanStepId;
               return (
-                <ListItem
+                <Tooltip
                   key={step.id}
-                  onMouseEnter={() => actions.setHighlightPlanStep(step.id, step.relatedAgentId)}
-                  onMouseLeave={() => actions.setHighlightPlanStep(undefined, undefined)}
-                  sx={{
-                    borderRadius: 2,
-                    border: isLinked ? '1px solid rgba(99,179,237,0.6)' : '1px solid transparent',
-                    backgroundColor: isLinked ? 'rgba(99, 179, 237, 0.15)' : 'transparent',
-                  }}
+                  title={step.description ?? undefined}
+                  placement="right"
+                  arrow
+                  enterDelay={200}
                 >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: `${color}22`, color }}>
-                      <IconComponent fontSize="small" />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={<Typography fontWeight={600}>{step.title}</Typography>}
-                    secondary={
-                      <Typography variant="caption" color="text.secondary">
-                        {label}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
+                  <ListItem
+                    onMouseEnter={() => actions.setHighlightPlanStep(step.id, step.relatedAgentId)}
+                    onMouseLeave={() => actions.setHighlightPlanStep(undefined, undefined)}
+                    onClick={() => actions.setHighlightPlanStep(step.id, step.relatedAgentId)}
+                    sx={{
+                      borderRadius: 2,
+                      border:
+                        isFocused || isLinked
+                          ? '1px solid rgba(99,179,237,0.6)'
+                          : '1px solid rgba(255,255,255,0.08)',
+                      backgroundColor:
+                        isFocused || isLinked ? 'rgba(99, 179, 237, 0.18)' : 'rgba(15, 23, 42, 0.35)',
+                      transition: 'background-color 120ms ease, border 120ms ease',
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: `${color}22`, color }}>
+                        <IconComponent fontSize="small" />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Typography fontWeight={600} display="flex" alignItems="center" gap={1}>
+                          <Typography component="span" variant="caption" color="text.secondary">
+                            {String(index + 1).padStart(2, '0')}
+                          </Typography>
+                          {step.title}
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography variant="caption" color="text.secondary">
+                          {label}
+                          {step.description ? ' • Hover for details' : ''}
+                        </Typography>
+                      }
+                    />
+                  </ListItem>
+                </Tooltip>
               );
             })}
           </List>

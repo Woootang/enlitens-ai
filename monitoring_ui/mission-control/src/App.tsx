@@ -1,7 +1,11 @@
 import { Box, Container, Stack } from '@mui/material';
 import { AlertBanner } from './components/AlertBanner';
+import { AssistantDock } from './components/AssistantDock';
+import { InsightStrip } from './components/InsightStrip';
 import { PipelineGraph } from './components/PipelineGraph';
 import { PlanPanel } from './components/PlanPanel';
+import { PerformancePanel } from './components/PerformancePanel';
+import { QualityPanel } from './components/QualityPanel';
 import { SummaryPanel } from './components/SummaryPanel';
 import { useDashboardStore } from './state/useDashboardStore';
 import { useTelemetryConnection } from './hooks/useTelemetryConnection';
@@ -28,6 +32,7 @@ function App() {
         <Stack spacing={4}>
           <AlertBanner severity={summary.severity} messages={summary.alertMessages} connectionStatus={connection} />
           <SummaryPanel summary={summary} />
+          <InsightStrip />
           <Box
             sx={{
               display: 'grid',
@@ -43,8 +48,19 @@ function App() {
               <PlanPanel steps={plan} visible={layout.showPlan} />
             </Box>
           </Box>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', xl: '1.8fr 1fr' },
+              gap: 4,
+            }}
+          >
+            <PerformancePanel />
+            <QualityPanel />
+          </Box>
         </Stack>
       </Container>
+      <AssistantDock />
     </Box>
   );
 }

@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY requirements-monitoring.txt ./
+RUN pip install --no-cache-dir -r requirements-monitoring.txt
+
+COPY monitoring_server_enhanced.py monitoring_server_enhanced.py
+COPY monitoring_server.py monitoring_server.py
+COPY src src
+COPY enlitens_knowledge_base enlitens_knowledge_base
+
+EXPOSE 8000
+
+CMD ["uvicorn", "monitoring_server_enhanced:app", "--host", "0.0.0.0", "--port", "8000"]
+

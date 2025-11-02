@@ -70,6 +70,17 @@ def _merge_sets(existing: Set[str], new: Set[str]) -> Set[str]:
     return existing | new
 
 
+def _merge_metadata(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+    """Reducer that merges metadata dictionaries across node writes."""
+    if existing is None:
+        return new or {}
+    if new is None:
+        return existing
+    merged = dict(existing)
+    merged.update(new)
+    return merged
+
+
 class WorkflowState(TypedDict, total=False):
     """TypedDict holding the shared workflow state across nodes.
 
@@ -99,7 +110,7 @@ class WorkflowState(TypedDict, total=False):
     intermediate_results: Annotated[Dict[str, Any], _merge_intermediate_results]
     cache_prefix: str
     cache_chunk_id: str
-    metadata: Dict[str, Any]
+    metadata: Annotated[Dict[str, Any], _merge_metadata]
 
     # Node outputs tracked explicitly
     science_result: Optional[Dict[str, Any]]

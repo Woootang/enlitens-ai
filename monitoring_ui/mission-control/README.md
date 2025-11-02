@@ -49,3 +49,32 @@ mission-control/
 ## Quality checks
 
 The CI entry point for the dashboard is `npm run build`, which runs TypeScript checks and compiles the production bundle. The build currently emits a single chunk around ~500 kB after minification; future phases will introduce code-splitting as more features arrive.
+
+## Additional tooling
+
+- Run `npm run test:regression` after `npm install`/`npx playwright install` to execute the Playwright regression suite located under `tests/playwright`.
+- Accessibility gate: `npx axe http://localhost:5173`
+- Lighthouse snapshot: `npx lighthouse http://localhost:5173 --preset=desktop --output=json --output=html --output-path=./lighthouse-report`
+
+## Docker compose profile
+
+A two-container profile is available in `docker/mission-control/docker-compose.yml`:
+
+```bash
+cd docker/mission-control
+docker compose up --build
+```
+
+This publishes:
+
+- `monitoring-api` on http://localhost:8000
+- `monitoring-ui` on http://localhost:5173
+
+Adjust the compose file to customise ports or mount alternative knowledge base directories.
+
+## Operator checklist
+
+1. Start the stack (compose or `npm run dev` + FastAPI).
+2. Monitor alert + insight banners, pipeline DAG, and plan panel for orchestration issues.
+3. Use performance and quality panels to identify regressions.
+4. Open the assistant dock (chat icon) to query telemetry or trigger guarded actions (retry, verbose logging) — each action requires confirmation and posts results back to the transcript.

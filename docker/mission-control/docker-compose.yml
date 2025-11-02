@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  monitoring-api:
+    build:
+      context: ../..
+      dockerfile: docker/mission-control/Dockerfile.api
+    ports:
+      - '8000:8000'
+    environment:
+      - PYTHONPATH=/app
+
+  monitoring-ui:
+    build:
+      context: ../../monitoring_ui/mission-control
+    ports:
+      - '5173:80'
+    environment:
+      - VITE_MONITORING_API=http://monitoring-api:8000
+      - VITE_MONITORING_WS=ws://monitoring-api:8000/ws
+    depends_on:
+      - monitoring-api
+

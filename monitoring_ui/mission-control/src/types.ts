@@ -21,6 +21,26 @@ export interface PlanStep {
   description?: string;
 }
 
+export interface AgentPerformanceSnapshot {
+  timestamp: string;
+  avgTimeSeconds?: number;
+  executions?: number;
+  successes?: number;
+  failures?: number;
+}
+
+export interface QualityMetrics {
+  precisionAt3?: number;
+  recallAt3?: number;
+  hallucinationRate?: number;
+  faithfulness?: number;
+  citationVerified?: number;
+  validationFailures?: number;
+  emptyFields?: number;
+  layerFailures: string[];
+  lastEvaluatedAt?: string | null;
+}
+
 export type SeverityLevel = 'normal' | 'warning' | 'critical';
 
 export interface TelemetryEvent {
