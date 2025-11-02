@@ -29,6 +29,18 @@ class ClinicalOutline(BaseModel):
 class ClinicalSynthesisAgent(BaseAgent):
     """Agent specialized in synthesizing clinical applications."""
 
+    @staticmethod
+    def _model_to_json(model: BaseModel, *, indent: int = 2) -> str:
+        """Serialize a pydantic model to UTF-8 safe JSON.
+
+        Pydantic v2 removed the ``ensure_ascii`` argument from ``model_dump_json``.
+        This helper mirrors the previous behaviour by routing through ``model_dump``
+        before handing control to ``json.dumps`` so downstream consumers continue
+        receiving human-readable UTF-8 JSON payloads.
+        """
+
+        return json.dumps(model.model_dump(), indent=indent, ensure_ascii=False)
+
     def __init__(self):
         super().__init__(
             name="ClinicalSynthesis",
@@ -110,7 +122,7 @@ Return JSON with fields {{"thesis": str, "sections": [str], "client_strengths": 
                     rallying_cry="We torch the lie that clients are broken and re-engineer the water they swim in.",
                 )
 
-            outline_json = json.dumps(outline.model_dump(), indent=2, ensure_ascii=False)
+            outline_json = self._model_to_json(outline)
             exemplars = (
                 "FEW-SHOT EXEMPLARS (mirror structure, mark speculation clearly):\n"
                 f"{few_shot_block}\n\n" if few_shot_block else ""
