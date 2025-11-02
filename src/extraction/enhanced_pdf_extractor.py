@@ -22,9 +22,27 @@ from typing import Dict, List, Optional, Tuple, Any
 import logging
 from datetime import datetime
 
-import fitz  # PyMuPDF
-import pdfplumber
-from docling.document_converter import DocumentConverter
+try:  # pragma: no cover - allow running without PyMuPDF
+    import fitz  # type: ignore
+except Exception:  # pragma: no cover - fallback stub when PyMuPDF unavailable
+    fitz = None  # type: ignore
+
+try:  # pragma: no cover - pdfplumber optional in lightweight environments
+    import pdfplumber  # type: ignore
+except Exception:  # pragma: no cover
+    pdfplumber = None  # type: ignore
+
+try:  # pragma: no cover - docling optional
+    from docling.document_converter import DocumentConverter  # type: ignore
+except Exception:  # pragma: no cover - provide lightweight stub
+    class DocumentConverter:  # type: ignore[misc]
+        """Minimal stub used when Docling is unavailable."""
+
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            self._error = RuntimeError("Docling is not installed")
+
+        def convert(self, *_args: Any, **_kwargs: Any) -> Any:
+            raise self._error
 
 try:
     import pytesseract
@@ -184,6 +202,8 @@ class EnhancedPDFExtractor:
         """Fallback extraction using PyMuPDF plain text."""
 
         logger.info("Falling back to PyMuPDF extraction for %s", pdf_path)
+        if fitz is None:  # pragma: no cover - dependency missing in some environments
+            raise RuntimeError("PyMuPDF is not available for fallback extraction")
         text_chunks: List[str] = []
         with fitz.open(str(pdf_path)) as doc:
             for page in doc:
@@ -229,6 +249,8 @@ class EnhancedPDFExtractor:
         """Fallback extraction using pdfplumber page-by-page."""
 
         logger.info("Falling back to pdfplumber extraction for %s", pdf_path)
+        if pdfplumber is None:  # pragma: no cover - dependency missing
+            raise RuntimeError("pdfplumber is not available for fallback extraction")
         text_chunks: List[str] = []
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
@@ -242,6 +264,8 @@ class EnhancedPDFExtractor:
 
         if pytesseract is None or Image is None:
             raise RuntimeError("pytesseract or Pillow not available for OCR fallback")
+        if fitz is None:
+            raise RuntimeError("PyMuPDF is required for OCR fallback")
 
         logger.info("Falling back to OCR extraction for %s", pdf_path)
         ocr_text: List[str] = []

@@ -6,9 +6,7 @@ import logging
 import math
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
-
-import numpy as np
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 try:  # Optional dependency - only required for persistent usage
     import chromadb
@@ -19,13 +17,27 @@ except Exception:  # pragma: no cover - chromadb not always installed in tests
     ChromaClient = None  # type: ignore
     InvalidCollectionException = Exception  # type: ignore
 
-from qdrant_client import QdrantClient
-from qdrant_client.http import models as qmodels
+try:  # Optional dependency - allow tests to run without Qdrant installed
+    from qdrant_client import QdrantClient
+    from qdrant_client.http import models as qmodels
+except Exception:  # pragma: no cover - CI environment without qdrant_client
+    QdrantClient = None  # type: ignore[assignment]
+    qmodels = None  # type: ignore[assignment]
 
 try:  # sentence_transformers is optional in lightweight environments
     from sentence_transformers import SentenceTransformer as _SentenceTransformer
 except Exception:  # pragma: no cover - used in testing environments without torch
     _SentenceTransformer = None
+
+from src.utils.vector_math import (
+    dot as vector_dot,
+    ensure_2d_float_list,
+    ensure_float_list,
+    normalize as vector_normalize,
+    numpy_available,
+    to_numpy,
+    to_numpy_matrix,
+)
 
 
 class HashingSentenceTransformer:
@@ -49,31 +61,31 @@ class HashingSentenceTransformer:
         sentences: Union[str, Sequence[str]],
         normalize_embeddings: bool = True,
         **_: Any,
-    ) -> np.ndarray:
+    ) -> Union[List[float], List[List[float]], "np.ndarray"]:
         single_input = isinstance(sentences, str)
         if single_input:
             to_encode = [sentences]
         else:
             to_encode = list(sentences)
 
-        embeddings: List[np.ndarray] = []
+        embeddings: List[List[float]] = []
         for sentence in to_encode:
             text = sentence or ""
             digest = hashlib.sha256(text.encode("utf-8")).digest()
-            byte_values = np.frombuffer(digest, dtype=np.uint8).astype(np.float32)
+            byte_values = [byte / 255.0 for byte in digest]
             repeats = int(math.ceil(self.dimension / float(len(byte_values))))
-            tiled = np.tile(byte_values, repeats)[: self.dimension]
-            embedding = tiled / 255.0
+            tiled = (byte_values * repeats)[: self.dimension]
+            embedding = vector_normalize(tiled) if normalize_embeddings else tiled
             embeddings.append(embedding)
 
-        matrix = np.vstack(embeddings).astype(np.float32)
-        if normalize_embeddings:
-            norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-            norms[norms == 0] = 1.0
-            matrix = matrix / norms
         if single_input:
-            return matrix[0]
-        return matrix
+            if numpy_available():
+                return to_numpy(embeddings[0])
+            return embeddings[0]
+
+        if numpy_available():
+            return to_numpy_matrix(embeddings)
+        return embeddings
 
 logger = logging.getLogger(__name__)
 
@@ -109,18 +121,25 @@ def _resolve_embedding_model(
         return HashingSentenceTransformer()
 
 
-def _normalize_vector(vector: np.ndarray) -> np.ndarray:
-    norm = np.linalg.norm(vector)
-    if norm == 0:
-        return vector
-    return vector / norm
+def _normalize_vector(vector: Union[Sequence[float], "np.ndarray"]) -> List[float]:
+    return vector_normalize(vector)
 
 
-def _build_filter_condition(metadata_filter: Optional[Dict[str, Any]]) -> Optional[qmodels.Filter]:
-    if not metadata_filter:
+def _to_float_vectors(
+    embeddings: Union[Sequence[Sequence[float]], "np.ndarray"],
+) -> List[List[float]]:
+    return ensure_2d_float_list(embeddings)
+
+
+def _to_float_vector(vector: Union[Sequence[float], "np.ndarray"]) -> List[float]:
+    return ensure_float_list(vector)
+
+
+def _build_filter_condition(metadata_filter: Optional[Dict[str, Any]]) -> Optional[Any]:
+    if qmodels is None or not metadata_filter:
         return None
 
-    conditions: List[qmodels.FieldCondition] = []
+    conditions: List[Any] = []
     for key, value in metadata_filter.items():
         if value is None:
             continue
@@ -157,7 +176,7 @@ class BaseVectorStore:
 
     def search(
         self,
-        query: Union[str, Sequence[float], np.ndarray],
+        query: Union[str, Sequence[float]],
         limit: int = 50,
         metadata_filter: Optional[Dict[str, Any]] = None,
     ) -> List[SearchResult]:  # pragma: no cover - interface
@@ -239,16 +258,17 @@ class QdrantVectorStore(BaseVectorStore):
         if not chunks:
             return
 
-        embeddings = self.embedding_model.encode(
+        embeddings_raw = self.embedding_model.encode(
             [chunk["text"] for chunk in chunks],
             normalize_embeddings=True,
         )
+        embeddings = _to_float_vectors(embeddings_raw)
 
         if self.client is not None:
             points = [
                 qmodels.PointStruct(
                     id=chunk["chunk_id"],
-                    vector=embedding.tolist(),
+                    vector=embedding,
                     payload={**chunk, **chunk.get("metadata", {})},
                 )
                 for chunk, embedding in zip(chunks, embeddings)
@@ -258,32 +278,32 @@ class QdrantVectorStore(BaseVectorStore):
         for chunk, embedding in zip(chunks, embeddings):
             self.local_store[chunk["chunk_id"]] = {
                 "chunk": chunk,
-                "embedding": np.array(embedding),
+                "embedding": embedding,
             }
 
     def search(
         self,
-        query: Union[str, Sequence[float], np.ndarray],
+        query: Union[str, Sequence[float]],
         limit: int = 50,
         metadata_filter: Optional[Dict[str, Any]] = None,
     ) -> List[SearchResult]:
         if isinstance(query, (list, tuple)):
-            query_vector = np.array(query, dtype=np.float32)
-        elif isinstance(query, np.ndarray):
-            query_vector = query
+            query_vector = _normalize_vector(query)
+        elif numpy_available() and hasattr(query, "shape"):
+            query_vector = _normalize_vector(query)  # type: ignore[arg-type]
         else:
-            if not str(query).strip():
+            query_text = str(query)
+            if not query_text.strip():
                 return []
-            query_vector = self.embedding_model.encode(str(query), normalize_embeddings=True)
-
-        query_vector = _normalize_vector(query_vector)
+            encoded = self.embedding_model.encode(query_text, normalize_embeddings=True)
+            query_vector = _normalize_vector(_to_float_vector(encoded))
 
         if self.client is not None:
             try:
                 filter_condition = _build_filter_condition(metadata_filter)
                 results = self.client.search(
                     collection_name=self.collection_name,
-                    query_vector=query_vector.tolist(),
+                    query_vector=query_vector,
                     limit=limit,
                     with_payload=True,
                     query_filter=filter_condition,
@@ -304,7 +324,7 @@ class QdrantVectorStore(BaseVectorStore):
 
     def _local_search(
         self,
-        query_vector: np.ndarray,
+        query_vector: Sequence[float],
         limit: int,
         metadata_filter: Optional[Dict[str, Any]] = None,
     ) -> List[SearchResult]:
@@ -317,7 +337,7 @@ class QdrantVectorStore(BaseVectorStore):
             if metadata_filter and not _metadata_matches(chunk, metadata_filter):
                 continue
             embedding = entry["embedding"]
-            score = float(np.dot(query_vector, embedding))
+            score = float(vector_dot(query_vector, embedding))
             scores.append((score, chunk))
 
         scores.sort(key=lambda item: item[0], reverse=True)
@@ -410,10 +430,11 @@ class ChromaVectorStore(BaseVectorStore):
         if not chunks:
             return
 
-        embeddings = self.embedding_model.encode(
+        embeddings_raw = self.embedding_model.encode(
             [chunk["text"] for chunk in chunks],
             normalize_embeddings=True,
         )
+        embeddings = _to_float_vectors(embeddings_raw)
 
         ids = [str(chunk["chunk_id"]) for chunk in chunks]
         metadatas = [{**chunk, **chunk.get("metadata", {})} for chunk in chunks]
@@ -421,30 +442,30 @@ class ChromaVectorStore(BaseVectorStore):
 
         self.collection.upsert(
             ids=ids,
-            embeddings=[embedding.tolist() for embedding in embeddings],
+            embeddings=embeddings,
             metadatas=metadatas,
             documents=documents,
         )
 
     def search(
         self,
-        query: Union[str, Sequence[float], np.ndarray],
+        query: Union[str, Sequence[float]],
         limit: int = 50,
         metadata_filter: Optional[Dict[str, Any]] = None,
     ) -> List[SearchResult]:
         if isinstance(query, (list, tuple)):
-            query_vector = np.array(query, dtype=np.float32)
-        elif isinstance(query, np.ndarray):
-            query_vector = query
+            query_vector = _normalize_vector(query)
+        elif numpy_available() and hasattr(query, "shape"):
+            query_vector = _normalize_vector(query)  # type: ignore[arg-type]
         else:
-            if not str(query).strip():
+            query_text = str(query)
+            if not query_text.strip():
                 return []
-            query_vector = self.embedding_model.encode(str(query), normalize_embeddings=True)
-
-        query_vector = _normalize_vector(query_vector)
+            encoded = self.embedding_model.encode(query_text, normalize_embeddings=True)
+            query_vector = _normalize_vector(_to_float_vector(encoded))
 
         results = self.collection.query(
-            query_embeddings=[query_vector.tolist()],
+            query_embeddings=[query_vector],
             n_results=limit,
             where=metadata_filter,
             include=["metadatas", "distances", "documents", "embeddings"],
