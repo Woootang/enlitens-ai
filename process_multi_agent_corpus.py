@@ -358,6 +358,15 @@ class MultiAgentProcessor:
             with open(self.temp_file, 'w', encoding='utf-8') as f:
                 json.dump(knowledge_base.model_dump(), f, indent=2, default=str)
             logger.info(f"💾 Progress saved: {processed_count}/{total_files} documents processed")
+
+            latest_path = self.output_file.parent / "enlitens_knowledge_base_latest.json"
+            tmp_latest = latest_path.with_suffix(".json.tmp") if latest_path.suffix else latest_path.with_name(f"{latest_path.name}.tmp")
+            try:
+                with open(tmp_latest, 'w', encoding='utf-8') as latest_f:
+                    json.dump(knowledge_base.model_dump(), latest_f, indent=2, default=str)
+                os.replace(tmp_latest, latest_path)
+            except Exception as latest_exc:
+                logger.error(f"❌ Error updating latest knowledge base file: {latest_exc}")
         except Exception as e:
             logger.error(f"❌ Error saving progress: {e}")
 

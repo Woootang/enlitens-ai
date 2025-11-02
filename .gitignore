@@ -28,6 +28,8 @@ logs/
 
 # Broader temp JSON artifacts
 *.json.temp*
+enlitens_knowledge_base_latest.json
+logs_live
 
 # CI/CD
 .circleci/

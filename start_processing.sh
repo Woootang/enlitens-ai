@@ -27,6 +27,7 @@ rm -f "$LOG_DIR"/*.log 2>/dev/null || true
 
 # Create fresh logs directory
 mkdir -p "$LOG_DIR"
+ln -sfn "$LOG_DIR" "$SCRIPT_DIR/logs_live"
 
 # Check GPU status
 echo ""
