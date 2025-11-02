@@ -19,6 +19,7 @@ from .prompts import (
     TEMPERATURE_CREATIVE,
     get_full_system_prompt,
 )
+from .normalize import normalize_research_content_payload
 from src.utils.prompt_cache import PromptCache
 from src.utils.settings import get_settings
 
@@ -380,6 +381,8 @@ class VLLMClient:
                         for key in ("narrative_deconstruction","sensory_profiling","executive_function","social_processing","strengths_synthesis","rebellion_themes","aha_moments"):
                             if key in parsed and isinstance(parsed[key], list) and any(isinstance(x, list) for x in parsed[key]):
                                 parsed[key] = _flatten(parsed[key])
+                    elif response_model.__name__ == "ResearchContent":
+                        parsed = normalize_research_content_payload(parsed)
                 except Exception:
                     # Best-effort sanitation; fall through to validation
                     pass
