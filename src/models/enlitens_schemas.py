@@ -344,6 +344,62 @@ class ContentCreationIdeas(BaseModel):
     seasonal_ideas: List[str] = Field(default_factory=list, description="Seasonal ideas")
 
 
+class ClientProfile(BaseModel):
+    """Client profile linking intake language to specific research citations."""
+
+    profile_name: str = Field(..., description="Short, descriptive label for the client persona")
+    intake_reference: str = Field(
+        ...,
+        description="Direct intake phrasing, quoted exactly as the client or intake form stated it",
+    )
+    research_reference: str = Field(
+        ...,
+        description="Sentence that cites a retrieved research passage using [Source #] tags",
+    )
+    benefit_explanation: str = Field(
+        ...,
+        description="Why the cited research benefits this client, explicitly citing [Source #]",
+    )
+    st_louis_alignment: Optional[str] = Field(
+        None,
+        description="Optional tie-in to St. Louis context or community realities, also citing [Source #] when applicable",
+    )
+
+    @field_validator("intake_reference")
+    @classmethod
+    def ensure_intake_quote(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("Intake reference cannot be empty")
+        quote_markers = ('"', "'", "“", "”")
+        if not any(marker in cleaned for marker in quote_markers):
+            raise ValueError(
+                "Intake reference must include the client's exact phrasing wrapped in quotes"
+            )
+        return cleaned
+
+    @field_validator("research_reference", "benefit_explanation", "st_louis_alignment")
+    @classmethod
+    def ensure_source_citation(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        cleaned = value.strip()
+        if cleaned and "[Source" not in cleaned:
+            raise ValueError("Research-connected fields must include a [Source #] citation tag")
+        return cleaned
+
+
+class ClientProfileSet(BaseModel):
+    """Container for exactly three client profiles derived from a research paper."""
+
+    profiles: List[ClientProfile] = Field(
+        ..., description="Exactly three tailored client profiles", min_length=3, max_length=3
+    )
+    shared_thread: Optional[str] = Field(
+        None,
+        description="Optional summary describing the common thread across the three profiles",
+    )
+
 class DocumentMetadata(BaseModel):
     """Metadata for each processed document."""
     document_id: str = Field(description="Unique document identifier")
@@ -380,6 +436,9 @@ class EnlitensKnowledgeEntry(BaseModel):
     clinical_content: ClinicalContent = Field(description="Clinical content")
     research_content: ResearchContent = Field(description="Research content")
     content_creation_ideas: ContentCreationIdeas = Field(description="Content creation ideas")
+    client_profiles: Optional[ClientProfileSet] = Field(
+        None, description="Three intake-grounded client profiles aligned to retrieved research"
+    )
 
     # New field for verification
     full_document_text: Optional[str] = Field(
@@ -415,6 +474,18 @@ class EnlitensKnowledgeEntry(BaseModel):
                     "strengths_synthesis": ["Neurodiversity as strength"],
                     "rebellion_themes": ["Science over shame"],
                     "aha_moments": ["Your brain isn't broken, it's adapting"]
+                },
+                "client_profiles": {
+                    "profiles": [
+                        {
+                            "profile_name": "Transit-triggered shutdowns",
+                            "intake_reference": "\"I lose words after the evening Metro ride\"",
+                            "research_reference": "[Source 1] documents sensory gating strain during urban commutes.",
+                            "benefit_explanation": "[Source 1] shows vestibular supports lower shutdown risk for this pattern.",
+                            "st_louis_alignment": "[Source 1] plus STL Metro noise complaints justify adapting transit routines.",
+                        }
+                    ],
+                    "shared_thread": "Clients ride St. Louis transit systems under chronic sensory load.",
                 }
             }
         }

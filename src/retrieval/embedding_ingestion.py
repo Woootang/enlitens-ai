@@ -222,6 +222,11 @@ class EmbeddingIngestionPipeline:
             "research_content": entry.research_content.model_dump(),
             "content_creation_ideas": entry.content_creation_ideas.model_dump(),
             "extracted_entities": entry.extracted_entities.model_dump(),
+            **(
+                {"client_profiles": entry.client_profiles.model_dump()}
+                if entry.client_profiles is not None
+                else {}
+            ),
         }
 
     def _sanitize_metadata(self, entry: EnlitensKnowledgeEntry) -> Dict[str, Any]:
