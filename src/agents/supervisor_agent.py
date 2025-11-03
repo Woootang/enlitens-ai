@@ -539,6 +539,54 @@ class SupervisorAgent(BaseAgent):
             "cache_chunk_id": state.get("cache_chunk_id"),
             "retry_attempt": attempt,
         }
+
+        retrieved_passages: List[Dict[str, Any]] = []
+        rag_payload: Dict[str, Any] = {}
+
+        context_result = state.get("context_result") or {}
+        if isinstance(context_result, dict):
+            rag_payload = context_result.get("rag_retrieval", {}) or {}
+
+        if not rag_payload:
+            rag_payload = (
+                state.get("intermediate_results", {}).get("rag_retrieval")
+                if isinstance(state.get("intermediate_results"), dict)
+                else {}
+            ) or {}
+
+        top_passages = []
+        if isinstance(rag_payload, dict):
+            candidate = rag_payload.get("top_passages")
+            if isinstance(candidate, list):
+                top_passages = candidate
+
+        for idx, passage in enumerate(top_passages, start=1):
+            if not isinstance(passage, dict):
+                continue
+            text = (passage.get("text") or "").strip()
+            if not text:
+                continue
+            metadata = passage.get("metadata") or {}
+            if not isinstance(metadata, dict):
+                metadata = {}
+            retrieved_passages.append(
+                {
+                    "source_index": idx,
+                    "text": text,
+                    "chunk_id": passage.get("chunk_id"),
+                    "document_id": passage.get("document_id")
+                    or metadata.get("document_id"),
+                    "source_type": passage.get("source_type")
+                    or metadata.get("source_type"),
+                    "agent": passage.get("agent") or metadata.get("agent"),
+                    "field_path": passage.get("field_path")
+                    or metadata.get("field_path"),
+                    "score": passage.get("score"),
+                    "metadata": metadata,
+                }
+            )
+
+        base_context["retrieved_passages"] = retrieved_passages
         plan_step = None
         for step in state.get("metadata", {}).get("execution_plan", []):
             if step.get("agent") == agent_name:

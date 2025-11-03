@@ -136,7 +136,15 @@ async def test_generate_website_copy_prompt_omits_deprecated_sections(monkeypatc
 
     result = await agent._generate_website_copy(
         clinical_data={"insight": "value"},
-        context={"document_text": "Neuroscience insights."},
+        context={
+            "document_text": "Neuroscience insights.",
+            "retrieved_passages": [
+                {
+                    "text": "St. Louis clients report 3x sensory load in open office plans.",
+                    "chunk_id": "chunk-1",
+                }
+            ],
+        },
         client_insights_summary=client_summary,
         client_insight_segments=client_segments,
     )
@@ -146,6 +154,7 @@ async def test_generate_website_copy_prompt_omits_deprecated_sections(monkeypatc
     assert "feature_descriptions" not in prompt
     assert "benefit_statements" not in prompt
     assert "service_descriptions" not in prompt
+    assert "3x sensory load" in prompt
     assert result.topic_ideas == ["idea"]
 
 
@@ -181,6 +190,12 @@ async def test_generate_social_media_prompt_uses_sources_and_quote_rules(monkeyp
         "retrieved_context": [
             "Neurodiversity celebrates differences and nervous systems adapt under pressure."
         ],
+        "retrieved_passages": [
+            {
+                "text": "St. Louis ADHD brains juggle relentless sensory input, not laziness.",
+                "chunk_id": "chunk-88",
+            }
+        ],
     }
 
     client_segments = [
@@ -202,6 +217,7 @@ async def test_generate_social_media_prompt_uses_sources_and_quote_rules(monkeyp
     assert "carousel" not in prompt.lower()
     assert "SOURCE MATERIAL" in prompt
     assert "[Source 1]" in prompt
+    assert "relentless sensory input" in prompt
     assert "QUOTE REQUIREMENTS" in prompt
     assert "Client Intake Insights" in prompt
     assert "emergency mode 24/7" in prompt
@@ -237,7 +253,15 @@ async def test_marketing_prompt_uses_client_insights_language(monkeypatch):
 
     await agent._generate_marketing_content(
         clinical_data={},
-        context={"document_text": "Brain-based interventions."},
+        context={
+            "document_text": "Brain-based interventions.",
+            "retrieved_passages": [
+                {
+                    "text": "Clients describe executive shutdown when sensory input spikes.",
+                    "chunk_id": "chunk-55",
+                }
+            ],
+        },
         client_insights_summary=client_summary,
         client_insight_segments=client_segments,
     )
@@ -246,6 +270,7 @@ async def test_marketing_prompt_uses_client_insights_language(monkeypatch):
     assert "executive function falls apart" in prompt
     assert "Sensory overload at the office" in prompt
     assert "No new intake insights" not in prompt
+    assert "executive shutdown" in prompt
 
 
 @pytest.mark.asyncio
@@ -276,6 +301,7 @@ async def test_marketing_prompt_falls_back_to_static_challenges(monkeypatch):
     )
 
     prompt = captured_prompt.get("prompt", "")
+    assert "No retrieved passages" in prompt
     assert "No new intake insights provided" in prompt
     for challenge in agent.client_challenges[:2]:
         assert challenge in prompt

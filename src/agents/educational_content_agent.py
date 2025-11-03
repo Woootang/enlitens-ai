@@ -43,6 +43,11 @@ class EducationalContentAgent(BaseAgent):
             document_text = context.get("document_text", "")[:8000]
             research_content = context.get("science_data", {}).get("research_content", {})
             clinical_content = context.get("clinical_content", {})
+            retrieved_block = self._render_retrieved_passages_block(
+                context.get("retrieved_passages"),
+                raw_client_context=context.get("raw_client_context"),
+                raw_founder_context=context.get("raw_founder_context"),
+            )
 
             few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
                 task="educational_content",
@@ -74,6 +79,9 @@ DOCUMENT TEXT:
 
 RESEARCH FINDINGS:
 {research_content.get('findings', [])}
+
+RETRIEVED PASSAGES (quote verbatim and cite with [Source #]):
+{retrieved_block}
 
 CLINICAL APPLICATIONS:
 {clinical_content.get('interventions', [])}
@@ -107,6 +115,7 @@ EXTRACTION GUIDELINES:
 
 Return as JSON with these EXACT field names:
 {{"explanations": [list], "examples": [list], "analogies": [list], "definitions": [list], "processes": [list], "comparisons": [list], "visual_aids": [list], "learning_objectives": [list]}}
+Attach [Source #] tags to any item that uses a retrieved passage so QA can trace the citation.
 """
 
             cache_kwargs = self._cache_kwargs(context)

@@ -107,3 +107,70 @@ class BaseAgent(ABC):
             "cache_prefix": prefix,
             "cache_chunk_id": chunk_id,
         }
+
+    @staticmethod
+    def _summarize_text_block(text: Optional[str], max_chars: int = 400) -> str:
+        if not text:
+            return ""
+        cleaned = " ".join(str(text).split())
+        if len(cleaned) <= max_chars:
+            return cleaned
+        return cleaned[: max_chars - 1].rstrip() + "…"
+
+    def _render_retrieved_passages_block(
+        self,
+        retrieved_passages: Optional[List[Dict[str, Any]]],
+        *,
+        raw_client_context: Optional[str] = None,
+        raw_founder_context: Optional[str] = None,
+        max_passages: int = 5,
+    ) -> str:
+        """Render retrieved passages or fall back to contextual summaries."""
+
+        lines: List[str] = []
+        passages = retrieved_passages or []
+
+        if passages:
+            lines.append("CITE USING THE BRACKETED TAGS BELOW (e.g., [Source 1]).")
+            for idx, passage in enumerate(passages[:max_passages], start=1):
+                text = self._summarize_text_block(passage.get("text"), max_chars=420)
+                if not text:
+                    continue
+                doc_id = passage.get("document_id") or passage.get("metadata", {}).get("document_id")
+                chunk_id = passage.get("chunk_id") or passage.get("metadata", {}).get("chunk_id")
+                source_type = passage.get("source_type") or passage.get("metadata", {}).get("source_type")
+                meta_parts = []
+                if doc_id:
+                    meta_parts.append(f"doc={doc_id}")
+                if chunk_id:
+                    meta_parts.append(f"chunk={chunk_id}")
+                if source_type:
+                    meta_parts.append(f"type={source_type}")
+                if meta_parts:
+                    lines.append(f"[Source {idx}] {text}\n    ({', '.join(meta_parts)})")
+                else:
+                    lines.append(f"[Source {idx}] {text}")
+
+            return "\n".join(lines)
+
+        fallback_sections: List[str] = []
+        client_summary = self._summarize_text_block(raw_client_context, max_chars=420)
+        founder_summary = self._summarize_text_block(raw_founder_context, max_chars=420)
+
+        if client_summary:
+            fallback_sections.append(f"[Source F1 – Client Context] {client_summary}")
+        if founder_summary:
+            index = len(fallback_sections) + 1
+            fallback_sections.append(f"[Source F{index} – Founder Context] {founder_summary}")
+
+        if fallback_sections:
+            lines.append(
+                "No retrieved passages available. Use these summaries and cite using the [Source F#] tags."
+            )
+            lines.extend(fallback_sections)
+        else:
+            lines.append(
+                "No retrieved passages or raw context available. Note the absence but maintain factual grounding."
+            )
+
+        return "\n".join(lines)
