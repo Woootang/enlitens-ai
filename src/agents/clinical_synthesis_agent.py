@@ -14,8 +14,10 @@ from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
 from src.synthesis.ollama_client import OllamaClient
 from src.utils.enlitens_constitution import EnlitensConstitution
 from src.utils.prompt_briefing import compose_document_brief
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "clinical_synthesis_agent"
 
 
 class ClinicalOutline(BaseModel):
@@ -63,7 +65,16 @@ class ClinicalSynthesisAgent(BaseAgent):
             logger.info(f"✅ {self.name} agent initialized")
             return True
         except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(e)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -194,7 +205,16 @@ If you use a claim from the passages above, include the corresponding [Source #]
             return {"clinical_content": ClinicalContent().model_dump()}
 
         except Exception as e:
-            logger.error(f"Clinical synthesis failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Clinical synthesis failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Clinical synthesis failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return {"clinical_content": ClinicalContent().model_dump()}
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:

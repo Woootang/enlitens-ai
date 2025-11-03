@@ -12,8 +12,10 @@ from .base_agent import BaseAgent
 from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
 from src.synthesis.ollama_client import OllamaClient
 from src.utils.enlitens_constitution import EnlitensConstitution
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "client_profile_agent"
 
 
 class ClientProfileAgent(BaseAgent):
@@ -39,7 +41,16 @@ class ClientProfileAgent(BaseAgent):
             logger.info("✅ %s agent initialized", self.name)
             return True
         except Exception as exc:  # pragma: no cover - defensive logging
-            logger.error("Failed to initialize %s: %s", self.name, exc)
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(exc)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -123,7 +134,14 @@ OUTPUT REQUIREMENTS:
             )
 
             if response is None:
-                logger.warning("⚠️ ClientProfileAgent falling back to deterministic profiles")
+                log_with_telemetry(
+                    logger.warning,
+                    "⚠️ ClientProfileAgent falling back to deterministic profiles",
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Client profiles fallback",
+                    doc_id=context.get("document_id"),
+                )
                 response = self._fallback_profiles(intake_quotes, retrieved_passages, st_louis_context)
 
             payload = response.model_dump()
@@ -137,7 +155,16 @@ OUTPUT REQUIREMENTS:
                 },
             }
         except Exception as exc:
-            logger.error("ClientProfileAgent failed: %s", exc)
+            log_with_telemetry(
+                logger.error,
+                "ClientProfileAgent failed: %s",
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Client profile generation failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(exc)},
+            )
             fallback = self._fallback_profiles([], context.get("retrieved_passages") or [], context.get("st_louis_context") or {})
             return {
                 "client_profiles": fallback.model_dump(),

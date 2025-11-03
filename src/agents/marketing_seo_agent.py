@@ -10,8 +10,10 @@ from .base_agent import BaseAgent
 from src.models.enlitens_schemas import MarketingContent, SEOContent
 from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
 from src.synthesis.ollama_client import OllamaClient
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "marketing_seo_agent"
 
 class MarketingSEOAgent(BaseAgent):
     """Agent specialized in marketing and SEO content generation."""
@@ -35,7 +37,16 @@ class MarketingSEOAgent(BaseAgent):
             logger.info(f"✅ {self.name} agent initialized")
             return True
         except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(e)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -186,7 +197,16 @@ Return ONLY valid JSON in this exact format:
             }
 
         except Exception as e:
-            logger.error(f"Marketing SEO generation failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Marketing SEO generation failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Marketing SEO generation failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return {
                 "marketing_content": MarketingContent().model_dump(),
                 "seo_content": SEOContent().model_dump()

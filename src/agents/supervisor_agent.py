@@ -21,8 +21,10 @@ from .validation_agent import ValidationAgent
 from .educational_content_agent import EducationalContentAgent
 from .rebellion_framework_agent import RebellionFrameworkAgent
 from .workflow_state import WorkflowState, create_initial_state, record_attempt, as_dict
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "supervisor_agent"
 
 PIPELINE_AGENTS: List[str] = [
     "context_rag",
@@ -116,17 +118,33 @@ class SupervisorAgent(BaseAgent):
                 if isinstance(result, Exception) or result is False:
                     failed_agents.append(name)
 
-            if failed_agents:
-                logger.error("Failed to initialize agents: %s", failed_agents)
-                return False
+        if failed_agents:
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize agents: %s",
+                failed_agents,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Agent initialization failed",
+                details={"failed_agents": failed_agents},
+            )
+            return False
 
             self.workflow_graph = self._build_graph()
             self.is_initialized = True
             logger.info("✅ Supervisor and all specialized agents initialized successfully")
             return True
-        except Exception as exc:
-            logger.error("Failed to initialize supervisor: %s", exc)
-            return False
+    except Exception as exc:
+        log_with_telemetry(
+            logger.error,
+            "Failed to initialize supervisor: %s",
+            exc,
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.CRITICAL,
+            impact="Supervisor initialization failed",
+            details={"error": str(exc)},
+        )
+        return False
 
     async def _initialize_agent_with_retry(
         self, agent: BaseAgent, agent_name: str, max_retries: int = 3
@@ -136,15 +154,27 @@ class SupervisorAgent(BaseAgent):
                 if await agent.initialize():
                     logger.info("✅ Agent %s initialized on attempt %d", agent_name, attempt + 1)
                     return True
-                logger.warning(
-                    "Agent %s initialization failed on attempt %d", agent_name, attempt + 1
+                log_with_telemetry(
+                    logger.warning,
+                    "Agent %s initialization failed on attempt %d",
+                    agent_name,
+                    attempt + 1,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Agent initialization retry",
+                    details={"agent": agent_name, "attempt": attempt + 1},
                 )
             except Exception as exc:
-                logger.warning(
+                log_with_telemetry(
+                    logger.warning,
                     "Agent %s initialization error on attempt %d: %s",
                     agent_name,
                     attempt + 1,
                     exc,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Agent initialization exception",
+                    details={"agent": agent_name, "attempt": attempt + 1, "error": str(exc)},
                 )
 
             if attempt < max_retries - 1:
@@ -247,7 +277,16 @@ class SupervisorAgent(BaseAgent):
                 await agent.cleanup()
                 logger.info("✅ Agent %s cleaned up", name)
             except Exception as exc:
-                logger.error("❌ Error cleaning up agent %s: %s", name, exc)
+                log_with_telemetry(
+                    logger.error,
+                    "❌ Error cleaning up agent %s: %s",
+                    name,
+                    exc,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Agent cleanup error",
+                    details={"agent": name, "error": str(exc)},
+                )
         self.agents.clear()
         self.processing_history.clear()
         self.is_initialized = False
@@ -494,7 +533,15 @@ class SupervisorAgent(BaseAgent):
         target_field: str,
     ) -> Dict[str, Any]:
         if not result:
-            logger.warning("⚠️ %s returned empty results", node_name)
+            log_with_telemetry(
+                logger.warning,
+                "⚠️ %s returned empty results",
+                node_name,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Workflow node returned empty results",
+                details={"node": node_name},
+            )
             self._mark_plan_step(state, node_name, "needs_follow_up", "Empty result returned")
             return {
                 "stage": f"{node_name}_empty",
@@ -522,7 +569,15 @@ class SupervisorAgent(BaseAgent):
     ) -> Dict[str, Any]:
         agent = self.agents.get(agent_name)
         if not agent:
-            logger.error("Agent %s not found", agent_name)
+            log_with_telemetry(
+                logger.error,
+                "Agent %s not found",
+                agent_name,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Requested agent missing",
+                details={"agent": agent_name},
+            )
             return {}
 
         max_attempts = self.retry_policy["max_attempts"]
@@ -545,7 +600,15 @@ class SupervisorAgent(BaseAgent):
                 await asyncio.sleep(delay)
                 delay *= factor
 
-        logger.warning("⚠️ %s exhausted retries", agent_name)
+        log_with_telemetry(
+            logger.warning,
+            "⚠️ %s exhausted retries",
+            agent_name,
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MAJOR,
+            impact="Agent retries exhausted",
+            details={"agent": agent_name},
+        )
         self._mark_plan_step(state, agent_name, "failed", "Retries exhausted")
         return last_result
 
@@ -850,7 +913,15 @@ class SupervisorAgent(BaseAgent):
         }
         handler = handlers.get(agent_name)
         if not handler:
-            logger.warning("No follow-up handler registered for %s", agent_name)
+            log_with_telemetry(
+                logger.warning,
+                "No follow-up handler registered for %s",
+                agent_name,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="No follow-up handler",
+                details={"agent": agent_name},
+            )
             return None
         try:
             result = await handler(state)
@@ -858,7 +929,16 @@ class SupervisorAgent(BaseAgent):
                 self._mark_plan_step(state, agent_name, "completed", "Follow-up execution")
             return result
         except Exception as exc:
-            logger.error("Follow-up execution for %s failed: %s", agent_name, exc)
+            log_with_telemetry(
+                logger.error,
+                "Follow-up execution for %s failed: %s",
+                agent_name,
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Follow-up execution failed",
+                details={"agent": agent_name, "error": str(exc)},
+            )
             self._mark_plan_step(state, agent_name, "failed", f"Follow-up error: {exc}")
             return None
 

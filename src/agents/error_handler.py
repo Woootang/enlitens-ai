@@ -13,7 +13,13 @@ from typing import Dict, List, Any, Optional
 import asyncio
 from datetime import datetime
 
+from src.monitoring.error_telemetry import (
+    TelemetrySeverity,
+    log_with_telemetry,
+)
+
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "error_handler"
 
 
 class ErrorHandler:
@@ -61,7 +67,17 @@ class ErrorHandler:
             Error handling result
         """
         try:
-            logger.error(f"Error Handler: Processing error for {pdf_path}: {error}")
+            log_with_telemetry(
+                logger.error,
+                "Error Handler: Processing error for %s: %s",
+                pdf_path,
+                error,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Error handler engaged",
+                doc_id=pdf_path,
+                details={"error": str(error)},
+            )
             
             # Classify the error
             error_type = self._classify_error(error)
@@ -87,7 +103,16 @@ class ErrorHandler:
             }
             
         except Exception as e:
-            logger.error(f"Error Handler: Failed to handle error: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error Handler: Failed to handle error: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Error handler failure",
+                doc_id=pdf_path,
+                details={"error": str(e)},
+            )
             return {
                 'error_type': 'unknown_error',
                 'error_message': str(e),
@@ -171,7 +196,17 @@ class ErrorHandler:
                     break
                     
             except Exception as e:
-                logger.warning(f"Error Handler: Remediation strategy {strategy} failed: {e}")
+                log_with_telemetry(
+                    logger.warning,
+                    "Error Handler: Remediation strategy %s failed: %s",
+                    strategy,
+                    e,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Remediation strategy failed",
+                    doc_id=pdf_path,
+                    details={"error": str(e), "strategy": strategy},
+                )
                 continue
         
         return remediation_result
@@ -183,7 +218,16 @@ class ErrorHandler:
             extractor = HybridExtractor()
             return extractor.extract(pdf_path)
         except Exception as e:
-            logger.warning(f"Error Handler: Retry extraction failed: {e}")
+            log_with_telemetry(
+                logger.warning,
+                "Error Handler: Retry extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Retry extraction failed",
+                doc_id=pdf_path,
+                details={"error": str(e)},
+            )
             return None
     
     async def _fallback_extraction(self, pdf_path: str) -> Optional[Dict[str, Any]]:
@@ -221,7 +265,16 @@ class ErrorHandler:
                 }
             }
         except Exception as e:
-            logger.warning(f"Error Handler: Fallback extraction failed: {e}")
+            log_with_telemetry(
+                logger.warning,
+                "Error Handler: Fallback extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Fallback extraction failed",
+                doc_id=pdf_path,
+                details={"error": str(e)},
+            )
             return None
     
     async def _retry_analysis(self, pdf_path: str) -> Optional[Dict[str, Any]]:
@@ -286,7 +339,18 @@ class ErrorHandler:
     
     async def _log_error(self, pdf_path: str, error: Exception, error_type: str, remediation_result: Dict[str, Any]):
         """Log the error and remediation result"""
-        logger.error(f"Error logged for {pdf_path}: {error_type} - {error}")
+        log_with_telemetry(
+            logger.error,
+            "Error logged for %s: %s - %s",
+            pdf_path,
+            error_type,
+            error,
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MAJOR,
+            impact="Error recorded for remediation",
+            doc_id=pdf_path,
+            details={"error_type": error_type, "error": str(error), "remediation": remediation_result},
+        )
         logger.info(f"Remediation result: {remediation_result}")
         
         # Could also write to a dedicated error log file

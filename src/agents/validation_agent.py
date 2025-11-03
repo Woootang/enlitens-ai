@@ -10,8 +10,10 @@ from typing import Any, Dict, List
 
 from .base_agent import BaseAgent
 from src.utils.enlitens_constitution import EnlitensConstitution
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "validation_agent"
 
 
 class ValidationAgent(BaseAgent):
@@ -69,7 +71,16 @@ class ValidationAgent(BaseAgent):
             logger.info(f"✅ {self.name} agent initialized")
             return True
         except Exception as exc:  # pragma: no cover - defensive guard
-            logger.error("Failed to initialize %s: %s", self.name, exc)
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(exc)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:

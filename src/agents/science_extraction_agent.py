@@ -12,8 +12,10 @@ from src.models.enlitens_schemas import ResearchContent
 from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
 from src.synthesis.ollama_client import OllamaClient
 from src.utils.enlitens_constitution import EnlitensConstitution
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "science_extraction_agent"
 
 class ScienceExtractionAgent(BaseAgent):
     """Agent specialized in extracting scientific and research content."""
@@ -41,7 +43,16 @@ class ScienceExtractionAgent(BaseAgent):
             logger.info(f"✅ {self.name} agent initialized")
             return True
         except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(e)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -119,7 +130,16 @@ Tone: factual, precise, and constitutionally aligned from the start.
             return {"research_content": ResearchContent().model_dump()}
 
         except Exception as e:
-            logger.error(f"Science extraction failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Science extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Science extraction fallback",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return {"research_content": ResearchContent().model_dump()}
 
     async def _run_self_consistency_sampling(self, prompt: str) -> List[ResearchContent]:

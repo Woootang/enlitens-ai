@@ -12,8 +12,10 @@ from .base_agent import BaseAgent
 from src.retrieval.vector_store import BaseVectorStore, QdrantVectorStore, SearchResult
 from src.utils.enlitens_constitution import EnlitensConstitution
 from src.utils.vector_math import ensure_float_list, mean as vector_mean
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "context_rag_agent"
 
 
 class ContextRAGAgent(BaseAgent):
@@ -52,7 +54,16 @@ class ContextRAGAgent(BaseAgent):
             logger.info("✅ %s agent initialized (top_k=%d)", self.name, self.top_k)
             return True
         except Exception as exc:
-            logger.error("Failed to initialize %s: %s", self.name, exc)
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(exc)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -100,7 +111,16 @@ class ContextRAGAgent(BaseAgent):
             }
 
         except Exception as exc:
-            logger.error("Context RAG failed: %s", exc)
+            log_with_telemetry(
+                logger.error,
+                "Context RAG failed: %s",
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Context retrieval unavailable",
+                doc_id=context.get("document_id"),
+                details={"error": str(exc)},
+            )
             return {"context_enhanced": False, "error": str(exc)}
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:

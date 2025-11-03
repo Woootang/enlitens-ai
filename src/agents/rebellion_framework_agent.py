@@ -7,8 +7,10 @@ from typing import Dict, Any
 from .base_agent import BaseAgent
 from src.synthesis.ollama_client import OllamaClient
 from src.models.enlitens_schemas import RebellionFramework
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "rebellion_framework_agent"
 
 class RebellionFrameworkAgent(BaseAgent):
     """Agent specialized in applying the Rebellion Framework to research."""
@@ -32,7 +34,16 @@ class RebellionFrameworkAgent(BaseAgent):
             logger.info(f"✅ {self.name} agent initialized")
             return True
         except Exception as e:
-            logger.error(f"Failed to initialize {self.name}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize %s: %s",
+                self.name,
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(e)},
+            )
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -129,7 +140,16 @@ Return as JSON with these EXACT field names:
                 return {"rebellion_framework": RebellionFramework().model_dump()}
 
         except Exception as e:
-            logger.error(f"Rebellion framework application failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Rebellion framework application failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Rebellion framework application failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return {"rebellion_framework": RebellionFramework().model_dump()}
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
