@@ -58,11 +58,59 @@ class EnhancedCompleteEnlitensAgent:
             # Extract entities using enhanced tools
             entities = await self._extract_entities(text)
             
-            # Generate content insights if client/founder data available
-            content_insights = {}
-            if client_insights and founder_insights:
+            client_payload: Dict[str, Any] = dict(client_insights or {})
+            founder_payload: Dict[str, Any] = dict(founder_insights or {})
+
+            raw_client_context = client_payload.get("raw_context")
+            if not raw_client_context:
+                enhanced_client = client_payload.get("enhanced_analysis")
+                if isinstance(enhanced_client, dict):
+                    raw_client_context = enhanced_client.get("raw_content")
+            if raw_client_context:
+                client_payload["raw_context"] = raw_client_context
+
+            raw_founder_context = founder_payload.get("raw_context")
+            if not raw_founder_context:
+                enhanced_founder = founder_payload.get("enhanced_analysis")
+                if isinstance(enhanced_founder, dict):
+                    raw_founder_context = enhanced_founder.get("raw_content")
+            if raw_founder_context:
+                founder_payload["raw_context"] = raw_founder_context
+
+            if raw_client_context and not client_payload.get("pain_point_keywords"):
+                try:
+                    fallback_keywords = [
+                        keyword
+                        for keyword, _ in self.extraction_tools.extract_semantic_keywords(
+                            raw_client_context,
+                            keyphrase_ngram_range=(1, 3),
+                            top_n=5,
+                        )
+                    ]
+                    if fallback_keywords:
+                        client_payload["pain_point_keywords"] = fallback_keywords
+                except Exception as exc:
+                    logger.warning("Failed to derive client pain point keywords from raw context: %s", exc)
+
+            if raw_founder_context and not founder_payload.get("founder_keywords"):
+                try:
+                    fallback_keywords = [
+                        keyword
+                        for keyword, _ in self.extraction_tools.extract_semantic_keywords(
+                            raw_founder_context,
+                            keyphrase_ngram_range=(1, 3),
+                            top_n=8,
+                        )
+                    ]
+                    if fallback_keywords:
+                        founder_payload["founder_keywords"] = fallback_keywords
+                except Exception as exc:
+                    logger.warning("Failed to derive founder keywords from raw context: %s", exc)
+
+            content_insights: Dict[str, Any] = {}
+            if client_payload or founder_payload:
                 content_insights = self.extraction_tools.generate_content_insights(
-                    text, client_insights, founder_insights
+                    text, client_payload, founder_payload
                 )
             
             # Extract all content types with enhanced prompts

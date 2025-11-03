@@ -100,6 +100,8 @@ class WorkflowState(TypedDict, total=False):
     client_insights: Optional[Dict[str, Any]]
     founder_insights: Optional[Dict[str, Any]]
     st_louis_context: Optional[Dict[str, Any]]
+    raw_client_context: Optional[str]
+    raw_founder_context: Optional[str]
 
     # Shared orchestration metadata - use Annotated to allow multiple updates
     stage: Annotated[str, _keep_last_value]
@@ -136,6 +138,8 @@ def create_initial_state(
     client_insights: Optional[Dict[str, Any]] = None,
     founder_insights: Optional[Dict[str, Any]] = None,
     st_louis_context: Optional[Dict[str, Any]] = None,
+    raw_client_context: Optional[str] = None,
+    raw_founder_context: Optional[str] = None,
     cache_prefix: Optional[str] = None,
     cache_chunk_id: Optional[str] = None,
 ) -> WorkflowState:
@@ -147,6 +151,8 @@ def create_initial_state(
         client_insights=client_insights,
         founder_insights=founder_insights,
         st_louis_context=st_louis_context,
+        raw_client_context=raw_client_context,
+        raw_founder_context=raw_founder_context,
         stage="initial",
         skip_nodes=set(),
         completed_nodes={},

@@ -62,6 +62,8 @@ class ContextRAGAgent(BaseAgent):
             st_louis_context = context.get("st_louis_context", {})
             client_insights = context.get("client_insights") or {}
             founder_insights = context.get("founder_insights") or {}
+            raw_client_context = context.get("raw_client_context") or client_insights.get("raw_context")
+            raw_founder_context = context.get("raw_founder_context") or founder_insights.get("raw_context")
             intermediate = context.get("intermediate_results") or {}
 
             query_components = self._collect_query_components(
@@ -70,6 +72,8 @@ class ContextRAGAgent(BaseAgent):
                 founder_insights=founder_insights,
                 st_louis_context=st_louis_context,
                 intermediate=intermediate,
+                raw_client_context=raw_client_context,
+                raw_founder_context=raw_founder_context,
             )
 
             retrieval_results = self._run_retrieval(query_components)
@@ -120,6 +124,9 @@ class ContextRAGAgent(BaseAgent):
         founder_insights: Dict[str, Any],
         st_louis_context: Dict[str, Any],
         intermediate: Dict[str, Any],
+        *,
+        raw_client_context: Optional[str] = None,
+        raw_founder_context: Optional[str] = None,
     ) -> Dict[str, str]:
         components: Dict[str, str] = {}
 
@@ -128,9 +135,13 @@ class ContextRAGAgent(BaseAgent):
 
         if client_insights:
             components["client_themes"] = json.dumps(client_insights, ensure_ascii=False)
+        elif raw_client_context:
+            components["client_themes"] = raw_client_context[: self.max_document_chars]
 
         if founder_insights:
             components["founder_voice"] = json.dumps(founder_insights, ensure_ascii=False)
+        elif raw_founder_context:
+            components["founder_voice"] = raw_founder_context[: self.max_document_chars]
 
         if st_louis_context:
             components["regional_context"] = json.dumps(st_louis_context, ensure_ascii=False)

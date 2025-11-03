@@ -191,6 +191,8 @@ class SupervisorAgent(BaseAgent):
             client_insights=payload.get("client_insights"),
             founder_insights=payload.get("founder_insights"),
             st_louis_context=payload.get("st_louis_context"),
+            raw_client_context=payload.get("raw_client_context"),
+            raw_founder_context=payload.get("raw_founder_context"),
             cache_prefix=payload.get("cache_prefix", payload.get("document_id", "doc")),
             cache_chunk_id=payload.get("cache_chunk_id", f"{payload.get('document_id', 'doc')}:root"),
         )
@@ -528,6 +530,8 @@ class SupervisorAgent(BaseAgent):
             "document_text": state["document_text"],
             "client_insights": state.get("client_insights"),
             "founder_insights": state.get("founder_insights"),
+            "raw_client_context": state.get("raw_client_context"),
+            "raw_founder_context": state.get("raw_founder_context"),
             "st_louis_context": state.get("st_louis_context"),
             "processing_stage": state.get("stage"),
             "intermediate_results": dict(state.get("intermediate_results", {})),
