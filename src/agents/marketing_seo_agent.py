@@ -154,8 +154,7 @@ CREATE SEO content optimized for local search and mental health queries:
 2. Secondary keywords (5-10 keywords)
 3. Long-tail keywords (5-10 specific phrases)
 4. Meta descriptions (3-5 descriptions, 150-160 characters each)
-5. Title tags (3-5 titles, 50-60 characters each)
-6. Content topics (5-10 blog/article ideas)
+5. Content topics (5-10 blog/article ideas)
 
 NOTE: Generate creative, searchable content - not just quotes from research.
 
@@ -165,7 +164,6 @@ Return ONLY valid JSON in this exact format:
   "secondary_keywords": ["keyword1", "keyword2"],
   "long_tail_keywords": ["phrase1", "phrase2"],
   "meta_descriptions": ["desc1", "desc2"],
-  "title_tags": ["title1", "title2"],
   "content_topics": ["topic1", "topic2"]
 }}
 """
@@ -204,7 +202,6 @@ Return ONLY valid JSON in this exact format:
 
         seo_fields = (
             "meta_descriptions",
-            "title_tags",
             "primary_keywords",
             "secondary_keywords",
             "long_tail_keywords",
