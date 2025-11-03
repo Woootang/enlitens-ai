@@ -113,36 +113,63 @@ class FounderVoiceAgent(BaseAgent):
             enhanced_data = context.get("enhanced_data", {})
             document_id = context.get("document_id", "unknown")
 
+            client_insights = context.get("client_insights")
+            raw_client_context = context.get("raw_client_context")
+            client_insight_segments = self._collect_client_insight_segments(
+                client_insights, raw_client_context
+            )
+            client_insights_summary = self._render_client_insights(
+                client_insight_segments
+            )
+
             logger.info(f"🎙️ Founder Voice Agent processing: {document_id}")
 
             # Generate marketing content in Liz's voice
             marketing_content = await self._generate_marketing_content(
-                clinical_data, context
+                clinical_data,
+                context,
+                client_insights_summary,
+                client_insight_segments,
             )
 
             # Generate SEO content optimized for St. Louis searches
             seo_content = await self._generate_seo_content(
-                clinical_data, context
+                clinical_data,
+                context,
+                client_insights_summary,
+                client_insight_segments,
             )
 
             # Create website copy that converts
             website_copy = await self._generate_website_copy(
-                clinical_data, context
+                clinical_data,
+                context,
+                client_insights_summary,
+                client_insight_segments,
             )
 
             # Generate blog content that engages
             blog_content = await self._generate_blog_content(
-                clinical_data, context
+                clinical_data,
+                context,
+                client_insights_summary,
+                client_insight_segments,
             )
 
             # Create social media content that connects
             social_media_content = await self._generate_social_media_content(
-                clinical_data, context
+                clinical_data,
+                context,
+                client_insights_summary,
+                client_insight_segments,
             )
 
             # Generate content creation ideas
             content_creation_ideas = await self._generate_content_ideas(
-                clinical_data, context
+                clinical_data,
+                context,
+                client_insights_summary,
+                client_insight_segments,
             )
 
             return {
@@ -160,12 +187,28 @@ class FounderVoiceAgent(BaseAgent):
             logger.error(f"Founder voice integration failed: {e}")
             return {}
 
-    async def _generate_marketing_content(self, clinical_data: Dict[str, Any],
-                                         context: Dict[str, Any]) -> MarketingContent:
+    async def _generate_marketing_content(
+        self,
+        clinical_data: Dict[str, Any],
+        context: Dict[str, Any],
+        client_insights_summary: str,
+        client_insight_segments: List[str],
+    ) -> MarketingContent:
         """Generate marketing content in Liz's authentic voice."""
         try:
             document_text = context.get("document_text", "")
             summary = self._summarize_research(document_text)
+            if client_insight_segments:
+                quoted_intakes = "\n".join(
+                    f"• \"{segment}\"" for segment in client_insight_segments[:5]
+                )
+                intake_voice_section = (
+                    "\n# INTAKE VOICES (verbatim excerpts)\n"
+                    f"{quoted_intakes}\n"
+                )
+            else:
+                intake_voice_section = "\n# INTAKE VOICES\n• No verbatim intake quotes available.\n"
+
             prompt = f"""
 You are Liz Wooten, founder of Enlitens, speaking directly to frustrated St. Louis clients.
 
@@ -178,8 +221,9 @@ You are Liz Wooten, founder of Enlitens, speaking directly to frustrated St. Lou
 # RESEARCH SNAPSHOT (trimmed)
 {summary}
 
-# CLIENT CHALLENGES (top of mind)
-{self.client_challenges}
+# CLIENT INTAKE INSIGHTS (quote or summarize these real phrases)
+{client_insights_summary}
+{intake_voice_section}
 
 # TASK
 Craft bold marketing assets that turn this research into action.
@@ -188,6 +232,7 @@ Craft bold marketing assets that turn this research into action.
 - 3-5 value propositions tying neuroscience to relief.
 - 3-5 benefits mixing emotional relief + tangible wins.
 - 3-5 pain points echoing client language.
+  - Mirror the exact wording from the intake insights above when possible.
 
 NOTE: Do NOT generate social proof, testimonials, credentials, or practice statistics (FTC violation).
 Only reference research findings from the provided context.
@@ -321,6 +366,48 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
 
         return self._deduplicate_segments(segments, limit)
 
+    def _collect_client_insight_segments(
+        self,
+        client_insights: Any,
+        raw_client_context: Any,
+        limit: int = 10,
+    ) -> List[str]:
+        segments: List[str] = []
+
+        def _gather(value: Any, prefix: str = "") -> None:
+            if value is None:
+                return
+            if isinstance(value, str):
+                stripped = value.strip()
+                if stripped:
+                    segments.append(stripped)
+            elif isinstance(value, dict):
+                for key, item in value.items():
+                    label = f"{prefix}{key}: " if key else prefix
+                    if isinstance(item, (dict, list, tuple, set)):
+                        _gather(item, prefix=label)
+                    else:
+                        text = f"{label}{item}".strip()
+                        if text:
+                            segments.append(text)
+            elif isinstance(value, (list, tuple, set)):
+                for item in value:
+                    _gather(item, prefix=prefix)
+
+        _gather(client_insights)
+        _gather(raw_client_context)
+
+        return self._deduplicate_segments(segments, limit)
+
+    def _render_client_insights(self, segments: List[str]) -> str:
+        if segments:
+            return "\n".join(f"- {segment}" for segment in segments)
+        fallback_lines = "\n".join(f"- {challenge}" for challenge in self.client_challenges)
+        return (
+            "No new intake insights provided. Default to known St. Louis client challenges:\n"
+            f"{fallback_lines}"
+        )
+
     def _render_source_section(self, segments: List[str]) -> str:
         if not segments:
             return (
@@ -333,10 +420,22 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
             lines.append(f"[Source {idx}] {self._summarize_research(segment, max_chars=400)}")
         return "\n".join(lines)
 
-    async def _generate_seo_content(self, clinical_data: Dict[str, Any],
-                                  context: Dict[str, Any]) -> SEOContent:
+    async def _generate_seo_content(
+        self,
+        clinical_data: Dict[str, Any],
+        context: Dict[str, Any],
+        client_insights_summary: str,
+        client_insight_segments: List[str],
+    ) -> SEOContent:
         """Generate SEO content optimized for St. Louis mental health searches."""
         try:
+            if client_insight_segments:
+                intake_phrases = ", ".join(
+                    f'"{segment}"' for segment in client_insight_segments[:6]
+                )
+            else:
+                intake_phrases = "No verbatim intake phrases available."
+
             prompt = f"""
 You are Liz Wooten optimizing content for St. Louis clients searching for real help.
 Create SEO content that ranks well and speaks directly to local challenges.
@@ -349,6 +448,12 @@ SEO Context:
 
 Clinical Data:
 {clinical_data}
+
+Client Intake Signals:
+{client_insights_summary}
+
+Direct Phrases Clients Use:
+{intake_phrases}
 
 St. Louis Mental Health Landscape:
 - High trauma rates, poverty, racial disparities
@@ -392,12 +497,24 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             logger.error(f"SEO content generation failed: {e}")
             return SEOContent()
 
-    async def _generate_website_copy(self, clinical_data: Dict[str, Any],
-                                   context: Dict[str, Any]) -> WebsiteCopy:
+    async def _generate_website_copy(
+        self,
+        clinical_data: Dict[str, Any],
+        context: Dict[str, Any],
+        client_insights_summary: str,
+        client_insight_segments: List[str],
+    ) -> WebsiteCopy:
         """Generate website copy that converts visitors to clients."""
         try:
             document_text = context.get("document_text", "")
             summary = self._summarize_research(document_text, max_chars=1500)
+
+            if client_insight_segments:
+                intake_quotes = "\n".join(
+                    f"• \"{segment}\"" for segment in client_insight_segments[:5]
+                )
+            else:
+                intake_quotes = "• No verbatim intake quotes available."
 
             prompt = f"""
 You are Liz Wooten writing website copy that converts St. Louis visitors into clients.
@@ -408,6 +525,12 @@ RESEARCH CONTEXT:
 
 CLINICAL INSIGHTS:
 {clinical_data}
+
+CLIENT INTAKE INSIGHTS (mirror this language when validating struggles):
+{client_insights_summary}
+
+INTAKE VOICES YOU CAN QUOTE:
+{intake_quotes}
 
 Website Goals:
 - Convert visitors who are frustrated with traditional approaches
@@ -467,12 +590,24 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             logger.error(f"Website copy generation failed: {e}")
             return WebsiteCopy()
 
-    async def _generate_blog_content(self, clinical_data: Dict[str, Any],
-                                   context: Dict[str, Any]) -> BlogContent:
+    async def _generate_blog_content(
+        self,
+        clinical_data: Dict[str, Any],
+        context: Dict[str, Any],
+        client_insights_summary: str,
+        client_insight_segments: List[str],
+    ) -> BlogContent:
         """Generate blog content that establishes thought leadership."""
         try:
             document_text = context.get("document_text", "")
             summary = self._summarize_research(document_text, max_chars=1500)
+
+            if client_insight_segments:
+                intake_quotes = "\n".join(
+                    f"• \"{segment}\"" for segment in client_insight_segments[:6]
+                )
+            else:
+                intake_quotes = "• No verbatim intake quotes available."
 
             prompt = f"""
 You are Liz Wooten writing blog content that positions Enlitens as the neuroscience therapy leader in St. Louis.
@@ -483,6 +618,12 @@ RESEARCH CONTEXT:
 
 CLINICAL INSIGHTS:
 {clinical_data}
+
+CLIENT INTAKE INSIGHTS TO WEAVE INTO STORIES:
+{client_insights_summary}
+
+VERBATIM CLIENT VOICES TO QUOTE OR PARAPHRASE:
+{intake_quotes}
 
 Blog Strategy:
 - Establish expertise in neuroscience-based therapy
@@ -572,12 +713,24 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             logger.error(f"Blog content generation failed: {e}")
             return BlogContent()
 
-    async def _generate_social_media_content(self, clinical_data: Dict[str, Any],
-                                           context: Dict[str, Any]) -> SocialMediaContent:
+    async def _generate_social_media_content(
+        self,
+        clinical_data: Dict[str, Any],
+        context: Dict[str, Any],
+        client_insights_summary: str,
+        client_insight_segments: List[str],
+    ) -> SocialMediaContent:
         """Generate social media content that builds community."""
         try:
             source_segments = self._collect_source_segments(context)
             source_section = self._render_source_section(source_segments)
+            if client_insight_segments:
+                intake_quotes = "\n".join(
+                    f"• \"{segment}\"" for segment in client_insight_segments[:6]
+                )
+            else:
+                intake_quotes = "• No verbatim intake quotes available."
+
             prompt = f"""
 You are Liz Wooten creating social media content that builds Enlitens' community in St. Louis.
 Your social media should feel like a conversation with a trusted friend who really gets it.
@@ -591,6 +744,12 @@ Social Media Goals:
 
 Clinical Data:
 {clinical_data}
+
+Client Intake Insights (mirror their exact pain phrases):
+{client_insights_summary}
+
+Direct Quotes You Can Use or Echo:
+{intake_quotes}
 
 Content Style:
 - Short, punchy, and relatable
@@ -664,10 +823,22 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             logger.error(f"Social media content generation failed: {e}")
             return SocialMediaContent()
 
-    async def _generate_content_ideas(self, clinical_data: Dict[str, Any],
-                                    context: Dict[str, Any]) -> ContentCreationIdeas:
+    async def _generate_content_ideas(
+        self,
+        clinical_data: Dict[str, Any],
+        context: Dict[str, Any],
+        client_insights_summary: str,
+        client_insight_segments: List[str],
+    ) -> ContentCreationIdeas:
         """Generate content creation ideas for ongoing marketing."""
         try:
+            if client_insight_segments:
+                intake_quotes = "\n".join(
+                    f"• \"{segment}\"" for segment in client_insight_segments[:6]
+                )
+            else:
+                intake_quotes = "• No verbatim intake quotes available."
+
             prompt = f"""
 You are Liz Wooten brainstorming content ideas that will establish Enlitens as St. Louis's neuroscience therapy leader.
 Your content should drive inquiries while building long-term trust and authority.
@@ -681,6 +852,12 @@ Content Strategy:
 
 Clinical Data:
 {clinical_data}
+
+Client Intake Insights (use this language to frame problems/solutions):
+{client_insights_summary}
+
+Verbatim Client Language for Hooks:
+{intake_quotes}
 
 Content Goals:
 - Weekly blog posts and social media
