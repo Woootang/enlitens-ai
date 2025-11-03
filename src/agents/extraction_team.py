@@ -4,7 +4,8 @@ import asyncio
 import logging
 import os
 import types
-from typing import Any, Callable, Dict, List, Optional
+from collections import Counter
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 try:  # pragma: no cover - allow runtime without PyTorch installed
     import torch  # type: ignore
@@ -26,6 +27,8 @@ try:  # pragma: no cover - optional dependency
     from packaging import version
 except ImportError:  # pragma: no cover - fallback when packaging is missing
     version = None
+
+from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +109,70 @@ class ExtractionTeam:
             'clinical': ['SYMPTOM', 'TREATMENT', 'DIAGNOSIS', 'INTERVENTION', 'OUTCOME']
         }
         self.hf_models_enabled = self._resolve_hf_support()
+        self._fallback_tools: Optional[EnhancedExtractionTools] = None
+        self._heuristic_patterns: Dict[str, Dict[str, Tuple[str, ...]]] = {
+            'biomedical': {
+                'label': 'BIOMEDICAL_KEYWORD',
+                'terms': (
+                    'bio',
+                    'cell',
+                    'molec',
+                    'gene',
+                    'protein',
+                    'enzyme',
+                    'biomarker',
+                    'mutation',
+                    'immune',
+                    'disease',
+                    'pathogen',
+                    'pharma',
+                    'drug',
+                    'tissue',
+                ),
+            },
+            'neuroscience': {
+                'label': 'NEUROSCIENCE_KEYWORD',
+                'terms': (
+                    'brain',
+                    'neuro',
+                    'neural',
+                    'synap',
+                    'cortex',
+                    'hippocamp',
+                    'dopamine',
+                    'serotonin',
+                    'glia',
+                    'axon',
+                    'neur',
+                ),
+            },
+            'psychology': {
+                'label': 'PSYCHOLOGY_KEYWORD',
+                'terms': (
+                    'psych',
+                    'behavior',
+                    'cognit',
+                    'emotion',
+                    'affect',
+                    'mental',
+                ),
+            },
+            'clinical': {
+                'label': 'CLINICAL_KEYWORD',
+                'terms': (
+                    'clinic',
+                    'patient',
+                    'treat',
+                    'therap',
+                    'symptom',
+                    'diagnos',
+                    'intervention',
+                    'trial',
+                    'outcome',
+                    'care',
+                ),
+            },
+        }
         
     async def extract_entities(self, extraction_result: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -146,19 +213,21 @@ class ExtractionTeam:
                 clinical_entities = await self._extract_clinical_entities(text_content)
                 entities['clinical'] = clinical_entities
             else:
-                logger.debug("Extraction Team: Hugging Face models disabled; returning empty entity sets")
-                entities.update({
-                    'biomedical': [],
-                    'neuroscience': [],
-                    'psychology': [],
-                    'clinical': [],
-                })
+                logger.debug("Extraction Team: Hugging Face models disabled; using heuristic extraction")
+                entities.update(self._extract_entities_with_heuristics(text_content))
             
             # Statistical entities
             statistical_entities = await self._extract_statistical_entities(text_content)
             entities['statistical'] = statistical_entities
             
-            logger.info(f"Extraction Team: Extracted {sum(len(v) for v in entities.values())} entities")
+            total_entities = sum(
+                len(bucket)
+                for bucket in entities.values()
+                if isinstance(bucket, list)
+            )
+            entities['total_entities'] = total_entities
+
+            logger.info("Extraction Team: Extracted %d entities", total_entities)
             return entities
             
         except Exception as e:
@@ -339,8 +408,117 @@ class ExtractionTeam:
                     'start': match.start(),
                     'end': match.end()
                 })
-        
+
         return statistical_entities
+
+    def _extract_entities_with_heuristics(self, text: str) -> Dict[str, List[Dict[str, Any]]]:
+        """Use lightweight heuristics to approximate specialised entity buckets."""
+
+        buckets: Dict[str, List[Dict[str, Any]]] = {
+            'biomedical': [],
+            'neuroscience': [],
+            'psychology': [],
+            'clinical': [],
+        }
+
+        keywords: List[Tuple[str, float]] = []
+        tools = self._get_fallback_tools()
+        if tools is not None:
+            try:
+                keywords = tools.extract_semantic_keywords(
+                    text,
+                    keyphrase_ngram_range=(1, 3),
+                    top_n=20,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Extraction Team: heuristic keyword extraction failed with EnhancedExtractionTools (%s)",
+                    exc,
+                )
+
+        if not keywords:
+            keywords = self._basic_keyword_fallback(text, top_n=20)
+
+        text_lower = text.lower()
+        for keyword, score in keywords:
+            if not keyword:
+                continue
+
+            keyword_lower = keyword.lower()
+            bucket_name = self._classify_keyword(keyword_lower)
+            if bucket_name is None:
+                continue
+
+            start = text_lower.find(keyword_lower)
+            if start == -1:
+                start = text_lower.find(keyword_lower.replace('-', ' '))
+            end = start + len(keyword) if start != -1 else -1
+
+            label = self._heuristic_patterns[bucket_name]['label']
+            confidence = float(score if isinstance(score, (int, float)) else 0.5)
+            confidence = max(0.0, min(1.0, confidence))
+
+            buckets[bucket_name].append({
+                'text': keyword,
+                'label': label,
+                'confidence': confidence,
+                'start': start,
+                'end': end,
+            })
+
+        return buckets
+
+    def _get_fallback_tools(self) -> Optional[EnhancedExtractionTools]:
+        """Lazily instantiate EnhancedExtractionTools for heuristic extraction."""
+
+        if self._fallback_tools is None:
+            try:
+                self._fallback_tools = EnhancedExtractionTools(device="cpu")
+            except Exception as exc:
+                logger.warning(
+                    "Extraction Team: unable to initialise EnhancedExtractionTools for heuristics (%s)",
+                    exc,
+                )
+                self._fallback_tools = None
+        return self._fallback_tools
+
+    def _classify_keyword(self, keyword_lower: str) -> Optional[str]:
+        """Map a keyword to a heuristic entity bucket."""
+
+        for bucket, config in self._heuristic_patterns.items():
+            for term in config['terms']:
+                if term in keyword_lower or keyword_lower in term:
+                    return bucket
+        return None
+
+    @staticmethod
+    def _basic_keyword_fallback(text: str, top_n: int = 10) -> List[Tuple[str, float]]:
+        """Simplified keyword extraction when EnhancedExtractionTools are unavailable."""
+
+        import re
+
+        words = re.findall(r"\b[a-zA-Z][a-zA-Z-]{1,}\b", text.lower())
+        if not words:
+            return []
+
+        stop_words = {
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of',
+            'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have',
+            'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
+            'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'into',
+            'from', 'over', 'under', 'after', 'before', 'about', 'within', 'their',
+            'them', 'they', 'his', 'her', 'she', 'him', 'you', 'your', 'ours', 'ourselves',
+        }
+        filtered_words = [word for word in words if word not in stop_words and len(word) > 2]
+        if not filtered_words:
+            return []
+
+        frequency = Counter(filtered_words)
+        results: List[Tuple[str, float]] = []
+        for index, (word, _count) in enumerate(frequency.most_common(top_n)):
+            score = max(0.0, 1.0 - (index * 0.05))
+            results.append((word, score))
+        return results
 
     def _resolve_hf_support(self) -> bool:
         """Determine whether heavyweight HF models should be enabled."""
