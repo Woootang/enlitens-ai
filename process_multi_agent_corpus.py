@@ -645,12 +645,47 @@ class MultiAgentProcessor:
             # Entity enrichment via ExtractionTeam
             logger.info(f"🧬 Running entity extraction for {document_id}")
             entities = await self.extraction_team.extract_entities(extraction_result)
-            logger.info(f"✅ Entity extraction complete: {sum(len(v) for v in entities.values())} entities")
+
+            list_bucket_lengths = {
+                bucket: len(values)
+                for bucket, values in entities.items()
+                if isinstance(values, (list, tuple))
+            }
+            total_entity_count = sum(list_bucket_lengths.values())
+
+            total_entities_payload = entities.get("total_entities")
+            per_category_counts: Dict[str, int] = dict(list_bucket_lengths)
+
+            if isinstance(total_entities_payload, dict):
+                per_category_from_payload = {
+                    bucket: count
+                    for bucket, count in total_entities_payload.items()
+                    if bucket != "total" and isinstance(count, int)
+                }
+                if per_category_from_payload:
+                    per_category_counts = per_category_from_payload
+                payload_total = total_entities_payload.get("total")
+                if isinstance(payload_total, int):
+                    total_entity_count = payload_total
+            elif isinstance(total_entities_payload, int):
+                total_entity_count = total_entities_payload
+
+            entity_count_summary = {
+                "total": total_entity_count,
+                "categories": per_category_counts,
+            }
+
+            logger.info(
+                "✅ Entity extraction complete: total=%s | categories=%s",
+                entity_count_summary["total"],
+                entity_count_summary["categories"],
+            )
 
             # Create processing context
             logger.info(f"🔧 Creating processing context for {document_id}")
             context = await self._create_processing_context(text, document_id)
             context["extracted_entities"] = entities
+            context["entity_counts"] = entity_count_summary
             logger.info(f"✅ Processing context created")
 
             # Process through supervisor (multi-agent system)

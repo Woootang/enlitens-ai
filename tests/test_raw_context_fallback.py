@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import sys
 import types
 from pathlib import Path
@@ -159,3 +160,87 @@ def test_pipeline_uses_raw_context_when_analyses_empty(tmp_path: Path):
     assert entry.rebellion_framework.narrative_deconstruction == [snippet]
     assert entry.educational_content.explanations == [snippet]
     assert entry.marketing_content.headlines == [snippet]
+
+
+def test_entity_extraction_logging_includes_counts(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    processor = MultiAgentProcessor.__new__(MultiAgentProcessor)
+    processor.input_dir = tmp_path
+    processor.output_file = tmp_path / "out.json"
+    processor.temp_file = processor.output_file.with_suffix(".temp")
+    processor.context_dir = tmp_path
+    processor.supervisor = _StubSupervisor()
+    processor.extraction_team = object()
+    processor.pdf_extractor = object()
+    processor.extraction_tools = object()
+    processor.knowledge_base = None
+    processor.embedding_ingestion = None
+    processor.retry_attempts = 1
+    processor.st_louis_context = {
+        "demographics": {},
+        "clinical_priorities": [],
+        "founder_voice": [],
+    }
+
+    sample_entities = {
+        "biomedical": [{"text": "EntityA"}],
+        "clinical": [{"text": "EntityB"}, {"text": "EntityC"}],
+        "psychology": ({"text": "EntityD"},),
+        "metadata": {"ignored": True},
+        "total_entities": {
+            "total": 4,
+            "biomedical": 1,
+            "clinical": 2,
+            "psychology": 1,
+        },
+    }
+
+    class _ExtractionTeamWithPayload:
+        async def extract_entities(self, *_args, **_kwargs):
+            return sample_entities
+
+    processor.extraction_team = _ExtractionTeamWithPayload()
+
+    async def _fake_extract(self, *_args, **_kwargs):
+        return {
+            "archival_content": {"full_document_text_markdown": "Document body " * 10}
+        }
+
+    async def _fake_context(self, text, document_id):
+        return {"document_id": document_id, "document_text": text}
+
+    async def _fake_convert(self, *_args, **_kwargs):
+        return types.SimpleNamespace()
+
+    processor._extract_pdf_text = types.MethodType(_fake_extract, processor)
+    processor._create_processing_context = types.MethodType(_fake_context, processor)
+    processor._convert_to_knowledge_entry = types.MethodType(_fake_convert, processor)
+    processor._get_pdf_file_size = types.MethodType(lambda self, _path: 0, processor)
+    processor._get_page_count_from_extraction = types.MethodType(
+        lambda self, *_args, **_kwargs: 1, processor
+    )
+
+    pdf_path = tmp_path / "entity.pdf"
+    pdf_path.write_text("pdf", encoding="utf-8")
+
+    with caplog.at_level(logging.INFO):
+        entry = asyncio.run(processor.process_document(pdf_path))
+
+    assert entry is not None, "Expected knowledge entry"
+
+    messages = [message for message in caplog.messages if "Entity extraction complete" in message]
+    assert messages, "Expected entity extraction log message"
+    summary_message = messages[-1]
+    assert "total=4" in summary_message
+    assert "'biomedical': 1" in summary_message
+    assert "'clinical': 2" in summary_message
+    assert "'psychology': 1" in summary_message
+
+    supervisor_context = processor.supervisor.last_context
+    assert supervisor_context["entity_counts"] == {
+        "total": 4,
+        "categories": {
+            "biomedical": 1,
+            "clinical": 2,
+            "psychology": 1,
+        },
+    }
