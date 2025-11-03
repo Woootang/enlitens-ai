@@ -13,9 +13,11 @@ from src.models.enlitens_schemas import ClinicalContent, EducationalContent, Reb
 class _RecordingOllamaClient:
     """Test double that records prompts and returns canned responses."""
 
-    def __init__(self, responses):
+    def __init__(self, responses, *, text_responder=None):
         self.responses = responses
         self.prompts = []
+        self.text_prompts = []
+        self._text_responder = text_responder
 
     async def generate_structured_response(self, *, prompt, response_model, **kwargs):  # type: ignore[override]
         self.prompts.append((prompt, response_model))
@@ -23,6 +25,17 @@ class _RecordingOllamaClient:
         if callable(factory):
             return factory()
         return factory
+
+    async def generate_response(self, prompt, **kwargs):  # type: ignore[override]
+        self.text_prompts.append(prompt)
+        responder = self._text_responder
+        if callable(responder):
+            text = responder(prompt, kwargs)
+        elif isinstance(responder, str):
+            text = responder
+        else:
+            text = ""
+        return {"response": text}
 
 
 def _sample_retrieved_passages():

@@ -13,6 +13,7 @@ from src.models.enlitens_schemas import ClinicalContent
 from src.synthesis.few_shot_library import FEW_SHOT_LIBRARY
 from src.synthesis.ollama_client import OllamaClient
 from src.utils.enlitens_constitution import EnlitensConstitution
+from src.utils.prompt_briefing import compose_document_brief
 
 logger = logging.getLogger(__name__)
 
@@ -72,9 +73,15 @@ class ClinicalSynthesisAgent(BaseAgent):
             research_content = science_data.get("research_content", {}) or {}
             sanitized_research = self.constitution.sanitize_mapping(research_content)
             research_payload = json.dumps(sanitized_research, ensure_ascii=False, indent=2)
-            document_text = (context.get("document_text", "") or "")[:5000]
+            document_text = context.get("document_text", "") or ""
+            retrieved_passages = context.get("retrieved_passages") or []
+            document_brief = await compose_document_brief(
+                document_text=document_text,
+                retrieved_passages=retrieved_passages,
+                ollama_client=self.ollama_client,
+            )
             retrieved_block = self._render_retrieved_passages_block(
-                context.get("retrieved_passages"),
+                retrieved_passages,
                 raw_client_context=context.get("raw_client_context"),
                 raw_founder_context=context.get("raw_founder_context"),
             )
@@ -87,7 +94,7 @@ class ClinicalSynthesisAgent(BaseAgent):
 
             few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
                 task="clinical_synthesis",
-                query=document_text,
+                query=document_brief or document_text,
                 k=2,
             )
 
@@ -102,8 +109,8 @@ RETRIEVED PASSAGES FOR CITATION:
 RESEARCH SNAPSHOT:
 {research_payload}
 
-DOCUMENT EXCERPT (for tone and lived detail):
-{document_text}
+DOCUMENT BRIEF (for tone and lived detail):
+{document_brief}
 
 Return JSON with fields {{"thesis": str, "sections": [str], "client_strengths": [str], "key_system_levers": [str], "rallying_cry": str}}.
 """
@@ -153,6 +160,9 @@ OUTLINE TO HONOUR:
 
 RESEARCH CONTENT (cleaned):
 {research_payload}
+
+DOCUMENT BRIEF (tone + late-stage insights):
+{document_brief}
 
 {exemplars}
 
