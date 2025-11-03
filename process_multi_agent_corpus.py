@@ -686,7 +686,12 @@ class MultiAgentProcessor:
             seo_data = agent_outputs.get("seo_content", {})
             seo_content = SEOContent()
             if seo_data:
-                for field, value in seo_data.items():
+                filtered_seo_data = {
+                    field: value
+                    for field, value in seo_data.items()
+                    if field != "title_tags"
+                }
+                for field, value in filtered_seo_data.items():
                     if hasattr(seo_content, field) and isinstance(value, list):
                         setattr(seo_content, field, value)
 

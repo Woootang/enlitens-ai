@@ -150,7 +150,6 @@ class SEOContent(BaseModel):
     secondary_keywords: List[str] = Field(default_factory=list, description="Secondary SEO keywords")
     long_tail_keywords: List[str] = Field(default_factory=list, description="Long-tail SEO keywords")
     meta_descriptions: List[str] = Field(default_factory=list, description="Meta descriptions")
-    title_tags: List[str] = Field(default_factory=list, description="Title tags")
     content_topics: List[str] = Field(default_factory=list, description="Content topics")
 
 
