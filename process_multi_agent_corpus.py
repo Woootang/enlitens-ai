@@ -23,7 +23,7 @@ import sys
 import time
 import gc
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import argparse
 
@@ -170,6 +170,7 @@ class MultiAgentProcessor:
             try:
                 self.embedding_ingestion = EmbeddingIngestionPipeline()
                 logger.info("🧠 Vector store ingestion pipeline initialized")
+                self._bootstrap_context_ingestion()
             except Exception as exc:
                 logger.warning("⚠️ Failed to initialize vector ingestion pipeline: %s", exc)
                 self.embedding_ingestion = None
@@ -183,6 +184,129 @@ class MultiAgentProcessor:
         self.retry_attempts = 3
 
         logger.info("🚀 Multi-Agent Processor initialized")
+
+    def _bootstrap_context_ingestion(self) -> None:
+        """Seed the vector store with static context documents when available."""
+
+        if not self.embedding_ingestion:
+            return
+
+        context_documents: List[Tuple[str, str, Dict[str, Any]]] = []
+
+        intakes_text, intakes_path = self._load_optional_context_text(
+            "intakes.txt", description="client intake narratives"
+        )
+        if intakes_text:
+            context_documents.append(
+                (
+                    "context:intakes",
+                    intakes_text,
+                    {
+                        "doc_type": "context_reference",
+                        "source_type": "client_intakes",
+                        "description": "Aggregated client intake insights for Enlitens clients",
+                        "filename": intakes_path.name if intakes_path else "intakes.txt",
+                    },
+                )
+            )
+
+        transcripts_text, transcripts_path = self._load_optional_context_text(
+            "transcripts.txt", description="founder voice transcripts"
+        )
+        if transcripts_text:
+            context_documents.append(
+                (
+                    "context:transcripts",
+                    transcripts_text,
+                    {
+                        "doc_type": "context_reference",
+                        "source_type": "founder_transcripts",
+                        "description": "Founder transcript excerpts capturing Liz Wooten's voice",
+                        "filename": transcripts_path.name if transcripts_path else "transcripts.txt",
+                    },
+                )
+            )
+
+        stl_report_text = self._extract_st_louis_report_text()
+        if stl_report_text:
+            context_documents.append(
+                (
+                    "context:stl_health_report",
+                    stl_report_text,
+                    {
+                        "doc_type": "context_reference",
+                        "source_type": "stl_health_report",
+                        "description": "Regional health indicators for the St. Louis metro area",
+                        "filename": self.st_louis_report.name if self.st_louis_report else "st_louis_report.pdf",
+                    },
+                )
+            )
+
+        for document_id, full_text, metadata in context_documents:
+            try:
+                if full_text.strip():
+                    self.embedding_ingestion.ingest_document(
+                        document_id=document_id,
+                        full_text=full_text,
+                        metadata={**metadata, "document_id": document_id},
+                    )
+            except Exception as exc:  # pragma: no cover - defensive logging
+                logger.warning(
+                    "Unable to ingest context document %s: %s", document_id, exc
+                )
+
+    def _load_optional_context_text(
+        self, filename: str, *, description: str
+    ) -> Tuple[Optional[str], Optional[Path]]:
+        """Read optional context files from known locations."""
+
+        for candidate in self._context_file_candidates(filename):
+            if not candidate.exists():
+                continue
+            try:
+                return candidate.read_text(encoding="utf-8"), candidate
+            except Exception as exc:  # pragma: no cover - defensive logging
+                logger.warning(
+                    "Failed to read %s at %s: %s", description, candidate, exc
+                )
+                return None, None
+
+        logger.debug("No %s available for ingestion", description)
+        return None, None
+
+    def _context_file_candidates(self, filename: str) -> List[Path]:
+        """Return candidate paths for locating optional context files."""
+
+        return [
+            self.context_dir / filename,
+            self.context_dir / "enlitens_knowledge_base" / filename,
+        ]
+
+    def _extract_st_louis_report_text(self) -> Optional[str]:
+        """Extract markdown text from the optional St. Louis health report."""
+
+        if not self.st_louis_report or not self.st_louis_report.exists():
+            return None
+
+        try:
+            extraction = self.pdf_extractor.extract(str(self.st_louis_report))
+        except Exception as exc:  # pragma: no cover - defensive logging
+            logger.warning(
+                "Failed to extract St. Louis health report for ingestion: %s", exc
+            )
+            return None
+
+        if isinstance(extraction, dict):
+            archival = extraction.get("archival_content", {})
+            text = archival.get("full_document_text_markdown")
+            if text:
+                return text
+            legacy_text = extraction.get("text")
+            if isinstance(legacy_text, str) and legacy_text.strip():
+                return legacy_text
+
+        logger.debug("St. Louis health report extraction did not yield text for ingestion")
+        return None
 
     def _load_st_louis_context(self) -> Dict[str, Any]:
         """Load St. Louis regional context."""

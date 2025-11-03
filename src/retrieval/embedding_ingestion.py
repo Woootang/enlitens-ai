@@ -124,7 +124,9 @@ class EmbeddingIngestionPipeline:
             logger.error("Embedding ingestion failed for %s: %s", document_id, exc)
             raise
 
-        full_text_chunks = sum(1 for chunk in chunks if chunk["metadata"].get("source_type") == "full_document_text")
+        full_text_chunks = sum(
+            1 for chunk in chunks if chunk["metadata"].get("source_type") != "agent_output"
+        )
         agent_chunks = len(chunks) - full_text_chunks
         logger.info(
             "Ingested %d chunks for %s (%d full text, %d agent outputs)",
@@ -370,6 +372,8 @@ class EmbeddingIngestionPipeline:
             "processing_timestamp",
             "quality_score",
             "confidence_score",
+            "source_type",
+            "description",
         }
         return {key: metadata[key] for key in allowed_keys if key in metadata}
 
