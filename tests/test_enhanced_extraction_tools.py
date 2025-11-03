@@ -157,3 +157,5 @@ def test_processing_context_persists_insights(monkeypatch):
     assert context["founder_insights"]["topic_modeling"] == founder_analysis["topic_modeling"]
     assert context["insight_registry"]["client"] == client_analysis
     assert context["insight_registry"]["founder"] == founder_analysis
+    assert context["raw_client_context"] is None
+    assert context["raw_founder_context"] is None

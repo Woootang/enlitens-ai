@@ -440,37 +440,50 @@ class MultiAgentProcessor:
         client_analysis = self._analyze_client_insights()
         founder_analysis = self._analyze_founder_insights()
 
+        raw_client_context = client_analysis.get("raw_content") if isinstance(client_analysis, dict) else None
+        raw_founder_context = founder_analysis.get("raw_content") if isinstance(founder_analysis, dict) else None
+
+        client_insights = {
+            "challenges": self.st_louis_context["demographics"]["mental_health_challenges"],
+            "priorities": self.st_louis_context["clinical_priorities"],
+            "enhanced_analysis": client_analysis,
+            "topic_modeling": client_analysis.get("topic_modeling", {}),
+            "sentiment_analysis": client_analysis.get("sentiment_analysis", {}),
+            "pain_points": client_analysis.get("pain_points", []),
+            "key_themes": client_analysis.get("key_themes", []),
+        }
+        if raw_client_context:
+            client_insights["raw_context"] = raw_client_context
+
+        founder_insights = {
+            "voice_characteristics": self.st_louis_context["founder_voice"],
+            "clinical_philosophy": [
+                "Bottom-up sensory meets top-down cognitive",
+                "Neuroplasticity as hope",
+                "Interoceptive awareness foundation",
+                "Executive function neuroscience support",
+            ],
+            "enhanced_analysis": founder_analysis,
+            "topic_modeling": founder_analysis.get("topic_modeling", {}),
+            "sentiment_analysis": founder_analysis.get("sentiment_analysis", {}),
+            "voice_profile": founder_analysis.get("voice_characteristics", {}),
+            "key_messages": founder_analysis.get("key_messages", []),
+        }
+        if raw_founder_context:
+            founder_insights["raw_context"] = raw_founder_context
+
         return {
             "document_id": document_id,
             "document_text": text,
-            "client_insights": {
-                "challenges": self.st_louis_context["demographics"]["mental_health_challenges"],
-                "priorities": self.st_louis_context["clinical_priorities"],
-                "enhanced_analysis": client_analysis,
-                "topic_modeling": client_analysis.get("topic_modeling", {}),
-                "sentiment_analysis": client_analysis.get("sentiment_analysis", {}),
-                "pain_points": client_analysis.get("pain_points", []),
-                "key_themes": client_analysis.get("key_themes", []),
-            },
-            "founder_insights": {
-                "voice_characteristics": self.st_louis_context["founder_voice"],
-                "clinical_philosophy": [
-                    "Bottom-up sensory meets top-down cognitive",
-                    "Neuroplasticity as hope",
-                    "Interoceptive awareness foundation",
-                    "Executive function neuroscience support",
-                ],
-                "enhanced_analysis": founder_analysis,
-                "topic_modeling": founder_analysis.get("topic_modeling", {}),
-                "sentiment_analysis": founder_analysis.get("sentiment_analysis", {}),
-                "voice_profile": founder_analysis.get("voice_characteristics", {}),
-                "key_messages": founder_analysis.get("key_messages", []),
-            },
+            "client_insights": client_insights,
+            "founder_insights": founder_insights,
             "st_louis_context": self.st_louis_context["demographics"],
             "insight_registry": {
                 "client": client_analysis,
                 "founder": founder_analysis,
             },
+            "raw_client_context": raw_client_context,
+            "raw_founder_context": raw_founder_context,
             "processing_stage": "initial",
         }
 
