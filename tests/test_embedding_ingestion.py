@@ -16,6 +16,8 @@ from src.agents.context_rag_agent import ContextRAGAgent
 from src.models.enlitens_schemas import (
     BlogContent,
     ClinicalContent,
+    ClientProfile,
+    ClientProfileSet,
     ContentCreationIdeas,
     DocumentMetadata,
     EducationalContent,
@@ -65,6 +67,31 @@ def build_sample_entry(document_id: str = "doc-001") -> EnlitensKnowledgeEntry:
         clinical_content=ClinicalContent(interventions=["Polyvagal exercises"]),
         research_content=ResearchContent(findings=["Improved regulation"]),
         content_creation_ideas=ContentCreationIdeas(topic_ideas=["Executive function support"]),
+        client_profiles=ClientProfileSet(
+            profiles=[
+                ClientProfile(
+                    profile_name="Transit sensory overload",
+                    intake_reference='"The red line makes my skin buzz"',
+                    research_reference="[Source 1] explains auditory overload on commuters.",
+                    benefit_explanation="[Source 1] backs vestibular regulation for this pattern.",
+                    st_louis_alignment="[Source 1] plus STL Metro noise logs demand local adjustments.",
+                ),
+                ClientProfile(
+                    profile_name="After-school crash",
+                    intake_reference='"By pickup time I am empty and shaking"',
+                    research_reference="[Source 1] connects cortisol spikes to sensory debt.",
+                    benefit_explanation="[Source 1] validates co-reg stops before homework.",
+                    st_louis_alignment="[Source 1] and STL school density data show needed buffers.",
+                ),
+                ClientProfile(
+                    profile_name="Night shift hypervigilance",
+                    intake_reference='"Night sirens keep my jaw locked"',
+                    research_reference="[Source 1] documents auditory hypervigilance for night workers.",
+                    benefit_explanation="[Source 1] shows decompression pods reduce sympathetic spikes.",
+                    st_louis_alignment="[Source 1] paired with hospital siren counts justify hospital pods.",
+                ),
+            ]
+        ),
         full_document_text="Neuroscience-based therapy helps regulate the nervous system and builds resilience.",
     )
 

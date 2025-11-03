@@ -726,7 +726,7 @@ class MultiAgentProcessor:
                 DocumentMetadata, ExtractedEntities, RebellionFramework,
                 MarketingContent, SEOContent, WebsiteCopy, BlogContent,
                 SocialMediaContent, EducationalContent, ClinicalContent,
-                ResearchContent, ContentCreationIdeas
+                ResearchContent, ContentCreationIdeas, ClientProfileSet
             )
 
             # Determine full document text to persist for verification and metadata
@@ -861,10 +861,20 @@ class MultiAgentProcessor:
                     "⚠️ Failed to validate blog content for %s: %s", document_id, exc
                 )
                 blog_content = BlogContent()
-                if blog_data:
-                    for field, value in blog_data.items():
-                        if hasattr(blog_content, field) and isinstance(value, list):
-                            setattr(blog_content, field, value)
+            if blog_data:
+                for field, value in blog_data.items():
+                    if hasattr(blog_content, field) and isinstance(value, list):
+                        setattr(blog_content, field, value)
+
+            client_profiles_data = agent_outputs.get("client_profiles")
+            client_profiles = None
+            if client_profiles_data:
+                try:
+                    client_profiles = ClientProfileSet.model_validate(client_profiles_data or {})
+                except Exception as exc:
+                    logger.warning(
+                        "⚠️ Failed to validate client profiles for %s: %s", document_id, exc
+                    )
 
             entry = EnlitensKnowledgeEntry(
                 metadata=metadata,
@@ -879,6 +889,7 @@ class MultiAgentProcessor:
                 clinical_content=clinical_content,
                 research_content=research_content,
                 content_creation_ideas=content_creation_ideas,
+                client_profiles=client_profiles,
                 full_document_text=full_document_text  # CRITICAL: Store for citation verification
             )
 
@@ -927,6 +938,7 @@ class MultiAgentProcessor:
                 clinical_content=ClinicalContent(),
                 research_content=ResearchContent(),
                 content_creation_ideas=ContentCreationIdeas(),
+                client_profiles=None,
                 full_document_text=full_document_text  # Store even in fallback case
             )
 

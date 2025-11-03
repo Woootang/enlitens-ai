@@ -16,6 +16,7 @@ from .clinical_synthesis_agent import ClinicalSynthesisAgent
 from .founder_voice_agent import FounderVoiceAgent
 from .context_rag_agent import ContextRAGAgent
 from .marketing_seo_agent import MarketingSEOAgent
+from .client_profile_agent import ClientProfileAgent
 from .validation_agent import ValidationAgent
 from .educational_content_agent import EducationalContentAgent
 from .rebellion_framework_agent import RebellionFrameworkAgent
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 PIPELINE_AGENTS: List[str] = [
     "context_rag",
+    "client_profiles",
     "science_extraction",
     "clinical_synthesis",
     "educational_content",
@@ -68,10 +70,11 @@ class SupervisorAgent(BaseAgent):
                     "founder_voice",
                     "marketing_seo",
                     "validation",
+                    "client_profiles",
                 }
             },
             "marketing_refresh": {
-                "skip": {"science_extraction", "clinical_synthesis"},
+                "skip": {"science_extraction", "clinical_synthesis", "client_profiles"},
             },
             "validation_only": {
                 "skip": {
@@ -81,6 +84,7 @@ class SupervisorAgent(BaseAgent):
                     "rebellion_framework",
                     "founder_voice",
                     "marketing_seo",
+                    "client_profiles",
                 }
             },
         }
@@ -96,6 +100,7 @@ class SupervisorAgent(BaseAgent):
                 "rebellion_framework": RebellionFrameworkAgent(),
                 "founder_voice": FounderVoiceAgent(),
                 "context_rag": ContextRAGAgent(),
+                "client_profiles": ClientProfileAgent(),
                 "marketing_seo": MarketingSEOAgent(),
                 "validation": ValidationAgent(),
             }
@@ -153,6 +158,7 @@ class SupervisorAgent(BaseAgent):
         graph.add_node("entry", self._entry_node)
         graph.add_node("science_extraction", self._science_node)
         graph.add_node("context_rag", self._context_node)
+        graph.add_node("client_profiles", self._client_profile_node)
         graph.add_node("clinical_synthesis", self._clinical_node)
         graph.add_node("educational_content", self._education_node)
         graph.add_node("rebellion_framework", self._rebellion_node)
@@ -164,7 +170,8 @@ class SupervisorAgent(BaseAgent):
         graph.add_edge("entry", "science_extraction")
         graph.add_edge("entry", "context_rag")
         graph.add_edge("science_extraction", "clinical_synthesis")
-        graph.add_edge("context_rag", "clinical_synthesis")
+        graph.add_edge("context_rag", "client_profiles")
+        graph.add_edge("client_profiles", "clinical_synthesis")
         graph.add_edge("clinical_synthesis", "educational_content")
         graph.add_edge("clinical_synthesis", "rebellion_framework")
         graph.add_edge("clinical_synthesis", "founder_voice")
@@ -301,6 +308,25 @@ class SupervisorAgent(BaseAgent):
         result = await self._run_agent_with_retry("context_rag", state, payload)
         return self._merge_results(state, "context_rag", result, "context_result")
 
+    async def _client_profile_node(self, state: WorkflowState) -> Dict[str, Any]:
+        if "client_profiles" in state.get("skip_nodes", set()):
+            logger.info("⏭️ Skipping client profiles due to doc_type route")
+            self._mark_plan_step(state, "client_profiles", "skipped", "Skip flag detected")
+            return {
+                "stage": "client_profiles_skipped",
+                "client_profile_result": state.get("client_profile_result") or {},
+                "completed_nodes": {**state.get("completed_nodes", {}), "client_profiles": "skipped"},
+                "metadata": self._metadata_with_plan(state),
+            }
+
+        payload = {
+            "retrieved_passages": state.get("context_result", {})
+            .get("rag_retrieval", {})
+            .get("top_passages"),
+        }
+        result = await self._run_agent_with_retry("client_profiles", state, payload)
+        return self._merge_results(state, "client_profiles", result, "client_profile_result")
+
     async def _clinical_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "clinical_synthesis" in state.get("skip_nodes", set()):
             logger.info("⏭️ Skipping clinical synthesis due to doc_type route")
@@ -316,10 +342,15 @@ class SupervisorAgent(BaseAgent):
             logger.debug("Waiting for science extraction before clinical synthesis")
             return {"stage": "clinical_waiting_science"}
 
+        if state.get("client_profile_result") is None and "client_profiles" not in state.get("skip_nodes", set()):
+            logger.debug("Waiting for client profiles before clinical synthesis")
+            return {"stage": "clinical_waiting_client_profiles"}
+
         payload = {
             "science_data": state.get("science_result") or {},
             "document_text": state["document_text"],
             "context_result": state.get("context_result"),
+            "client_profiles": state.get("client_profile_result"),
         }
         result = await self._run_agent_with_retry("clinical_synthesis", state, payload)
         return self._merge_results(state, "clinical_synthesis", result, "clinical_result")
@@ -676,6 +707,10 @@ class SupervisorAgent(BaseAgent):
             add_step(
                 "context_rag",
                 "Gather constitution-aligned context and supporting research",
+            )
+            add_step(
+                "client_profiles",
+                "Translate retrieved research and intake quotes into three client profiles",
             )
 
         add_step("science_extraction", "Extract constitution-filtered scientific facts")

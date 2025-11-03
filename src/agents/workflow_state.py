@@ -117,6 +117,7 @@ class WorkflowState(TypedDict, total=False):
     # Node outputs tracked explicitly
     science_result: Optional[Dict[str, Any]]
     context_result: Optional[Dict[str, Any]]
+    client_profile_result: Optional[Dict[str, Any]]
     clinical_result: Optional[Dict[str, Any]]
     educational_result: Optional[Dict[str, Any]]
     rebellion_result: Optional[Dict[str, Any]]
@@ -164,6 +165,7 @@ def create_initial_state(
         metadata={},
         science_result=None,
         context_result=None,
+        client_profile_result=None,
         clinical_result=None,
         educational_result=None,
         rebellion_result=None,
