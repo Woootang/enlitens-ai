@@ -1,9 +1,11 @@
 import pytest
 
 pydantic = pytest.importorskip("pydantic")
-import pytest
 from pydantic import ValidationError
 
+from src.agents.clinical_synthesis_agent import ClinicalSynthesisAgent
+from src.agents.educational_content_agent import EducationalContentAgent
+from src.agents.rebellion_framework_agent import RebellionFrameworkAgent
 from src.models.enlitens_schemas import BlogContent
 from src.validation.chain_of_verification import ChainOfVerification
 from src.agents.validation_agent import ValidationAgent
@@ -49,7 +51,7 @@ def test_blog_statistics_missing_quote_fails():
 def test_marketing_compliance_flags_banned_terms():
     output = {
         "marketing_content": {
-            "headlines": ["Guaranteed results in two weeks"],
+            "headlines": ["We guarantee results in two weeks"],
             "value_propositions": ["Clinician-approved"],
         }
     }
@@ -58,6 +60,80 @@ def test_marketing_compliance_flags_banned_terms():
     marketing_step = next(step for step in report["steps"] if step["name"] == "Marketing compliance")
     assert not marketing_step["passed"]
     assert any("guarantee" in issue.lower() for issue in marketing_step["issues"])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "agent_cls,payload_key,requirements",
+    [
+        (
+            RebellionFrameworkAgent,
+            "rebellion_framework",
+            {
+                "narrative_deconstruction": 3,
+                "sensory_profiling": 3,
+                "executive_function": 3,
+                "social_processing": 3,
+                "strengths_synthesis": 3,
+                "rebellion_themes": 3,
+                "aha_moments": 3,
+            },
+        ),
+        (
+            ClinicalSynthesisAgent,
+            "clinical_content",
+            {
+                "interventions": 3,
+                "assessments": 3,
+                "outcomes": 3,
+                "protocols": 3,
+                "guidelines": 3,
+                "contraindications": 3,
+                "side_effects": 3,
+                "monitoring": 3,
+            },
+        ),
+        (
+            EducationalContentAgent,
+            "educational_content",
+            {
+                "explanations": 5,
+                "examples": 5,
+                "analogies": 5,
+                "definitions": 5,
+                "processes": 5,
+                "comparisons": 5,
+                "visual_aids": 5,
+                "learning_objectives": 5,
+            },
+        ),
+    ],
+)
+async def test_agent_validators_reject_short_lists(agent_cls, payload_key, requirements):
+    agent = agent_cls()
+
+    passing_payload = {
+        payload_key: {
+            field: [f"{field} item {idx}" for idx in range(minimum)]
+            for field, minimum in requirements.items()
+        }
+    }
+
+    assert await agent.validate_output(passing_payload) is True
+
+    failing_payload = {
+        payload_key: {
+            field: [f"{field} item {idx}" for idx in range(minimum)]
+            for field, minimum in requirements.items()
+        }
+    }
+    first_field = next(iter(requirements))
+    failing_payload[payload_key][first_field] = ["insufficient"]
+
+    with pytest.raises(ValueError) as excinfo:
+        await agent.validate_output(failing_payload)
+
+    assert first_field in str(excinfo.value)
 
 
 @pytest.mark.asyncio
@@ -81,15 +157,16 @@ async def test_validation_agent_end_to_end():
         },
         "clinical_content": {
             "interventions": [
-                "Co-design rebellious routines with the client—torch the bullshit deficit story and map environmental triggers.",
+                "Co-design adaptive routines with neurodivergent clients—replace limiting narratives with context-aware mapping of environmental triggers.",
                 "Polyvagal regulation practice so the nervous system feels safe before cognitive work.",
+                "Embed collaborative planning sessions that highlight strengths and shared agency.",
             ],
             "assessments": ["Context-and-strengths inventory co-created with the client."],
             "protocols": [
                 "Eight-week executive coaching arc with choice-driven sessions and collaborative checkpoints."
             ],
             "guidelines": [
-                "Context audit: analyse workplace system pressures and burn the old metrics that ignore environment.",
+                "Context audit: analyse workplace system pressures and replace outdated metrics that ignore environment.",
                 "Plan advocacy moves targeting school and workplace ableism."
             ],
             "outcomes": [
