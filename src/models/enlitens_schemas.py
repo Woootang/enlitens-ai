@@ -12,7 +12,13 @@ from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import difflib
+import logging
 import re
+
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
+
+
+logger = logging.getLogger(__name__)
 
 
 class Citation(BaseModel):
@@ -221,21 +227,52 @@ class SocialMediaContent(BaseModel):
         cleaned = re.sub(r"\s*\[Source[^\]]+\]\s*$", "", value).strip()
         return cleaned
 
+    @staticmethod
+    def _quote_in_text(quote: str, text: str) -> bool:
+        if not quote or not text:
+            return False
+        if quote in text:
+            return True
+        sentences = [
+            sentence.strip()
+            for sentence in re.split(r'(?<=[.!?])\s+', text)
+            if sentence.strip()
+        ]
+        if not sentences:
+            return False
+        best_match = difflib.get_close_matches(quote, sentences, n=1, cutoff=0.85)
+        return bool(best_match)
+
     @field_validator("quotes")
     @classmethod
     def validate_quotes(cls, values: List[str], info: ValidationInfo) -> List[str]:
         if not values:
-            return values or []
+            return []
 
         context = info.context or {}
-        source_text = context.get("source_text", "") or ""
-        additional_sources = context.get("source_segments") or []
-        combined_sources = "\n".join(
-            [source_text] + [seg for seg in additional_sources if isinstance(seg, str)]
-        ).strip()
+        source_text = (context.get("source_text") or "").strip()
+        raw_segments = context.get("source_segments") or []
+        citation_map = dict(context.get("source_citation_map") or {})
+        telemetry_meta = context.get("quote_validation_telemetry") or {}
+        missing_note = (context.get("quote_missing_note") or "").strip()
 
-        if not combined_sources:
-            return values
+        normalized_segments: List[str] = []
+        for segment in raw_segments:
+            if isinstance(segment, str):
+                stripped = segment.strip()
+                if stripped:
+                    normalized_segments.append(stripped)
+            elif isinstance(segment, dict):
+                text = str(segment.get("text", "")).strip()
+                tag = str(segment.get("tag", "")).strip()
+                if text:
+                    normalized_segments.append(text)
+                    if tag:
+                        citation_map.setdefault(tag, text)
+
+        combined_sources = "\n".join(
+            [part for part in [source_text, *normalized_segments] if part]
+        ).strip()
 
         sentences = [
             sentence.strip()
@@ -243,21 +280,66 @@ class SocialMediaContent(BaseModel):
             if sentence.strip()
         ]
 
+        valid_quotes: List[str] = []
+        missing_quotes: List[str] = []
+
         for value in values:
             quote_body = cls._extract_quote_body(value)
             if not quote_body:
                 raise ValueError("Quote entries must include extractable quoted text")
 
-            if quote_body in combined_sources:
-                continue
+            matched = False
+            citation_tags = [tag.strip() for tag in re.findall(r"\[([^\]]+)\]", value)]
+            for tag in citation_tags:
+                if not tag:
+                    continue
+                normalized_tag = " ".join(tag.split())
+                source_payload = citation_map.get(normalized_tag) or citation_map.get(tag)
+                if source_payload and cls._quote_in_text(quote_body, source_payload):
+                    matched = True
+                    break
 
-            best_match = difflib.get_close_matches(quote_body, sentences, n=1, cutoff=0.85)
-            if not best_match:
-                raise ValueError(
-                    f"Quote not found in provided source material: {quote_body[:80]}..."
+            if not matched and combined_sources:
+                if quote_body in combined_sources or difflib.get_close_matches(quote_body, sentences, n=1, cutoff=0.85):
+                    matched = True
+
+            if matched:
+                valid_quotes.append(value)
+            else:
+                missing_quotes.append(value)
+
+        if valid_quotes:
+            if missing_quotes and telemetry_meta:
+                log_with_telemetry(
+                    logger.warning,
+                    "Filtered social media quotes without matching evidence",
+                    agent=telemetry_meta.get("agent", "unknown"),
+                    severity=TelemetrySeverity.MINOR,
+                    impact="quote_validation_partial_mismatch",
+                    doc_id=telemetry_meta.get("doc_id"),
+                    details={
+                        "dropped_quotes": missing_quotes,
+                        "available_citations": list(citation_map.keys()),
+                    },
                 )
+            return valid_quotes
 
-        return values
+        if telemetry_meta:
+            log_with_telemetry(
+                logger.warning,
+                "No verifiable quotes matched provided sources",
+                agent=telemetry_meta.get("agent", "unknown"),
+                severity=TelemetrySeverity.MINOR,
+                impact="quote_validation_missing_evidence",
+                doc_id=telemetry_meta.get("doc_id"),
+                details={
+                    "requested_quotes": values,
+                    "available_citations": list(citation_map.keys()),
+                },
+            )
+
+        fallback_note = missing_note or "Evidence unavailable: no verified quotes could be matched to the provided sources."
+        return [fallback_note]
 
 
 class EducationalContent(BaseModel):

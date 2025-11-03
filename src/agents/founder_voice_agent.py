@@ -100,6 +100,15 @@ class FounderVoiceAgent(BaseAgent):
         suffix: str,
         **kwargs,
     ):
+        validation_context = kwargs.pop("validation_context", None)
+        if validation_context is not None:
+            normalized_context = self._prepare_validation_context(
+                validation_context,
+                response_model=response_model,
+                agent_context=context,
+            )
+            if normalized_context:
+                kwargs["validation_context"] = normalized_context
         cache_kwargs = self._cache_kwargs(context, suffix=suffix)
         return await self.ollama_client.generate_structured_response(
             prompt=prompt,
@@ -107,6 +116,63 @@ class FounderVoiceAgent(BaseAgent):
             **kwargs,
             **cache_kwargs,
         )
+
+    def _prepare_validation_context(
+        self,
+        context_payload: Dict[str, Any],
+        *,
+        response_model,
+        agent_context: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Normalize validation context for downstream schema checks."""
+
+        normalized: Dict[str, Any] = dict(context_payload or {})
+
+        raw_segments = normalized.get("source_segments") or []
+        citation_map = dict(normalized.get("source_citation_map") or {})
+
+        normalized_segments: List[str] = []
+        for idx, segment in enumerate(raw_segments, start=1):
+            tag = f"Source {idx}"
+            if isinstance(segment, dict):
+                text = str(segment.get("text", "")).strip()
+                explicit_tag = str(segment.get("tag", "")).strip() or tag
+                if text:
+                    normalized_segments.append(text)
+                    citation_map.setdefault(explicit_tag, text)
+                    if explicit_tag != tag:
+                        citation_map.setdefault(tag, text)
+            else:
+                text = str(segment).strip()
+                if text:
+                    normalized_segments.append(text)
+                    citation_map.setdefault(tag, text)
+
+        if normalized_segments:
+            normalized["source_segments"] = normalized_segments
+            normalized.setdefault("source_text", "\n\n".join(normalized_segments))
+        else:
+            normalized["source_segments"] = []
+
+        if citation_map:
+            normalized["source_citation_map"] = citation_map
+        else:
+            normalized.pop("source_citation_map", None)
+
+        if response_model is SocialMediaContent:
+            normalized.setdefault(
+                "quote_missing_note",
+                "Evidence unavailable: no verified quotes could be matched to the provided sources.",
+            )
+            normalized.setdefault(
+                "quote_validation_telemetry",
+                {
+                    "agent": TELEMETRY_AGENT,
+                    "doc_id": agent_context.get("document_id"),
+                },
+            )
+
+        return normalized
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -405,6 +471,12 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                 for item in value:
                     _gather(item)
 
+        for passage in context.get("retrieved_passages") or []:
+            if isinstance(passage, dict):
+                _gather(passage.get("text"))
+            else:
+                _gather(passage)
+
         _gather(context.get("document_text", ""))
         _gather(context.get("retrieved_context"))
         final_context = context.get("final_context") or {}
@@ -458,17 +530,21 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
             f"{fallback_lines}"
         )
 
-    def _render_source_section(self, segments: List[str]) -> str:
+    def _render_source_section(self, segments: List[str]) -> tuple[str, Dict[str, str]]:
         if not segments:
             return (
                 "No source material was provided. If this happens, ground quotes in the clinical data "
-                "without inventing research."
+                "without inventing research.",
+                {},
             )
 
-        lines = []
+        lines: List[str] = []
+        citation_map: Dict[str, str] = {}
         for idx, segment in enumerate(segments, start=1):
-            lines.append(f"[Source {idx}] {self._summarize_research(segment, max_chars=400)}")
-        return "\n".join(lines)
+            tag = f"Source {idx}"
+            citation_map[tag] = segment
+            lines.append(f"[{tag}] {self._summarize_research(segment, max_chars=400)}")
+        return "\n".join(lines), citation_map
 
     def _retrieved_passage_block(self, context: Dict[str, Any]) -> str:
         return self._render_retrieved_passages_block(
@@ -825,8 +901,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
         """Generate social media content that builds community."""
         try:
             source_segments = self._collect_source_segments(context)
-            source_section = self._render_source_section(source_segments)
-            retrieved_block = self._retrieved_passage_block(context)
+            source_section, citation_map = self._render_source_section(source_segments)
             if client_insight_segments:
                 intake_quotes = "\n".join(
                     f"• \"{segment}\"" for segment in client_insight_segments[:6]
@@ -861,13 +936,10 @@ Content Style:
 - Real talk about real challenges
 - Hopeful without being cheesy
 
-SOURCE MATERIAL (quote verbatim and cite using the provided tags):
-{source_section}
+        SOURCE MATERIAL (quote verbatim and cite using the provided tags):
+        {source_section}
 
-RETRIEVED PASSAGES (tag with [Source #] when referenced):
-{retrieved_block}
-
-CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
+        CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
 Generate 5-10 strings for each field below:
 
@@ -921,6 +993,14 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 validation_context={
                     "source_text": "\n\n".join(source_segments),
                     "source_segments": source_segments,
+                    "source_citation_map": citation_map,
+                    "quote_missing_note": (
+                        "Evidence unavailable: no verified quotes could be matched to the provided sources."
+                    ),
+                    "quote_validation_telemetry": {
+                        "agent": TELEMETRY_AGENT,
+                        "doc_id": context.get("document_id"),
+                    },
                 },
             )
 
