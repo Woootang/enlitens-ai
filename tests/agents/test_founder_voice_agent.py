@@ -54,7 +54,7 @@ if "json_repair" not in sys.modules:
     sys.modules["json_repair"] = json_repair_stub
 
 from src.agents.founder_voice_agent import FounderVoiceAgent
-from src.models.enlitens_schemas import WebsiteCopy, SocialMediaContent
+from src.models.enlitens_schemas import MarketingContent, WebsiteCopy, SocialMediaContent
 
 
 def test_website_copy_schema_excludes_deprecated_fields():
@@ -131,9 +131,14 @@ async def test_generate_website_copy_prompt_omits_deprecated_sections(monkeypatc
 
     monkeypatch.setattr(agent, "_structured_generation", fake_structured_generation)
 
+    client_segments = ["I can't keep my ADHD brain organized long enough to finish a project."]
+    client_summary = agent._render_client_insights(client_segments)
+
     result = await agent._generate_website_copy(
         clinical_data={"insight": "value"},
         context={"document_text": "Neuroscience insights."},
+        client_insights_summary=client_summary,
+        client_insight_segments=client_segments,
     )
 
     prompt = captured_prompt.get("prompt", "")
@@ -178,9 +183,17 @@ async def test_generate_social_media_prompt_uses_sources_and_quote_rules(monkeyp
         ],
     }
 
+    client_segments = [
+        "My nervous system never powers down—it feels like I'm running on emergency mode 24/7.",
+        "Executive dysfunction keeps wrecking my work deadlines.",
+    ]
+    client_summary = agent._render_client_insights(client_segments)
+
     result = await agent._generate_social_media_content(
         clinical_data={"insight": "value"},
         context=context,
+        client_insights_summary=client_summary,
+        client_insight_segments=client_segments,
     )
 
     prompt = captured.get("prompt", "")
@@ -190,7 +203,79 @@ async def test_generate_social_media_prompt_uses_sources_and_quote_rules(monkeyp
     assert "SOURCE MATERIAL" in prompt
     assert "[Source 1]" in prompt
     assert "QUOTE REQUIREMENTS" in prompt
+    assert "Client Intake Insights" in prompt
+    assert "emergency mode 24/7" in prompt
 
     validation_context = captured.get("validation_context") or {}
     assert "Neurodiversity celebrates differences." in validation_context.get("source_text", "")
     assert result.quotes == ['"Neurodiversity celebrates differences." — [Source 1]']
+
+
+@pytest.mark.asyncio
+async def test_marketing_prompt_uses_client_insights_language(monkeypatch):
+    agent = FounderVoiceAgent()
+    captured_prompt: Dict[str, Any] = {}
+
+    async def fake_structured_generation(prompt, response_model, context, suffix, **kwargs):
+        captured_prompt["prompt"] = prompt
+        assert response_model is MarketingContent
+        return MarketingContent(
+            headlines=["headline"],
+            taglines=["tagline"],
+            value_propositions=["value"],
+            benefits=["benefit"],
+            pain_points=["pain"],
+        )
+
+    monkeypatch.setattr(agent, "_structured_generation", fake_structured_generation)
+
+    client_segments = [
+        "My executive function falls apart after lunch.",
+        "Sensory overload at the office makes me shut down.",
+    ]
+    client_summary = agent._render_client_insights(client_segments)
+
+    await agent._generate_marketing_content(
+        clinical_data={},
+        context={"document_text": "Brain-based interventions."},
+        client_insights_summary=client_summary,
+        client_insight_segments=client_segments,
+    )
+
+    prompt = captured_prompt.get("prompt", "")
+    assert "executive function falls apart" in prompt
+    assert "Sensory overload at the office" in prompt
+    assert "No new intake insights" not in prompt
+
+
+@pytest.mark.asyncio
+async def test_marketing_prompt_falls_back_to_static_challenges(monkeypatch):
+    agent = FounderVoiceAgent()
+    captured_prompt: Dict[str, Any] = {}
+
+    async def fake_structured_generation(prompt, response_model, context, suffix, **kwargs):
+        captured_prompt["prompt"] = prompt
+        return MarketingContent(
+            headlines=["headline"],
+            taglines=["tagline"],
+            value_propositions=["value"],
+            benefits=["benefit"],
+            pain_points=["pain"],
+        )
+
+    monkeypatch.setattr(agent, "_structured_generation", fake_structured_generation)
+
+    client_segments: list[str] = []
+    client_summary = agent._render_client_insights(client_segments)
+
+    await agent._generate_marketing_content(
+        clinical_data={},
+        context={"document_text": "Brain-based interventions."},
+        client_insights_summary=client_summary,
+        client_insight_segments=client_segments,
+    )
+
+    prompt = captured_prompt.get("prompt", "")
+    assert "No new intake insights provided" in prompt
+    for challenge in agent.client_challenges[:2]:
+        assert challenge in prompt
