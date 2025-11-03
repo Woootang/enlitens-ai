@@ -73,6 +73,11 @@ class ClinicalSynthesisAgent(BaseAgent):
             sanitized_research = self.constitution.sanitize_mapping(research_content)
             research_payload = json.dumps(sanitized_research, ensure_ascii=False, indent=2)
             document_text = (context.get("document_text", "") or "")[:5000]
+            retrieved_block = self._render_retrieved_passages_block(
+                context.get("retrieved_passages"),
+                raw_client_context=context.get("raw_client_context"),
+                raw_founder_context=context.get("raw_founder_context"),
+            )
 
             constitution_block = self.constitution.render_prompt_section(
                 self._prompt_principles,
@@ -90,6 +95,9 @@ class ClinicalSynthesisAgent(BaseAgent):
 You are planning an Enlitens-aligned clinical synthesis. Construct a JSON outline that captures the rebellious thesis, strength-first arcs, and system-level moves required by the constitution.
 
 {constitution_block}
+
+RETRIEVED PASSAGES FOR CITATION:
+{retrieved_block}
 
 RESEARCH SNAPSHOT:
 {research_payload}
@@ -148,7 +156,11 @@ RESEARCH CONTENT (cleaned):
 
 {exemplars}
 
+RETRIEVED PASSAGES WITH SOURCE TAGS:
+{retrieved_block}
+
 Return JSON strictly matching {{"interventions": [str], "assessments": [str], "outcomes": [str], "protocols": [str], "guidelines": [str], "contraindications": [str], "side_effects": [str], "monitoring": [str]}}. Every list must contain 3-8 items and embed contextual analogies plus citations in plain language when relevant.
+If you use a claim from the passages above, include the corresponding [Source #] tag in the string so downstream validation can trace it.
 """
 
             cache_kwargs = self._cache_kwargs(context)

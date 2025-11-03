@@ -41,6 +41,11 @@ class RebellionFrameworkAgent(BaseAgent):
             document_text = context.get("document_text", "")[:8000]
             research_content = context.get("science_data", {}).get("research_content", {})
             clinical_content = context.get("clinical_content", {})
+            retrieved_block = self._render_retrieved_passages_block(
+                context.get("retrieved_passages"),
+                raw_client_context=context.get("raw_client_context"),
+                raw_founder_context=context.get("raw_founder_context"),
+            )
 
             prompt = f"""
 You are applying Enlitens' proprietary Rebellion Framework to neuroscience research.
@@ -60,6 +65,9 @@ DOCUMENT TEXT:
 
 RESEARCH FINDINGS:
 {research_content.get('findings', [])}
+
+RETRIEVED PASSAGES (quote verbatim and cite with [Source #]):
+{retrieved_block}
 
 CLINICAL APPLICATIONS:
 {clinical_content.get('interventions', [])}
@@ -96,6 +104,8 @@ IMPORTANT:
 - Ground in actual neuroscience findings
 - Make it personally relevant to clients
 - Challenge traditional mental health narratives
+
+For any claim grounded in the passages above, include the matching [Source #] tag in the string so QA can trace it.
 
 Return as JSON with these EXACT field names:
 {{"narrative_deconstruction": [list], "sensory_profiling": [list], "executive_function": [list], "social_processing": [list], "strengths_synthesis": [list], "rebellion_themes": [list], "aha_moments": [list]}}

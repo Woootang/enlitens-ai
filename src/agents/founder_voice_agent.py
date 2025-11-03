@@ -209,6 +209,8 @@ class FounderVoiceAgent(BaseAgent):
             else:
                 intake_voice_section = "\n# INTAKE VOICES\n• No verbatim intake quotes available.\n"
 
+            retrieved_block = self._retrieved_passage_block(context)
+
             prompt = f"""
 You are Liz Wooten, founder of Enlitens, speaking directly to frustrated St. Louis clients.
 
@@ -217,6 +219,9 @@ You are Liz Wooten, founder of Enlitens, speaking directly to frustrated St. Lou
 - Honor the brain isn't broken; it adapts.
 - Ground every promise in neuroscience or lived experience.
 - Assume audience craves hope plus proof.
+
+# RETRIEVED PASSAGES (quote + tag with [Source #] when referenced)
+{retrieved_block}
 
 # RESEARCH SNAPSHOT (trimmed)
 {summary}
@@ -239,6 +244,7 @@ Only reference research findings from the provided context.
 
 Avoid repetition. Keep copy punchy; no bullets/numbers in strings.
 Respond with JSON matching MarketingContent schema (NO social_proof field).
+Use [Source #] tags whenever you leverage a retrieved passage so QA can trace it.
 """
 
             llama_client = self.ollama_client.clone_with_model("llama3.1:8b")
@@ -420,6 +426,13 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
             lines.append(f"[Source {idx}] {self._summarize_research(segment, max_chars=400)}")
         return "\n".join(lines)
 
+    def _retrieved_passage_block(self, context: Dict[str, Any]) -> str:
+        return self._render_retrieved_passages_block(
+            context.get("retrieved_passages"),
+            raw_client_context=context.get("raw_client_context"),
+            raw_founder_context=context.get("raw_founder_context"),
+        )
+
     async def _generate_seo_content(
         self,
         clinical_data: Dict[str, Any],
@@ -435,6 +448,8 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                 )
             else:
                 intake_phrases = "No verbatim intake phrases available."
+
+            retrieved_block = self._retrieved_passage_block(context)
 
             prompt = f"""
 You are Liz Wooten optimizing content for St. Louis clients searching for real help.
@@ -454,6 +469,9 @@ Client Intake Signals:
 
 Direct Phrases Clients Use:
 {intake_phrases}
+
+Retrieved Passages to cite (attach [Source #] tags when used):
+{retrieved_block}
 
 St. Louis Mental Health Landscape:
 - High trauma rates, poverty, racial disparities
@@ -477,6 +495,7 @@ Generate 5-10 items for each field below and return as JSON:
 Write in Liz's voice - make it authentic and trustworthy.
 Target the specific pain points St. Louis clients face.
 Position Enlitens as the neuroscience alternative to traditional therapy.
+Add [Source #] tags anytime you rely on the retrieved passages so compliance can verify.
 
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
@@ -516,6 +535,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             else:
                 intake_quotes = "• No verbatim intake quotes available."
 
+            retrieved_block = self._retrieved_passage_block(context)
+
             prompt = f"""
 You are Liz Wooten writing website copy that converts St. Louis visitors into clients.
 Your website needs to speak directly to people who've tried traditional therapy and want something different.
@@ -525,6 +546,9 @@ RESEARCH CONTEXT:
 
 CLINICAL INSIGHTS:
 {clinical_data}
+
+RETRIEVED PASSAGES TO QUOTE (tag with [Source #]):
+{retrieved_block}
 
 CLIENT INTAKE INSIGHTS (mirror this language when validating struggles):
 {client_insights_summary}
@@ -570,6 +594,7 @@ Generate 3-8 paragraph-length strings for the narrative sections. Each string sh
 NOTE: Testimonials field REMOVED for FTC compliance (16 CFR Part 465 - no AI-generated testimonials).
 
 Use Liz's direct, authentic voice. Ground everything in neuroscience. Address real St. Louis client pain points.
+If you cite a retrieved passage, include the matching [Source #] tag in the generated string.
 
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
@@ -609,6 +634,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             else:
                 intake_quotes = "• No verbatim intake quotes available."
 
+            retrieved_block = self._retrieved_passage_block(context)
+
             prompt = f"""
 You are Liz Wooten writing blog content that positions Enlitens as the neuroscience therapy leader in St. Louis.
 Your blog should educate, challenge traditional approaches, and drive inquiries.
@@ -618,6 +645,9 @@ RESEARCH CONTEXT:
 
 CLINICAL INSIGHTS:
 {clinical_data}
+
+RETRIEVED PASSAGES TO INCORPORATE (tag with [Source #]):
+{retrieved_block}
 
 CLIENT INTAKE INSIGHTS TO WEAVE INTO STORIES:
 {client_insights_summary}
@@ -692,6 +722,7 @@ CASE STUDY RULES:
 - Base examples on research findings, not fabricated scenarios
 
 Use Liz's rebellious, direct voice. Ground everything in neuroscience. Make it shareable and valuable.
+When referencing retrieved passages, include the appropriate [Source #] tag inside the string.
 
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
 """
@@ -724,6 +755,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
         try:
             source_segments = self._collect_source_segments(context)
             source_section = self._render_source_section(source_segments)
+            retrieved_block = self._retrieved_passage_block(context)
             if client_insight_segments:
                 intake_quotes = "\n".join(
                     f"• \"{segment}\"" for segment in client_insight_segments[:6]
@@ -761,6 +793,9 @@ Content Style:
 SOURCE MATERIAL (quote verbatim and cite using the provided tags):
 {source_section}
 
+RETRIEVED PASSAGES (tag with [Source #] when referenced):
+{retrieved_block}
+
 CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
 Generate 5-10 strings for each field below:
@@ -797,6 +832,7 @@ QUOTE REQUIREMENTS:
 - Wrap each quote in double quotes and append the citation tag like [Source 2].
 - Skip any quote you cannot directly trace to a provided source.
 - Never fabricate citations or invent research.
+- Apply the [Source #] tags for the retrieved passages when they inform captions or post ideas.
 
 Write as Liz - conversational, direct, and caring. Balance education with empathy.
 
@@ -839,6 +875,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             else:
                 intake_quotes = "• No verbatim intake quotes available."
 
+            retrieved_block = self._retrieved_passage_block(context)
+
             prompt = f"""
 You are Liz Wooten brainstorming content ideas that will establish Enlitens as St. Louis's neuroscience therapy leader.
 Your content should drive inquiries while building long-term trust and authority.
@@ -852,6 +890,9 @@ Content Strategy:
 
 Clinical Data:
 {clinical_data}
+
+Retrieved Passages for hook inspiration (cite with [Source #]):
+{retrieved_block}
 
 Client Intake Insights (use this language to frame problems/solutions):
 {client_insights_summary}
@@ -910,6 +951,7 @@ Generate 5-10 strings for each field below:
 Focus on content that directly addresses ADHD, anxiety, trauma challenges and drives inquiries.
 
 RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
+If a concept uses a retrieved passage, include the matching [Source #] tag inside the generated string.
 """
 
             response = await self._structured_generation(
