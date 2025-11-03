@@ -1,6 +1,6 @@
 import sys
 import types
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 
@@ -218,12 +218,16 @@ async def test_generate_social_media_prompt_uses_sources_and_quote_rules(monkeyp
     assert "SOURCE MATERIAL" in prompt
     assert "[Source 1]" in prompt
     assert "relentless sensory input" in prompt
+    assert "RETRIEVED PASSAGES" not in prompt
     assert "QUOTE REQUIREMENTS" in prompt
     assert "Client Intake Insights" in prompt
     assert "emergency mode 24/7" in prompt
 
     validation_context = captured.get("validation_context") or {}
     assert "Neurodiversity celebrates differences." in validation_context.get("source_text", "")
+    assert validation_context.get("source_citation_map", {}).get("Source 1")
+    assert "quote_missing_note" in validation_context
+    assert "quote_validation_telemetry" in validation_context
     assert result.quotes == ['"Neurodiversity celebrates differences." — [Source 1]']
 
 
@@ -305,3 +309,82 @@ async def test_marketing_prompt_falls_back_to_static_challenges(monkeypatch):
     assert "No new intake insights provided" in prompt
     for challenge in agent.client_challenges[:2]:
         assert challenge in prompt
+
+
+def test_social_media_quote_validation_accepts_retrieved_passage(monkeypatch):
+    telemetry_calls: List[Dict[str, Any]] = []
+
+    def fake_telemetry(logger_method, message, *args, **kwargs):
+        telemetry_calls.append({"message": message, "kwargs": kwargs})
+
+    monkeypatch.setattr(
+        "src.models.enlitens_schemas.log_with_telemetry",
+        fake_telemetry,
+    )
+
+    payload = {
+        "post_ideas": [],
+        "captions": [],
+        "quotes": ['"St. Louis ADHD brains juggle relentless sensory input." — [Source 1]'],
+        "hashtags": [],
+        "story_ideas": [],
+        "poll_questions": [],
+    }
+
+    context = {
+        "source_text": "Neurodiversity celebrates differences.",
+        "source_segments": [
+            "St. Louis ADHD brains juggle relentless sensory input, not laziness."
+        ],
+        "source_citation_map": {
+            "Source 1": "St. Louis ADHD brains juggle relentless sensory input, not laziness."
+        },
+        "quote_validation_telemetry": {
+            "agent": "founder_voice_agent",
+            "doc_id": "doc-success",
+        },
+    }
+
+    validated = SocialMediaContent.model_validate(payload, context=context)
+    assert validated.quotes == payload["quotes"]
+    assert telemetry_calls == []
+
+
+def test_social_media_quote_validation_degrades_without_evidence(monkeypatch):
+    telemetry_calls: List[Dict[str, Any]] = []
+
+    def fake_telemetry(logger_method, message, *args, **kwargs):
+        telemetry_calls.append({"message": message, "kwargs": kwargs})
+
+    monkeypatch.setattr(
+        "src.models.enlitens_schemas.log_with_telemetry",
+        fake_telemetry,
+    )
+
+    payload = {
+        "post_ideas": [],
+        "captions": [],
+        "quotes": ['"Invented claim." — [Source 1]'],
+        "hashtags": [],
+        "story_ideas": [],
+        "poll_questions": [],
+    }
+
+    fallback_note = "Evidence unavailable: no source matched this quote."
+
+    context = {
+        "source_text": "",
+        "source_segments": [],
+        "source_citation_map": {},
+        "quote_missing_note": fallback_note,
+        "quote_validation_telemetry": {
+            "agent": "founder_voice_agent",
+            "doc_id": "doc-missing",
+        },
+    }
+
+    validated = SocialMediaContent.model_validate(payload, context=context)
+    assert validated.quotes == [fallback_note]
+    assert telemetry_calls, "Expected telemetry to be recorded for missing evidence"
+    logged = telemetry_calls[0]
+    assert logged["kwargs"].get("impact") == "quote_validation_missing_evidence"
