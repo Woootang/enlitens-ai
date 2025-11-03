@@ -334,6 +334,70 @@ class MultiAgentProcessor:
             logger.error(f"❌ Fallback extraction failed for {pdf_path.name}: {e}")
             return None
 
+    def _get_pdf_file_size(self, pdf_path: Path) -> Optional[int]:
+        """Return the file size for the provided PDF path."""
+        try:
+            size = pdf_path.stat().st_size
+            logger.debug(f"📏 PDF file size for {pdf_path.name}: {size} bytes")
+            return size
+        except OSError as exc:
+            logger.warning(f"⚠️ Unable to determine file size for {pdf_path.name}: {exc}")
+            return None
+
+    def _get_page_count_from_extraction(self, extraction_result: Any, pdf_path: Path) -> Optional[int]:
+        """Attempt to derive page count from extraction metadata or the original PDF."""
+        page_count: Optional[int] = None
+
+        if isinstance(extraction_result, dict):
+            # Direct page count fields from extractor payloads
+            direct_page_count = extraction_result.get('page_count')
+            if isinstance(direct_page_count, int) and direct_page_count > 0:
+                page_count = direct_page_count
+
+            if page_count is None:
+                pages_payload = extraction_result.get('pages')
+                if isinstance(pages_payload, list) and pages_payload:
+                    page_count = len(pages_payload)
+
+            if page_count is None:
+                candidate_paths = (
+                    ('source_metadata', 'page_count'),
+                    ('quality_metrics', 'page_count'),
+                    ('document_stats', 'page_count'),
+                )
+                for top_level, nested_key in candidate_paths:
+                    nested = extraction_result.get(top_level, {})
+                    if isinstance(nested, dict):
+                        nested_value = nested.get(nested_key)
+                        if isinstance(nested_value, int) and nested_value > 0:
+                            page_count = nested_value
+                            break
+
+        if page_count is not None:
+            logger.debug(f"📄 Page count from extraction metadata for {pdf_path.name}: {page_count}")
+            return page_count
+
+        # Fallback: inspect PDF directly if libraries are available
+        try:
+            import fitz  # type: ignore
+
+            try:
+                document = fitz.open(str(pdf_path))
+            except Exception as exc:
+                logger.debug(f"⚠️ Unable to open PDF for page count ({pdf_path.name}): {exc}")
+                return None
+
+            try:
+                page_total = document.page_count
+                logger.debug(f"📄 Page count from PDF for {pdf_path.name}: {page_total}")
+                return page_total
+            finally:
+                document.close()
+        except Exception:
+            # fitz may be unavailable in lightweight environments
+            logger.debug(f"ℹ️ PyMuPDF not available; skipping page count fallback for {pdf_path.name}")
+            return None
+
     async def _load_progress(self) -> EnlitensKnowledgeBase:
         """Load progress from temporary file."""
         try:
@@ -438,6 +502,9 @@ class MultiAgentProcessor:
 
             logger.info(f"✅ Text extracted successfully: {len(text)} characters")
 
+            # Collect file metadata for knowledge entry
+            file_size_bytes = self._get_pdf_file_size(pdf_path)
+
             # Entity enrichment via ExtractionTeam
             logger.info(f"🧬 Running entity extraction for {document_id}")
             entities = await self.extraction_team.extract_entities(extraction_result)
@@ -482,7 +549,16 @@ class MultiAgentProcessor:
 
                 # Convert result to EnlitensKnowledgeEntry format
                 logger.info(f"🔄 Converting result to knowledge entry for {document_id}")
-                knowledge_entry = await self._convert_to_knowledge_entry(result, document_id, processing_time)
+                page_count = self._get_page_count_from_extraction(extraction_result, pdf_path)
+                knowledge_entry = await self._convert_to_knowledge_entry(
+                    result,
+                    document_id,
+                    processing_time,
+                    file_size=file_size_bytes,
+                    page_count=page_count,
+                    filename=pdf_path.name,
+                    fallback_full_text=text,
+                )
 
                 logger.info(f"✅ Document {document_id} processed successfully in {processing_time:.2f}s")
                 return knowledge_entry
@@ -496,8 +572,17 @@ class MultiAgentProcessor:
             logger.error(f"Full traceback: {traceback.format_exc()}")
             return None
 
-    async def _convert_to_knowledge_entry(self, result: Dict[str, Any], document_id: str,
-                                        processing_time: float) -> EnlitensKnowledgeEntry:
+    async def _convert_to_knowledge_entry(
+        self,
+        result: Dict[str, Any],
+        document_id: str,
+        processing_time: float,
+        *,
+        file_size: Optional[int] = None,
+        page_count: Optional[int] = None,
+        filename: Optional[str] = None,
+        fallback_full_text: str = "",
+    ) -> EnlitensKnowledgeEntry:
         """Convert multi-agent result to EnlitensKnowledgeEntry format."""
         try:
             from src.models.enlitens_schemas import (
@@ -507,13 +592,20 @@ class MultiAgentProcessor:
                 ResearchContent, ContentCreationIdeas
             )
 
+            # Determine full document text to persist for verification and metadata
+            full_document_text = result.get("document_text") or fallback_full_text or ""
+            logger.info(f"📄 Storing full document text: {len(full_document_text)} characters")
+
             # Create metadata
             metadata = DocumentMetadata(
                 document_id=document_id,
-                filename=f"{document_id}.pdf",
+                filename=filename or f"{document_id}.pdf",
                 processing_timestamp=datetime.now(),
                 processing_time=processing_time,
-                word_count=len(result.get("document_text", "").split())
+                word_count=len(full_document_text.split()) if full_document_text else 0,
+                file_size=file_size,
+                page_count=page_count,
+                full_text_stored=bool(full_document_text),
             )
 
             # Extract content from agent outputs
@@ -609,10 +701,6 @@ class MultiAgentProcessor:
                     if hasattr(content_creation_ideas, field) and isinstance(value, list):
                         setattr(content_creation_ideas, field, value)
 
-            # Get full document text for citation verification
-            full_document_text = result.get("document_text", "")
-            logger.info(f"📄 Storing full document text: {len(full_document_text)} characters")
-
             # Get blog content with validation context for statistics verification
             blog_data = agent_outputs.get("blog_content", {})
             blog_context = {"source_text": full_document_text} if full_document_text else {}
@@ -666,12 +754,17 @@ class MultiAgentProcessor:
         except Exception as e:
             logger.error(f"Error converting to knowledge entry: {e}")
             # Return minimal valid entry with document text if available
-            full_document_text = result.get("document_text", "") if isinstance(result, dict) else ""
+            full_document_text = ""
+            if isinstance(result, dict):
+                full_document_text = result.get("document_text") or fallback_full_text or ""
             return EnlitensKnowledgeEntry(
                 metadata=DocumentMetadata(
                     document_id=document_id,
-                    filename=f"{document_id}.pdf",
-                    processing_timestamp=datetime.now()
+                    filename=filename or f"{document_id}.pdf",
+                    processing_timestamp=datetime.now(),
+                    file_size=file_size,
+                    page_count=page_count,
+                    full_text_stored=bool(full_document_text),
                 ),
                 extracted_entities=ExtractedEntities(),
                 rebellion_framework=RebellionFramework(),
