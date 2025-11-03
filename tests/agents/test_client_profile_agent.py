@@ -92,3 +92,89 @@ def test_client_profile_agent_validate_output_enforces_citations():
 
     with pytest.raises(ValueError):
         asyncio.run(agent.validate_output({"client_profiles": bad_profiles}))
+
+
+def test_client_profile_agent_normalizes_fragmented_partial_payload():
+    agent = ClientProfileAgent()
+
+    partial_payload = {
+        "shared_thread": "Threaded",
+        "profiles": [
+            {
+                "profile_name": "Sensory rail commuter",
+                "intake_reference": '"The red line makes my skin buzz"',
+                "research_reference": "[Source 1] Transit overload evidence.",
+                "benefit_explanation": "[Source 1] Tailored commute regulation.",
+                "st_louis_alignment": "[Source 1] Metro tie-in.",
+            },
+            "profile_name",
+        ],
+        "profiles.1.profile_name": "After-school melter",
+        "profiles.1.intake_reference": '"By pickup time I am empty and shaking"',
+        "profiles.1.research_reference": "[Source 1] Afternoon cortisol guidance.",
+        "profiles.1.benefit_explanation": "[Source 1] Homework decompression plan.",
+        "profiles.1.st_louis_alignment": "[Source 1] Northside school realities.",
+        "profiles[2].profile_name": "Shift worker hypervigilance",
+        "profiles[2].intake_reference": '"Night sirens keep my jaw locked"',
+        "profiles[2].research_reference": "[Source 1] Overnight siren data.",
+        "profiles[2].benefit_explanation": "[Source 1] Low-light decompression pods.",
+        "profiles[2].st_louis_alignment": "[Source 1] STL hospital siren map.",
+    }
+
+    client = _RecordingOllamaClient({ClientProfileSet: lambda: partial_payload})
+    agent.ollama_client = client
+
+    context = {
+        "retrieved_passages": [
+            {
+                "text": "[Source 1] Elevated siren exposure in St. Louis correlates with autonomic dysregulation.",
+                "chunk_id": "chunk-1",
+                "document_id": "doc-ctx",
+            }
+        ],
+        "client_insights": {"direct_quotes": ['"Night sirens keep my jaw locked"']},
+        "raw_client_context": 'Client said "The red line makes my skin buzz" during intake.',
+        "st_louis_context": {"neighbourhoods": ["The Ville"], "stressors": ["sirens"]},
+    }
+
+    result = asyncio.run(agent.process(context))
+    payload = result["client_profiles"]
+
+    assert len(payload["profiles"]) == 3
+    assert payload["profiles"][1]["profile_name"] == "After-school melter"
+    assert payload["profiles"][2]["profile_name"] == "Shift worker hypervigilance"
+
+    assert asyncio.run(agent.validate_output(result))
+
+
+def test_client_profile_agent_falls_back_when_partial_payload_invalid():
+    agent = ClientProfileAgent()
+
+    malformed_payload = {
+        "profiles": ["profile_name", "intake_reference", "research_reference"],
+        "shared_thread": "garbled",
+    }
+
+    client = _RecordingOllamaClient({ClientProfileSet: lambda: malformed_payload})
+    agent.ollama_client = client
+
+    context = {
+        "retrieved_passages": [
+            {
+                "text": "[Source 1] Elevated siren exposure in St. Louis correlates with autonomic dysregulation.",
+                "chunk_id": "chunk-1",
+                "document_id": "doc-ctx",
+            }
+        ],
+        "client_insights": {"direct_quotes": ['"Night sirens keep my jaw locked"']},
+        "raw_client_context": 'Client said "The red line makes my skin buzz" during intake.',
+        "st_louis_context": {"neighbourhoods": ["The Ville"], "stressors": ["sirens"]},
+    }
+
+    result = asyncio.run(agent.process(context))
+    payload = result["client_profiles"]
+
+    assert len(payload["profiles"]) == 3
+    assert payload["profiles"][0]["profile_name"] == "Transit sensory overload"
+
+    assert asyncio.run(agent.validate_output(result))
