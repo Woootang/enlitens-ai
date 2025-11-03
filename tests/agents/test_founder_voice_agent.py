@@ -1,5 +1,6 @@
 import sys
 import types
+from typing import Any, Dict
 
 import pytest
 
@@ -53,7 +54,7 @@ if "json_repair" not in sys.modules:
     sys.modules["json_repair"] = json_repair_stub
 
 from src.agents.founder_voice_agent import FounderVoiceAgent
-from src.models.enlitens_schemas import WebsiteCopy
+from src.models.enlitens_schemas import WebsiteCopy, SocialMediaContent
 
 
 def test_website_copy_schema_excludes_deprecated_fields():
@@ -62,6 +63,56 @@ def test_website_copy_schema_excludes_deprecated_fields():
     assert "benefit_statements" not in fields
     assert "service_descriptions" not in fields
     assert {"about_sections", "faq_content", "topic_ideas"}.issubset(fields)
+
+
+def test_social_media_schema_updates_remove_reels_and_carousels():
+    fields = set(SocialMediaContent.model_fields.keys())
+    assert "reel_ideas" not in fields
+    assert "carousel_content" not in fields
+    assert {"story_ideas", "hashtags", "poll_questions"}.issubset(fields)
+
+
+def test_social_media_quotes_require_source_matches():
+    payload = {
+        "post_ideas": [],
+        "captions": [],
+        "quotes": ['"Neurodiversity celebrates differences." — [Source 1]'],
+        "hashtags": [],
+        "story_ideas": [],
+        "poll_questions": [],
+    }
+
+    validated = SocialMediaContent.model_validate(
+        payload,
+        context={
+            "source_text": "Neurodiversity celebrates differences. Regulation is key.",
+            "source_segments": [
+                "Neurodiversity celebrates differences. Regulation is key."
+            ],
+        },
+    )
+
+    assert validated.quotes == ['"Neurodiversity celebrates differences." — [Source 1]']
+
+
+def test_social_media_quotes_raise_for_missing_sources():
+    payload = {
+        "post_ideas": [],
+        "captions": [],
+        "quotes": ['"Invented insight." — [Source 9]'],
+        "hashtags": [],
+        "story_ideas": [],
+        "poll_questions": [],
+    }
+
+    with pytest.raises(ValueError):
+        SocialMediaContent.model_validate(
+            payload,
+            context={
+                "source_text": "Neurodiversity celebrates differences.",
+                "source_segments": ["Neurodiversity celebrates differences."],
+            },
+        )
 
 
 @pytest.mark.asyncio
@@ -91,3 +142,55 @@ async def test_generate_website_copy_prompt_omits_deprecated_sections(monkeypatc
     assert "benefit_statements" not in prompt
     assert "service_descriptions" not in prompt
     assert result.topic_ideas == ["idea"]
+
+
+@pytest.mark.asyncio
+async def test_generate_social_media_prompt_uses_sources_and_quote_rules(monkeypatch):
+    agent = FounderVoiceAgent()
+    captured: Dict[str, Any] = {}
+
+    async def fake_structured_generation(prompt, response_model, context, suffix, **kwargs):
+        captured["prompt"] = prompt
+        captured["validation_context"] = kwargs.get("validation_context")
+        assert response_model is SocialMediaContent
+        return SocialMediaContent(
+            post_ideas=["idea"],
+            captions=["caption"],
+            quotes=['"Neurodiversity celebrates differences." — [Source 1]'],
+            hashtags=["#tag"],
+            story_ideas=["story"],
+            poll_questions=["poll"],
+        )
+
+    monkeypatch.setattr(agent, "_structured_generation", fake_structured_generation)
+
+    context = {
+        "document_text": "Neurodiversity celebrates differences. Regulation is key for resilience.",
+        "final_context": {
+            "research_content": {
+                "findings": [
+                    "Regulation is key for resilience and executive function."
+                ]
+            }
+        },
+        "retrieved_context": [
+            "Neurodiversity celebrates differences and nervous systems adapt under pressure."
+        ],
+    }
+
+    result = await agent._generate_social_media_content(
+        clinical_data={"insight": "value"},
+        context=context,
+    )
+
+    prompt = captured.get("prompt", "")
+    assert prompt, "Expected prompt to be captured"
+    assert "reel" not in prompt.lower()
+    assert "carousel" not in prompt.lower()
+    assert "SOURCE MATERIAL" in prompt
+    assert "[Source 1]" in prompt
+    assert "QUOTE REQUIREMENTS" in prompt
+
+    validation_context = captured.get("validation_context") or {}
+    assert "Neurodiversity celebrates differences." in validation_context.get("source_text", "")
+    assert result.quotes == ['"Neurodiversity celebrates differences." — [Source 1]']
