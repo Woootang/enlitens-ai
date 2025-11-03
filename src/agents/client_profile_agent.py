@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from pydantic import ValidationError
 
@@ -123,26 +123,13 @@ OUTPUT REQUIREMENTS:
 {schema_hint}
 """
 
-            cache_kwargs = self._cache_kwargs(context, suffix="profiles")
-            response = await self.ollama_client.generate_structured_response(
+            response = await self._structured_generation(
                 prompt=prompt,
-                response_model=ClientProfileSet,
-                temperature=0.15,
-                max_retries=3,
-                enforce_grammar=True,
-                **cache_kwargs,
+                context=context,
+                intake_quotes=intake_quotes,
+                retrieved_passages=retrieved_passages,
+                st_louis_context=st_louis_context,
             )
-
-            if response is None:
-                log_with_telemetry(
-                    logger.warning,
-                    "⚠️ ClientProfileAgent falling back to deterministic profiles",
-                    agent=TELEMETRY_AGENT,
-                    severity=TelemetrySeverity.MINOR,
-                    impact="Client profiles fallback",
-                    doc_id=context.get("document_id"),
-                )
-                response = self._fallback_profiles(intake_quotes, retrieved_passages, st_louis_context)
 
             payload = response.model_dump()
             source_tags = self._collect_source_tags(response)
@@ -196,9 +183,190 @@ OUTPUT REQUIREMENTS:
                 raise ValueError("Intake references must include quoted client language")
         return True
 
+    async def _structured_generation(
+        self,
+        *,
+        prompt: str,
+        context: Dict[str, Any],
+        intake_quotes: List[str],
+        retrieved_passages: Sequence[Dict[str, Any]],
+        st_louis_context: Dict[str, Any],
+    ) -> ClientProfileSet:
+        if self.ollama_client is None:
+            raise RuntimeError("ClientProfileAgent not initialized")
+
+        cache_kwargs = self._cache_kwargs(context, suffix="profiles")
+
+        try:
+            raw_response = await self.ollama_client.generate_structured_response(
+                prompt=prompt,
+                response_model=ClientProfileSet,
+                temperature=0.15,
+                max_retries=3,
+                enforce_grammar=True,
+                **cache_kwargs,
+            )
+        except Exception as exc:  # pragma: no cover - defensive logging
+            log_with_telemetry(
+                logger.warning,
+                "Structured generation raised error: %s",
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Client profile structured generation error",
+                doc_id=context.get("document_id"),
+            )
+            raw_response = None
+
+        if isinstance(raw_response, ClientProfileSet):
+            return raw_response
+
+        normalized = self._normalize_partial_profiles(raw_response)
+        if normalized is not None:
+            try:
+                return ClientProfileSet.model_validate(normalized)
+            except ValidationError as exc:
+                log_with_telemetry(
+                    logger.warning,
+                    "Partial profile payload failed validation: %s",
+                    exc,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Client profile partial validation failed",
+                    doc_id=context.get("document_id"),
+                )
+
+        log_with_telemetry(
+            logger.warning,
+            "⚠️ ClientProfileAgent falling back to deterministic profiles",
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MINOR,
+            impact="Client profiles fallback",
+            doc_id=context.get("document_id"),
+        )
+        return self._fallback_profiles(intake_quotes, retrieved_passages, st_louis_context)
+
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+    def _normalize_partial_profiles(self, payload: Any) -> Optional[Dict[str, Any]]:
+        if payload is None:
+            return None
+        if isinstance(payload, ClientProfileSet):
+            return payload.model_dump()
+        if not isinstance(payload, dict):
+            return None
+
+        allowed_keys = {
+            "profile_name",
+            "intake_reference",
+            "research_reference",
+            "benefit_explanation",
+            "st_louis_alignment",
+        }
+
+        normalized: Dict[str, Any] = {}
+        if "shared_thread" in payload:
+            shared = payload["shared_thread"]
+            if shared is None or isinstance(shared, str):
+                normalized["shared_thread"] = shared
+
+        def _coerce_profile(value: Any) -> Optional[Dict[str, Any]]:
+            if isinstance(value, ClientProfile):
+                return value.model_dump()
+            if isinstance(value, dict):
+                if allowed_keys <= set(value.keys()):
+                    return {key: value[key] for key in allowed_keys if key in value}
+                if len(value) == 1 and isinstance(next(iter(value.values())), dict):
+                    return _coerce_profile(next(iter(value.values())))
+                cleaned: Dict[str, Any] = {}
+                for key, val in value.items():
+                    if key in allowed_keys:
+                        cleaned[key] = val
+                    elif isinstance(val, dict):
+                        nested = _coerce_profile(val)
+                        if nested:
+                            cleaned.update(nested)
+                return cleaned or None
+            if isinstance(value, list):
+                combined: Dict[str, Any] = {}
+                for item in value:
+                    nested = _coerce_profile(item)
+                    if nested:
+                        combined.update(nested)
+                return combined or None
+            return None
+
+        profiles: List[Dict[str, Any]] = []
+        raw_profiles = payload.get("profiles")
+        if isinstance(raw_profiles, list):
+            for item in raw_profiles:
+                coerced = _coerce_profile(item)
+                if coerced:
+                    profiles.append(coerced)
+        elif isinstance(raw_profiles, dict):
+            indexed: List[Tuple[int, Dict[str, Any]]] = []
+            remainder: List[Dict[str, Any]] = []
+            for key, value in raw_profiles.items():
+                coerced = _coerce_profile(value)
+                if not coerced:
+                    continue
+                try:
+                    index = int(str(key))
+                except ValueError:
+                    remainder.append(coerced)
+                else:
+                    indexed.append((index, coerced))
+            if indexed:
+                for _, item in sorted(indexed, key=lambda pair: pair[0]):
+                    profiles.append(item)
+            profiles.extend(remainder)
+
+        fragment_patterns = (
+            re.compile(r"profiles\[(\d+)\]\.(.+)"),
+            re.compile(r"profiles\.(\d+)\.(.+)"),
+            re.compile(r"profiles_(\d+)_(.+)"),
+        )
+        fragment_buckets: Dict[int, Dict[str, Any]] = {}
+        for key, value in payload.items():
+            if key == "profiles" or not key.startswith("profiles"):
+                continue
+            for pattern in fragment_patterns:
+                match = pattern.match(key)
+                if not match:
+                    continue
+                index = int(match.group(1))
+                field = match.group(2).replace("__", ".")
+                if field in allowed_keys:
+                    bucket = fragment_buckets.setdefault(index, {})
+                    bucket[field] = value
+                break
+
+        if fragment_buckets:
+            for index, fragment in sorted(fragment_buckets.items(), key=lambda pair: pair[0]):
+                coerced = _coerce_profile(fragment)
+                if not coerced:
+                    continue
+                if index < len(profiles):
+                    for key, value in coerced.items():
+                        profiles[index].setdefault(key, value)
+                else:
+                    profiles.append(coerced)
+
+        cleaned_profiles: List[Dict[str, Any]] = []
+        for profile in profiles:
+            if not isinstance(profile, dict):
+                continue
+            cleaned = {key: profile.get(key) for key in allowed_keys if profile.get(key) is not None}
+            if cleaned:
+                cleaned_profiles.append(cleaned)
+
+        if not cleaned_profiles:
+            return None
+
+        normalized["profiles"] = cleaned_profiles
+        return normalized
+
     def _collect_intake_quotes(
         self,
         client_insights: Dict[str, Any],
