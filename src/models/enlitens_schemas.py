@@ -11,6 +11,7 @@ HALLUCINATION PREVENTION:
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+import difflib
 import re
 
 
@@ -207,9 +208,56 @@ class SocialMediaContent(BaseModel):
     quotes: List[str] = Field(default_factory=list, description="Quote content")
     hashtags: List[str] = Field(default_factory=list, description="Hashtag suggestions")
     story_ideas: List[str] = Field(default_factory=list, description="Story ideas")
-    reel_ideas: List[str] = Field(default_factory=list, description="Reel ideas")
-    carousel_content: List[str] = Field(default_factory=list, description="Carousel content")
     poll_questions: List[str] = Field(default_factory=list, description="Poll questions")
+
+    @staticmethod
+    def _extract_quote_body(value: str) -> str:
+        if not isinstance(value, str):
+            return ""
+        match = re.search(r'"([^"]+)"', value)
+        if match:
+            return match.group(1).strip()
+        # Remove trailing citation blocks like [Source 1]
+        cleaned = re.sub(r"\s*\[Source[^\]]+\]\s*$", "", value).strip()
+        return cleaned
+
+    @field_validator("quotes")
+    @classmethod
+    def validate_quotes(cls, values: List[str], info: ValidationInfo) -> List[str]:
+        if not values:
+            return values or []
+
+        context = info.context or {}
+        source_text = context.get("source_text", "") or ""
+        additional_sources = context.get("source_segments") or []
+        combined_sources = "\n".join(
+            [source_text] + [seg for seg in additional_sources if isinstance(seg, str)]
+        ).strip()
+
+        if not combined_sources:
+            return values
+
+        sentences = [
+            sentence.strip()
+            for sentence in re.split(r'(?<=[.!?])\s+', combined_sources)
+            if sentence.strip()
+        ]
+
+        for value in values:
+            quote_body = cls._extract_quote_body(value)
+            if not quote_body:
+                raise ValueError("Quote entries must include extractable quoted text")
+
+            if quote_body in combined_sources:
+                continue
+
+            best_match = difflib.get_close_matches(quote_body, sentences, n=1, cutoff=0.85)
+            if not best_match:
+                raise ValueError(
+                    f"Quote not found in provided source material: {quote_body[:80]}..."
+                )
+
+        return values
 
 
 class EducationalContent(BaseModel):

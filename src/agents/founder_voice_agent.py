@@ -281,6 +281,58 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                 lines.append(stripped)
         return "\n".join(lines)
 
+    @staticmethod
+    def _deduplicate_segments(segments: List[str], limit: int) -> List[str]:
+        unique: List[str] = []
+        seen: set[str] = set()
+        for segment in segments:
+            text = segment.strip()
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            unique.append(segment)
+            if len(unique) >= limit:
+                break
+        return unique
+
+    def _collect_source_segments(self, context: Dict[str, Any], limit: int = 5) -> List[str]:
+        segments: List[str] = []
+
+        def _gather(value: Any) -> None:
+            if isinstance(value, str):
+                stripped = value.strip()
+                if stripped:
+                    segments.append(stripped)
+            elif isinstance(value, dict):
+                for item in value.values():
+                    _gather(item)
+            elif isinstance(value, (list, tuple, set)):
+                for item in value:
+                    _gather(item)
+
+        _gather(context.get("document_text", ""))
+        _gather(context.get("retrieved_context"))
+        final_context = context.get("final_context") or {}
+        if isinstance(final_context, dict):
+            _gather(final_context.get("research_content"))
+        _gather(context.get("research_snippets"))
+        _gather(context.get("raw_founder_context"))
+        _gather(context.get("raw_client_context"))
+
+        return self._deduplicate_segments(segments, limit)
+
+    def _render_source_section(self, segments: List[str]) -> str:
+        if not segments:
+            return (
+                "No source material was provided. If this happens, ground quotes in the clinical data "
+                "without inventing research."
+            )
+
+        lines = []
+        for idx, segment in enumerate(segments, start=1):
+            lines.append(f"[Source {idx}] {self._summarize_research(segment, max_chars=400)}")
+        return "\n".join(lines)
+
     async def _generate_seo_content(self, clinical_data: Dict[str, Any],
                                   context: Dict[str, Any]) -> SEOContent:
         """Generate SEO content optimized for St. Louis mental health searches."""
@@ -524,6 +576,8 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                                            context: Dict[str, Any]) -> SocialMediaContent:
         """Generate social media content that builds community."""
         try:
+            source_segments = self._collect_source_segments(context)
+            source_section = self._render_source_section(source_segments)
             prompt = f"""
 You are Liz Wooten creating social media content that builds Enlitens' community in St. Louis.
 Your social media should feel like a conversation with a trusted friend who really gets it.
@@ -545,6 +599,9 @@ Content Style:
 - Real talk about real challenges
 - Hopeful without being cheesy
 
+SOURCE MATERIAL (quote verbatim and cite using the provided tags):
+{source_section}
+
 CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
 Generate 5-10 strings for each field below:
@@ -559,7 +616,7 @@ Generate 5-10 strings for each field below:
     ...
   ],
   "quotes": [
-    "Traditional therapy asks 'what's wrong with you?' Neuroscience asks 'what happened TO you, and how did your brain adapt?'",
+    "\"Traditional therapy asks 'what's wrong with you?' Neuroscience asks 'what happened TO you, and how did your brain adapt?'\" — [Source 1]",
     ...
   ],
   "hashtags": [
@@ -570,19 +627,17 @@ Generate 5-10 strings for each field below:
     "Film morning routine showing sensory regulation techniques—demonstrate bilateral stimulation, explain vagus nerve activation in voiceover.",
     ...
   ],
-  "reel_ideas": [
-    "30-second explanation of why your anxiety spikes at bedtime—show how cortisol rhythm works, demonstrate 3-minute reset technique.",
-    ...
-  ],
-  "carousel_content": [
-    "5 signs your anxiety is actually sensory processing differences: 1-overwhelmed by noise 2-need alone time to recharge 3-difficulty in crowds 4-sensitive to textures 5-emotional after busy days.",
-    ...
-  ],
   "poll_questions": [
     "What time of day is your ADHD brain sharpest? A) Morning (7-10am) B) Midday (10am-2pm) C) Afternoon (2-6pm) D) Evening/Night (after 6pm)",
     ...
   ]
 }}
+
+QUOTE REQUIREMENTS:
+- Use verbatim sentences from the numbered sources above.
+- Wrap each quote in double quotes and append the citation tag like [Source 2].
+- Skip any quote you cannot directly trace to a provided source.
+- Never fabricate citations or invent research.
 
 Write as Liz - conversational, direct, and caring. Balance education with empathy.
 
@@ -597,6 +652,10 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 temperature=0.6,  # Higher creativity for social media
                 max_retries=3,
                 use_cot_prompt=False,
+                validation_context={
+                    "source_text": "\n\n".join(source_segments),
+                    "source_segments": source_segments,
+                },
             )
 
             return response or SocialMediaContent()
