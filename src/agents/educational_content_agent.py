@@ -133,15 +133,36 @@ Return as JSON with these EXACT field names:
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the generated educational content."""
-        educational_content = output.get("educational_content", {})
+        educational_content = output.get("educational_content")
 
-        has_content = any([
-            educational_content.get("explanations"),
-            educational_content.get("examples"),
-            educational_content.get("analogies")
-        ])
+        if not isinstance(educational_content, dict):
+            raise ValueError(
+                "EducationalContentAgent validation failed: expected 'educational_content' payload to be a mapping."
+            )
 
-        return has_content
+        required_counts = {
+            "explanations": 5,
+            "examples": 5,
+            "analogies": 5,
+            "definitions": 5,
+            "processes": 5,
+            "comparisons": 5,
+            "visual_aids": 5,
+            "learning_objectives": 5,
+        }
+
+        for field, minimum in required_counts.items():
+            items = educational_content.get(field)
+            if not isinstance(items, list):
+                raise ValueError(
+                    f"EducationalContentAgent validation failed: field '{field}' must be a list; got {type(items).__name__}."
+                )
+            if len(items) < minimum:
+                raise ValueError(
+                    f"EducationalContentAgent validation failed: expected at least {minimum} items in '{field}', got {len(items)}."
+                )
+
+        return True
 
     async def cleanup(self):
         """Clean up resources."""

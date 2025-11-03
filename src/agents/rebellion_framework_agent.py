@@ -124,15 +124,35 @@ Return as JSON with these EXACT field names:
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the rebellion framework content."""
-        rebellion_content = output.get("rebellion_framework", {})
+        rebellion_content = output.get("rebellion_framework")
 
-        has_content = any([
-            rebellion_content.get("narrative_deconstruction"),
-            rebellion_content.get("aha_moments"),
-            rebellion_content.get("strengths_synthesis")
-        ])
+        if not isinstance(rebellion_content, dict):
+            raise ValueError(
+                "RebellionFrameworkAgent validation failed: expected 'rebellion_framework' payload to be a mapping."
+            )
 
-        return has_content
+        required_counts = {
+            "narrative_deconstruction": 3,
+            "sensory_profiling": 3,
+            "executive_function": 3,
+            "social_processing": 3,
+            "strengths_synthesis": 3,
+            "rebellion_themes": 3,
+            "aha_moments": 3,
+        }
+
+        for field, minimum in required_counts.items():
+            items = rebellion_content.get(field)
+            if not isinstance(items, list):
+                raise ValueError(
+                    f"RebellionFrameworkAgent validation failed: field '{field}' must be a list; got {type(items).__name__}."
+                )
+            if len(items) < minimum:
+                raise ValueError(
+                    f"RebellionFrameworkAgent validation failed: expected at least {minimum} items in '{field}', got {len(items)}."
+                )
+
+        return True
 
     async def cleanup(self):
         """Clean up resources."""

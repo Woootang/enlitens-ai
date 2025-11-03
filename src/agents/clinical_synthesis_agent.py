@@ -177,16 +177,36 @@ Return JSON strictly matching {{"interventions": [str], "assessments": [str], "o
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         """Validate the synthesized clinical content."""
-        clinical_content = output.get("clinical_content", {})
+        clinical_content = output.get("clinical_content")
 
-        # Check for correct field names matching ClinicalContent schema
-        has_content = any([
-            clinical_content.get("interventions"),
-            clinical_content.get("assessments"),
-            clinical_content.get("outcomes")
-        ])
+        if not isinstance(clinical_content, dict):
+            raise ValueError(
+                "ClinicalSynthesisAgent validation failed: expected 'clinical_content' payload to be a mapping."
+            )
 
-        return has_content
+        required_counts = {
+            "interventions": 3,
+            "assessments": 3,
+            "outcomes": 3,
+            "protocols": 3,
+            "guidelines": 3,
+            "contraindications": 3,
+            "side_effects": 3,
+            "monitoring": 3,
+        }
+
+        for field, minimum in required_counts.items():
+            items = clinical_content.get(field)
+            if not isinstance(items, list):
+                raise ValueError(
+                    f"ClinicalSynthesisAgent validation failed: field '{field}' must be a list; got {type(items).__name__}."
+                )
+            if len(items) < minimum:
+                raise ValueError(
+                    f"ClinicalSynthesisAgent validation failed: expected at least {minimum} items in '{field}', got {len(items)}."
+                )
+
+        return True
 
     async def cleanup(self):
         """Clean up resources."""
