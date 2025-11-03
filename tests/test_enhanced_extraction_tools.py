@@ -159,3 +159,70 @@ def test_processing_context_persists_insights(monkeypatch):
     assert context["insight_registry"]["founder"] == founder_analysis
     assert context["raw_client_context"] is None
     assert context["raw_founder_context"] is None
+
+
+def test_extract_semantic_keywords_uses_keybert_when_available(monkeypatch):
+    import src.extraction.enhanced_extraction_tools as module
+
+    class _DummySentenceTransformer:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+    load_counter = {"count": 0}
+
+    class _DummyKeyBERT:
+        def __init__(self, model):
+            load_counter["count"] += 1
+            self.model = model
+
+        def extract_keywords(
+            self,
+            text,
+            keyphrase_ngram_range=(1, 1),
+            stop_words="english",
+            top_n=5,
+            use_maxsum=False,
+            use_mmr=False,
+            diversity=0.0,
+            candidates=None,
+        ):
+            return [
+                ("advanced therapy insights", 0.82),
+                ("therapy", 0.42),
+            ]
+
+    monkeypatch.setattr(module, "SentenceTransformer", _DummySentenceTransformer)
+    monkeypatch.setattr(module, "KeyBERT", _DummyKeyBERT)
+
+    tool = EnhancedExtractionTools(device="cpu")
+
+    keywords = tool.extract_semantic_keywords(
+        "Exploring advanced therapy insights for neural rehabilitation."
+    )
+
+    assert any(" " in keyword for keyword, _ in keywords)
+    assert load_counter["count"] == 1
+
+    # Subsequent calls reuse the cached model
+    tool.extract_semantic_keywords("Follow up analysis on therapy insights.")
+    assert load_counter["count"] == 1
+
+
+def test_extract_semantic_keywords_falls_back_when_dependencies_missing(monkeypatch):
+    import src.extraction.enhanced_extraction_tools as module
+
+    monkeypatch.setattr(module, "KeyBERT", None)
+    monkeypatch.setattr(module, "SentenceTransformer", None)
+
+    tool = EnhancedExtractionTools(device="cpu")
+
+    fallback = tool._fallback_keyword_extraction(
+        "Exploring advanced therapy insights for neural rehabilitation.", top_n=5
+    )
+    keywords = tool.extract_semantic_keywords(
+        "Exploring advanced therapy insights for neural rehabilitation.", top_n=5
+    )
+
+    assert keywords == fallback
+    assert not any(" " in keyword for keyword, _ in keywords)

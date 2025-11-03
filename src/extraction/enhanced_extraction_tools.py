@@ -138,27 +138,53 @@ class EnhancedExtractionTools:
                     logger.error(f"Failed to load BERTopic model on CPU fallback: {cpu_error}")
                     raise
 
-    def extract_semantic_keywords(self, text: str,
-                                keyphrase_ngram_range: Tuple[int, int] = (1, 3),
-                                stop_words: str = "english",
-                                top_n: int = 10,
-                                candidates: Optional[List[str]] = None) -> List[Tuple[str, float]]:
-        """
-        Extract semantic keywords (fast fallback).
-        
-        Args:
-            text: Input text to analyze
-            keyphrase_ngram_range: Range of n-grams to consider
-            stop_words: Stop words to filter out
-            top_n: Number of top keywords to return
-            candidates: Optional list of candidate phrases to score
-            
-        Returns:
-            List of (keyword, score) tuples
-        """
-        # Fast fallback - return simple keywords based on word frequency
-        logger.info("Semantic keyword extraction: using fast fallback")
-        return self._fallback_keyword_extraction(text, top_n)
+    def extract_semantic_keywords(
+        self,
+        text: str,
+        keyphrase_ngram_range: Tuple[int, int] = (1, 3),
+        stop_words: str = "english",
+        top_n: int = 10,
+        candidates: Optional[List[str]] = None,
+    ) -> List[Tuple[str, float]]:
+        """Extract semantic keywords using KeyBERT when available."""
+
+        if not text or not text.strip():
+            logger.info(
+                "Semantic keyword extraction skipped for empty text",
+                extra={"event": "semantic_keyword_skipped", "text_length": len(text or "")},
+            )
+            return []
+
+        try:
+            self._load_keybert()
+            if self.keybert_model is None:
+                raise RuntimeError("KeyBERT model is unavailable")
+
+            keywords = self.keybert_model.extract_keywords(
+                text,
+                keyphrase_ngram_range=keyphrase_ngram_range,
+                stop_words=stop_words,
+                top_n=top_n,
+                use_maxsum=False,
+                use_mmr=True,
+                diversity=0.6,
+                candidates=candidates,
+            )
+            logger.info(
+                "Semantic keyword extraction: using KeyBERT",
+                extra={"event": "semantic_keyword_keybert", "top_n": top_n},
+            )
+            return keywords
+
+        except Exception as keybert_error:
+            logger.info(
+                "Semantic keyword extraction: falling back to heuristic keywords",
+                extra={
+                    "event": "semantic_keyword_fallback",
+                    "error": str(keybert_error),
+                },
+            )
+            return self._fallback_keyword_extraction(text, top_n)
 
     def analyze_sentiment(self, text: str) -> Dict[str, float]:
         """Analyze sentiment using VADER with graceful fallback."""
