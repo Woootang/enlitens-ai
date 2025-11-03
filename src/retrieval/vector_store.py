@@ -29,6 +29,18 @@ try:  # sentence_transformers is optional in lightweight environments
 except Exception:  # pragma: no cover - used in testing environments without torch
     _SentenceTransformer = None
 
+try:  # pragma: no cover - torch is optional for lightweight test environments
+    import torch  # type: ignore
+except Exception:  # pragma: no cover - match optional dependency pattern
+    torch = None  # type: ignore
+
+try:  # pragma: no cover - packaging may be absent in some environments
+    from packaging import version as packaging_version
+except ImportError:  # pragma: no cover - fall back to simple comparison
+    packaging_version = None  # type: ignore[assignment]
+
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
+
 from src.utils.vector_math import (
     dot as vector_dot,
     ensure_2d_float_list,
@@ -88,6 +100,72 @@ class HashingSentenceTransformer:
         return embeddings
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "vector_store"
+_BGE_M3_MODEL_NAME = "BAAI/bge-m3"
+_BGE_M3_TORCH_REQUIREMENT = "2.6"
+_BGE_M3_FALLBACK_MODEL = "intfloat/e5-base-v2"
+
+
+def _parse_version_tuple(version_str: str) -> Optional[Tuple[int, ...]]:
+    numeric_portion = version_str.split("+", 1)[0]
+    parts: List[int] = []
+    for segment in numeric_portion.split("."):
+        digits = ""
+        for char in segment:
+            if char.isdigit():
+                digits += char
+            else:
+                break
+        if not digits:
+            break
+        parts.append(int(digits))
+    if not parts:
+        return None
+    return tuple(parts)
+
+
+def _version_is_less_than(current: str, minimum_required: str) -> bool:
+    if packaging_version is not None:
+        try:
+            return packaging_version.parse(current) < packaging_version.parse(minimum_required)
+        except Exception:  # pragma: no cover - fall back to manual parsing
+            pass
+
+    current_tuple = _parse_version_tuple(current)
+    required_tuple = _parse_version_tuple(minimum_required)
+    if current_tuple is None or required_tuple is None:
+        return False
+
+    # Pad tuples to the same length for lexicographic comparison
+    max_length = max(len(current_tuple), len(required_tuple))
+    current_padded = current_tuple + (0,) * (max_length - len(current_tuple))
+    required_padded = required_tuple + (0,) * (max_length - len(required_tuple))
+    return current_padded < required_padded
+
+
+def _maybe_apply_bge_m3_fallback(requested_model: str) -> Tuple[str, Optional[Dict[str, str]]]:
+    """Return a safetensors-compatible fallback model when torch is too old."""
+
+    if requested_model != _BGE_M3_MODEL_NAME:
+        return requested_model, None
+
+    if torch is None:  # pragma: no cover - occurs when torch is unavailable entirely
+        return requested_model, None
+
+    torch_version = getattr(torch, "__version__", None)
+    if not torch_version:
+        return requested_model, None
+
+    if not _version_is_less_than(torch_version, _BGE_M3_TORCH_REQUIREMENT):
+        return requested_model, None
+
+    details = {
+        "original_model": requested_model,
+        "fallback_model": _BGE_M3_FALLBACK_MODEL,
+        "torch_version": torch_version,
+        "minimum_required_torch": _BGE_M3_TORCH_REQUIREMENT,
+    }
+    return _BGE_M3_FALLBACK_MODEL, details
 
 
 def _resolve_embedding_model(
@@ -102,6 +180,25 @@ def _resolve_embedding_model(
     if resolved_name in {"hash", "debug-hashing", "hashing"}:
         logger.info("Using hashing embedding model '%s'", resolved_name)
         return HashingSentenceTransformer()
+
+    fallback_name, fallback_details = _maybe_apply_bge_m3_fallback(resolved_name)
+    if fallback_details:
+        log_with_telemetry(
+            logger.warning,
+            (
+                "Torch %s detected; %s requires torch>=%s for safetensors support. "
+                "Falling back to %s to avoid incompatibilities."
+            ),
+            fallback_details["torch_version"],
+            fallback_details["original_model"],
+            fallback_details["minimum_required_torch"],
+            fallback_details["fallback_model"],
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MINOR,
+            impact="retrieval-quality",
+            details=fallback_details,
+        )
+        resolved_name = fallback_name
 
     if _SentenceTransformer is None:
         logger.warning(
