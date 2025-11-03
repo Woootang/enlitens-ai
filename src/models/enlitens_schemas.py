@@ -159,11 +159,12 @@ class WebsiteCopy(BaseModel):
     NOTE: testimonials field REMOVED for FTC compliance (no fake testimonials)
     """
     about_sections: List[str] = Field(default_factory=list, description="About page content")
-    feature_descriptions: List[str] = Field(default_factory=list, description="Feature descriptions")
-    benefit_statements: List[str] = Field(default_factory=list, description="Benefit statements")
     # testimonials: REMOVED - FTC violation (16 CFR Part 465)
     faq_content: List[str] = Field(default_factory=list, description="FAQ content")
-    service_descriptions: List[str] = Field(default_factory=list, description="Service descriptions")
+    topic_ideas: List[str] = Field(
+        default_factory=list,
+        description="High-level topic ideas for future website updates",
+    )
 
 
 class BlogContent(BaseModel):

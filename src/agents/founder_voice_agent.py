@@ -372,7 +372,7 @@ St. Louis Context:
 
 CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
 
-Generate 3-8 paragraph-length strings for each field. Each string should be a complete, substantial piece of content.
+Generate 3-8 paragraph-length strings for the narrative sections. Each string should be a complete, substantial piece of content tailored to Liz's voice.
 
 {{
   "about_sections": [
@@ -380,20 +380,14 @@ Generate 3-8 paragraph-length strings for each field. Each string should be a co
     "Another about paragraph...",
     ...
   ],
-  "feature_descriptions": [
-    "Bottom-Up Neuroscience Assessment: Unlike traditional therapy questionnaires, we measure your actual nervous system responses through interoceptive awareness evaluation, sensory processing analysis, and executive function testing to understand how your brain uniquely processes the world.",
-    ...
-  ],
-  "benefit_statements": [
-    "Reduce anxiety attacks by understanding and regulating your nervous system responses rather than just managing symptoms.",
-    ...
-  ],
   "faq_content": [
     "Q: How is this different from regular therapy? A: Traditional therapy focuses on thoughts and behaviors. We start with your neurobiology—how your brain actually processes information—and build interventions that work with your unique wiring, not against it.",
     ...
   ],
-  "service_descriptions": [
-    "ADHD Executive Function Support: Comprehensive neuroscience-based assessment of working memory, attention systems, and dopamine regulation, followed by targeted interventions including environmental modifications, cognitive strategies, and nervous system regulation techniques tailored to your specific executive function profile.",
+  "topic_ideas": [
+    "Neuroscience explainer: Why traditional coping skills failed your nervous system",
+    "Guide: How we map your sensory profile before we ever talk interventions",
+    "St. Louis spotlight: Community factors rewiring our clients' brains",
     ...
   ]
 }}

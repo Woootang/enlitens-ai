@@ -699,8 +699,16 @@ class MultiAgentProcessor:
             website_data = agent_outputs.get("website_copy", {})
             website_copy = WebsiteCopy()
             if website_data:
+                allowed_website_fields = set(WebsiteCopy.model_fields.keys())
                 for field, value in website_data.items():
-                    if hasattr(website_copy, field) and isinstance(value, list):
+                    if field not in allowed_website_fields:
+                        logger.debug(
+                            "Dropping deprecated website_copy field '%s' for document %s",
+                            field,
+                            document_id,
+                        )
+                        continue
+                    if isinstance(value, list):
                         setattr(website_copy, field, value)
 
             # Get social media content
