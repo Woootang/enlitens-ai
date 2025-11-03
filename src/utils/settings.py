@@ -32,6 +32,7 @@ class ProviderSettings:
 
     provider: str = "vllm"
     base_url: Optional[str] = None
+    secondary_base_url: Optional[str] = None
     default_model: Optional[str] = None
     monitoring_model: Optional[str] = None
     endpoints: Dict[str, str] = field(default_factory=dict)
@@ -100,6 +101,10 @@ def _load_env_overrides() -> Dict[str, Any]:
     if base_url:
         llm["base_url"] = base_url
 
+    secondary_base_url = os.environ.get("LLM_BASE_URL_SECONDARY")
+    if secondary_base_url:
+        llm["secondary_base_url"] = secondary_base_url
+
     default_model = os.environ.get("LLM_MODEL_DEFAULT")
     if default_model:
         llm["default_model"] = default_model
@@ -141,6 +146,7 @@ def _coerce_provider_settings(data: Dict[str, Any]) -> ProviderSettings:
     return ProviderSettings(
         provider=str(llm_data.get("provider", "vllm")).lower(),
         base_url=llm_data.get("base_url"),
+        secondary_base_url=llm_data.get("secondary_base_url"),
         default_model=llm_data.get("default_model"),
         monitoring_model=llm_data.get("monitoring_model"),
         endpoints=llm_data.get("endpoints", {}),
@@ -150,6 +156,7 @@ def _coerce_provider_settings(data: Dict[str, Any]) -> ProviderSettings:
         extra={key: value for key, value in llm_data.items() if key not in {
             "provider",
             "base_url",
+            "secondary_base_url",
             "default_model",
             "monitoring_model",
             "endpoints",
@@ -180,6 +187,9 @@ def _build_settings() -> Settings:
 
     if provider_settings.base_url:
         provider_settings.base_url = provider_settings.base_url.rstrip("/")
+
+    if provider_settings.secondary_base_url:
+        provider_settings.secondary_base_url = provider_settings.secondary_base_url.rstrip("/")
 
     if not provider_settings.local_weights_path:
         provider_settings.local_weights_path = provider_settings.default_model
