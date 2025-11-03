@@ -29,8 +29,10 @@ except ImportError:  # pragma: no cover - fallback when packaging is missing
     version = None
 
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "extraction_team"
 
 
 class LazyPipelineLoader:
@@ -186,11 +188,17 @@ class ExtractionTeam:
         """
         try:
             logger.info("Extraction Team: Starting entity extraction")
-            
+
             # Get text content
             text_content = self._get_text_content(extraction_result)
             if not text_content:
-                logger.warning("Extraction Team: No text content found")
+                log_with_telemetry(
+                    logger.warning,
+                    "Extraction Team: No text content found",
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Entity extraction skipped due to missing text",
+                )
                 return {}
             
             # Extract entities using different models
@@ -231,7 +239,15 @@ class ExtractionTeam:
             return entities
             
         except Exception as e:
-            logger.error(f"Extraction Team: Entity extraction failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Extraction Team: Entity extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Entity extraction failed",
+                details={"error": str(e)},
+            )
             return {}
     
     def _get_text_content(self, extraction_result: Dict[str, Any]) -> str:
@@ -272,7 +288,15 @@ class ExtractionTeam:
             return biomedical_entities
             
         except Exception as e:
-            logger.error(f"Biomedical entity extraction failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Biomedical entity extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Biomedical entity extraction failed",
+                details={"error": str(e)},
+            )
             return []
     
     async def _extract_neuroscience_entities(self, text: str) -> List[Dict[str, Any]]:
@@ -307,7 +331,15 @@ class ExtractionTeam:
             return neuro_entities
             
         except Exception as e:
-            logger.error(f"Neuroscience entity extraction failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Neuroscience entity extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Neuroscience entity extraction failed",
+                details={"error": str(e)},
+            )
             return []
     
     async def _extract_psychology_entities(self, text: str) -> List[Dict[str, Any]]:
@@ -342,7 +374,15 @@ class ExtractionTeam:
             return psych_entities
             
         except Exception as e:
-            logger.error(f"Psychology entity extraction failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Psychology entity extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Psychology entity extraction failed",
+                details={"error": str(e)},
+            )
             return []
     
     async def _extract_clinical_entities(self, text: str) -> List[Dict[str, Any]]:
@@ -377,7 +417,15 @@ class ExtractionTeam:
             return clinical_entities
             
         except Exception as e:
-            logger.error(f"Clinical entity extraction failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Clinical entity extraction failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Clinical entity extraction failed",
+                details={"error": str(e)},
+            )
             return []
     
     async def _extract_statistical_entities(self, text: str) -> List[Dict[str, Any]]:
@@ -431,9 +479,14 @@ class ExtractionTeam:
                     top_n=20,
                 )
             except Exception as exc:
-                logger.warning(
+                log_with_telemetry(
+                    logger.warning,
                     "Extraction Team: heuristic keyword extraction failed with EnhancedExtractionTools (%s)",
                     exc,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Heuristic keyword extraction fallback",
+                    details={"error": str(exc)},
                 )
 
         if not keywords:
@@ -475,9 +528,14 @@ class ExtractionTeam:
             try:
                 self._fallback_tools = EnhancedExtractionTools(device="cpu")
             except Exception as exc:
-                logger.warning(
+                log_with_telemetry(
+                    logger.warning,
                     "Extraction Team: unable to initialise EnhancedExtractionTools for heuristics (%s)",
                     exc,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Heuristic tools unavailable",
+                    details={"error": str(exc)},
                 )
                 self._fallback_tools = None
         return self._fallback_tools
@@ -550,10 +608,15 @@ class ExtractionTeam:
             return True
 
         if current_version < version.parse(min_version):
-            logger.warning(
+            log_with_telemetry(
+                logger.warning,
                 "Extraction Team: Torch %s detected (<%s); skipping HF entity models to avoid load errors",
                 torch_version,
                 min_version,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="HF entity models disabled",
+                details={"torch_version": str(torch_version)},
             )
             return False
 

@@ -37,6 +37,11 @@ from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
 from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
+from src.monitoring.error_telemetry import (
+    TelemetrySeverity,
+    log_with_telemetry,
+    telemetry_recorder,
+)
 from src.utils.terminology import sanitize_structure, contains_banned_terms
 from src.pipeline.optional_context_loader import analyze_optional_context
 
@@ -72,6 +77,8 @@ if monitor_endpoint:
     logger.info(f"📡 Streaming logs to monitoring server at {monitor_endpoint}")
 else:
     logger.info("📝 Remote monitoring disabled; using local log file only")
+
+TELEMETRY_AGENT = "multi_agent_corpus"
 
 # ---------------------------------------------------------------------------
 # Monitoring helpers
@@ -119,9 +126,25 @@ def post_monitor_stats(payload: Dict[str, Any]) -> None:
             response.raise_for_status() # Raise an exception for bad status codes
 
     except (httpx.RequestError, httpx.HTTPStatusError, TimeoutError, ConnectionError) as e:
-        logger.warning(f"Could not send stats to monitoring server: {e}")
+        log_with_telemetry(
+            logger.warning,
+            "Could not send stats to monitoring server: %s",
+            e,
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MINOR,
+            impact="Monitoring visibility degraded",
+            details={"error": str(e), "payload_keys": list(payload.keys())},
+        )
     except Exception as e:
-        logger.warning(f"An unexpected error occurred during monitoring stats: {e}")
+        log_with_telemetry(
+            logger.warning,
+            "An unexpected error occurred during monitoring stats: %s",
+            e,
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MINOR,
+            impact="Monitoring stats transmission failed",
+            details={"error": str(e)},
+        )
 
 # Clean up old logs after logger is configured
 try:
@@ -135,7 +158,15 @@ try:
                 pass  # File might not exist or be in use
     logger.info(f"🧹 Cleaned up old log files")
 except Exception as e:
-    logger.warning(f"Could not clean old logs: {e}")
+    log_with_telemetry(
+        logger.warning,
+        "Could not clean old logs: %s",
+        e,
+        agent=TELEMETRY_AGENT,
+        severity=TelemetrySeverity.MINOR,
+        impact="Log maintenance skipped",
+        details={"error": str(e)},
+    )
 
 class MultiAgentProcessor:
     """
@@ -172,7 +203,15 @@ class MultiAgentProcessor:
                 logger.info("🧠 Vector store ingestion pipeline initialized")
                 self._bootstrap_context_ingestion()
             except Exception as exc:
-                logger.warning("⚠️ Failed to initialize vector ingestion pipeline: %s", exc)
+                log_with_telemetry(
+                    logger.warning,
+                    "⚠️ Failed to initialize vector ingestion pipeline: %s",
+                    exc,
+                    agent="vector_ingestion",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Vector store ingestion disabled",
+                    details={"error": str(exc)},
+                )
                 self.embedding_ingestion = None
 
         # St. Louis regional context
@@ -251,8 +290,16 @@ class MultiAgentProcessor:
                         metadata={**metadata, "document_id": document_id},
                     )
             except Exception as exc:  # pragma: no cover - defensive logging
-                logger.warning(
-                    "Unable to ingest context document %s: %s", document_id, exc
+                log_with_telemetry(
+                    logger.warning,
+                    "Unable to ingest context document %s: %s",
+                    document_id,
+                    exc,
+                    agent="vector_ingestion",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Context document not ingested",
+                    doc_id=document_id,
+                    details={"error": str(exc), "document_id": document_id},
                 )
 
     def _load_optional_context_text(
@@ -266,8 +313,20 @@ class MultiAgentProcessor:
             try:
                 return candidate.read_text(encoding="utf-8"), candidate
             except Exception as exc:  # pragma: no cover - defensive logging
-                logger.warning(
-                    "Failed to read %s at %s: %s", description, candidate, exc
+                log_with_telemetry(
+                    logger.warning,
+                    "Failed to read %s at %s: %s",
+                    description,
+                    candidate,
+                    exc,
+                    agent="context_loader",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Optional context unavailable",
+                    details={
+                        "error": str(exc),
+                        "context_description": description,
+                        "candidate_path": str(candidate),
+                    },
                 )
                 return None, None
 
@@ -291,8 +350,14 @@ class MultiAgentProcessor:
         try:
             extraction = self.pdf_extractor.extract(str(self.st_louis_report))
         except Exception as exc:  # pragma: no cover - defensive logging
-            logger.warning(
-                "Failed to extract St. Louis health report for ingestion: %s", exc
+            log_with_telemetry(
+                logger.warning,
+                "Failed to extract St. Louis health report for ingestion: %s",
+                exc,
+                agent="context_loader",
+                severity=TelemetrySeverity.MINOR,
+                impact="St. Louis context unavailable",
+                details={"error": str(exc)},
             )
             return None
 
@@ -352,7 +417,15 @@ class MultiAgentProcessor:
                 context["health_report"] = self.pdf_extractor.extract(str(self.st_louis_report))
                 logger.info(f"✅ Loaded St. Louis health report: {self.st_louis_report}")
             except Exception as e:
-                logger.warning(f"Could not load St. Louis health report: {e}")
+                log_with_telemetry(
+                    logger.warning,
+                    "Could not load St. Louis health report: %s",
+                    e,
+                    agent="context_loader",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="St. Louis health report omitted",
+                    details={"error": str(e)},
+                )
 
         return context
 
@@ -369,7 +442,15 @@ class MultiAgentProcessor:
                 analyzer=analyzer,
             )
         except Exception as e:
-            logger.error(f"Error analyzing client insights: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error analyzing client insights: %s",
+                e,
+                agent="client_context_analysis",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Client context analysis unavailable",
+                details={"error": str(e)},
+            )
             return {}
 
     def _analyze_founder_insights(self) -> Dict[str, Any]:
@@ -385,7 +466,15 @@ class MultiAgentProcessor:
                 analyzer=analyzer,
             )
         except Exception as e:
-            logger.error(f"Error analyzing founder insights: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error analyzing founder insights: %s",
+                e,
+                agent="founder_context_analysis",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder context analysis unavailable",
+                details={"error": str(e)},
+            )
             return {}
 
     async def _extract_pdf_text(self, pdf_path: Path) -> Optional[Dict[str, Any]]:
@@ -402,7 +491,15 @@ class MultiAgentProcessor:
                         logger.info(f"✅ Successfully extracted {len(full_text)} characters from {pdf_path.name}")
                         return extraction_result
                     else:
-                        logger.warning(f"⚠️ Poor extraction quality from {pdf_path.name}, retrying...")
+                        log_with_telemetry(
+                            logger.warning,
+                            "⚠️ Poor extraction quality from %s, retrying...",
+                            pdf_path.name,
+                            agent="pdf_extraction",
+                            severity=TelemetrySeverity.MAJOR,
+                            impact="Retrying extraction due to low quality",
+                            doc_id=pdf_path.name,
+                        )
                         continue
                 elif extraction_result and isinstance(extraction_result, str):
                     # Fallback for simple string extraction
@@ -410,19 +507,54 @@ class MultiAgentProcessor:
                         logger.info(f"✅ Successfully extracted {len(extraction_result)} characters from {pdf_path.name}")
                         return {"archival_content": {"full_document_text_markdown": extraction_result}}
                     else:
-                        logger.warning(f"⚠️ Poor extraction quality from {pdf_path.name}, retrying...")
+                        log_with_telemetry(
+                            logger.warning,
+                            "⚠️ Poor extraction quality from %s, retrying...",
+                            pdf_path.name,
+                            agent="pdf_extraction",
+                            severity=TelemetrySeverity.MAJOR,
+                            impact="Retrying extraction due to low quality",
+                            doc_id=pdf_path.name,
+                        )
                         continue
                 else:
-                    logger.warning(f"⚠️ Invalid extraction result type from {pdf_path.name}, retrying...")
+                    log_with_telemetry(
+                        logger.warning,
+                        "⚠️ Invalid extraction result type from %s, retrying...",
+                        pdf_path.name,
+                        agent="pdf_extraction",
+                        severity=TelemetrySeverity.MAJOR,
+                        impact="Extraction result invalid - retrying",
+                        doc_id=pdf_path.name,
+                    )
                     continue
 
             except Exception as e:
-                logger.error(f"❌ PDF extraction failed for {pdf_path.name} (attempt {attempt + 1}): {e}")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ PDF extraction failed for %s (attempt %s): %s",
+                    pdf_path.name,
+                    attempt + 1,
+                    e,
+                    agent="pdf_extraction",
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="PDF extraction attempt failed",
+                    doc_id=pdf_path.name,
+                    details={"error": str(e), "attempt": attempt + 1},
+                )
                 if attempt < self.retry_attempts - 1:
                     await asyncio.sleep(2 ** attempt)  # Exponential backoff
                     continue
 
-        logger.error(f"❌ All PDF extraction attempts failed for {pdf_path.name}")
+        log_with_telemetry(
+            logger.error,
+            "❌ All PDF extraction attempts failed for %s",
+            pdf_path.name,
+            agent="pdf_extraction",
+            severity=TelemetrySeverity.CRITICAL,
+            impact="PDF extraction aborted",
+            doc_id=pdf_path.name,
+        )
         logger.info(f"🔄 Trying fallback extraction for {pdf_path.name}")
         return self._extract_pdf_text_simple(pdf_path)
 
@@ -451,11 +583,29 @@ class MultiAgentProcessor:
                 logger.info(f"✅ Fallback extraction successful: {len(text)} characters")
                 return {"archival_content": {"full_document_text_markdown": text}}
             else:
-                logger.warning(f"⚠️ Fallback extraction too short: {len(text)} characters")
+                log_with_telemetry(
+                    logger.warning,
+                    "⚠️ Fallback extraction too short: %s characters",
+                    len(text),
+                    agent="pdf_extraction_fallback",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Fallback extraction produced insufficient text",
+                    doc_id=pdf_path.name,
+                )
                 return None
 
         except Exception as e:
-            logger.error(f"❌ Fallback extraction failed for {pdf_path.name}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "❌ Fallback extraction failed for %s: %s",
+                pdf_path.name,
+                e,
+                agent="pdf_extraction_fallback",
+                severity=TelemetrySeverity.MINOR,
+                impact="Fallback extractor failed",
+                doc_id=pdf_path.name,
+                details={"error": str(e)},
+            )
             return None
 
     def _get_pdf_file_size(self, pdf_path: Path) -> Optional[int]:
@@ -465,7 +615,17 @@ class MultiAgentProcessor:
             logger.debug(f"📏 PDF file size for {pdf_path.name}: {size} bytes")
             return size
         except OSError as exc:
-            logger.warning(f"⚠️ Unable to determine file size for {pdf_path.name}: {exc}")
+            log_with_telemetry(
+                logger.warning,
+                "⚠️ Unable to determine file size for %s: %s",
+                pdf_path.name,
+                exc,
+                agent="file_system",
+                severity=TelemetrySeverity.MINOR,
+                impact="PDF size unavailable",
+                doc_id=pdf_path.name,
+                details={"error": str(exc)},
+            )
             return None
 
     def _get_page_count_from_extraction(self, extraction_result: Any, pdf_path: Path) -> Optional[int]:
@@ -535,7 +695,15 @@ class MultiAgentProcessor:
                 logger.info("📋 No previous progress found, starting fresh")
                 return EnlitensKnowledgeBase()
         except Exception as e:
-            logger.error(f"❌ Error loading progress: {e}")
+            log_with_telemetry(
+                logger.error,
+                "❌ Error loading progress: %s",
+                e,
+                agent="progress_tracking",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Saved progress could not be restored",
+                details={"error": str(e), "temp_file": str(self.temp_file)},
+            )
             return EnlitensKnowledgeBase()
 
     async def _save_progress(self, knowledge_base: EnlitensKnowledgeBase,
@@ -554,9 +722,25 @@ class MultiAgentProcessor:
                     json.dump(knowledge_base.model_dump(), latest_f, indent=2, default=str)
                 os.replace(tmp_latest, latest_path)
             except Exception as latest_exc:
-                logger.error(f"❌ Error updating latest knowledge base file: {latest_exc}")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ Error updating latest knowledge base file: %s",
+                    latest_exc,
+                    agent="progress_tracking",
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Latest knowledge base not updated",
+                    details={"error": str(latest_exc), "target": str(latest_path)},
+                )
         except Exception as e:
-            logger.error(f"❌ Error saving progress: {e}")
+            log_with_telemetry(
+                logger.error,
+                "❌ Error saving progress: %s",
+                e,
+                agent="progress_tracking",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Progress checkpoint not persisted",
+                details={"error": str(e), "temp_file": str(self.temp_file)},
+            )
 
     async def _create_processing_context(self, text: str, document_id: str) -> Dict[str, Any]:
         """Create processing context for the supervisor."""
@@ -622,19 +806,44 @@ class MultiAgentProcessor:
             logger.info(f"📄 Extracting text from PDF: {pdf_path.name}")
             extraction_result = await self._extract_pdf_text(pdf_path)
             if not extraction_result:
-                logger.error(f"❌ No text extracted from {document_id}")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ No text extracted from %s",
+                    document_id,
+                    agent="pdf_extraction",
+                    severity=TelemetrySeverity.CRITICAL,
+                    impact="Document aborted due to missing text",
+                    doc_id=document_id,
+                )
                 return None
 
             # Extract the full text from the structured result
             if isinstance(extraction_result, dict) and 'archival_content' in extraction_result:
                 text = extraction_result['archival_content'].get('full_document_text_markdown', '')
                 if not text:
-                    logger.error(f"❌ No full text found in extraction result for {document_id}")
+                    log_with_telemetry(
+                        logger.error,
+                        "❌ No full text found in extraction result for %s",
+                        document_id,
+                        agent="pdf_extraction",
+                        severity=TelemetrySeverity.CRITICAL,
+                        impact="Extraction returned empty text",
+                        doc_id=document_id,
+                    )
                     return None
             elif isinstance(extraction_result, str):
                 text = extraction_result
             else:
-                logger.error(f"❌ Unexpected extraction result type for {document_id}: {type(extraction_result)}")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ Unexpected extraction result type for %s: %s",
+                    document_id,
+                    type(extraction_result),
+                    agent="pdf_extraction",
+                    severity=TelemetrySeverity.CRITICAL,
+                    impact="Unsupported extraction result",
+                    doc_id=document_id,
+                )
                 return None
 
             logger.info(f"✅ Text extracted successfully: {len(text)} characters")
@@ -717,7 +926,17 @@ class MultiAgentProcessor:
                             rebuild=True,
                         )
                     except Exception as exc:
-                        logger.warning("⚠️ Vector ingestion failed for %s: %s", document_id, exc)
+                        log_with_telemetry(
+                            logger.warning,
+                            "⚠️ Vector ingestion failed for %s: %s",
+                            document_id,
+                            exc,
+                            agent="vector_ingestion",
+                            severity=TelemetrySeverity.MINOR,
+                            impact="Document skipped for vector ingestion",
+                            doc_id=document_id,
+                            details={"error": str(exc)},
+                        )
 
                 # Convert result to EnlitensKnowledgeEntry format
                 logger.info(f"🔄 Converting result to knowledge entry for {document_id}")
@@ -735,13 +954,40 @@ class MultiAgentProcessor:
                 logger.info(f"✅ Document {document_id} processed successfully in {processing_time:.2f}s")
                 return knowledge_entry
             else:
-                logger.error(f"❌ Multi-agent processing failed for {document_id}: {result}")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ Multi-agent processing failed for %s: %s",
+                    document_id,
+                    result,
+                    agent="multi_agent_supervisor",
+                    severity=TelemetrySeverity.CRITICAL,
+                    impact="Supervisor reported failure",
+                    doc_id=document_id,
+                )
                 return None
 
         except Exception as e:
-            logger.error(f"❌ Error processing document {document_id}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "❌ Error processing document %s: %s",
+                document_id,
+                e,
+                agent="multi_agent_processor",
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Document processing crashed",
+                doc_id=document_id,
+                details={"error": str(e)},
+            )
             import traceback
-            logger.error(f"Full traceback: {traceback.format_exc()}")
+            log_with_telemetry(
+                logger.error,
+                "Full traceback: %s",
+                traceback.format_exc(),
+                agent="multi_agent_processor",
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Traceback captured for diagnostics",
+                doc_id=document_id,
+            )
             return None
 
     async def _convert_to_knowledge_entry(
@@ -892,8 +1138,16 @@ class MultiAgentProcessor:
             try:
                 blog_content = BlogContent.model_validate(blog_data or {}, context=blog_context)
             except Exception as exc:
-                logger.warning(
-                    "⚠️ Failed to validate blog content for %s: %s", document_id, exc
+                log_with_telemetry(
+                    logger.warning,
+                    "⚠️ Failed to validate blog content for %s: %s",
+                    document_id,
+                    exc,
+                    agent="content_validation",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="Blog content validation fallback",
+                    doc_id=document_id,
+                    details={"error": str(exc)},
                 )
                 blog_content = BlogContent()
             if blog_data:
@@ -907,8 +1161,16 @@ class MultiAgentProcessor:
                 try:
                     client_profiles = ClientProfileSet.model_validate(client_profiles_data or {})
                 except Exception as exc:
-                    logger.warning(
-                        "⚠️ Failed to validate client profiles for %s: %s", document_id, exc
+                    log_with_telemetry(
+                        logger.warning,
+                        "⚠️ Failed to validate client profiles for %s: %s",
+                        document_id,
+                        exc,
+                        agent="content_validation",
+                        severity=TelemetrySeverity.MINOR,
+                        impact="Client profile validation fallback",
+                        doc_id=document_id,
+                        details={"error": str(exc)},
                     )
 
             entry = EnlitensKnowledgeEntry(
@@ -935,20 +1197,47 @@ class MultiAgentProcessor:
                     entry = EnlitensKnowledgeEntry.model_validate(sanitized)
                     logger.info("🔧 Applied terminology sanitizer to knowledge entry: %s", document_id)
             except Exception as _san_exc:
-                logger.warning("Terminology sanitizer failed for %s: %s", document_id, _san_exc)
+                log_with_telemetry(
+                    logger.warning,
+                    "Terminology sanitizer failed for %s: %s",
+                    document_id,
+                    _san_exc,
+                    agent="terminology_sanitizer",
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Terminology sanitizer skipped",
+                    doc_id=document_id,
+                    details={"error": str(_san_exc)},
+                )
 
             # Log if any banned terms remain
             try:
                 dump_text = json.dumps(entry.model_dump(), ensure_ascii=False)
                 if contains_banned_terms(dump_text):
-                    logger.warning("⚠️ Banned terminology detected post-sanitize for %s", document_id)
+                    log_with_telemetry(
+                        logger.warning,
+                        "⚠️ Banned terminology detected post-sanitize for %s",
+                        document_id,
+                        agent="terminology_sanitizer",
+                        severity=TelemetrySeverity.MAJOR,
+                        impact="Banned terminology present",
+                        doc_id=document_id,
+                    )
             except Exception:
                 pass
 
             return entry
 
         except Exception as e:
-            logger.error(f"Error converting to knowledge entry: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error converting to knowledge entry: %s",
+                e,
+                agent="knowledge_entry_conversion",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Fallback knowledge entry generated",
+                doc_id=document_id,
+                details={"error": str(e)},
+            )
             # Return minimal valid entry with document text if available
             full_document_text = ""
             if isinstance(result, dict):
@@ -997,7 +1286,13 @@ class MultiAgentProcessor:
             logger.info(f"📚 Found {total_files} PDF files to process")
 
             if total_files == 0:
-                logger.error("❌ No PDF files found in input directory")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ No PDF files found in input directory",
+                    agent="multi_agent_processor",
+                    severity=TelemetrySeverity.CRITICAL,
+                    impact="Corpus processing aborted",
+                )
                 return
 
             # Ensure the supervisor and all specialized agents are ready
@@ -1005,7 +1300,13 @@ class MultiAgentProcessor:
                 logger.info("🧠 Initializing multi-agent supervisor and specialized agents")
                 init_success = await self.supervisor.initialize()
                 if not init_success:
-                    logger.error("❌ Supervisor initialization failed; aborting corpus processing")
+                    log_with_telemetry(
+                        logger.error,
+                        "❌ Supervisor initialization failed; aborting corpus processing",
+                        agent="multi_agent_supervisor",
+                        severity=TelemetrySeverity.CRITICAL,
+                        impact="Supervisor unavailable",
+                    )
                     return
 
             self.knowledge_base = await self._load_progress()
@@ -1051,7 +1352,15 @@ class MultiAgentProcessor:
                         "last_duration": round(doc_duration, 2),
                     })
                 else:
-                    logger.error(f"❌ Failed to process: {pdf_path.name}")
+                    log_with_telemetry(
+                        logger.error,
+                        "❌ Failed to process: %s",
+                        pdf_path.name,
+                        agent="multi_agent_processor",
+                        severity=TelemetrySeverity.CRITICAL,
+                        impact="Document processing failed",
+                        doc_id=pdf_path.stem,
+                    )
                     failed_count += 1
                     post_monitor_stats({
                         "status": "processing",
@@ -1077,7 +1386,15 @@ class MultiAgentProcessor:
                     json.dump(self.knowledge_base.model_dump(), f, indent=2, default=str)
                 os.replace(tmp_final, self.output_file)
             except Exception as e:
-                logger.error(f"❌ Atomic write failed, falling back to direct write: {e}")
+                log_with_telemetry(
+                    logger.error,
+                    "❌ Atomic write failed, falling back to direct write: %s",
+                    e,
+                    agent="progress_tracking",
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Atomic write failed",
+                    details={"error": str(e), "output_file": str(self.output_file)},
+                )
                 with open(self.output_file, 'w', encoding='utf-8') as f:
                     json.dump(self.knowledge_base.model_dump(), f, indent=2, default=str)
 
@@ -1115,7 +1432,15 @@ class MultiAgentProcessor:
             })
 
         except Exception as e:
-            logger.error(f"❌ Error processing corpus: {e}")
+            log_with_telemetry(
+                logger.error,
+                "❌ Error processing corpus: %s",
+                e,
+                agent="multi_agent_processor",
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Corpus processing halted",
+                details={"error": str(e)},
+            )
             post_monitor_stats({"status": "error", "error": str(e)})
             raise
         finally:
@@ -1135,7 +1460,13 @@ class MultiAgentProcessor:
                 gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
                 logger.info(f"🔥 GPU: {gpu_name} ({gpu_memory:.1f}GB)")
             else:
-                logger.warning("⚠️ No GPU available - using CPU")
+                log_with_telemetry(
+                    logger.warning,
+                    "⚠️ No GPU available - using CPU",
+                    agent="system_resources",
+                    severity=TelemetrySeverity.MINOR,
+                    impact="GPU acceleration unavailable",
+                )
 
             # Memory information
             memory = psutil.virtual_memory()
@@ -1146,7 +1477,15 @@ class MultiAgentProcessor:
             logger.info(f"💽 Disk: {disk.free / 1e9:.1f}GB available")
 
         except Exception as e:
-            logger.warning(f"Could not check system resources: {e}")
+            log_with_telemetry(
+                logger.warning,
+                "Could not check system resources: %s",
+                e,
+                agent="system_resources",
+                severity=TelemetrySeverity.MINOR,
+                impact="Resource check skipped",
+                details={"error": str(e)},
+            )
 
     async def _cleanup_memory(self):
         """Clean up memory between processing batches."""
@@ -1165,7 +1504,15 @@ class MultiAgentProcessor:
             logger.info("🧹 Memory cleanup completed")
 
         except Exception as e:
-            logger.warning(f"Memory cleanup failed: {e}")
+            log_with_telemetry(
+                logger.warning,
+                "Memory cleanup failed: %s",
+                e,
+                agent="memory_cleanup",
+                severity=TelemetrySeverity.MINOR,
+                impact="Memory cleanup skipped",
+                details={"error": str(e)},
+            )
 
     async def _cleanup(self):
         """Clean up all resources."""
@@ -1186,7 +1533,15 @@ class MultiAgentProcessor:
             logger.info("✅ Cleanup completed")
 
         except Exception as e:
-            logger.error(f"Error during cleanup: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error during cleanup: %s",
+                e,
+                agent="resource_cleanup",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Cleanup encountered errors",
+                details={"error": str(e)},
+            )
 
     def _calculate_avg_confidence(self) -> float:
         """Calculate average confidence score across all processed documents."""
@@ -1212,7 +1567,15 @@ class MultiAgentProcessor:
             return total_confidence / count if count > 0 else 0.0
 
         except Exception as e:
-            logger.error(f"Error calculating average confidence: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error calculating average confidence: %s",
+                e,
+                agent="quality_metrics",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Confidence metric unavailable",
+                details={"error": str(e)},
+            )
             return 0.0
 
     def _count_total_retries(self) -> int:
@@ -1230,7 +1593,15 @@ class MultiAgentProcessor:
             return total_retries
 
         except Exception as e:
-            logger.error(f"Error counting retries: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error counting retries: %s",
+                e,
+                agent="quality_metrics",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Retry statistics unavailable",
+                details={"error": str(e)},
+            )
             return 0
 
     def _get_quality_breakdown(self) -> Dict[str, Dict[str, float]]:
@@ -1262,7 +1633,15 @@ class MultiAgentProcessor:
             return quality_stats
 
         except Exception as e:
-            logger.error(f"Error getting quality breakdown: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error getting quality breakdown: %s",
+                e,
+                agent="quality_metrics",
+                severity=TelemetrySeverity.MAJOR,
+                impact="Quality breakdown unavailable",
+                details={"error": str(e)},
+            )
             return {}
 
 async def main():
@@ -1279,12 +1658,34 @@ async def main():
 
     # Validate input directory
     if not os.path.exists(args.input_dir):
-        logger.error(f"❌ Input directory does not exist: {args.input_dir}")
+        log_with_telemetry(
+            logger.error,
+            "❌ Input directory does not exist: %s",
+            args.input_dir,
+            agent="multi_agent_processor",
+            severity=TelemetrySeverity.CRITICAL,
+            impact="Run aborted due to missing input",
+        )
         return
 
     # Create processor and run
     processor = MultiAgentProcessor(args.input_dir, args.output_file, args.st_louis_report)
-    await processor.process_corpus()
+    run_status = "completed"
+    try:
+        await processor.process_corpus()
+    except Exception:
+        run_status = "failed"
+        raise
+    finally:
+        summary_snapshot = telemetry_recorder.get_summary_snapshot()
+        summary_path = telemetry_recorder.flush_summary()
+        post_monitor_stats(
+            {
+                "status": run_status,
+                "telemetry_summary": summary_snapshot,
+                "telemetry_summary_path": str(summary_path),
+            }
+        )
 
 if __name__ == "__main__":
     # Set environment variables for optimal performance

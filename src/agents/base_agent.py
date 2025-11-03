@@ -11,8 +11,10 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from src.utils.settings import get_settings
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "base_agent"
 
 class BaseAgent(ABC):
     """
@@ -76,11 +78,29 @@ class BaseAgent(ABC):
                 logger.info(f"Agent {self.name} completed successfully")
                 return result
             else:
-                logger.warning(f"Agent {self.name} output validation failed")
+                log_with_telemetry(
+                    logger.warning,
+                    "Agent %s output validation failed",
+                    self.name,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Agent output failed validation",
+                    doc_id=context.get("document_id"),
+                )
                 return {}
 
         except Exception as e:
-            logger.error(f"Agent {self.name} execution failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Agent %s execution failed: %s",
+                self.name,
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent execution crashed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return {}
 
     async def cleanup(self):

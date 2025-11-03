@@ -16,8 +16,10 @@ from ..models.enlitens_schemas import (
     MarketingContent, SEOContent, WebsiteCopy, BlogContent,
     SocialMediaContent, ContentCreationIdeas, VerifiedStatistic, Citation
 )
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "founder_voice_agent"
 
 class FounderVoiceAgent(BaseAgent):
     """
@@ -79,7 +81,15 @@ class FounderVoiceAgent(BaseAgent):
             logger.info("✅ Founder Voice Agent initialized with Liz persona")
             return True
         except Exception as e:
-            logger.error(f"Failed to initialize Founder Voice Agent: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize Founder Voice Agent: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Agent initialization failed",
+                details={"error": str(e)},
+            )
             return False
 
     async def _structured_generation(
@@ -184,7 +194,16 @@ class FounderVoiceAgent(BaseAgent):
             }
 
         except Exception as e:
-            logger.error(f"Founder voice integration failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Founder voice integration failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder voice integration failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return {}
 
     async def _generate_marketing_content(
@@ -288,7 +307,16 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                     use_cot_prompt=False,  # Creative marketing content - no CoT
                 )
             except Exception as err:
-                logger.error("Founder structured fallback failed: %s", err)
+                log_with_telemetry(
+                    logger.error,
+                    "Founder structured fallback failed: %s",
+                    err,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Founder structured fallback failed",
+                    doc_id=context.get("document_id"),
+                    details={"error": str(err)},
+                )
                 structured = None
 
             if structured:
@@ -298,11 +326,27 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                 )
                 return structured
 
-            logger.warning("Founder structured fallback failed to produce output; returning empty model")
+            log_with_telemetry(
+                logger.warning,
+                "Founder structured fallback failed to produce output; returning empty model",
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Founder marketing fallback empty",
+                doc_id=context.get("document_id"),
+            )
             return MarketingContent()
         except Exception as e:
             # Lower severity: transient 404s from local vLLM can occur
-            logger.warning(f"Marketing content generation fallback: {e}")
+            log_with_telemetry(
+                logger.warning,
+                "Marketing content generation fallback: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Founder marketing fallback",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return MarketingContent()
 
     def _summarize_research(self, text: str, max_chars: int = 1200) -> str:
@@ -513,7 +557,16 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             return response or SEOContent()
 
         except Exception as e:
-            logger.error(f"SEO content generation failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "SEO content generation failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder SEO content failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return SEOContent()
 
     async def _generate_website_copy(
@@ -612,7 +665,16 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             return response or WebsiteCopy()
 
         except Exception as e:
-            logger.error(f"Website copy generation failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Website copy generation failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder website copy failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return WebsiteCopy()
 
     async def _generate_blog_content(
@@ -741,7 +803,16 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             return response or BlogContent()
 
         except Exception as e:
-            logger.error(f"Blog content generation failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Blog content generation failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder blog content failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return BlogContent()
 
     async def _generate_social_media_content(
@@ -856,7 +927,16 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             return response or SocialMediaContent()
 
         except Exception as e:
-            logger.error(f"Social media content generation failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Social media content generation failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder social content failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return SocialMediaContent()
 
     async def _generate_content_ideas(
@@ -967,7 +1047,16 @@ If a concept uses a retrieved passage, include the matching [Source #] tag insid
             return response or ContentCreationIdeas()
 
         except Exception as e:
-            logger.error(f"Content ideas generation failed: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Content ideas generation failed: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Founder content ideas failed",
+                doc_id=context.get("document_id"),
+                details={"error": str(e)},
+            )
             return ContentCreationIdeas()
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:

@@ -17,8 +17,10 @@ from src.models.enlitens_schemas import (
     ResearchContent, ContentCreationIdeas
 )
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "enhanced_complete_enlitens_agent"
 
 class EnhancedCompleteEnlitensAgent:
     """
@@ -90,7 +92,16 @@ class EnhancedCompleteEnlitensAgent:
                     if fallback_keywords:
                         client_payload["pain_point_keywords"] = fallback_keywords
                 except Exception as exc:
-                    logger.warning("Failed to derive client pain point keywords from raw context: %s", exc)
+                    log_with_telemetry(
+                        logger.warning,
+                        "Failed to derive client pain point keywords from raw context: %s",
+                        exc,
+                        agent=TELEMETRY_AGENT,
+                        severity=TelemetrySeverity.MINOR,
+                        impact="Client keyword fallback failed",
+                        doc_id=document_id,
+                        details={"error": str(exc)},
+                    )
 
             if raw_founder_context and not founder_payload.get("founder_keywords"):
                 try:
@@ -105,7 +116,16 @@ class EnhancedCompleteEnlitensAgent:
                     if fallback_keywords:
                         founder_payload["founder_keywords"] = fallback_keywords
                 except Exception as exc:
-                    logger.warning("Failed to derive founder keywords from raw context: %s", exc)
+                    log_with_telemetry(
+                        logger.warning,
+                        "Failed to derive founder keywords from raw context: %s",
+                        exc,
+                        agent=TELEMETRY_AGENT,
+                        severity=TelemetrySeverity.MINOR,
+                        impact="Founder keyword fallback failed",
+                        doc_id=document_id,
+                        details={"error": str(exc)},
+                    )
 
             content_insights: Dict[str, Any] = {}
             if client_payload or founder_payload:
@@ -145,7 +165,17 @@ class EnhancedCompleteEnlitensAgent:
             return knowledge_entry
             
         except Exception as e:
-            logger.error(f"Error extracting complete content for {document_id}: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting complete content for %s: %s",
+                document_id,
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Complete content extraction failed",
+                doc_id=document_id,
+                details={"error": str(e)},
+            )
             raise
 
     async def _extract_entities(self, text: str) -> ExtractedEntities:
@@ -182,7 +212,15 @@ class EnhancedCompleteEnlitensAgent:
             )
             
         except Exception as e:
-            logger.error(f"Error extracting entities: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting entities: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Entity extraction failed",
+                details={"error": str(e)},
+            )
             return ExtractedEntities()
 
     async def _extract_rebellion_framework(self, text: str, content_insights: Dict[str, Any]) -> RebellionFramework:
@@ -254,7 +292,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else RebellionFramework()
         except Exception as e:
-            logger.error(f"Error extracting rebellion framework: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting rebellion framework: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Rebellion framework extraction failed",
+                details={"error": str(e)},
+            )
             return RebellionFramework()
 
     async def _extract_marketing_content(self, text: str, content_insights: Dict[str, Any]) -> MarketingContent:
@@ -347,7 +393,15 @@ Return JSON only.
                     max_retries=3
                 )
             except Exception as err:
-                logger.error("Structured marketing formatting failed: %s", err)
+                log_with_telemetry(
+                    logger.error,
+                    "Structured marketing formatting failed: %s",
+                    err,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="Marketing structuring failed",
+                    details={"error": str(err)},
+                )
                 structured = None
 
             if structured:
@@ -357,10 +411,24 @@ Return JSON only.
                 )
                 return structured
 
-            logger.warning("Marketing content structuring failed; returning empty model")
+            log_with_telemetry(
+                logger.warning,
+                "Marketing content structuring failed; returning empty model",
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Marketing content fallback",
+            )
             return MarketingContent()
         except Exception as e:
-            logger.error(f"Error extracting marketing content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting marketing content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Marketing content extraction failed",
+                details={"error": str(e)},
+            )
             return MarketingContent()
 
     async def _extract_seo_content(self, text: str, content_insights: Dict[str, Any]) -> SEOContent:
@@ -418,7 +486,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else SEOContent()
         except Exception as e:
-            logger.error(f"Error extracting SEO content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting SEO content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="SEO content extraction failed",
+                details={"error": str(e)},
+            )
             return SEOContent()
 
     async def _extract_website_copy(self, text: str, content_insights: Dict[str, Any]) -> WebsiteCopy:
@@ -477,7 +553,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else WebsiteCopy()
         except Exception as e:
-            logger.error(f"Error extracting website copy: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting website copy: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Website copy extraction failed",
+                details={"error": str(e)},
+            )
             return WebsiteCopy()
 
     async def _extract_blog_content(self, text: str, content_insights: Dict[str, Any]) -> BlogContent:
@@ -539,7 +623,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else BlogContent()
         except Exception as e:
-            logger.error(f"Error extracting blog content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting blog content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Blog content extraction failed",
+                details={"error": str(e)},
+            )
             return BlogContent()
 
     async def _extract_social_media_content(self, text: str, content_insights: Dict[str, Any]) -> SocialMediaContent:
@@ -601,7 +693,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else SocialMediaContent()
         except Exception as e:
-            logger.error(f"Error extracting social media content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting social media content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Social media content extraction failed",
+                details={"error": str(e)},
+            )
             return SocialMediaContent()
 
     async def _extract_educational_content(self, text: str, content_insights: Dict[str, Any]) -> EducationalContent:
@@ -665,7 +765,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else EducationalContent()
         except Exception as e:
-            logger.error(f"Error extracting educational content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting educational content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Educational content extraction failed",
+                details={"error": str(e)},
+            )
             return EducationalContent()
 
     async def _extract_clinical_content(self, text: str, content_insights: Dict[str, Any]) -> ClinicalContent:
@@ -728,7 +836,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else ClinicalContent()
         except Exception as e:
-            logger.error(f"Error extracting clinical content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting clinical content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Clinical content extraction failed",
+                details={"error": str(e)},
+            )
             return ClinicalContent()
 
     async def _extract_research_content(self, text: str, content_insights: Dict[str, Any]) -> ResearchContent:
@@ -791,7 +907,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else ResearchContent()
         except Exception as e:
-            logger.error(f"Error extracting research content: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting research content: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Research content extraction failed",
+                details={"error": str(e)},
+            )
             return ResearchContent()
 
     async def _extract_content_creation_ideas(self, text: str, content_insights: Dict[str, Any]) -> ContentCreationIdeas:
@@ -852,7 +976,15 @@ Ensure all fields are present and properly formatted as simple lists.
             )
             return result if result else ContentCreationIdeas()
         except Exception as e:
-            logger.error(f"Error extracting content creation ideas: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error extracting content creation ideas: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Content ideas extraction failed",
+                details={"error": str(e)},
+            )
             return ContentCreationIdeas()
 
     async def close(self):
@@ -862,7 +994,15 @@ Ensure all fields are present and properly formatted as simple lists.
             self.extraction_tools.cleanup()
             logger.info("Enhanced Complete Enlitens Agent closed")
         except Exception as e:
-            logger.error(f"Error closing agent: {e}")
+            log_with_telemetry(
+                logger.error,
+                "Error closing agent: %s",
+                e,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Agent cleanup encountered errors",
+                details={"error": str(e)},
+            )
 
     def _summarize_research(self, text: str, max_chars: int = 1200) -> str:
         snippet = text.strip().replace("\n", " ")
