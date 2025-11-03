@@ -7,7 +7,7 @@ import pytest
 httpx = pytest.importorskip("httpx")
 
 from src.agents.base_agent import BaseAgent
-from src.synthesis.ollama_client import OllamaClient, VLLMClient
+from src.synthesis.ollama_client import LLMServiceError, OllamaClient, VLLMClient
 from src.utils.settings import get_settings, reset_settings_cache
 
 
@@ -21,6 +21,23 @@ class _DummyAgent(BaseAgent):
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
         return {"echo": context}
+
+    async def validate_output(self, output: Dict[str, Any]) -> bool:
+        return True
+
+
+class _LLMStubAgent(BaseAgent):
+    def __init__(self, client: OllamaClient) -> None:
+        super().__init__(name="LLMStub", role="Test", model=client.default_model)
+        self.ollama_client = client
+        # We bypass initialize to focus on execute behaviour
+        self.is_initialized = True
+
+    async def initialize(self) -> bool:
+        return True
+
+    async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        return await self.ollama_client.generate_response("ping")
 
     async def validate_output(self, output: Dict[str, Any]) -> bool:
         return True
@@ -150,3 +167,89 @@ async def test_vllm_client_auto_continuation(monkeypatch: pytest.MonkeyPatch) ->
     assert result["done"] is True
     assert len(responses) == 2
     assert responses[1]["messages"][-2]["role"] == "assistant"
+
+
+@pytest.mark.asyncio
+async def test_health_check_falls_back_to_secondary_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: List[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(str(request.url))
+        if request.url.host == "primary.local":
+            return httpx.Response(404, json={"error": "missing"})
+        if request.url.path.endswith("/chat/completions"):
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {
+                            "message": {"content": "ok"},
+                            "finish_reason": "stop",
+                        }
+                    ],
+                    "usage": {"completion_tokens": 1},
+                },
+            )
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": []})
+        return httpx.Response(200, json={})
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setenv("LLM_BASE_URL", "http://primary.local")
+    monkeypatch.setenv("LLM_BASE_URL_SECONDARY", "http://secondary.local")
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "test-model")
+    reset_settings_cache()
+
+    client = OllamaClient(transport=transport)
+    try:
+        healthy = await client.check_connection()
+        assert healthy is True
+        assert client.base_url == "http://secondary.local"
+        resolved = client.resolved_chat_endpoint
+        assert resolved is not None and resolved.endswith("/chat/completions")
+
+        result = await client.generate_response("hello")
+        assert result["response"] == "ok"
+    finally:
+        await client.close()
+
+    assert any("primary.local" in call for call in calls)
+    assert any("secondary.local" in call for call in calls)
+
+
+@pytest.mark.asyncio
+async def test_agent_raises_llm_service_error_on_client_failures(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404, json={"error": "not found"})
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setenv("LLM_BASE_URL", "http://broken.local")
+    monkeypatch.delenv("LLM_BASE_URL_SECONDARY", raising=False)
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "test-model")
+    reset_settings_cache()
+
+    telemetry_events: List[Dict[str, Any]] = []
+
+    def fake_record_event(*args: Any, **kwargs: Any) -> None:
+        telemetry_events.append({"args": args, "kwargs": kwargs})
+
+    monkeypatch.setattr(
+        "src.synthesis.ollama_client.telemetry_recorder.record_event",
+        fake_record_event,
+    )
+
+    client = OllamaClient(transport=transport)
+    agent = _LLMStubAgent(client)
+
+    with pytest.raises(LLMServiceError) as excinfo:
+        await agent.execute({"document_id": "doc-1"})
+
+    assert "broken.local" in excinfo.value.endpoint
+    assert telemetry_events, "expected telemetry to capture the client error"
+    details = telemetry_events[-1]["kwargs"].get("details", {})
+    assert details.get("status") == 404
+    assert "chat/completions" in details.get("endpoint", "")
+
+    await client.close()

@@ -12,6 +12,7 @@ from datetime import datetime
 
 from src.utils.settings import get_settings
 from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
+from src.synthesis.ollama_client import LLMServiceError
 
 logger = logging.getLogger(__name__)
 TELEMETRY_AGENT = "base_agent"
@@ -89,6 +90,23 @@ class BaseAgent(ABC):
                 )
                 return {}
 
+        except LLMServiceError as err:
+            log_with_telemetry(
+                logger.error,
+                "Agent %s encountered LLM service error: %s",
+                self.name,
+                err,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="LLM service unavailable",
+                doc_id=context.get("document_id"),
+                details={
+                    "endpoint": getattr(err, "endpoint", None),
+                    "status": getattr(err, "status", None),
+                    "payload": getattr(err, "payload_summary", {}),
+                },
+            )
+            raise
         except Exception as e:
             log_with_telemetry(
                 logger.error,

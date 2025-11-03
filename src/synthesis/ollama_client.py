@@ -7,7 +7,9 @@ import json
 import logging
 import os
 import re
+import weakref
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from urllib.parse import urlparse
 
 import httpx
 from json_repair import repair_json
@@ -22,8 +24,51 @@ from .prompts import (
 from .normalize import normalize_research_content_payload
 from src.utils.prompt_cache import PromptCache
 from src.utils.settings import get_settings
+from src.monitoring.error_telemetry import TelemetrySeverity, telemetry_recorder
 
 logger = logging.getLogger(__name__)
+
+TELEMETRY_AGENT = "ollama_client"
+
+
+class LLMServiceError(RuntimeError):
+    """Exception raised when the LLM backend is unavailable or misconfigured."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        endpoint: str,
+        status: Optional[int] = None,
+        payload_summary: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        super().__init__(message)
+        self.endpoint = endpoint
+        self.status = status
+        self.payload_summary = payload_summary or {}
+
+
+class _FailoverNeeded(RuntimeError):
+    """Internal control-flow exception indicating a failover should be retried."""
+
+
+def _build_payload_summary(payload: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {}
+
+    summary: Dict[str, Any] = {}
+    for key in ("model", "temperature", "max_tokens", "top_p"):
+        if key in payload:
+            summary[key] = payload[key]
+
+    messages = payload.get("messages") if isinstance(payload.get("messages"), list) else []
+    if messages:
+        last_message = messages[-1]
+        if isinstance(last_message, dict):
+            content = str(last_message.get("content", ""))
+            summary["last_message_preview"] = content[:160]
+
+    return summary
 
 _FALLBACK_BASE_URL = "http://localhost:8000/v1"
 _FALLBACK_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
@@ -112,9 +157,11 @@ class VLLMClient:
         headers: Optional[Dict[str, str]] = None,
         max_retries: int = 3,
         transport: Optional[httpx.AsyncBaseTransport] = None,
+        secondary_base_url: Optional[str] = None,
     ) -> None:
         resolved_base = (base_url or _resolve_default_base_url()).rstrip("/")
         resolved_model = default_model or _resolve_default_model()
+        secondary = (secondary_base_url or "").rstrip("/") or None
         self.base_url = resolved_base
         self.default_model = resolved_model
         self.enable_prefix_caching = enable_prefix_caching
@@ -122,14 +169,27 @@ class VLLMClient:
         self.continuous_batch_sizes = list(continuous_batch_sizes or (8, 16, 24))
         self.headers = dict(headers or {})
         self.max_retries = max_retries
+        self._timeout_seconds = timeout_seconds
+        self._transport = transport
+        self._base_url_candidates: List[str] = []
+        for candidate in (resolved_base, secondary):
+            if candidate and candidate not in self._base_url_candidates:
+                self._base_url_candidates.append(candidate)
+        if not self._base_url_candidates:
+            self._base_url_candidates.append(resolved_base)
+        self._active_base_index = 0
         self.default_max_tokens = _resolve_default_completion_tokens()
         self.max_completion_tokens = _resolve_max_completion_tokens(self.default_max_tokens)
         self.client = httpx.AsyncClient(
-            base_url=self.base_url,
             timeout=timeout_seconds,
             headers=self.headers or None,
             transport=transport,
         )
+        self._resolved_chat_path: Optional[str] = None
+        self._resolved_chat_endpoint_url: Optional[str] = None
+        self._health_lock = asyncio.Lock()
+        self._peers: "weakref.WeakSet[VLLMClient]" = weakref.WeakSet()
+        self._peers.add(self)
 
     def clone_with_model(self, model: str) -> "VLLMClient":
         """Create a lightweight clone that reuses the underlying HTTP client."""
@@ -145,6 +205,15 @@ class VLLMClient:
         clone.max_retries = self.max_retries
         clone.default_max_tokens = self.default_max_tokens
         clone.max_completion_tokens = self.max_completion_tokens
+        clone._timeout_seconds = self._timeout_seconds
+        clone._transport = self._transport
+        clone._base_url_candidates = list(self._base_url_candidates)
+        clone._active_base_index = self._active_base_index
+        clone._resolved_chat_path = self._resolved_chat_path
+        clone._resolved_chat_endpoint_url = self._resolved_chat_endpoint_url
+        clone._health_lock = self._health_lock
+        clone._peers = self._peers
+        self._peers.add(clone)
         return clone
 
     def _resolve_model(self, model: Optional[str]) -> str:
@@ -152,6 +221,8 @@ class VLLMClient:
 
     @staticmethod
     def _should_retry_exception(exc: BaseException) -> bool:
+        if isinstance(exc, _FailoverNeeded):
+            return True
         if isinstance(exc, httpx.RequestError):
             return True
         if isinstance(exc, httpx.HTTPStatusError):
@@ -159,7 +230,144 @@ class VLLMClient:
             return status >= 500 or status in {408, 429}
         return False
 
+    def _propagate_state(self) -> None:
+        for peer in list(self._peers):
+            peer.base_url = self.base_url
+            peer._active_base_index = self._active_base_index
+            peer._resolved_chat_path = self._resolved_chat_path
+            peer._resolved_chat_endpoint_url = self._resolved_chat_endpoint_url
+
+    @staticmethod
+    def _candidate_chat_paths(base_url: str) -> List[str]:
+        parsed = urlparse(base_url)
+        suffix = parsed.path.rstrip("/")
+        candidates: List[str] = []
+        if suffix.endswith("/v1"):
+            candidates.append("chat/completions")
+        else:
+            candidates.append("v1/chat/completions")
+        candidates.append("chat/completions")
+        # Ensure uniqueness preserving order
+        seen: set[str] = set()
+        ordered: List[str] = []
+        for path in candidates:
+            key = path.lstrip("/")
+            if key not in seen:
+                seen.add(key)
+                ordered.append(key)
+        return ordered
+
+    @staticmethod
+    def _build_absolute_url(base_url: str, path: str) -> str:
+        base = base_url.rstrip("/")
+        segment = path.lstrip("/")
+        return f"{base}/{segment}" if segment else base
+
+    def _health_check_payload(self) -> Dict[str, Any]:
+        return {
+            "model": self.default_model,
+            "messages": [{"role": "user", "content": "ping"}],
+            "max_tokens": 1,
+            "stream": False,
+        }
+
+    async def _ensure_chat_endpoint(
+        self,
+        *,
+        force: bool = False,
+        start_index: Optional[int] = None,
+    ) -> None:
+        if self._resolved_chat_path and not force:
+            return
+
+        async with self._health_lock:
+            if self._resolved_chat_path and not force:
+                return
+
+            last_exception: Optional[Exception] = None
+            index_start = start_index if start_index is not None else (0 if force else self._active_base_index)
+
+            for idx in range(index_start, len(self._base_url_candidates)):
+                base = self._base_url_candidates[idx]
+                for path in self._candidate_chat_paths(base):
+                    url = self._build_absolute_url(base, path)
+                    try:
+                        response = await self.client.post(url, json=self._health_check_payload())
+                        if response.status_code < 400:
+                            self.base_url = base
+                            self._active_base_index = idx
+                            self._resolved_chat_path = path
+                            self._resolved_chat_endpoint_url = str(response.request.url)
+                            self._propagate_state()
+                            return
+                        if response.status_code in {400, 404}:
+                            last_exception = httpx.HTTPStatusError(
+                                "Health check failed",
+                                request=response.request,
+                                response=response,
+                            )
+                        else:
+                            response.raise_for_status()
+                    except Exception as exc:
+                        last_exception = exc
+                        continue
+
+            endpoint = self._build_absolute_url(self._base_url_candidates[min(len(self._base_url_candidates) - 1, index_start)], "chat/completions")
+            summary = _build_payload_summary(self._health_check_payload())
+            raise LLMServiceError(
+                "No responsive chat completions endpoint discovered",
+                endpoint=endpoint,
+                status=getattr(getattr(last_exception, "response", None), "status_code", None),
+                payload_summary=summary,
+            )
+
+    async def _attempt_failover(self) -> bool:
+        if self._active_base_index + 1 >= len(self._base_url_candidates):
+            return False
+
+        self._active_base_index += 1
+        self.base_url = self._base_url_candidates[self._active_base_index]
+        self._resolved_chat_path = None
+        self._resolved_chat_endpoint_url = None
+        self._propagate_state()
+
+        try:
+            await self._ensure_chat_endpoint(force=True, start_index=self._active_base_index)
+            return True
+        except LLMServiceError:
+            return False
+
+    def _record_client_error(
+        self,
+        *,
+        response: httpx.Response,
+        payload: Optional[Dict[str, Any]],
+    ) -> None:
+        try:
+            summary = _build_payload_summary(payload)
+            telemetry_recorder.record_event(
+                doc_id=None,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="LLM chat completion returned client error",
+                details={
+                    "status": response.status_code,
+                    "endpoint": str(response.request.url),
+                    "payload": summary,
+                },
+            )
+        except Exception:  # pragma: no cover - telemetry should not break requests
+            logger.exception("Failed to record telemetry for client error")
+
+    @property
+    def resolved_chat_endpoint(self) -> Optional[str]:
+        return self._resolved_chat_endpoint_url
+
     async def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response:
+        is_chat_completion = url == "chat/completions"
+        if is_chat_completion:
+            await self._ensure_chat_endpoint()
+
         async for attempt in AsyncRetrying(
             stop=stop_after_attempt(self.max_retries),
             wait=wait_exponential(multiplier=0.5, min=0.5, max=10),
@@ -167,9 +375,33 @@ class VLLMClient:
             reraise=True,
         ):
             with attempt:
-                response = await self.client.request(method, url, **kwargs)
+                request_url = url
+                if is_chat_completion and self._resolved_chat_path:
+                    request_url = self._resolved_chat_path
+                if not str(request_url).startswith("http"):
+                    request_url = self._build_absolute_url(self.base_url, str(request_url))
+
+                response = await self.client.request(method, request_url, **kwargs)
+
                 if response.status_code >= 400:
+                    if is_chat_completion and response.status_code in {400, 404}:
+                        self._record_client_error(
+                            response=response,
+                            payload=kwargs.get("json"),
+                        )
+                        if await self._attempt_failover():
+                            raise _FailoverNeeded("chat endpoint failover triggered")
+
+                        summary = _build_payload_summary(kwargs.get("json"))
+                        raise LLMServiceError(
+                            f"LLM chat completion failed with status {response.status_code}",
+                            endpoint=str(response.request.url),
+                            status=response.status_code,
+                            payload_summary=summary,
+                        )
+
                     response.raise_for_status()
+
                 return response
         raise RuntimeError("Retry loop exited unexpectedly")
 
@@ -195,6 +427,9 @@ class VLLMClient:
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
+
+        if self._resolved_chat_path is None:
+            await self._ensure_chat_endpoint()
 
         if num_predict is not None and num_predict > self.max_completion_tokens:
             logger.info(
@@ -242,37 +477,8 @@ class VLLMClient:
             #     payload.setdefault("extra_body", {}).update(extra_options)
 
             # Primary request
-            try:
-                response = await self._request_with_retry("POST", "chat/completions", json=payload)
-                data = response.json()
-            except httpx.HTTPStatusError as exc:
-                # Intermittent 404s can happen depending on how the server exposes the OpenAI routes.
-                # If we hit a 404, retry by toggling the /v1 prefix heuristically.
-                if exc.response is not None and exc.response.status_code == 404:
-                    base = self.base_url.rstrip("/")
-                    candidates: List[str] = []
-                    if base.endswith("/v1"):
-                        base_no = base[:-3]
-                        candidates.append(f"{base_no}/v1/chat/completions")
-                        candidates.append(f"{base_no}/chat/completions")
-                    else:
-                        candidates.append(f"{base}/v1/chat/completions")
-                    data = None
-                    for url in candidates:
-                        try:
-                            fb = await httpx.AsyncClient(
-                                timeout=self.client.timeout,
-                                headers=self.headers or None,
-                            ).post(url, json=payload)
-                            fb.raise_for_status()
-                            data = fb.json()
-                            break
-                        except Exception:
-                            continue
-                    if data is None:
-                        raise
-                else:
-                    raise
+            response = await self._request_with_retry("POST", "chat/completions", json=payload)
+            data = response.json()
 
             choice = data.get("choices", [{}])[0]
             message = choice.get("message", {})
@@ -789,8 +995,12 @@ class VLLMClient:
         """Verify the backing server is reachable."""
 
         try:
+            await self._ensure_chat_endpoint()
             await self._request_with_retry("GET", "models")
             return True
+        except LLMServiceError as exc:
+            logger.error("LLM health check failed: %s", exc)
+            return False
         except Exception as exc:
             logger.error("LLM connection failed: %s", exc)
             return False
@@ -875,6 +1085,7 @@ class OllamaClient:
         provider_name = (provider or settings.llm.provider or "vllm").lower()
         resolved_model = default_model or settings.llm.default_model
         resolved_url = base_url or settings.llm.endpoint_for(provider_name) or settings.llm.base_url
+        secondary_url = settings.llm.secondary_base_url
 
         client_kwargs: Dict[str, Any] = dict(kwargs)
         if transport is not None:
@@ -900,12 +1111,13 @@ class OllamaClient:
             self._client = client_cls(
                 base_url=resolved_url,
                 default_model=resolved_model or _resolve_default_model(),
+                secondary_base_url=secondary_url,
                 **client_kwargs,
             )
 
         self.provider = provider_name
-        self.base_url = getattr(self._client, "base_url", resolved_url)
         self.default_model = getattr(self._client, "default_model", resolved_model)
+        self._secondary_base_url = secondary_url
 
     def __getattr__(self, item: str) -> Any:
         return getattr(self._client, item)
@@ -915,10 +1127,18 @@ class OllamaClient:
         wrapper = object.__new__(OllamaClient)
         wrapper._client = cloned
         wrapper.provider = self.provider
-        wrapper.base_url = getattr(cloned, "base_url", self.base_url)
         wrapper.default_model = getattr(cloned, "default_model", model)
         wrapper._settings = self._settings
+        wrapper._secondary_base_url = getattr(self, "_secondary_base_url", None)
         return wrapper
+
+    @property
+    def base_url(self) -> Optional[str]:
+        return getattr(self._client, "base_url", None)
+
+    @property
+    def resolved_chat_endpoint(self) -> Optional[str]:
+        return getattr(self._client, "resolved_chat_endpoint", None)
 
     async def close(self) -> None:
         if hasattr(self._client, "close"):
