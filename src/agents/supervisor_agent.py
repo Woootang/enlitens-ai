@@ -232,6 +232,12 @@ class SupervisorAgent(BaseAgent):
             raw_founder_context=payload.get("raw_founder_context"),
             cache_prefix=payload.get("cache_prefix", payload.get("document_id", "doc")),
             cache_chunk_id=payload.get("cache_chunk_id", f"{payload.get('document_id', 'doc')}:root"),
+            document_passages=payload.get("document_passages"),
+            intake_registry=payload.get("intake_registry"),
+            transcript_registry=payload.get("transcript_registry"),
+            regional_atlas=payload.get("regional_atlas"),
+            health_report_summary=payload.get("health_report_summary"),
+            document_locality_matches=payload.get("document_locality_matches"),
         )
 
         state["skip_nodes"].update(plan_data["skip_nodes"])
@@ -634,12 +640,30 @@ class SupervisorAgent(BaseAgent):
             "cache_prefix": f"{state.get('cache_prefix')}:{agent_name}",
             "cache_chunk_id": state.get("cache_chunk_id"),
             "retry_attempt": attempt,
+            "document_passages": state.get("document_passages"),
+            "intake_registry": state.get("intake_registry"),
+            "transcript_registry": state.get("transcript_registry"),
+            "regional_atlas": state.get("regional_atlas"),
+            "health_report_summary": state.get("health_report_summary"),
+            "document_locality_matches": state.get("document_locality_matches"),
+            "client_profiles": state.get("client_profile_result"),
         }
+
+        context_result = state.get("context_result") or {}
+        rag_payload_snapshot = context_result.get("rag_retrieval") or {}
+
+        if "rag_retrieval" not in base_context:
+            base_context["rag_retrieval"] = rag_payload_snapshot
+        if "retrieved_passages" not in base_context:
+            base_context["retrieved_passages"] = rag_payload_snapshot.get("top_passages", [])
+        if "source_segments" not in base_context:
+            base_context["source_segments"] = rag_payload_snapshot.get("source_segments", [])
+        if "citation_map" not in base_context:
+            base_context["citation_map"] = rag_payload_snapshot.get("citation_map", {})
 
         retrieved_passages: List[Dict[str, Any]] = []
         rag_payload: Dict[str, Any] = {}
 
-        context_result = state.get("context_result") or {}
         if isinstance(context_result, dict):
             rag_payload = context_result.get("rag_retrieval", {}) or {}
 
@@ -683,6 +707,22 @@ class SupervisorAgent(BaseAgent):
             )
 
         base_context["retrieved_passages"] = retrieved_passages
+        source_segments = []
+        raw_segments = rag_payload.get("source_segments")
+        if isinstance(raw_segments, list):
+            source_segments = [segment for segment in raw_segments if isinstance(segment, dict)]
+        base_context["source_segments"] = source_segments
+
+        citation_map: Dict[str, str] = {}
+        raw_citation_map = rag_payload.get("citation_map")
+        if isinstance(raw_citation_map, dict):
+            citation_map = {
+                str(key): str(value)
+                for key, value in raw_citation_map.items()
+                if value is not None
+            }
+        base_context["citation_map"] = citation_map
+
         plan_step = None
         for step in state.get("metadata", {}).get("execution_plan", []):
             if step.get("agent") == agent_name:

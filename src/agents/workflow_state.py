@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, Optional, Set, Annotated
+from typing import Any, Dict, Optional, Set, Annotated, List, Tuple
 
 from typing_extensions import TypedDict
 
@@ -102,6 +102,12 @@ class WorkflowState(TypedDict, total=False):
     st_louis_context: Optional[Dict[str, Any]]
     raw_client_context: Optional[str]
     raw_founder_context: Optional[str]
+    document_passages: Optional[List[Dict[str, Any]]]
+    intake_registry: Optional[Dict[str, Any]]
+    transcript_registry: Optional[Dict[str, Any]]
+    regional_atlas: Optional[Dict[str, Any]]
+    health_report_summary: Optional[Dict[str, Any]]
+    document_locality_matches: Optional[List[Tuple[str, int]]]
 
     # Shared orchestration metadata - use Annotated to allow multiple updates
     stage: Annotated[str, _keep_last_value]
@@ -143,6 +149,12 @@ def create_initial_state(
     raw_founder_context: Optional[str] = None,
     cache_prefix: Optional[str] = None,
     cache_chunk_id: Optional[str] = None,
+    document_passages: Optional[List[Dict[str, Any]]] = None,
+    intake_registry: Optional[Dict[str, Any]] = None,
+    transcript_registry: Optional[Dict[str, Any]] = None,
+    regional_atlas: Optional[Dict[str, Any]] = None,
+    health_report_summary: Optional[Dict[str, Any]] = None,
+    document_locality_matches: Optional[List[Tuple[str, int]]] = None,
 ) -> WorkflowState:
     """Create a properly initialized workflow state."""
     return WorkflowState(
@@ -163,6 +175,12 @@ def create_initial_state(
         cache_prefix=cache_prefix or document_id,
         cache_chunk_id=cache_chunk_id or f"{document_id}:root",
         metadata={},
+        document_passages=document_passages,
+        intake_registry=intake_registry,
+        transcript_registry=transcript_registry,
+        regional_atlas=regional_atlas,
+        health_report_summary=health_report_summary,
+        document_locality_matches=document_locality_matches,
         science_result=None,
         context_result=None,
         client_profile_result=None,
