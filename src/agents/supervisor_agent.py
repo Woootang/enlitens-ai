@@ -118,33 +118,33 @@ class SupervisorAgent(BaseAgent):
                 if isinstance(result, Exception) or result is False:
                     failed_agents.append(name)
 
-        if failed_agents:
-            log_with_telemetry(
-                logger.error,
-                "Failed to initialize agents: %s",
-                failed_agents,
-                agent=TELEMETRY_AGENT,
-                severity=TelemetrySeverity.CRITICAL,
-                impact="Agent initialization failed",
-                details={"failed_agents": failed_agents},
-            )
-            return False
+            if failed_agents:
+                log_with_telemetry(
+                    logger.error,
+                    "Failed to initialize agents: %s",
+                    failed_agents,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.CRITICAL,
+                    impact="Agent initialization failed",
+                    details={"failed_agents": failed_agents},
+                )
+                return False
 
             self.workflow_graph = self._build_graph()
             self.is_initialized = True
             logger.info("✅ Supervisor and all specialized agents initialized successfully")
             return True
-    except Exception as exc:
-        log_with_telemetry(
-            logger.error,
-            "Failed to initialize supervisor: %s",
-            exc,
-            agent=TELEMETRY_AGENT,
-            severity=TelemetrySeverity.CRITICAL,
-            impact="Supervisor initialization failed",
-            details={"error": str(exc)},
-        )
-        return False
+        except Exception as exc:
+            log_with_telemetry(
+                logger.error,
+                "Failed to initialize supervisor: %s",
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Supervisor initialization failed",
+                details={"error": str(exc)},
+            )
+            return False
 
     async def _initialize_agent_with_retry(
         self, agent: BaseAgent, agent_name: str, max_retries: int = 3
@@ -244,6 +244,8 @@ class SupervisorAgent(BaseAgent):
                 "plan_status": "pending",
             }
         )
+        if payload.get("vector_store_status") is not None:
+            metadata["vector_store_status"] = dict(payload.get("vector_store_status"))
         state["metadata"] = metadata
 
         final_state = await self.workflow_graph.ainvoke(state)
@@ -698,12 +700,13 @@ class SupervisorAgent(BaseAgent):
 
         quality_score = 0.0
         confidence_score = 0.0
+        validation_payload = state.get("validation_result") or {}
         validation_passed = False
-        if state.get("validation_result"):
-            quality_score = state.get("validation_result").get("quality_scores", {}).get(
+        if validation_payload:
+            quality_score = validation_payload.get("quality_scores", {}).get(
                 "overall_quality", 0.0
             )
-            confidence_score = state.get("validation_result").get("confidence_scoring", {}).get(
+            confidence_score = validation_payload.get("confidence_scoring", {}).get(
                 "confidence_score", 0.0
             )
             validation_passed = quality_score >= self.quality_thresholds["minimum_quality"]
@@ -718,11 +721,24 @@ class SupervisorAgent(BaseAgent):
             "quality_score": quality_score,
             "confidence_score": confidence_score,
             "validation_passed": validation_passed,
-            "retry_metadata": state.get("validation_result", {}).get("retry_metadata", {}),
+            "retry_metadata": validation_payload.get("retry_metadata", {}),
             "retry_counts": state.get("attempt_counters", {}),
             "completed_nodes": state.get("completed_nodes", {}),
             "metadata": as_dict(state).get("metadata", {}),
         }
+
+        run_summary: Dict[str, Any] = {
+            "status": final_output["supervisor_status"],
+        }
+        vector_status = final_output["metadata"].get("vector_store_status")
+        if vector_status is not None:
+            run_summary["vector_store_status"] = vector_status
+            if not vector_status.get("is_healthy", True):
+                run_summary["warnings"] = [
+                    "Persistent vector store unavailable; retrieval will use in-memory fallback.",
+                ]
+
+        final_output["run_summary"] = run_summary
 
         self.processing_history.append(
             {

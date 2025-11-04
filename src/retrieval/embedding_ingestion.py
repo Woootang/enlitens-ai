@@ -10,11 +10,71 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from src.models.enlitens_schemas import EnlitensKnowledgeEntry
+from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 from .chunker import DocumentChunker
 from .vector_store import BaseVectorStore, QdrantVectorStore
 
 logger = logging.getLogger(__name__)
+TELEMETRY_AGENT = "vector_ingestion"
+
+
+@dataclass
+class EmbeddingIngestion:
+    """Wrap the ingestion pipeline with health monitoring for the vector store."""
+
+    vector_store: Optional[BaseVectorStore] = None
+    pipeline_kwargs: Dict[str, Any] = field(default_factory=dict)
+    pipeline: "EmbeddingIngestionPipeline" = field(init=False)
+    health_status: Dict[str, Any] = field(init=False, default_factory=dict)
+
+    def __post_init__(self) -> None:
+        params = dict(self.pipeline_kwargs)
+        if "vector_store" not in params:
+            params["vector_store"] = self.vector_store
+        self.pipeline = EmbeddingIngestionPipeline(**params)
+        self.vector_store = self.pipeline.vector_store
+        self.health_status = self.check_health()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.pipeline, name)
+
+    @property
+    def ingest_mode(self) -> str:
+        return self.health_status.get("mode", "persistent")
+
+    def health_snapshot(self) -> Dict[str, Any]:
+        return dict(self.health_status)
+
+    def check_health(self) -> Dict[str, Any]:
+        status: Dict[str, Any]
+        try:
+            is_healthy, details = self.vector_store.check_health()
+        except Exception as exc:  # pragma: no cover - defensive catch
+            is_healthy = False
+            details = {"error": str(exc), "exception": exc.__class__.__name__}
+
+        status = dict(details or {})
+        status.setdefault("mode", "persistent" if is_healthy else "in_memory")
+        status.setdefault("checked_at", datetime.utcnow().isoformat() + "Z")
+        status["is_healthy"] = bool(is_healthy)
+
+        if not status["is_healthy"]:
+            error_message = status.get("error", "vector store health check failed")
+            log_with_telemetry(
+                logger.critical,
+                "Vector store health check failed: %s",
+                error_message,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="Persistent vector store unavailable",
+                details=status,
+            )
+            if hasattr(self.vector_store, "client"):
+                setattr(self.vector_store, "client", None)
+
+        self.health_status = status
+        return status
 
 
 @dataclass

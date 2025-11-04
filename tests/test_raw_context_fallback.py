@@ -23,7 +23,11 @@ _register_stub("src.agents.supervisor_agent", SupervisorAgent=_Stub)
 _register_stub("src.agents.extraction_team", ExtractionTeam=_Stub)
 _register_stub("src.extraction.enhanced_pdf_extractor", EnhancedPDFExtractor=_Stub)
 _register_stub("src.extraction.enhanced_extraction_tools", EnhancedExtractionTools=_Stub)
-_register_stub("src.retrieval.embedding_ingestion", EmbeddingIngestionPipeline=_Stub)
+_register_stub(
+    "src.retrieval.embedding_ingestion",
+    EmbeddingIngestionPipeline=_Stub,
+    EmbeddingIngestion=_Stub,
+)
 _register_stub(
     "src.models.enlitens_schemas",
     EnlitensKnowledgeBase=_Stub,

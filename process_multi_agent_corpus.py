@@ -36,7 +36,7 @@ from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
-from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
+from src.retrieval.embedding_ingestion import EmbeddingIngestion, EmbeddingIngestionPipeline
 from src.monitoring.error_telemetry import (
     TelemetrySeverity,
     log_with_telemetry,
@@ -194,12 +194,23 @@ class MultiAgentProcessor:
             "yes",
             "on",
         }
-        self.embedding_ingestion: Optional[EmbeddingIngestionPipeline] = None
+        self.embedding_ingestion: Optional[EmbeddingIngestion] = None
+        self.vector_store_status: Dict[str, Any] = {
+            "is_healthy": False,
+            "mode": "disabled",
+            "reason": "not_initialized",
+        }
         if disable_vector_ingestion:
             logger.info("🔌 Vector store ingestion disabled via environment toggle")
+            self.vector_store_status.update({"reason": "disabled_by_environment"})
         else:
             try:
-                self.embedding_ingestion = EmbeddingIngestionPipeline()
+                self.embedding_ingestion = EmbeddingIngestion()
+                self.vector_store_status = self.embedding_ingestion.health_snapshot()
+                if not self.vector_store_status.get("is_healthy", True):
+                    logger.warning(
+                        "⚠️ Vector store health degraded; falling back to in-memory mode"
+                    )
                 logger.info("🧠 Vector store ingestion pipeline initialized")
                 self._bootstrap_context_ingestion()
             except Exception as exc:
@@ -213,6 +224,12 @@ class MultiAgentProcessor:
                     details={"error": str(exc)},
                 )
                 self.embedding_ingestion = None
+                self.vector_store_status = {
+                    "is_healthy": False,
+                    "mode": "disabled",
+                    "reason": "initialization_failed",
+                    "error": str(exc),
+                }
 
         # St. Louis regional context
         self.st_louis_context = self._load_st_louis_context()
@@ -780,7 +797,7 @@ class MultiAgentProcessor:
         if raw_founder_context:
             founder_insights["raw_context"] = raw_founder_context
 
-        return {
+        context: Dict[str, Any] = {
             "document_id": document_id,
             "document_text": text,
             "client_insights": client_insights,
@@ -794,6 +811,12 @@ class MultiAgentProcessor:
             "raw_founder_context": raw_founder_context,
             "processing_stage": "initial",
         }
+
+        vector_status = getattr(self, "vector_store_status", None)
+        if vector_status is not None:
+            context["vector_store_status"] = dict(vector_status)
+
+        return context
 
     async def process_document(self, pdf_path: Path) -> Optional[EnlitensKnowledgeEntry]:
         """Process a single document through the complete multi-agent system."""

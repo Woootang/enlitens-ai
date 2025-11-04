@@ -46,7 +46,11 @@ _register_stub("src.agents.supervisor_agent", SupervisorAgent=_Placeholder)
 _register_stub("src.agents.extraction_team", ExtractionTeam=_Placeholder)
 _register_stub("src.extraction.enhanced_pdf_extractor", EnhancedPDFExtractor=_Placeholder)
 _register_stub("src.extraction.enhanced_extraction_tools", EnhancedExtractionTools=_Placeholder)
-_register_stub("src.retrieval.embedding_ingestion", EmbeddingIngestionPipeline=_Placeholder)
+_register_stub(
+    "src.retrieval.embedding_ingestion",
+    EmbeddingIngestionPipeline=_Placeholder,
+    EmbeddingIngestion=_Placeholder,
+)
 _register_stub(
     "src.models.enlitens_schemas",
     EnlitensKnowledgeBase=_Placeholder,
@@ -87,6 +91,7 @@ def test_context_documents_ingested_on_init(monkeypatch, tmp_path: Path, report_
     class StubIngestionPipeline:
         def __init__(self, *_args, **_kwargs):
             self.calls = []
+            self.health_status = {"is_healthy": True, "mode": "persistent"}
 
         def ingest_document(self, *, document_id, full_text, agent_outputs=None, metadata=None, rebuild=False):
             payload = {
@@ -104,6 +109,9 @@ def test_context_documents_ingested_on_init(monkeypatch, tmp_path: Path, report_
                 metadata=metadata or {},
             )
 
+        def health_snapshot(self):
+            return dict(self.health_status)
+
     monkeypatch.setattr(processor_module, "SupervisorAgent", lambda: _StubSupervisor())
     monkeypatch.setattr(processor_module, "ExtractionTeam", lambda: _StubExtractionTeam())
     monkeypatch.setattr(processor_module, "EnhancedExtractionTools", lambda: object())
@@ -115,7 +123,7 @@ def test_context_documents_ingested_on_init(monkeypatch, tmp_path: Path, report_
         "EnhancedPDFExtractor",
         lambda: _StubPDFExtractor(report_text),
     )
-    monkeypatch.setattr(processor_module, "EmbeddingIngestionPipeline", StubIngestionPipeline)
+    monkeypatch.setattr(processor_module, "EmbeddingIngestion", StubIngestionPipeline)
 
     def fake_candidates(self, filename: str):
         return [tmp_path / filename]
