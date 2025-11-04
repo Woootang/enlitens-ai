@@ -42,6 +42,11 @@ from src.monitoring.error_telemetry import (
     log_with_telemetry,
     telemetry_recorder,
 )
+from src.knowledge_base.status_file import (
+    STATUS_FILE_NAME,
+    clear_processing_status,
+    write_processing_status,
+)
 from src.utils.terminology import sanitize_structure, contains_banned_terms
 from src.pipeline.optional_context_loader import analyze_optional_context
 
@@ -179,6 +184,7 @@ class MultiAgentProcessor:
         self.st_louis_report = Path(st_louis_report) if st_louis_report else None
         self.context_dir = Path(__file__).parent
         self.temp_file = Path(f"{output_file}.temp")
+        self.status_file = self.output_file.parent / STATUS_FILE_NAME
 
         # Initialize components
         self.supervisor = SupervisorAgent()
@@ -1293,12 +1299,16 @@ class MultiAgentProcessor:
         """Process the entire corpus using the multi-agent system."""
         start_time = time.time()  # Track processing start time
         failed_count = 0
+        pdf_files: List[Path] = []
+        current_document_index = -1
         try:
             logger.info("🚀 Starting MULTI-AGENT Enlitens Corpus Processing")
             logger.info(f"📁 Input directory: {self.input_dir}")
             logger.info(f"📄 Output file: {self.output_file}")
             logger.info(f"📊 Log file: {log_filename} (comprehensive log for all 344 files)")
             logger.info(f"🏙️ St. Louis context: {len(self.st_louis_context)} categories loaded")
+
+            clear_processing_status(self.status_file)
 
             # Check system resources
             await self._check_system_resources()
@@ -1316,6 +1326,11 @@ class MultiAgentProcessor:
                     severity=TelemetrySeverity.CRITICAL,
                     impact="Corpus processing aborted",
                 )
+                write_processing_status(
+                    self.status_file,
+                    reason="No PDF files found in input directory",
+                    affected_documents=[],
+                )
                 return
 
             # Ensure the supervisor and all specialized agents are ready
@@ -1329,6 +1344,11 @@ class MultiAgentProcessor:
                         agent="multi_agent_supervisor",
                         severity=TelemetrySeverity.CRITICAL,
                         impact="Supervisor unavailable",
+                    )
+                    write_processing_status(
+                        self.status_file,
+                        reason="Supervisor initialization failed",
+                        affected_documents=[pdf.stem for pdf in pdf_files],
                     )
                     return
 
@@ -1344,6 +1364,7 @@ class MultiAgentProcessor:
 
             # Process documents with multi-agent system
             for i, pdf_path in enumerate(pdf_files):
+                current_document_index = i
                 if pdf_path.stem in processed_docs:
                     logger.info(f"⏭️ Skipping already processed: {pdf_path.name}")
                     continue
@@ -1454,6 +1475,8 @@ class MultiAgentProcessor:
                 "runtime_seconds": round(processing_duration, 2),
             })
 
+            clear_processing_status(self.status_file)
+
         except Exception as e:
             log_with_telemetry(
                 logger.error,
@@ -1465,6 +1488,15 @@ class MultiAgentProcessor:
                 details={"error": str(e)},
             )
             post_monitor_stats({"status": "error", "error": str(e)})
+            remaining_docs: List[str] = []
+            if pdf_files:
+                start_index = current_document_index if 0 <= current_document_index < len(pdf_files) else 0
+                remaining_docs = [pdf.stem for pdf in pdf_files[start_index:]]
+            write_processing_status(
+                self.status_file,
+                reason=str(e),
+                affected_documents=remaining_docs,
+            )
             raise
         finally:
             # Clean up resources

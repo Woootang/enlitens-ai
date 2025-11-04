@@ -7,10 +7,16 @@ import math
 import os
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from src.models.enlitens_schemas import EnlitensKnowledgeEntry
 from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
+from src.knowledge_base.status_file import (
+    STATUS_FILE_NAME,
+    KnowledgeBaseUnavailableError,
+    read_processing_status,
+)
 
 from .chunker import DocumentChunker
 from .vector_store import BaseVectorStore, QdrantVectorStore
@@ -461,10 +467,15 @@ def load_knowledge_entries_from_path(path: str) -> List[EnlitensKnowledgeEntry]:
     """Utility for loading knowledge entries from a JSON file."""
     from src.models.enlitens_schemas import EnlitensKnowledgeBase
 
-    if not os.path.exists(path):
+    kb_path = Path(path)
+    status = read_processing_status(kb_path.parent / STATUS_FILE_NAME)
+    if status and status.status.lower() != "ok":
+        raise KnowledgeBaseUnavailableError(status)
+
+    if not kb_path.exists():
         raise FileNotFoundError(path)
 
-    with open(path, "r", encoding="utf-8") as handle:
+    with kb_path.open("r", encoding="utf-8") as handle:
         raw = json.load(handle)
 
     if isinstance(raw, dict) and "documents" in raw:
