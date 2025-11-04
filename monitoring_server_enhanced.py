@@ -34,6 +34,7 @@ import uvicorn
 import httpx
 
 from src.synthesis.ollama_client import VLLMClient, MONITORING_MODEL
+from src.knowledge_base.status_file import STATUS_FILE_NAME, read_processing_status
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ FOREMAN_LOCAL_URL = os.environ.get("FOREMAN_LOCAL_URL", "http://localhost:8001/v
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-70b-versatile")
 KNOWLEDGE_BASE_PATH = Path("enlitens_knowledge_base_latest.json")
+KNOWLEDGE_BASE_STATUS_PATH = KNOWLEDGE_BASE_PATH.parent / STATUS_FILE_NAME
 STATIC_DIR = Path(__file__).parent / "monitoring_ui"
 
 # Initialize Groq client if API key is available
@@ -567,6 +569,15 @@ async def get_stats():
 @app.get("/api/knowledge-base")
 async def get_knowledge_base():
     """Get the latest knowledge base JSON for quality review."""
+    status = read_processing_status(KNOWLEDGE_BASE_STATUS_PATH)
+    if status and status.status.lower() != "ok":
+        return JSONResponse(
+            {
+                "error": status.reason,
+                "status": status.to_dict(),
+            },
+            status_code=503,
+        )
     if KNOWLEDGE_BASE_PATH.exists():
         try:
             with open(KNOWLEDGE_BASE_PATH, 'r') as f:
