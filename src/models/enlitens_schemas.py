@@ -103,13 +103,41 @@ class VerifiedStatistic(BaseModel):
 
 class RebellionFramework(BaseModel):
     """Rebellion framework content extracted from research papers."""
-    narrative_deconstruction: List[str] = Field(default_factory=list, description="Narrative deconstruction insights")
-    sensory_profiling: List[str] = Field(default_factory=list, description="Sensory profiling insights")
-    executive_function: List[str] = Field(default_factory=list, description="Executive function insights")
-    social_processing: List[str] = Field(default_factory=list, description="Social processing insights")
-    strengths_synthesis: List[str] = Field(default_factory=list, description="Strengths synthesis insights")
-    rebellion_themes: List[str] = Field(default_factory=list, description="Rebellion themes")
-    aha_moments: List[str] = Field(default_factory=list, description="Aha moments for clients")
+    narrative_deconstruction: List[str] = Field(
+        default_factory=list,
+        description="Narrative deconstruction insights",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
+    sensory_profiling: List[str] = Field(
+        default_factory=list,
+        description="Sensory profiling insights",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
+    executive_function: List[str] = Field(
+        default_factory=list,
+        description="Executive function insights",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
+    social_processing: List[str] = Field(
+        default_factory=list,
+        description="Social processing insights",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
+    strengths_synthesis: List[str] = Field(
+        default_factory=list,
+        description="Strengths synthesis insights",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
+    rebellion_themes: List[str] = Field(
+        default_factory=list,
+        description="Rebellion themes",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
+    aha_moments: List[str] = Field(
+        default_factory=list,
+        description="Aha moments for clients",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
 
     @staticmethod
     def _coerce_list(values: List[Any]) -> List[str]:
