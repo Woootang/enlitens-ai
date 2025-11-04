@@ -147,6 +147,62 @@ def test_client_profile_agent_normalizes_fragmented_partial_payload():
     assert asyncio.run(agent.validate_output(result))
 
 
+def test_client_profile_agent_backfills_missing_citations_from_retrieval():
+    agent = ClientProfileAgent()
+
+    citation_free_payload = {
+        "shared_thread": "Threaded",
+        "profiles": [
+            {
+                "profile_name": "Sensory rail commuter",
+                "intake_reference": '"The red line makes my skin buzz"',
+                "research_reference": "Transit overload evidence.",
+                "benefit_explanation": "Tailored commute regulation.",
+                "st_louis_alignment": "Metro tie-in for STL riders.",
+            },
+            {
+                "profile_name": "After-school melter",
+                "intake_reference": '"By pickup time I am empty and shaking"',
+                "research_reference": "Afternoon cortisol guidance.",
+                "benefit_explanation": "Homework decompression plan.",
+                "st_louis_alignment": "Northside school realities.",
+            },
+            {
+                "profile_name": "Shift worker hypervigilance",
+                "intake_reference": '"Night sirens keep my jaw locked"',
+                "research_reference": "Overnight siren data.",
+                "benefit_explanation": "Low-light decompression pods.",
+                "st_louis_alignment": "STL hospital siren map.",
+            },
+        ],
+    }
+
+    client = _RecordingOllamaClient({ClientProfileSet: lambda: citation_free_payload})
+    agent.ollama_client = client
+
+    context = {
+        "retrieved_passages": [
+            {"text": "Passage A", "chunk_id": "chunk-1", "document_id": "doc-1"},
+            {"text": "Passage B", "chunk_id": "chunk-2", "document_id": "doc-2"},
+            {"text": "Passage C", "chunk_id": "chunk-3", "document_id": "doc-3"},
+        ],
+        "client_insights": {"direct_quotes": ['"Night sirens keep my jaw locked"']},
+        "raw_client_context": 'Client said "The red line makes my skin buzz" during intake.',
+        "st_louis_context": {"neighbourhoods": ["The Ville"], "stressors": ["sirens"]},
+    }
+
+    result = asyncio.run(agent.process(context))
+    payload = result["client_profiles"]
+
+    validated = ClientProfileSet.model_validate(payload)
+    for idx, profile in enumerate(validated.profiles, start=1):
+        expected_tag = f"[Source {idx}]"
+        assert expected_tag in profile.research_reference
+        assert expected_tag in profile.benefit_explanation
+        if profile.st_louis_alignment:
+            assert expected_tag in profile.st_louis_alignment
+
+
 def test_client_profile_agent_falls_back_when_partial_payload_invalid():
     agent = ClientProfileAgent()
 

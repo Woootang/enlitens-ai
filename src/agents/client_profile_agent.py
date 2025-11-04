@@ -221,7 +221,8 @@ OUTPUT REQUIREMENTS:
         if isinstance(raw_response, ClientProfileSet):
             return raw_response
 
-        normalized = self._normalize_partial_profiles(raw_response)
+        source_tags = [f"[Source {idx}]" for idx, _ in enumerate(retrieved_passages, start=1)]
+        normalized = self._normalize_partial_profiles(raw_response, source_tags=source_tags)
         if normalized is not None:
             try:
                 return ClientProfileSet.model_validate(normalized)
@@ -249,7 +250,9 @@ OUTPUT REQUIREMENTS:
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
-    def _normalize_partial_profiles(self, payload: Any) -> Optional[Dict[str, Any]]:
+    def _normalize_partial_profiles(
+        self, payload: Any, *, source_tags: Sequence[str]
+    ) -> Optional[Dict[str, Any]]:
         if payload is None:
             return None
         if isinstance(payload, ClientProfileSet):
@@ -363,6 +366,17 @@ OUTPUT REQUIREMENTS:
 
         if not cleaned_profiles:
             return None
+
+        normalized_tags = [tag.strip() for tag in source_tags if isinstance(tag, str) and tag.strip()]
+        if normalized_tags:
+            for idx, profile in enumerate(cleaned_profiles):
+                tag = normalized_tags[min(idx, len(normalized_tags) - 1)]
+                for field_name in ("research_reference", "benefit_explanation", "st_louis_alignment"):
+                    value = profile.get(field_name)
+                    if isinstance(value, str):
+                        text = value.strip()
+                        if text and "[Source" not in text:
+                            profile[field_name] = f"{text} {tag}"
 
         normalized["profiles"] = cleaned_profiles
         return normalized
