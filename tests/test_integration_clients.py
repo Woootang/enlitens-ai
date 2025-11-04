@@ -253,3 +253,115 @@ async def test_agent_raises_llm_service_error_on_client_failures(
     assert "chat/completions" in details.get("endpoint", "")
 
     await client.close()
+
+
+@pytest.mark.asyncio
+async def test_vllm_client_reprobes_after_chat_404(monkeypatch: pytest.MonkeyPatch) -> None:
+    state: Dict[str, Any] = {
+        "health_checks": [],
+        "requests": [],
+        "v1_available": False,
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if request.method == "POST" and (
+            path.endswith("/chat/completions") or path.endswith("/v1/chat/completions")
+        ):
+            payload = json.loads(request.content.decode("utf-8"))
+            is_health_check = "temperature" not in payload
+            if is_health_check:
+                state["health_checks"].append(path)
+                if not state["v1_available"]:
+                    if path.endswith("/chat/completions"):
+                        return httpx.Response(200, json={"ok": True})
+                    return httpx.Response(404, json={"error": "missing"})
+                if path.endswith("/v1/chat/completions"):
+                    return httpx.Response(200, json={"ok": True})
+                return httpx.Response(404, json={"error": "moved"})
+
+            state["requests"].append(path)
+            if len(state["requests"]) == 1:
+                state["v1_available"] = True
+                return httpx.Response(404, json={"error": "missing"})
+
+            assert path.endswith("/v1/chat/completions")
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {
+                            "message": {"content": "recovered"},
+                            "finish_reason": "stop",
+                        }
+                    ],
+                    "usage": {"completion_tokens": 1},
+                },
+            )
+
+        raise AssertionError(f"Unexpected request path: {path}")
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setenv("LLM_BASE_URL", "http://router.local")
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "test-model")
+    reset_settings_cache()
+
+    client = VLLMClient(transport=transport)
+    try:
+        result = await client.generate_response("ping")
+    finally:
+        await client.close()
+
+    assert result["response"] == "recovered"
+    assert state["requests"] == ["/chat/completions", "/v1/chat/completions"]
+    assert any(path.endswith("/v1/chat/completions") for path in state["health_checks"])
+
+
+@pytest.mark.asyncio
+async def test_vllm_client_structured_fallback_on_persistent_404(monkeypatch: pytest.MonkeyPatch) -> None:
+    state: Dict[str, Any] = {
+        "requests": [],
+        "health_checks": 0,
+        "fail_mode": False,
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST" and request.url.path.endswith("/v1/chat/completions"):
+            payload = json.loads(request.content.decode("utf-8"))
+            is_health_check = "temperature" not in payload
+            state["health_checks"] += 1
+            if is_health_check and not state["fail_mode"]:
+                return httpx.Response(200, json={"ok": True})
+            return httpx.Response(404, json={"error": "missing"})
+
+        if request.method == "POST" and request.url.path.endswith("/chat/completions"):
+            payload = json.loads(request.content.decode("utf-8"))
+            is_health_check = "temperature" not in payload
+            if is_health_check:
+                state["health_checks"] += 1
+                return httpx.Response(404, json={"error": "missing"})
+
+            state["fail_mode"] = True
+            state["requests"].append(request.url.path)
+            return httpx.Response(404, json={"error": "missing"})
+
+        raise AssertionError(f"Unexpected request path: {request.url.path}")
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setenv("LLM_BASE_URL", "http://router.local/v1")
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "test-model")
+    reset_settings_cache()
+
+    client = VLLMClient(transport=transport)
+    try:
+        payload = await client.generate_response("ping")
+    finally:
+        await client.close()
+
+    assert payload["response"] == ""
+    raw = payload.get("raw", {})
+    assert raw.get("model") == ""
+    telemetry = raw.get("telemetry", {})
+    assert telemetry.get("status") == 404
+    assert telemetry.get("message")
+    assert state["requests"] == ["/chat/completions"]

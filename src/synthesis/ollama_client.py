@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import time
 import weakref
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 from urllib.parse import urlparse
@@ -381,18 +382,44 @@ class VLLMClient:
                 if not str(request_url).startswith("http"):
                     request_url = self._build_absolute_url(self.base_url, str(request_url))
 
-                response = await self.client.request(method, request_url, **kwargs)
+                request_url_str = str(request_url)
+                response = await self.client.request(method, request_url_str, **kwargs)
 
                 if response.status_code >= 400:
                     if is_chat_completion and response.status_code in {400, 404}:
+                        payload = kwargs.get("json")
+                        summary = _build_payload_summary(payload)
+
                         self._record_client_error(
                             response=response,
-                            payload=kwargs.get("json"),
+                            payload=payload,
                         )
+
+                        # Clear the cached endpoint so reprobe starts from scratch.
+                        self._resolved_chat_path = None
+                        self._resolved_chat_endpoint_url = None
+                        self._propagate_state()
+
+                        reprobe_error: Optional[LLMServiceError] = None
+                        try:
+                            await self._ensure_chat_endpoint(force=True, start_index=0)
+                        except LLMServiceError as exc:
+                            reprobe_error = exc
+                        else:
+                            raise _FailoverNeeded("chat endpoint reprobe triggered")
+
                         if await self._attempt_failover():
                             raise _FailoverNeeded("chat endpoint failover triggered")
 
-                        summary = _build_payload_summary(kwargs.get("json"))
+                        if reprobe_error is not None:
+                            return self._structured_fallback_response(
+                                method=method,
+                                request_url=request_url_str,
+                                payload_summary=summary,
+                                status_code=response.status_code,
+                                error=reprobe_error,
+                            )
+
                         raise LLMServiceError(
                             f"LLM chat completion failed with status {response.status_code}",
                             endpoint=str(response.request.url),
@@ -404,6 +431,54 @@ class VLLMClient:
 
                 return response
         raise RuntimeError("Retry loop exited unexpectedly")
+
+    def _structured_fallback_response(
+        self,
+        *,
+        method: str,
+        request_url: str,
+        payload_summary: Dict[str, Any],
+        status_code: int,
+        error: LLMServiceError,
+    ) -> httpx.Response:
+        request = httpx.Request(method, request_url)
+
+        telemetry_payload = {
+            "status": status_code,
+            "endpoint": str(request.url),
+            "message": "Returned empty structured fallback after chat client error",
+            "error": str(error),
+            "payload": payload_summary,
+        }
+
+        try:
+            telemetry_recorder.record_event(
+                doc_id=None,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.CRITICAL,
+                impact="LLM chat completion fallback response generated",
+                details=telemetry_payload,
+            )
+        except Exception:  # pragma: no cover - telemetry best effort
+            logger.exception("Failed to record telemetry for fallback response")
+
+        fallback_payload = {
+            "id": "fallback-empty-response",
+            "object": "chat.completion",
+            "created": int(time.time()),
+            "model": "",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {"role": "assistant", "content": ""},
+                    "finish_reason": "fallback",
+                }
+            ],
+            "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "telemetry": telemetry_payload,
+        }
+
+        return httpx.Response(200, json=fallback_payload, request=request)
 
     async def generate_response(
         self,
