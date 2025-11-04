@@ -288,6 +288,10 @@ class BaseVectorStore:
     def delete_by_document(self, document_id: str) -> None:  # pragma: no cover - interface
         raise NotImplementedError
 
+    def check_health(self) -> Tuple[bool, Dict[str, Any]]:
+        """Return whether the backing store is reachable."""
+        return True, {"mode": "persistent"}
+
 
 class QdrantVectorStore(BaseVectorStore):
     """Persist chunks and metadata while supporting dense retrieval."""
@@ -497,6 +501,25 @@ class QdrantVectorStore(BaseVectorStore):
 
     def get_all_chunks(self) -> List[Dict[str, Any]]:
         return [entry["chunk"] for entry in self.local_store.values()]
+
+    def check_health(self) -> Tuple[bool, Dict[str, Any]]:
+        if self.client is None:
+            return False, {
+                "mode": "in_memory",
+                "error": "Qdrant client unavailable; using local fallback",
+            }
+
+        try:
+            self.client.get_collection(self.collection_name)
+        except Exception as exc:
+            self.client = None
+            return False, {
+                "mode": "in_memory",
+                "error": str(exc),
+                "exception": exc.__class__.__name__,
+            }
+
+        return True, {"mode": "persistent"}
 
 
 class ChromaVectorStore(BaseVectorStore):

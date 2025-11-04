@@ -74,7 +74,11 @@ _register_stub("src.agents.supervisor_agent", SupervisorAgent=_StubSupervisorAge
 _register_stub("src.agents.extraction_team", ExtractionTeam=_StubExtractionTeam)
 _register_stub("src.extraction.enhanced_pdf_extractor", EnhancedPDFExtractor=_StubPDFExtractor)
 _register_stub("src.extraction.enhanced_extraction_tools", EnhancedExtractionTools=_StubExtractionTools)
-_register_stub("src.retrieval.embedding_ingestion", EmbeddingIngestionPipeline=_StubEmbeddingIngestionPipeline)
+_register_stub(
+    "src.retrieval.embedding_ingestion",
+    EmbeddingIngestionPipeline=_StubEmbeddingIngestionPipeline,
+    EmbeddingIngestion=_StubEmbeddingIngestionPipeline,
+)
 
 from process_multi_agent_corpus import MultiAgentProcessor
 
