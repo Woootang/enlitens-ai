@@ -437,14 +437,17 @@ class ClientProfile(BaseModel):
     research_reference: str = Field(
         ...,
         description="Sentence that cites a retrieved research passage using [Source #] tags",
+        json_schema_extra={"pattern": r"\[Source [^\]]+\]"},
     )
     benefit_explanation: str = Field(
         ...,
         description="Why the cited research benefits this client, explicitly citing [Source #]",
+        json_schema_extra={"pattern": r"\[Source [^\]]+\]"},
     )
     st_louis_alignment: Optional[str] = Field(
         None,
         description="Optional tie-in to St. Louis context or community realities, also citing [Source #] when applicable",
+        json_schema_extra={"pattern": r"\[Source [^\]]+\]"},
     )
 
     @field_validator("intake_reference")
