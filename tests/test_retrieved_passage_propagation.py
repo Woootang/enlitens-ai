@@ -189,3 +189,67 @@ async def test_rebellion_agent_prompt_and_output_reference_retrieved_passage():
     prompt = client.prompts[0][0]
     assert "Neurodivergent brains" in prompt
     assert "[Source 1]" in result["rebellion_framework"]["narrative_deconstruction"][0]
+
+
+@pytest.mark.asyncio
+async def test_rebellion_agent_normalizes_sparse_output():
+    agent = RebellionFrameworkAgent()
+
+    client = _RecordingOllamaClient(
+        {
+            RebellionFramework: lambda: RebellionFramework(
+                narrative_deconstruction=["Only one insight"],
+                sensory_profiling=[""],
+                executive_function=["Executive focus"],
+                social_processing=[],
+                strengths_synthesis=["Strength insight"],
+                rebellion_themes=["Theme"],
+                aha_moments=["Aha"],
+            )
+        }
+    )
+    agent.ollama_client = client
+
+    context = {
+        "document_text": "Document body",
+        "science_data": {"research_content": {"findings": ["Example finding"]}},
+        "clinical_content": {},
+        "retrieved_passages": _sample_retrieved_passages(),
+    }
+
+    result = await agent.process(context)
+    normalized = result["rebellion_framework"]
+
+    for field in RebellionFrameworkAgent.FRAMEWORK_FIELDS:
+        values = normalized[field]
+        assert len(values) >= 3, f"Expected normalized minimum entries for {field}"
+        assert all(isinstance(item, str) and item.strip() for item in values)
+
+    assert await agent.validate_output(result) is True
+
+
+@pytest.mark.asyncio
+async def test_rebellion_agent_populates_fallback_on_failure():
+    agent = RebellionFrameworkAgent()
+
+    class _FailingClient:
+        async def generate_structured_response(self, **kwargs):  # type: ignore[override]
+            return None
+
+    agent.ollama_client = _FailingClient()
+
+    context = {
+        "document_text": "Document body",
+        "science_data": {"research_content": {"findings": ["Example finding"]}},
+        "clinical_content": {},
+        "retrieved_passages": _sample_retrieved_passages(),
+    }
+
+    result = await agent.process(context)
+    normalized = result["rebellion_framework"]
+
+    for field in RebellionFrameworkAgent.FRAMEWORK_FIELDS:
+        assert len(normalized[field]) >= 3
+
+    assert result.get("framework_quality") == "needs_review"
+    assert await agent.validate_output(result) is True
