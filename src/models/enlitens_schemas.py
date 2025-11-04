@@ -344,14 +344,46 @@ class SocialMediaContent(BaseModel):
 
 class EducationalContent(BaseModel):
     """Educational content extracted from research papers."""
-    explanations: List[str] = Field(default_factory=list, description="Educational explanations")
-    examples: List[str] = Field(default_factory=list, description="Educational examples")
-    analogies: List[str] = Field(default_factory=list, description="Educational analogies")
-    definitions: List[str] = Field(default_factory=list, description="Educational definitions")
-    processes: List[str] = Field(default_factory=list, description="Educational processes")
-    comparisons: List[str] = Field(default_factory=list, description="Educational comparisons")
-    visual_aids: List[str] = Field(default_factory=list, description="Visual aid suggestions")
-    learning_objectives: List[str] = Field(default_factory=list, description="Learning objectives")
+    explanations: List[str] = Field(
+        default_factory=list,
+        description="Educational explanations",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    examples: List[str] = Field(
+        default_factory=list,
+        description="Educational examples",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    analogies: List[str] = Field(
+        default_factory=list,
+        description="Educational analogies",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    definitions: List[str] = Field(
+        default_factory=list,
+        description="Educational definitions",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    processes: List[str] = Field(
+        default_factory=list,
+        description="Educational processes",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    comparisons: List[str] = Field(
+        default_factory=list,
+        description="Educational comparisons",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    visual_aids: List[str] = Field(
+        default_factory=list,
+        description="Visual aid suggestions",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
+    learning_objectives: List[str] = Field(
+        default_factory=list,
+        description="Learning objectives",
+        json_schema_extra={"minItems": 5, "maxItems": 10},
+    )
 
 
 class ClinicalContent(BaseModel):
