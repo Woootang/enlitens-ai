@@ -1,6 +1,8 @@
 """Client Profile Agent - Links intake language to retrieved research citations."""
 from __future__ import annotations
 
+import asyncio
+import hashlib
 import json
 import logging
 import re
@@ -9,7 +11,16 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from pydantic import ValidationError
 
 from .base_agent import BaseAgent
-from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
+from src.models.enlitens_schemas import (
+    ClientProfile,
+    ClientProfileSet,
+    ExternalResearchSource,
+)
+from src.orchestration.research_orchestrator import (
+    ExternalResearchOrchestrator,
+    ResearchHit,
+    ResearchQuery,
+)
 from src.synthesis.ollama_client import OllamaClient
 from src.utils.enlitens_constitution import EnlitensConstitution
 from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
@@ -29,6 +40,8 @@ class ClientProfileAgent(BaseAgent):
         self.ollama_client: Optional[OllamaClient] = None
         self.constitution = EnlitensConstitution()
         self._prompt_principles: Sequence[str] = ("ENL-002", "ENL-003", "ENL-010")
+        self.research_orchestrator: Optional[ExternalResearchOrchestrator] = None
+        self._fallback_disclaimer = "FICTIONAL CLIENT SCENARIO – INTERNAL USE ONLY"
 
     async def initialize(self) -> bool:
         try:
@@ -37,6 +50,8 @@ class ClientProfileAgent(BaseAgent):
                 raise RuntimeError(
                     "Language model backend unavailable for ClientProfileAgent."
                 )
+            if self.research_orchestrator is None:
+                self.research_orchestrator = ExternalResearchOrchestrator.from_settings()
             self.is_initialized = True
             logger.info("✅ %s agent initialized", self.name)
             return True
@@ -54,6 +69,9 @@ class ClientProfileAgent(BaseAgent):
             return False
 
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        document_id = context.get("document_id") or "document"
+        external_sources: List[ExternalResearchSource] = []
+
         try:
             if self.ollama_client is None:
                 raise RuntimeError("ClientProfileAgent not initialized")
@@ -62,15 +80,46 @@ class ClientProfileAgent(BaseAgent):
             raw_client_context = context.get("raw_client_context")
             client_insights = context.get("client_insights") or {}
             st_louis_context = context.get("st_louis_context") or {}
+            intake_registry = context.get("intake_registry") or {}
+            transcript_registry = context.get("transcript_registry") or {}
+            regional_atlas = context.get("regional_atlas") or {}
+            health_summary = context.get("health_report_summary") or {}
+            document_localities = context.get("document_locality_matches") or []
 
             intake_quotes = self._collect_intake_quotes(client_insights, raw_client_context)
+            intake_segments = self._select_relevant_intake_segments(
+                intake_registry=intake_registry,
+                document_localities=document_localities,
+                retrieved_passages=retrieved_passages,
+                fallback_quotes=intake_quotes,
+            )
             intake_block = self._render_intake_block(intake_quotes, raw_client_context)
+            intake_registry_block = self._render_intake_registry_block(intake_segments)
             retrieved_block = self._render_retrieved_passages_block(
                 retrieved_passages,
                 raw_client_context=raw_client_context,
                 raw_founder_context=context.get("raw_founder_context"),
                 max_passages=6,
             )
+            regional_focus_block = self._render_regional_focus_block(
+                document_localities=document_localities,
+                intake_registry=intake_registry,
+                regional_atlas=regional_atlas,
+                transcript_registry=transcript_registry,
+            )
+            health_priority_block = self._render_health_priority_block(
+                health_summary=health_summary,
+                document_localities=document_localities,
+            )
+            research_focus_block = self._render_research_focus_block(retrieved_passages)
+
+            external_research_context = await self._gather_external_research(
+                context=context,
+                intake_segments=intake_segments,
+                document_localities=document_localities,
+            )
+            external_sources = external_research_context.get("sources", [])
+            external_block = external_research_context.get("prompt_block", "No external research harvested.")
 
             constitution_block = self.constitution.render_prompt_section(
                 self._prompt_principles,
@@ -89,18 +138,36 @@ class ClientProfileAgent(BaseAgent):
                 "  \"profiles\": [\n"
                 "    {\n"
                 "      \"profile_name\": str,\n"
+                "      \"fictional_disclaimer\": \"FICTIONAL CLIENT SCENARIO – internal use only\",\n"
                 "      \"intake_reference\": str,\n"
+                "      \"persona_overview\": str,\n"
                 "      \"research_reference\": str,\n"
                 "      \"benefit_explanation\": str,\n"
-                "      \"st_louis_alignment\": str | null\n"
-                "    } * 3\n"
+                "      \"st_louis_alignment\": str | null,\n"
+                "      \"regional_touchpoints\": [str],\n"
+                "      \"masking_signals\": [str],\n"
+                "      \"unmet_needs\": [str],\n"
+                "      \"support_recommendations\": [str],\n"
+                "      \"cautionary_flags\": [str]\n"
+                "    }\n"
                 "  ],\n"
-                "  \"shared_thread\": str | null\n"
+                "  \"shared_thread\": str | null,\n"
+                "  \"external_sources\": [\n"
+                "    {\n"
+                "      \"label\": \"[Ext #]\",\n"
+                "      \"title\": str,\n"
+                "      \"url\": str,\n"
+                "      \"publisher\": str | null,\n"
+                "      \"published_at\": str | null,\n"
+                "      \"summary\": str,\n"
+                "      \"verification_status\": \"verified\" | \"needs_review\" | \"flagged\"\n"
+                "    }\n"
+                "  ]\n"
                 "}"
             )
 
             prompt = f"""
-You are the Enlitens Client Profile Agent. Your mandate is to anchor neuroscience research to the exact words clients share during intake, proving why the study matters for them in St. Louis.
+You are the Enlitens Client Profile Agent. Create three fictional personas that weave intake language, St. Louis locality, and cited research into actionable case studies without promising clinical outcomes.
 
 {constitution_block}
 
@@ -110,16 +177,33 @@ INTAKE LANGUAGE TO HONOUR (reuse phrases verbatim inside quotes):
 ST. LOUIS CONTEXT SNAPSHOT:
 {st_louis_block}
 
+REGIONAL ATLAS SIGNALS (match personas to these neighbourhoods/towns):
+{regional_focus_block}
+
+HEALTH REPORT PRIORITIES TO RESPECT:
+{health_priority_block}
+
+INTAKE COHORT SNAPSHOT (ground profiles in these segments):
+{intake_registry_block}
+
+EXTERNAL RESEARCH & LOCAL DATA (cite using [Ext #] tags when referenced):
+{external_block}
+
+RESEARCH FOCUS NOTES:
+{research_focus_block}
+
 RETRIEVED PASSAGES WITH SOURCE TAGS:
 {retrieved_block}
 
 OUTPUT REQUIREMENTS:
 1. Produce exactly THREE distinct profiles in JSON.
-2. Each "intake_reference" must reuse the exact client phrasing inside quotes. If no quote exists, say "No direct intake quote provided" and flag the gap.
-3. "research_reference" AND "benefit_explanation" must each cite at least one [Source #] tag from the passages above.
-4. Use "st_louis_alignment" to connect the research to St. Louis realities (neighbourhood stressors, transit, economics). If data is missing, state that explicitly while still citing [Source #].
-5. Highlight why each profile benefits from the paper – make it concrete and rebellious, not generic sympathy.
-6. Return JSON exactly in this shape (no commentary):
+2. Every profile must include "fictional_disclaimer" explicitly stating it is a fictional scenario.
+3. Anchor each persona to a *unique* municipality/neighbourhood or micro-community listed above. Avoid conflicting demographics.
+4. Each "intake_reference" must reuse the exact client phrasing inside quotes. If no quote exists, say "No direct intake quote provided" and flag the gap.
+5. "research_reference" AND "benefit_explanation" must each cite at least one [Source #] tag from the passages above.
+6. Reference external data with [Ext #] tags when you draw from the external research block.
+7. Use "support_recommendations" for focus areas only—never promise outcomes, cures, or success rates.
+8. Return JSON exactly in this shape (no commentary). Keep persona names short but evocative ("Bevo Mill sensory de-masker"):
 {schema_hint}
 """
 
@@ -129,6 +213,17 @@ OUTPUT REQUIREMENTS:
                 intake_quotes=intake_quotes,
                 retrieved_passages=retrieved_passages,
                 st_louis_context=st_louis_context,
+                intake_segments=intake_segments,
+                external_sources=external_sources,
+                document_id=document_id,
+            )
+
+            response = self._post_process_profiles(
+                response=response,
+                document_id=document_id,
+                document_localities=document_localities,
+                external_sources=external_sources,
+                regional_atlas=regional_atlas,
             )
 
             payload = response.model_dump()
@@ -138,6 +233,14 @@ OUTPUT REQUIREMENTS:
                 "client_profile_summary": {
                     "intake_quotes_used": [p.intake_reference for p in response.profiles],
                     "source_tags": sorted(source_tags),
+                    "external_sources_used": [
+                        {
+                            "label": src.label,
+                            "url": str(src.url),
+                            "verification_status": src.verification_status,
+                        }
+                        for src in response.external_sources
+                    ],
                     "shared_thread": response.shared_thread,
                 },
             }
@@ -152,12 +255,29 @@ OUTPUT REQUIREMENTS:
                 doc_id=context.get("document_id"),
                 details={"error": str(exc)},
             )
-            fallback = self._fallback_profiles([], context.get("retrieved_passages") or [], context.get("st_louis_context") or {})
+            fallback = self._fallback_profiles(
+                intake_quotes=intake_quotes,
+                intake_segments=intake_segments,
+                retrieved_passages=retrieved_passages,
+                st_louis_context=st_louis_context,
+                regional_atlas=regional_atlas,
+                document_localities=document_localities,
+                external_sources=external_sources,
+                document_id=document_id,
+            )
             return {
                 "client_profiles": fallback.model_dump(),
                 "client_profile_summary": {
                     "intake_quotes_used": [p.intake_reference for p in fallback.profiles],
                     "source_tags": sorted(self._collect_source_tags(fallback)),
+                    "external_sources_used": [
+                        {
+                            "label": src.label,
+                            "url": str(src.url),
+                            "verification_status": src.verification_status,
+                        }
+                        for src in fallback.external_sources
+                    ],
                     "shared_thread": fallback.shared_thread,
                 },
             }
@@ -174,13 +294,24 @@ OUTPUT REQUIREMENTS:
         if len(profiles.profiles) != 3:
             raise ValueError("ClientProfileAgent must return exactly three profiles")
 
+        name_set: set[str] = set()
         for profile in profiles.profiles:
+            if profile.profile_name.lower() in name_set:
+                raise ValueError("Client profile names must be unique")
+            name_set.add(profile.profile_name.lower())
             if "[Source" not in profile.research_reference:
                 raise ValueError("Each research_reference must cite a [Source #]")
             if "[Source" not in profile.benefit_explanation:
                 raise ValueError("Each benefit_explanation must cite a [Source #]")
             if not any(marker in profile.intake_reference for marker in ('"', "'", "“", "”")):
                 raise ValueError("Intake references must include quoted client language")
+            if "fictional" not in profile.fictional_disclaimer.lower():
+                raise ValueError("Fictional disclaimer must clearly state the scenario is fictional")
+
+        for source in profiles.external_sources:
+            if "[Ext" not in source.label:
+                raise ValueError("External sources must have [Ext #] labels")
+
         return True
 
     async def _structured_generation(
@@ -191,11 +322,16 @@ OUTPUT REQUIREMENTS:
         intake_quotes: List[str],
         retrieved_passages: Sequence[Dict[str, Any]],
         st_louis_context: Dict[str, Any],
+        intake_segments: Sequence[Dict[str, Any]] | None = None,
+        external_sources: Sequence[ExternalResearchSource] | None = None,
+        document_id: str = "document",
     ) -> ClientProfileSet:
         if self.ollama_client is None:
             raise RuntimeError("ClientProfileAgent not initialized")
 
         cache_kwargs = self._cache_kwargs(context, suffix="profiles")
+        citation_map = context.get("citation_map") or {}
+        source_segments = context.get("source_segments") or []
 
         try:
             raw_response = await self.ollama_client.generate_structured_response(
@@ -221,8 +357,22 @@ OUTPUT REQUIREMENTS:
         if isinstance(raw_response, ClientProfileSet):
             return raw_response
 
-        source_tags = [f"[Source {idx}]" for idx, _ in enumerate(retrieved_passages, start=1)]
-        normalized = self._normalize_partial_profiles(raw_response, source_tags=source_tags)
+        source_tags: List[str] = []
+        if isinstance(source_segments, list):
+            for segment in source_segments:
+                tag = segment.get("tag") if isinstance(segment, dict) else None
+                if tag and tag not in source_tags:
+                    source_tags.append(str(tag))
+        if not source_tags:
+            source_tags = [f"[Source {idx}]" for idx, _ in enumerate(retrieved_passages, start=1)]
+        if not source_tags and isinstance(citation_map, dict):
+            source_tags = [str(tag) for tag in citation_map.keys()]
+
+        normalized = self._normalize_partial_profiles(
+            raw_response,
+            source_tags=source_tags,
+            citation_map=citation_map,
+        )
         if normalized is not None:
             try:
                 return ClientProfileSet.model_validate(normalized)
@@ -245,13 +395,31 @@ OUTPUT REQUIREMENTS:
             impact="Client profiles fallback",
             doc_id=context.get("document_id"),
         )
-        return self._fallback_profiles(intake_quotes, retrieved_passages, st_louis_context)
+        document_localities = context.get("document_locality_matches") or []
+        regional_atlas = context.get("regional_atlas") or {}
+        return self._fallback_profiles(
+            intake_quotes=intake_quotes,
+            intake_segments=intake_segments or [],
+            retrieved_passages=retrieved_passages,
+            st_louis_context=st_louis_context,
+            source_tags=source_tags,
+            citation_map=citation_map,
+            client_insights=context.get("client_insights") or {},
+            regional_atlas=regional_atlas,
+            document_localities=document_localities,
+            external_sources=list(external_sources or []),
+            document_id=document_id,
+        )
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
     def _normalize_partial_profiles(
-        self, payload: Any, *, source_tags: Sequence[str]
+        self,
+        payload: Any,
+        *,
+        source_tags: Sequence[str],
+        citation_map: Dict[str, str],
     ) -> Optional[Dict[str, Any]]:
         if payload is None:
             return None
@@ -262,123 +430,118 @@ OUTPUT REQUIREMENTS:
 
         allowed_keys = {
             "profile_name",
+            "fictional_disclaimer",
             "intake_reference",
+            "persona_overview",
             "research_reference",
             "benefit_explanation",
             "st_louis_alignment",
+            "regional_touchpoints",
+            "masking_signals",
+            "unmet_needs",
+            "support_recommendations",
+            "cautionary_flags",
         }
 
         normalized: Dict[str, Any] = {}
-        if "shared_thread" in payload:
-            shared = payload["shared_thread"]
-            if shared is None or isinstance(shared, str):
-                normalized["shared_thread"] = shared
+        shared = payload.get("shared_thread")
+        if shared is None or isinstance(shared, str):
+            normalized["shared_thread"] = shared
 
-        def _coerce_profile(value: Any) -> Optional[Dict[str, Any]]:
+        raw_profiles = payload.get("profiles")
+        if not raw_profiles:
+            return None
+
+        def flatten_profile(value: Any) -> Dict[str, Any]:
             if isinstance(value, ClientProfile):
                 return value.model_dump()
             if isinstance(value, dict):
-                if allowed_keys <= set(value.keys()):
-                    return {key: value[key] for key in allowed_keys if key in value}
-                if len(value) == 1 and isinstance(next(iter(value.values())), dict):
-                    return _coerce_profile(next(iter(value.values())))
-                cleaned: Dict[str, Any] = {}
+                flattened: Dict[str, Any] = {}
                 for key, val in value.items():
-                    if key in allowed_keys:
-                        cleaned[key] = val
+                    if key in allowed_keys and val is not None:
+                        flattened[key] = val
                     elif isinstance(val, dict):
-                        nested = _coerce_profile(val)
-                        if nested:
-                            cleaned.update(nested)
-                return cleaned or None
+                        nested = flatten_profile(val)
+                        for nested_key, nested_val in nested.items():
+                            flattened.setdefault(nested_key, nested_val)
+                    elif isinstance(val, list):
+                        if key in allowed_keys:
+                            flattened[key] = [str(item).strip() for item in val if str(item).strip()]
+                return flattened
             if isinstance(value, list):
-                combined: Dict[str, Any] = {}
+                merged: Dict[str, Any] = {}
                 for item in value:
-                    nested = _coerce_profile(item)
-                    if nested:
-                        combined.update(nested)
-                return combined or None
-            return None
+                    nested = flatten_profile(item)
+                    for nested_key, nested_val in nested.items():
+                        merged.setdefault(nested_key, nested_val)
+                return merged
+            return {}
 
         profiles: List[Dict[str, Any]] = []
-        raw_profiles = payload.get("profiles")
         if isinstance(raw_profiles, list):
             for item in raw_profiles:
-                coerced = _coerce_profile(item)
-                if coerced:
-                    profiles.append(coerced)
+                flattened = flatten_profile(item)
+                if flattened:
+                    profiles.append(flattened)
         elif isinstance(raw_profiles, dict):
-            indexed: List[Tuple[int, Dict[str, Any]]] = []
-            remainder: List[Dict[str, Any]] = []
-            for key, value in raw_profiles.items():
-                coerced = _coerce_profile(value)
-                if not coerced:
-                    continue
-                try:
-                    index = int(str(key))
-                except ValueError:
-                    remainder.append(coerced)
-                else:
-                    indexed.append((index, coerced))
-            if indexed:
-                for _, item in sorted(indexed, key=lambda pair: pair[0]):
-                    profiles.append(item)
-            profiles.extend(remainder)
+            for key in sorted(raw_profiles.keys(), key=str):
+                flattened = flatten_profile(raw_profiles[key])
+                if flattened:
+                    profiles.append(flattened)
 
-        fragment_patterns = (
-            re.compile(r"profiles\[(\d+)\]\.(.+)"),
-            re.compile(r"profiles\.(\d+)\.(.+)"),
-            re.compile(r"profiles_(\d+)_(.+)"),
-        )
-        fragment_buckets: Dict[int, Dict[str, Any]] = {}
-        for key, value in payload.items():
-            if key == "profiles" or not key.startswith("profiles"):
-                continue
-            for pattern in fragment_patterns:
-                match = pattern.match(key)
-                if not match:
-                    continue
-                index = int(match.group(1))
-                field = match.group(2).replace("__", ".")
-                if field in allowed_keys:
-                    bucket = fragment_buckets.setdefault(index, {})
-                    bucket[field] = value
-                break
-
-        if fragment_buckets:
-            for index, fragment in sorted(fragment_buckets.items(), key=lambda pair: pair[0]):
-                coerced = _coerce_profile(fragment)
-                if not coerced:
-                    continue
-                if index < len(profiles):
-                    for key, value in coerced.items():
-                        profiles[index].setdefault(key, value)
-                else:
-                    profiles.append(coerced)
-
-        cleaned_profiles: List[Dict[str, Any]] = []
-        for profile in profiles:
-            if not isinstance(profile, dict):
-                continue
-            cleaned = {key: profile.get(key) for key in allowed_keys if profile.get(key) is not None}
-            if cleaned:
-                cleaned_profiles.append(cleaned)
-
-        if not cleaned_profiles:
+        if not profiles:
             return None
 
         normalized_tags = [tag.strip() for tag in source_tags if isinstance(tag, str) and tag.strip()]
-        if normalized_tags:
-            for idx, profile in enumerate(cleaned_profiles):
-                tag = normalized_tags[min(idx, len(normalized_tags) - 1)]
-                for field_name in ("research_reference", "benefit_explanation", "st_louis_alignment"):
-                    value = profile.get(field_name)
-                    if isinstance(value, str):
-                        text = value.strip()
-                        if text and "[Source" not in text:
-                            profile[field_name] = f"{text} {tag}"
 
-        normalized["profiles"] = cleaned_profiles
+        def pick_tag(index: int) -> str:
+            if normalized_tags:
+                return normalized_tags[min(index, len(normalized_tags) - 1)]
+            if citation_map:
+                ordered = [str(tag) for tag in citation_map.keys()]
+                if ordered:
+                    return ordered[min(index, len(ordered) - 1)]
+            return "[Source F1]"
+
+        sanitized_profiles: List[Dict[str, Any]] = []
+        for idx, profile in enumerate(profiles):
+            tag = pick_tag(idx)
+            profile.setdefault("fictional_disclaimer", self._fallback_disclaimer)
+            if not profile.get("intake_reference"):
+                profile["intake_reference"] = '"No direct intake quote provided"'
+            if not profile.get("persona_overview"):
+                profile["persona_overview"] = "Fictional scenario describing masking and systemic stressors in St. Louis."
+            if not profile.get("research_reference"):
+                snippet = citation_map.get(tag)
+                summary = self._summarize_text_block(snippet, max_chars=160) if snippet else "Research insight"
+                profile["research_reference"] = f"{summary} {tag}".strip()
+            if not profile.get("benefit_explanation"):
+                profile["benefit_explanation"] = f"{tag} clarifies how this research reframes the client's needs."
+            if profile.get("st_louis_alignment") and "[Source" not in str(profile["st_louis_alignment"]):
+                profile["st_louis_alignment"] = f"{profile['st_louis_alignment']} {tag}".strip()
+            sanitized_profiles.append({key: profile.get(key) for key in allowed_keys if profile.get(key) is not None})
+
+        normalized["profiles"] = sanitized_profiles
+
+        raw_external = payload.get("external_sources")
+        if raw_external:
+            ext_list: List[Dict[str, Any]] = []
+            iterable = raw_external if isinstance(raw_external, list) else list(raw_external.values())
+            for item in iterable:
+                if isinstance(item, ExternalResearchSource):
+                    ext_list.append(item.model_dump())
+                elif isinstance(item, dict):
+                    entry: Dict[str, Any] = {}
+                    for key in ("label", "title", "url", "publisher", "published_at", "summary", "verification_status"):
+                        if key in item:
+                            entry[key] = item[key]
+                    if entry:
+                        label = str(entry.get("label", "")).strip()
+                        if "[Ext" not in label:
+                            entry["label"] = f"[Ext {len(ext_list) + 1}]"
+                        ext_list.append(entry)
+            normalized["external_sources"] = ext_list
+
         return normalized
 
     def _collect_intake_quotes(
@@ -459,34 +622,117 @@ OUTPUT REQUIREMENTS:
 
     def _fallback_profiles(
         self,
+        *,
         intake_quotes: List[str],
+        intake_segments: Sequence[Dict[str, Any]],
         retrieved_passages: Sequence[Dict[str, Any]],
         st_louis_context: Dict[str, Any],
+        source_tags: Sequence[str] | None = None,
+        citation_map: Dict[str, str] | None = None,
+        client_insights: Dict[str, Any] | None = None,
+        regional_atlas: Dict[str, Any] | None = None,
+        document_localities: Sequence[Tuple[str, int]] | None = None,
+        external_sources: Sequence[ExternalResearchSource] | None = None,
+        document_id: str = "document",
     ) -> ClientProfileSet:
-        quote = intake_quotes[0] if intake_quotes else "No direct intake quote provided"
-        if not any(marker in quote for marker in ('"', "“", "”", "'")):
-            quote = f'"{quote}"'
-        source_tag = "[Source 1]" if retrieved_passages else "[Source F1]"
-        stl_phrase = (
-            "St. Louis community data" if st_louis_context else "St. Louis context not documented"
-        )
-        templates = [
-            "Transit sensory overload",
-            "Workplace autonomic crash",
-            "Neighborhood hypervigilance",
-        ]
+        """Deterministic fallback when LLM output is unavailable."""
+
+        primary_source = source_tags[0] if source_tags else "[Source F1]"
+        alt_source = source_tags[1] if source_tags and len(source_tags) > 1 else primary_source
+
+        def pick_locations(count: int) -> List[str]:
+            picks: List[str] = []
+            locality_pairs = list(document_localities or [])
+            locality_pairs.sort(key=lambda item: (-item[1], item[0]))
+            for name, _ in locality_pairs:
+                if len(picks) >= count:
+                    break
+                picks.append(name)
+            atlas_candidates = []
+            if regional_atlas:
+                atlas_candidates.extend(regional_atlas.get("stl_city_neighborhoods", []))
+                atlas_candidates.extend(regional_atlas.get("stl_county_municipalities", []))
+                atlas_candidates.extend(regional_atlas.get("metro_east_communities", []))
+            for name in atlas_candidates:
+                if len(picks) >= count:
+                    break
+                if name not in picks:
+                    picks.append(name)
+            while len(picks) < count:
+                picks.append(f"St. Louis locality #{len(picks) + 1}")
+            return picks[:count]
+
+        def choose_quote(index: int) -> str:
+            if intake_quotes:
+                quote = intake_quotes[index % len(intake_quotes)]
+            elif intake_segments:
+                quote = intake_segments[index % len(intake_segments)]["snippet"]
+            else:
+                quote = "No direct intake quote provided"
+            quote = quote.strip()
+            if not any(marker in quote for marker in ('"', "“", "”", "'")):
+                quote = f'"{quote}"'
+            return quote
+
+        locations = pick_locations(3)
         profiles: List[ClientProfile] = []
-        for name in templates:
+        default_masking = [
+            "High masking in professional settings",
+            "Delayed interoceptive awareness",
+            "Over-functioning to hide sensory overwhelm",
+        ]
+        default_unmet = [
+            "Limited culturally safe peer support",
+            "Fragmented executive-function scaffolding",
+            "Sparse trauma-informed legal workplaces",
+        ]
+        default_support = [
+            "Co-design weekly decompression rituals",
+            "Resource mapping for neurodivergent-friendly community hubs",
+            "Structured advocacy scripts to request workplace accommodations",
+        ]
+        default_flags = [
+            "Do not infer clinical progress",
+            "Escalate if acute risk language emerges",
+        ]
+
+        for idx in range(3):
+            neighbourhood = locations[idx]
+            quote = choose_quote(idx)
+            persona_name = f"{neighbourhood} fictional scenario"
+            overview = (
+                f"Fictional vignette following a resident of {neighbourhood} balancing masking, family systems, and professional pressure."
+            )
+            stl_alignment = (
+                f"{primary_source} plus {neighbourhood} municipal data highlight how commute, school placement, and civic systems compound burnout."
+            )
             profiles.append(
                 ClientProfile(
-                    profile_name=name,
+                    profile_name=persona_name,
+                    fictional_disclaimer=self._fallback_disclaimer,
                     intake_reference=quote,
-                    research_reference=f"{source_tag} evidence describes the stressors this client flagged.",
-                    benefit_explanation=f"{source_tag} shows targeted supports that ease their exact trigger.",
-                    st_louis_alignment=f"{source_tag} plus {stl_phrase} call for localized action.",
+                    persona_overview=overview,
+                    research_reference=f"{primary_source} evidence surfaces mechanisms relevant to this intake theme.",
+                    benefit_explanation=f"{alt_source} maps interventions that resonate with this client's masking pattern.",
+                    st_louis_alignment=stl_alignment,
+                    regional_touchpoints=[
+                        neighbourhood,
+                        "Local library sensory room",
+                        "Neighborhood co-working hub",
+                    ],
+                    masking_signals=list(default_masking),
+                    unmet_needs=list(default_unmet),
+                    support_recommendations=list(default_support),
+                    cautionary_flags=list(default_flags),
                 )
             )
-        return ClientProfileSet(profiles=profiles, shared_thread="Research-driven validation for intake pain points")
+
+        external_list = list(external_sources or [])
+        return ClientProfileSet(
+            profiles=profiles,
+            shared_thread="Fictional personas demonstrating how regional systems intersect with neurodivergent masking",
+            external_sources=external_list,
+        )
 
     def _collect_source_tags(self, profiles: ClientProfileSet) -> List[str]:
         tags: List[str] = []
@@ -495,3 +741,404 @@ OUTPUT REQUIREMENTS:
             for field in (profile.research_reference, profile.benefit_explanation, profile.st_louis_alignment or ""):
                 tags.extend(pattern.findall(field))
         return tags
+
+    def _select_relevant_intake_segments(
+        self,
+        *,
+        intake_registry: Dict[str, Any],
+        document_localities: Sequence[Tuple[str, int]],
+        retrieved_passages: Sequence[Dict[str, Any]],
+        fallback_quotes: Sequence[str],
+        max_segments: int = 6,
+    ) -> List[Dict[str, Any]]:
+        entries = intake_registry.get("entries") if isinstance(intake_registry, dict) else None
+        entries = entries or []
+        locality_scores = {name.lower(): count for name, count in (document_localities or [])}
+        scored: List[Tuple[int, Dict[str, Any]]] = []
+
+        for entry in entries:
+            snippet = str(entry.get("snippet") or entry.get("text") or "").strip()
+            if not snippet:
+                continue
+            themes = entry.get("themes") or []
+            regional_mentions = entry.get("regional_mentions") or {}
+            score = len(snippet) // 80 + len(themes)
+            for name, count in regional_mentions.items():
+                score += int(count)
+                if name and name.lower() in locality_scores:
+                    score += 3
+            scored.append(
+                (
+                    score,
+                    {
+                        "snippet": snippet,
+                        "themes": [str(t).strip() for t in themes if str(t).strip()],
+                        "regional_mentions": {str(k): int(v) for k, v in regional_mentions.items() if k},
+                    },
+                )
+            )
+
+        scored.sort(key=lambda item: item[0], reverse=True)
+        segments = [payload for _, payload in scored[:max_segments]]
+
+        if not segments:
+            for quote in fallback_quotes:
+                if len(segments) >= max_segments:
+                    break
+                cleaned = quote.strip()
+                if cleaned:
+                    segments.append({"snippet": cleaned, "themes": [], "regional_mentions": {}})
+
+        if not segments and retrieved_passages:
+            for passage in retrieved_passages[:max_segments]:
+                text = self._summarize_text_block(passage.get("text"), max_chars=320)
+                if text:
+                    segments.append({"snippet": text, "themes": [], "regional_mentions": {}})
+
+        return segments[:max_segments]
+
+    def _render_intake_registry_block(self, segments: Sequence[Dict[str, Any]]) -> str:
+        if not segments:
+            return "- Intake analytics unavailable; note the gap and lean on retrieved passages."
+        lines: List[str] = []
+        for segment in segments[:6]:
+            snippet = self._summarize_text_block(segment.get("snippet"), max_chars=220)
+            themes = segment.get("themes") or []
+            mentions = segment.get("regional_mentions") or {}
+            theme_text = ", ".join(themes[:3]) if themes else "themes unclear"
+            regional_text = ", ".join(list(mentions.keys())[:3]) if mentions else "no region tagged"
+            lines.append(f"- \"{snippet}\" — themes: {theme_text}; regions: {regional_text}")
+        return "\n".join(lines)
+
+    def _render_regional_focus_block(
+        self,
+        *,
+        document_localities: Sequence[Tuple[str, int]],
+        intake_registry: Dict[str, Any],
+        regional_atlas: Dict[str, Any],
+        transcript_registry: Dict[str, Any],
+    ) -> str:
+        locality_lines: List[str] = []
+        if document_localities:
+            top = ", ".join(f"{name} (x{count})" for name, count in document_localities[:6])
+            locality_lines.append(f"Document mentions heavily: {top}")
+        top_locations = intake_registry.get("top_locations") if isinstance(intake_registry, dict) else None
+        if top_locations:
+            sample = ", ".join(name for name, _ in top_locations[:6])
+            locality_lines.append(f"High-volume intake ZIPs: {sample}")
+        transcript_themes = transcript_registry.get("top_themes") if isinstance(transcript_registry, dict) else None
+        if transcript_themes:
+            words = ", ".join(theme for theme, _ in transcript_themes[:6])
+            locality_lines.append(f"Founder voice emphasises: {words}")
+        atlas_neighbourhoods = regional_atlas.get("stl_city_neighborhoods", []) if isinstance(regional_atlas, dict) else []
+        if atlas_neighbourhoods:
+            locality_lines.append(
+                "Atlas inventory (sample): " + ", ".join(atlas_neighbourhoods[:6])
+            )
+        if not locality_lines:
+            return "- Regional atlas not loaded; cite any location explicitly mentioned in the PDF."
+        return "\n".join(f"- {line}" for line in locality_lines)
+
+    def _render_health_priority_block(
+        self,
+        *,
+        health_summary: Dict[str, Any],
+        document_localities: Sequence[Tuple[str, int]],
+    ) -> str:
+        if not health_summary:
+            return "- No health report loaded; acknowledge data gap."
+        lines: List[str] = []
+        priority_signals = health_summary.get("priority_signals") or []
+        if priority_signals:
+            highlights = ", ".join(label for label, _ in priority_signals[:5])
+            lines.append(f"Priority signals: {highlights}")
+        regional_mentions = health_summary.get("regional_mentions") or {}
+        if regional_mentions:
+            ordered = sorted(regional_mentions.items(), key=lambda item: (-item[1], item[0]))
+            focus = ", ".join(name for name, _ in ordered[:5])
+            lines.append(f"Health report hotspots: {focus}")
+        if not lines:
+            return "- Health report parsed but yielded no high-signal sections."
+        return "\n".join(f"- {line}" for line in lines)
+
+    def _render_research_focus_block(
+        self,
+        retrieved_passages: Sequence[Dict[str, Any]],
+        *,
+        max_passages: int = 5,
+    ) -> str:
+        if not retrieved_passages:
+            return "- No retrieved passages; rely on external research and intake analysis."
+        lines: List[str] = []
+        for idx, passage in enumerate(retrieved_passages[:max_passages], start=1):
+            tag = passage.get("tag") or f"[Source {idx}]"
+            snippet = self._summarize_text_block(passage.get("text"), max_chars=200)
+            origin = passage.get("document_id") or passage.get("metadata", {}).get("document_id")
+            doc_part = f" (doc={origin})" if origin else ""
+            lines.append(f"- {tag} {snippet}{doc_part}")
+        return "\n".join(lines)
+
+    async def _gather_external_research(
+        self,
+        *,
+        context: Dict[str, Any],
+        intake_segments: Sequence[Dict[str, Any]],
+        document_localities: Sequence[Tuple[str, int]],
+    ) -> Dict[str, Any]:
+        if not self.research_orchestrator:
+            return {
+                "sources": [],
+                "prompt_block": "- External research connectors not configured. Cite intake and PDF sources only.",
+            }
+
+        queries: List[ResearchQuery] = []
+        for name, _ in document_localities[:3]:
+            queries.append(
+                ResearchQuery(
+                    topic=f"neurodivergent burnout supports in {name}, Missouri",
+                    focus="regional_context",
+                    location=name,
+                    tags=["client_profile", "regional"],
+                    max_results=2,
+                )
+            )
+
+        for segment in intake_segments[:3]:
+            snippet = segment.get("snippet", "")
+            themes = ", ".join(segment.get("themes", [])[:3])
+            if snippet:
+                queries.append(
+                    ResearchQuery(
+                        topic=f"community resources for: {themes or snippet[:80]}",
+                        focus="intake_theme",
+                        location=document_localities[0][0] if document_localities else "St. Louis",
+                        tags=["client_profile", "theme"],
+                        max_results=2,
+                    )
+                )
+
+        if not queries:
+            queries.append(
+                ResearchQuery(
+                    topic="St. Louis neurodivergent adult support networks",
+                    focus="regional_context",
+                    location="St. Louis",
+                    tags=["fallback"],
+                    max_results=3,
+                )
+            )
+
+        try:
+            hits: List[ResearchHit] = await self.research_orchestrator.gather(queries)
+        except Exception as exc:
+            log_with_telemetry(
+                logger.warning,
+                "External research orchestrator failed: %s",
+                exc,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="External research unreachable",
+                doc_id=context.get("document_id"),
+            )
+            return {
+                "sources": [],
+                "prompt_block": "- External research service unavailable; rely on PDF citations.",
+            }
+
+        if not hits:
+            return {
+                "sources": [],
+                "prompt_block": "- No verified external sources surfaced; note this if context is thin.",
+            }
+
+        sources: List[ExternalResearchSource] = []
+        lines: List[str] = []
+        for idx, hit in enumerate(hits, start=1):
+            label = f"[Ext {idx}]"
+            summary = self._summarize_text_block(hit.snippet or hit.summary, max_chars=220)
+            verification = hit.verification_status if hasattr(hit, "verification_status") else "verified"
+            source = ExternalResearchSource(
+                label=label,
+                title=hit.title or "External research insight",
+                url=hit.url,
+                publisher=hit.publisher,
+                published_at=hit.published_at,
+                summary=summary or "Summary unavailable",
+                verification_status=verification,
+            )
+            sources.append(source)
+            lines.append(f"- {label} {source.title} — {source.summary}")
+
+        log_with_telemetry(
+            logger.info,
+            "Harvested external research hits",
+            "",
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MINOR,
+            impact="External research appended to client profiles",
+            doc_id=context.get("document_id"),
+            details={"total_hits": len(sources)},
+        )
+
+        return {"sources": sources, "prompt_block": "\n".join(lines)}
+
+    def _post_process_profiles(
+        self,
+        *,
+        response: ClientProfileSet,
+        document_id: str,
+        document_localities: Sequence[Tuple[str, int]],
+        external_sources: Sequence[ExternalResearchSource],
+        regional_atlas: Optional[Dict[str, Any]] = None,
+    ) -> ClientProfileSet:
+        profiles = list(response.profiles)
+        self._ensure_unique_profile_names(profiles, document_id)
+
+        locality_names = [name for name, _ in document_localities]
+        atlas_neighbourhoods = []
+        if isinstance(regional_atlas, dict):
+            atlas_neighbourhoods.extend(regional_atlas.get("stl_city_neighborhoods", [])[:10])
+            atlas_neighbourhoods.extend(regional_atlas.get("stl_county_municipalities", [])[:10])
+
+        for profile in profiles:
+            profile.fictional_disclaimer = self._ensure_disclaimer(profile.fictional_disclaimer)
+            profile.persona_overview = self._strip_outcome_language(profile.persona_overview)
+            profile.research_reference = self._strip_outcome_language(profile.research_reference)
+            profile.benefit_explanation = self._strip_outcome_language(profile.benefit_explanation)
+            if profile.st_louis_alignment:
+                profile.st_louis_alignment = self._strip_outcome_language(profile.st_louis_alignment)
+
+            profile.regional_touchpoints = self._ensure_minimum_items(
+                profile.regional_touchpoints,
+                fallback=(locality_names[:1] + atlas_neighbourhoods[:4] + ["Local sensory-friendly café"]),
+                min_items=3,
+                max_items=8,
+            )
+            profile.masking_signals = self._ensure_minimum_items(
+                profile.masking_signals,
+                fallback=[
+                    "Masking to sustain professional identity",
+                    "Hypervigilance around social slip-ups",
+                    "Compassion fatigue after caretaking",
+                ],
+                min_items=2,
+                max_items=8,
+            )
+            profile.unmet_needs = self._ensure_minimum_items(
+                profile.unmet_needs,
+                fallback=[
+                    "Predictable sensory decompression windows",
+                    "Peer community normalising neurodivergent parenting",
+                    "Trauma-informed professional mentorship",
+                ],
+                min_items=3,
+                max_items=8,
+            )
+            profile.support_recommendations = self._ensure_minimum_items(
+                profile.support_recommendations,
+                fallback=[
+                    "Map accessible co-working or library zones for deep work",
+                    "Schedule restorative time anchored to neighbourhood assets",
+                    "Translate research findings into scripts for family system conversations",
+                ],
+                min_items=3,
+                max_items=8,
+            )
+            profile.cautionary_flags = self._ensure_minimum_items(
+                profile.cautionary_flags,
+                fallback=[
+                    "Fictional scenario: do not infer outcomes",
+                    "Escalate if client references acute crisis or harm",
+                ],
+                min_items=2,
+                max_items=6,
+            )
+
+        merged_sources = self._merge_external_sources(response.external_sources, external_sources)
+        response.profiles = profiles
+        response.external_sources = merged_sources
+        return response
+
+    def _ensure_unique_profile_names(self, profiles: Sequence[ClientProfile], document_id: str) -> None:
+        seen: set[str] = set()
+        for index, profile in enumerate(profiles, start=1):
+            raw_name = getattr(profile, "profile_name", "")
+            base = re.sub(r"[^A-Za-z0-9\s]+", "", str(raw_name or "")).strip()
+            if not base:
+                base = f"Scenario {index}"
+            candidate = base
+            while candidate.lower() in seen:
+                suffix = hashlib.sha1(f"{document_id}:{base}:{len(seen)}".encode()).hexdigest()[:6]
+                candidate = f"{base} · {suffix}"
+            profile.profile_name = candidate
+            seen.add(candidate.lower())
+
+    def _ensure_disclaimer(self, value: Optional[str]) -> str:
+        text = str(value or "").strip()
+        if text and "fictional" in text.lower():
+            return text
+        return self._fallback_disclaimer
+
+    def _strip_outcome_language(self, text: Optional[str]) -> str:
+        if not text:
+            return ""
+        cleaned = str(text)
+        for phrase in getattr(ClientProfile, "_OUTCOME_BLOCKLIST", ()):  # type: ignore[attr-defined]
+            cleaned = re.sub(re.escape(phrase), "support focus", cleaned, flags=re.IGNORECASE)
+        return cleaned.strip()
+
+    def _ensure_minimum_items(
+        self,
+        items: Optional[Sequence[str]],
+        *,
+        fallback: Sequence[str],
+        min_items: int,
+        max_items: int,
+    ) -> List[str]:
+        unique: List[str] = []
+        seen: set[str] = set()
+        for entry in items or []:
+            cleaned = self._strip_outcome_language(entry)
+            if not cleaned:
+                continue
+            lowered = cleaned.lower()
+            if lowered not in seen:
+                seen.add(lowered)
+                unique.append(cleaned)
+        for entry in fallback:
+            if len(unique) >= min_items:
+                break
+            cleaned = self._strip_outcome_language(entry)
+            lowered = cleaned.lower()
+            if lowered not in seen and cleaned:
+                seen.add(lowered)
+                unique.append(cleaned)
+        if not unique:
+            unique = [self._strip_outcome_language(entry) for entry in fallback if entry][:min_items]
+        return unique[:max_items]
+
+    def _merge_external_sources(
+        self,
+        existing: Sequence[ExternalResearchSource],
+        extras: Sequence[ExternalResearchSource],
+    ) -> List[ExternalResearchSource]:
+        merged: List[ExternalResearchSource] = []
+        seen: set[str] = set()
+        for source in existing or []:
+            label = str(getattr(source, "label", "")).strip()
+            key = label.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(source)
+        for source in extras or []:
+            label = str(getattr(source, "label", "")).strip()
+            key = label.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(source)
+        max_items = ClientProfileSet.model_fields["external_sources"].json_schema_extra.get("maxItems")
+        if max_items and len(merged) > max_items:
+            merged = merged[:max_items]
+        return merged

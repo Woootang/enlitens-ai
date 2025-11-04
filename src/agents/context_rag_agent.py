@@ -76,6 +76,20 @@ class ContextRAGAgent(BaseAgent):
             raw_client_context = context.get("raw_client_context") or client_insights.get("raw_context")
             raw_founder_context = context.get("raw_founder_context") or founder_insights.get("raw_context")
             intermediate = context.get("intermediate_results") or {}
+            document_passages = context.get("document_passages") or []
+            document_id = context.get("document_id")
+
+            client_quotes: List[str] = []
+            if isinstance(client_insights, dict):
+                quotes = client_insights.get("verbatim_quotes") or []
+                if isinstance(quotes, list):
+                    client_quotes = [str(quote).strip() for quote in quotes if str(quote).strip()]
+
+            founder_quotes: List[str] = []
+            if isinstance(founder_insights, dict):
+                key_messages = founder_insights.get("key_messages") or []
+                if isinstance(key_messages, list):
+                    founder_quotes = [str(msg).strip() for msg in key_messages if str(msg).strip()]
 
             query_components = self._collect_query_components(
                 document_text=document_text,
@@ -85,6 +99,11 @@ class ContextRAGAgent(BaseAgent):
                 intermediate=intermediate,
                 raw_client_context=raw_client_context,
                 raw_founder_context=raw_founder_context,
+                intake_registry=context.get("intake_registry") or {},
+                transcript_registry=context.get("transcript_registry") or {},
+                document_localities=context.get("document_locality_matches") or [],
+                health_summary=context.get("health_report_summary") or {},
+                regional_atlas=context.get("regional_atlas") or {},
             )
 
             retrieval_results = self._run_retrieval(query_components)
@@ -98,15 +117,68 @@ class ContextRAGAgent(BaseAgent):
 
             alignment_summary = self._summarize_alignment(retrieval_results)
 
+            normalized_results: List[Dict[str, Any]] = []
+            for entry in retrieval_results:
+                normalized_entry = dict(entry)
+                metadata = dict(normalized_entry.get("metadata", {}))
+                normalized_entry["metadata"] = metadata
+                if "document_id" not in normalized_entry or not normalized_entry.get("document_id"):
+                    normalized_entry["document_id"] = metadata.get("document_id") or document_id
+                sources_value = normalized_entry.get("sources")
+                if isinstance(sources_value, set):
+                    normalized_entry["sources"] = sorted(sources_value)
+                elif isinstance(sources_value, list):
+                    normalized_entry["sources"] = sorted(str(src) for src in sources_value)
+                elif sources_value:
+                    normalized_entry["sources"] = [str(sources_value)]
+                else:
+                    normalized_entry["sources"] = []
+                normalized_entry.setdefault("text", "")
+                normalized_results.append(normalized_entry)
+
+            fallback_passages = self._build_fallback_passages(
+                document_passages=document_passages,
+                client_quotes=client_quotes,
+                founder_quotes=founder_quotes,
+                raw_client_context=raw_client_context,
+                raw_founder_context=raw_founder_context,
+                document_id=document_id,
+            )
+
+            combined_passages: List[Dict[str, Any]] = []
+            combined_passages.extend(normalized_results)
+            for fallback in fallback_passages:
+                combined_passages.append(fallback)
+                if len(combined_passages) >= self.top_k:
+                    break
+
+            combined_passages = combined_passages[: self.top_k]
+
+            source_segments: List[Dict[str, Any]] = []
+            citation_map: Dict[str, str] = {}
+            for idx, passage in enumerate(combined_passages, start=1):
+                tag = f"Source {idx}"
+                text = passage.get("text", "")
+                metadata = passage.get("metadata", {})
+                source_segments.append({
+                    "tag": tag,
+                    "text": text,
+                    "metadata": metadata,
+                })
+                citation_map[tag] = text
+                passage["tag"] = tag
+
             return {
-                "context_enhanced": bool(retrieval_results),
+                "context_enhanced": bool(combined_passages),
                 "st_louis_relevance": "high" if st_louis_context else "unknown",
                 "regional_context": st_louis_context,
                 "rag_retrieval": {
                     "query_components": query_components,
-                    "top_passages": retrieval_results,
+                    "top_passages": combined_passages,
                     "related_documents": related_documents,
                     "alignment_summary": alignment_summary,
+                    "source_segments": source_segments,
+                    "citation_map": citation_map,
                 },
             }
 
@@ -147,6 +219,11 @@ class ContextRAGAgent(BaseAgent):
         *,
         raw_client_context: Optional[str] = None,
         raw_founder_context: Optional[str] = None,
+        intake_registry: Dict[str, Any],
+        transcript_registry: Dict[str, Any],
+        document_localities: Sequence[Tuple[str, int]],
+        health_summary: Dict[str, Any],
+        regional_atlas: Dict[str, Any],
     ) -> Dict[str, str]:
         components: Dict[str, str] = {}
 
@@ -166,6 +243,39 @@ class ContextRAGAgent(BaseAgent):
         if st_louis_context:
             components["regional_context"] = json.dumps(st_louis_context, ensure_ascii=False)
 
+        if intake_registry:
+            top_locations = intake_registry.get("top_locations") or []
+            if top_locations:
+                components["intake_locations"] = json.dumps(top_locations[:15], ensure_ascii=False)
+            top_themes = [theme for theme, _ in (intake_registry.get("top_themes") or [])[:10]]
+            if top_themes:
+                components["intake_themes"] = ", ".join(top_themes)
+
+        if transcript_registry:
+            top_transcript_themes = [theme for theme, _ in (transcript_registry.get("top_themes") or [])[:10]]
+            if top_transcript_themes:
+                components["founder_transcript_themes"] = ", ".join(top_transcript_themes)
+
+        if document_localities:
+            components["document_localities"] = json.dumps(document_localities[:15], ensure_ascii=False)
+
+        if health_summary:
+            priority_signals = [label for label, _ in (health_summary.get("priority_signals") or [])[:10]]
+            if priority_signals:
+                components["health_report_priorities"] = ", ".join(priority_signals)
+            health_locations = health_summary.get("regional_mentions") or {}
+            if health_locations:
+                sorted_locations = sorted(health_locations.items(), key=lambda item: (-item[1], item[0]))
+                components["health_report_localities"] = json.dumps(sorted_locations[:15], ensure_ascii=False)
+
+        if regional_atlas and isinstance(regional_atlas, dict):
+            atlas_sample = {
+                "city_neighborhoods": regional_atlas.get("stl_city_neighborhoods", [])[:20],
+                "county_municipalities": regional_atlas.get("stl_county_municipalities", [])[:20],
+                "metro_east": regional_atlas.get("metro_east_communities", [])[:15],
+            }
+            components["regional_atlas"] = json.dumps(atlas_sample, ensure_ascii=False)
+
         highlight_keys = [
             "science_extraction",
             "clinical_content",
@@ -180,6 +290,110 @@ class ContextRAGAgent(BaseAgent):
             components["intermediate_highlights"] = "\n".join(highlights)
 
         return components
+
+    def _build_fallback_passages(
+        self,
+        *,
+        document_passages: List[Dict[str, Any]],
+        client_quotes: List[str],
+        founder_quotes: List[str],
+        raw_client_context: Optional[str],
+        raw_founder_context: Optional[str],
+        document_id: Optional[str],
+    ) -> List[Dict[str, Any]]:
+        """Construct fallback passages when vector retrieval is empty."""
+
+        fallback: List[Dict[str, Any]] = []
+
+        def _append_passage(
+            text: str,
+            *,
+            source_type: str,
+            chunk_suffix: str,
+            metadata: Optional[Dict[str, Any]] = None,
+            score: float = 0.0,
+        ) -> None:
+            cleaned = " ".join(text.split())
+            if not cleaned:
+                return
+            idx = len(fallback) + 1
+            chunk_id = f"{document_id or 'context'}::{chunk_suffix}::{idx}"
+            merged_metadata = {
+                "document_id": document_id,
+                "source_type": source_type,
+                "chunk_index": idx - 1,
+            }
+            if metadata:
+                merged_metadata.update(metadata)
+
+            fallback.append(
+                {
+                    "chunk_id": chunk_id,
+                    "text": cleaned,
+                    "document_id": merged_metadata.get("document_id"),
+                    "source_type": source_type,
+                    "metadata": merged_metadata,
+                    "sources": [source_type],
+                    "score": float(score),
+                }
+            )
+
+        for entry in document_passages:
+            if len(fallback) >= self.top_k:
+                break
+            text = str(entry.get("text", "")).strip()
+            if not text:
+                continue
+            metadata = dict(entry.get("metadata", {}))
+            metadata.setdefault("document_id", entry.get("document_id") or document_id)
+            metadata.setdefault("source_type", entry.get("source_type") or "document")
+            _append_passage(
+                text,
+                source_type=str(metadata.get("source_type", "document")),
+                chunk_suffix="doc",
+                metadata=metadata,
+                score=float(entry.get("score", 0.0)),
+            )
+
+        if len(fallback) < self.top_k:
+            for idx, quote in enumerate(client_quotes, start=1):
+                if len(fallback) >= self.top_k:
+                    break
+                _append_passage(
+                    quote,
+                    source_type="client_quote",
+                    chunk_suffix="client",
+                    metadata={"quote_index": idx - 1},
+                )
+
+        if len(fallback) < self.top_k:
+            for idx, quote in enumerate(founder_quotes, start=1):
+                if len(fallback) >= self.top_k:
+                    break
+                _append_passage(
+                    quote,
+                    source_type="founder_message",
+                    chunk_suffix="founder",
+                    metadata={"message_index": idx - 1},
+                )
+
+        if len(fallback) < self.top_k and raw_client_context:
+            _append_passage(
+                raw_client_context[:500],
+                source_type="client_context",
+                chunk_suffix="client_ctx",
+                metadata={"note": "client_raw_context_excerpt"},
+            )
+
+        if len(fallback) < self.top_k and raw_founder_context:
+            _append_passage(
+                raw_founder_context[:500],
+                source_type="founder_context",
+                chunk_suffix="founder_ctx",
+                metadata={"note": "founder_raw_context_excerpt"},
+            )
+
+        return fallback
 
     def _run_retrieval(self, query_components: Dict[str, str]) -> List[Dict[str, Any]]:
         if not query_components:

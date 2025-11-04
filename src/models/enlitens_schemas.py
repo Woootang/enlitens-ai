@@ -8,8 +8,8 @@ HALLUCINATION PREVENTION:
 - Validators block practice statistics and fabricated content
 """
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field, field_validator, ValidationInfo, HttpUrl
+from typing import ClassVar, List, Optional, Dict, Any, Literal, Tuple
 from datetime import datetime
 import difflib
 import logging
@@ -489,10 +489,21 @@ class ContentCreationIdeas(BaseModel):
 class ClientProfile(BaseModel):
     """Client profile linking intake language to specific research citations."""
 
-    profile_name: str = Field(..., description="Short, descriptive label for the client persona")
+    profile_name: str = Field(
+        ...,
+        description="Short, descriptive label for the client persona",
+    )
+    fictional_disclaimer: str = Field(
+        ...,
+        description="Explicit indicator that this scenario is fictional",
+    )
     intake_reference: str = Field(
         ...,
         description="Direct intake phrasing, quoted exactly as the client or intake form stated it",
+    )
+    persona_overview: str = Field(
+        ...,
+        description="Narrative snapshot of the fictional scenario (no clinical outcomes)",
     )
     research_reference: str = Field(
         ...,
@@ -509,6 +520,59 @@ class ClientProfile(BaseModel):
         description="Optional tie-in to St. Louis context or community realities, also citing [Source #] when applicable",
         json_schema_extra={"pattern": r"\[Source [^\]]+\]"},
     )
+    regional_touchpoints: List[str] = Field(
+        default_factory=list,
+        description="Named neighbourhoods, schools, or community sites that shape the client's week",
+        json_schema_extra={"minItems": 3, "maxItems": 8},
+    )
+    masking_signals: List[str] = Field(
+        default_factory=list,
+        description="Behavioural or autobiographical signs of masking/burnout",
+        json_schema_extra={"minItems": 2, "maxItems": 8},
+    )
+    unmet_needs: List[str] = Field(
+        default_factory=list,
+        description="Core needs or system barriers that intensify dysregulation",
+        json_schema_extra={"minItems": 3, "maxItems": 8},
+    )
+    support_recommendations: List[str] = Field(
+        default_factory=list,
+        description="Evidence-informed focus areas (no promises of outcomes)",
+        json_schema_extra={"minItems": 3, "maxItems": 8},
+    )
+    cautionary_flags: List[str] = Field(
+        default_factory=list,
+        description="Boundary or ethical cautions for the care team",
+        json_schema_extra={"minItems": 2, "maxItems": 6},
+    )
+
+    _FICTIONAL_KEYWORD: ClassVar[str] = "FICTIONAL"
+    _OUTCOME_BLOCKLIST: ClassVar[Tuple[str, ...]] = (
+        "cure",
+        "guarantee",
+        "100%",
+        "certain outcome",
+        "promised result",
+        "clinically proven",
+    )
+
+    @field_validator("profile_name")
+    @classmethod
+    def profile_name_not_empty(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("Profile name cannot be empty")
+        return cleaned
+
+    @field_validator("fictional_disclaimer")
+    @classmethod
+    def ensure_fictional_label(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("Fictional disclaimer cannot be empty")
+        if cls._FICTIONAL_KEYWORD.lower() not in cleaned.lower():
+            raise ValueError("Fictional disclaimer must clearly state the scenario is FICTIONAL")
+        return cleaned
 
     @field_validator("intake_reference")
     @classmethod
@@ -523,6 +587,15 @@ class ClientProfile(BaseModel):
             )
         return cleaned
 
+    @field_validator("persona_overview")
+    @classmethod
+    def block_outcome_language(cls, value: str) -> str:
+        cleaned = value.strip()
+        lowered = cleaned.lower()
+        if any(term in lowered for term in cls._OUTCOME_BLOCKLIST):
+            raise ValueError("Persona overview must not promise outcomes or cures")
+        return cleaned
+
     @field_validator("research_reference", "benefit_explanation", "st_louis_alignment")
     @classmethod
     def ensure_source_citation(cls, value: Optional[str]) -> Optional[str]:
@@ -531,6 +604,79 @@ class ClientProfile(BaseModel):
         cleaned = value.strip()
         if cleaned and "[Source" not in cleaned:
             raise ValueError("Research-connected fields must include a [Source #] citation tag")
+        lowered = cleaned.lower()
+        if any(term in lowered for term in cls._OUTCOME_BLOCKLIST):
+            raise ValueError("Research fields must not promise clinical outcomes")
+        return cleaned
+
+    @field_validator(
+        "regional_touchpoints",
+        "masking_signals",
+        "unmet_needs",
+        "support_recommendations",
+        "cautionary_flags",
+    )
+    @classmethod
+    def enforce_list_quality(cls, values: List[str], info: ValidationInfo) -> List[str]:
+        values = [str(item).strip() for item in values if str(item).strip()]
+        if not values:
+            raise ValueError(f"{info.field_name} cannot be empty")
+        unique_values = []
+        seen = set()
+        for item in values:
+            lowered = item.lower()
+            if lowered not in seen:
+                seen.add(lowered)
+                unique_values.append(item)
+        field_meta = ClientProfile.model_fields.get(info.field_name) if info.field_name else None
+        extras = field_meta.json_schema_extra if field_meta and field_meta.json_schema_extra else {}
+        min_items = extras.get("minItems")
+        max_items = extras.get("maxItems")
+        if min_items and len(unique_values) < min_items:
+            raise ValueError(f"{info.field_name} requires at least {min_items} entries")
+        if max_items and len(unique_values) > max_items:
+            unique_values = unique_values[:max_items]
+        if info.field_name == "support_recommendations":
+            for item in unique_values:
+                lowered = item.lower()
+                if any(term in lowered for term in cls._OUTCOME_BLOCKLIST):
+                    raise ValueError("Support recommendations must not promise clinical outcomes")
+        return unique_values
+
+
+class ExternalResearchSource(BaseModel):
+    """External research or regional data used to enrich fictional scenarios."""
+
+    label: str = Field(
+        ...,
+        description="Bracketed label that should be cited in text (e.g., [Ext 1])",
+        json_schema_extra={"pattern": r"\[Ext [^\]]+\]"},
+    )
+    title: str = Field(..., description="Title or headline of the external resource")
+    url: HttpUrl = Field(..., description="Resolvable URL for verification")
+    publisher: Optional[str] = Field(
+        None,
+        description="Publisher, newsroom, or organisation providing the data",
+    )
+    published_at: Optional[str] = Field(
+        None,
+        description="Publication date or retrieved date for the resource",
+    )
+    summary: str = Field(
+        ...,
+        description="Short factual summary of the relevant finding",
+    )
+    verification_status: Literal["verified", "needs_review", "flagged"] = Field(
+        "verified",
+        description="Confidence in the source after automated checks",
+    )
+
+    @field_validator("summary")
+    @classmethod
+    def summary_not_empty(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("External research summary cannot be empty")
         return cleaned
 
 
@@ -544,6 +690,27 @@ class ClientProfileSet(BaseModel):
         None,
         description="Optional summary describing the common thread across the three profiles",
     )
+    external_sources: List[ExternalResearchSource] = Field(
+        default_factory=list,
+        description="Externally verified references used across fictional personas",
+        json_schema_extra={"maxItems": 12},
+    )
+
+    @field_validator("external_sources")
+    @classmethod
+    def ensure_unique_labels(cls, sources: List[ExternalResearchSource]) -> List[ExternalResearchSource]:
+        seen = set()
+        unique_sources: List[ExternalResearchSource] = []
+        for source in sources:
+            label = source.label.strip().lower()
+            if label in seen:
+                continue
+            seen.add(label)
+            unique_sources.append(source)
+        max_items = cls.model_fields["external_sources"].json_schema_extra.get("maxItems")
+        if max_items and len(unique_sources) > max_items:
+            unique_sources = unique_sources[:max_items]
+        return unique_sources
 
 class DocumentMetadata(BaseModel):
     """Metadata for each processed document."""

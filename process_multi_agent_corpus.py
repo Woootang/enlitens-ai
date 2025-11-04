@@ -15,17 +15,20 @@ Features:
 - Progress tracking and checkpointing
 """
 
+import argparse
 import asyncio
+import copy
+import gc
 import json
 import logging
 import os
+import re
 import sys
 import time
-import gc
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from collections import Counter
 from datetime import datetime
-import argparse
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
@@ -36,20 +39,71 @@ from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
-from src.retrieval.embedding_ingestion import EmbeddingIngestion, EmbeddingIngestionPipeline
-from src.monitoring.error_telemetry import (
-    TelemetrySeverity,
-    log_with_telemetry,
-    telemetry_recorder,
-)
-from src.knowledge_base.status_file import (
-    STATUS_FILE_NAME,
-    clear_processing_status,
-    write_processing_status,
-)
+from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
 from src.utils.terminology import sanitize_structure, contains_banned_terms
+from src.context import REGIONAL_CONTEXT_DATA, match_municipalities
 from src.pipeline.optional_context_loader import analyze_optional_context
 
+# Keyword buckets used to derive themes from intake narratives and transcripts
+INTAKE_THEME_KEYWORDS: Dict[str, str] = {
+    "adhd": "ADHD & executive function",
+    "attention": "ADHD & executive function",
+    "executive": "ADHD & executive function",
+    "focus": "ADHD & executive function",
+    "autism": "Autistic identity",
+    "asd": "Autistic identity",
+    "mask": "Autistic identity",
+    "sensory": "Sensory integration",
+    "meltdown": "Sensory integration",
+    "overwhelm": "Sensory integration",
+    "anxiety": "Anxiety & regulation",
+    "panic": "Anxiety & regulation",
+    "worry": "Anxiety & regulation",
+    "depression": "Mood regulation",
+    "mood": "Mood regulation",
+    "trauma": "Trauma & complex PTSD",
+    "ptsd": "Trauma & complex PTSD",
+    "grief": "Grief & adjustment",
+    "loss": "Grief & adjustment",
+    "burnout": "Burnout & work stress",
+    "work": "Burnout & work stress",
+    "job": "Burnout & work stress",
+    "relationship": "Relational stress",
+    "marriage": "Relational stress",
+    "partner": "Relational stress",
+    "family": "Relational stress",
+    "child": "Family supports",
+    "school": "School supports",
+    "college": "School supports",
+    "assessment": "Assessment navigation",
+    "diagnosis": "Assessment navigation",
+    "women": "Gendered diagnosis gaps",
+    "female": "Gendered diagnosis gaps",
+    "girl": "Gendered diagnosis gaps",
+    "nonbinary": "Gender expansive experiences",
+    "trans": "Gender expansive experiences",
+    "lgbt": "Gender expansive experiences",
+}
+
+HEALTH_PRIORITY_TERMS: Dict[str, str] = {
+    "maternal": "Maternal & perinatal health",
+    "birth": "Maternal & perinatal health",
+    "infant": "Maternal & perinatal health",
+    "asthma": "Asthma & air quality",
+    "air": "Asthma & air quality",
+    "opioid": "Substance use",
+    "overdose": "Substance use",
+    "suicide": "Behavioral health",
+    "violence": "Community violence",
+    "homicide": "Community violence",
+    "transport": "Transportation barriers",
+    "transit": "Transportation barriers",
+    "food": "Food security",
+    "housing": "Housing security",
+    "homeless": "Housing security",
+    "lead": "Environmental health",
+    "pollution": "Environmental health",
+}
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 log_filename = "enlitens_complete_processing.log"  # Single comprehensive log
@@ -82,8 +136,6 @@ if monitor_endpoint:
     logger.info(f"📡 Streaming logs to monitoring server at {monitor_endpoint}")
 else:
     logger.info("📝 Remote monitoring disabled; using local log file only")
-
-TELEMETRY_AGENT = "multi_agent_corpus"
 
 # ---------------------------------------------------------------------------
 # Monitoring helpers
@@ -131,25 +183,9 @@ def post_monitor_stats(payload: Dict[str, Any]) -> None:
             response.raise_for_status() # Raise an exception for bad status codes
 
     except (httpx.RequestError, httpx.HTTPStatusError, TimeoutError, ConnectionError) as e:
-        log_with_telemetry(
-            logger.warning,
-            "Could not send stats to monitoring server: %s",
-            e,
-            agent=TELEMETRY_AGENT,
-            severity=TelemetrySeverity.MINOR,
-            impact="Monitoring visibility degraded",
-            details={"error": str(e), "payload_keys": list(payload.keys())},
-        )
+        logger.warning(f"Could not send stats to monitoring server: {e}")
     except Exception as e:
-        log_with_telemetry(
-            logger.warning,
-            "An unexpected error occurred during monitoring stats: %s",
-            e,
-            agent=TELEMETRY_AGENT,
-            severity=TelemetrySeverity.MINOR,
-            impact="Monitoring stats transmission failed",
-            details={"error": str(e)},
-        )
+        logger.warning(f"An unexpected error occurred during monitoring stats: {e}")
 
 # Clean up old logs after logger is configured
 try:
@@ -163,15 +199,7 @@ try:
                 pass  # File might not exist or be in use
     logger.info(f"🧹 Cleaned up old log files")
 except Exception as e:
-    log_with_telemetry(
-        logger.warning,
-        "Could not clean old logs: %s",
-        e,
-        agent=TELEMETRY_AGENT,
-        severity=TelemetrySeverity.MINOR,
-        impact="Log maintenance skipped",
-        details={"error": str(e)},
-    )
+    logger.warning(f"Could not clean old logs: {e}")
 
 class MultiAgentProcessor:
     """
@@ -184,7 +212,6 @@ class MultiAgentProcessor:
         self.st_louis_report = Path(st_louis_report) if st_louis_report else None
         self.context_dir = Path(__file__).parent
         self.temp_file = Path(f"{output_file}.temp")
-        self.status_file = self.output_file.parent / STATUS_FILE_NAME
 
         # Initialize components
         self.supervisor = SupervisorAgent()
@@ -200,45 +227,38 @@ class MultiAgentProcessor:
             "yes",
             "on",
         }
-        self.embedding_ingestion: Optional[EmbeddingIngestion] = None
-        self.vector_store_status: Dict[str, Any] = {
-            "is_healthy": False,
-            "mode": "disabled",
-            "reason": "not_initialized",
-        }
+        self.embedding_ingestion: Optional[EmbeddingIngestionPipeline] = None
         if disable_vector_ingestion:
             logger.info("🔌 Vector store ingestion disabled via environment toggle")
-            self.vector_store_status.update({"reason": "disabled_by_environment"})
         else:
             try:
-                self.embedding_ingestion = EmbeddingIngestion()
-                self.vector_store_status = self.embedding_ingestion.health_snapshot()
-                if not self.vector_store_status.get("is_healthy", True):
-                    logger.warning(
-                        "⚠️ Vector store health degraded; falling back to in-memory mode"
-                    )
+                self.embedding_ingestion = EmbeddingIngestionPipeline()
                 logger.info("🧠 Vector store ingestion pipeline initialized")
                 self._bootstrap_context_ingestion()
             except Exception as exc:
-                log_with_telemetry(
-                    logger.warning,
-                    "⚠️ Failed to initialize vector ingestion pipeline: %s",
-                    exc,
-                    agent="vector_ingestion",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="Vector store ingestion disabled",
-                    details={"error": str(exc)},
-                )
+                logger.warning("⚠️ Failed to initialize vector ingestion pipeline: %s", exc)
                 self.embedding_ingestion = None
-                self.vector_store_status = {
-                    "is_healthy": False,
-                    "mode": "disabled",
-                    "reason": "initialization_failed",
-                    "error": str(exc),
-                }
 
         # St. Louis regional context
         self.st_louis_context = self._load_st_louis_context()
+
+        # Optional context assets
+        (
+            self.client_intake_text,
+            self.client_intake_path,
+        ) = self._load_optional_context_text(
+            "intakes.txt", description="client intake narratives"
+        )
+        (
+            self.transcript_text,
+            self.transcript_path,
+        ) = self._load_optional_context_text(
+            "transcripts.txt", description="founder transcripts"
+        )
+        self.health_report_summary = self._extract_health_report_summary()
+        self.intake_registry = self._build_intake_registry(self.client_intake_text)
+        self.transcript_registry = self._build_transcript_registry(self.transcript_text)
+        self.regional_atlas = self._build_regional_atlas()
 
         # Processing configuration
         self.max_concurrent_documents = 1  # Sequential processing for memory management
@@ -313,16 +333,8 @@ class MultiAgentProcessor:
                         metadata={**metadata, "document_id": document_id},
                     )
             except Exception as exc:  # pragma: no cover - defensive logging
-                log_with_telemetry(
-                    logger.warning,
-                    "Unable to ingest context document %s: %s",
-                    document_id,
-                    exc,
-                    agent="vector_ingestion",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="Context document not ingested",
-                    doc_id=document_id,
-                    details={"error": str(exc), "document_id": document_id},
+                logger.warning(
+                    "Unable to ingest context document %s: %s", document_id, exc
                 )
 
     def _load_optional_context_text(
@@ -336,20 +348,8 @@ class MultiAgentProcessor:
             try:
                 return candidate.read_text(encoding="utf-8"), candidate
             except Exception as exc:  # pragma: no cover - defensive logging
-                log_with_telemetry(
-                    logger.warning,
-                    "Failed to read %s at %s: %s",
-                    description,
-                    candidate,
-                    exc,
-                    agent="context_loader",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="Optional context unavailable",
-                    details={
-                        "error": str(exc),
-                        "context_description": description,
-                        "candidate_path": str(candidate),
-                    },
+                logger.warning(
+                    "Failed to read %s at %s: %s", description, candidate, exc
                 )
                 return None, None
 
@@ -373,14 +373,8 @@ class MultiAgentProcessor:
         try:
             extraction = self.pdf_extractor.extract(str(self.st_louis_report))
         except Exception as exc:  # pragma: no cover - defensive logging
-            log_with_telemetry(
-                logger.warning,
-                "Failed to extract St. Louis health report for ingestion: %s",
-                exc,
-                agent="context_loader",
-                severity=TelemetrySeverity.MINOR,
-                impact="St. Louis context unavailable",
-                details={"error": str(exc)},
+            logger.warning(
+                "Failed to extract St. Louis health report for ingestion: %s", exc
             )
             return None
 
@@ -440,17 +434,179 @@ class MultiAgentProcessor:
                 context["health_report"] = self.pdf_extractor.extract(str(self.st_louis_report))
                 logger.info(f"✅ Loaded St. Louis health report: {self.st_louis_report}")
             except Exception as e:
-                log_with_telemetry(
-                    logger.warning,
-                    "Could not load St. Louis health report: %s",
-                    e,
-                    agent="context_loader",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="St. Louis health report omitted",
-                    details={"error": str(e)},
-                )
+                logger.warning(f"Could not load St. Louis health report: {e}")
 
         return context
+
+    def _extract_health_report_summary(self) -> Dict[str, Any]:
+        """Summarise health report content for downstream context."""
+
+        report_path: Optional[Path] = None
+        if self.st_louis_report and self.st_louis_report.exists():
+            report_path = self.st_louis_report
+        else:
+            candidate = self.context_dir / "enlitens_knowledge_base" / "st_louis_health_report.pdf"
+            if candidate.exists():
+                report_path = candidate
+
+        if not report_path:
+            return {}
+
+        try:
+            extraction = self.pdf_extractor.extract(str(report_path))
+        except Exception as exc:
+            logger.warning("Failed to extract health report summary: %s", exc)
+            return {}
+
+        if isinstance(extraction, dict):
+            text = extraction.get("archival_content", {}).get("full_document_text_markdown", "")
+        elif isinstance(extraction, str):
+            text = extraction
+        else:
+            text = ""
+
+        if not text:
+            return {"path": str(report_path)}
+
+        paragraphs = [
+            " ".join(paragraph.split())[:360]
+            for paragraph in re.split(r"\n{2,}", text)
+            if paragraph and len(paragraph.strip()) > 160
+        ]
+        highlights = paragraphs[:20]
+
+        regional_mentions = match_municipalities(text)
+
+        theme_counter: Counter[str] = Counter()
+        lowered = text.lower()
+        for keyword, bucket in HEALTH_PRIORITY_TERMS.items():
+            occurrences = lowered.count(keyword)
+            if occurrences:
+                theme_counter[bucket] += occurrences
+
+        top_themes = theme_counter.most_common(15)
+
+        return {
+            "path": str(report_path),
+            "highlights": highlights,
+            "regional_mentions": regional_mentions,
+            "priority_signals": top_themes,
+        }
+
+    def _build_intake_registry(self, raw_text: Optional[str]) -> Dict[str, Any]:
+        """Create a structured registry from client intake narratives."""
+
+        if not raw_text:
+            return {}
+
+        entries: List[Dict[str, Any]] = []
+        location_counter: Counter[str] = Counter()
+        theme_counter: Counter[str] = Counter()
+
+        blocks = re.findall(r"\{([^{}]+)\}", raw_text, flags=re.DOTALL)
+        for block in blocks:
+            snippet = " ".join(block.split())
+            if not snippet:
+                continue
+
+            regional_mentions = match_municipalities(snippet)
+            for name, count in regional_mentions.items():
+                location_counter[name] += count
+
+            themes = self._infer_themes(snippet)
+            for theme in themes:
+                theme_counter[theme] += 1
+
+            entries.append(
+                {
+                    "snippet": snippet[:420],
+                    "regional_mentions": regional_mentions,
+                    "themes": themes,
+                }
+            )
+
+        top_locations = location_counter.most_common(30)
+        top_themes = theme_counter.most_common(25)
+
+        return {
+            "entry_count": len(entries),
+            "top_locations": top_locations,
+            "location_counts": dict(location_counter),
+            "top_themes": top_themes,
+            "entries": entries[:80],
+        }
+
+    def _build_transcript_registry(self, raw_text: Optional[str]) -> Dict[str, Any]:
+        """Summarise founder transcripts for consistent downstream usage."""
+
+        if not raw_text:
+            return {}
+
+        lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
+        if not lines:
+            return {}
+
+        segments: List[str] = []
+        buffer: List[str] = []
+        for line in lines:
+            buffer.append(line)
+            joined = " ".join(buffer)
+            if len(joined) >= 240:
+                segments.append(joined[:360])
+                buffer = []
+            if len(segments) >= 60:
+                break
+
+        if buffer and len(segments) < 60:
+            segments.append(" ".join(buffer)[:360])
+
+        combined_text = " ".join(lines)
+        regional_mentions = match_municipalities(combined_text)
+
+        theme_counter: Counter[str] = Counter()
+        for segment in segments:
+            for theme in self._infer_themes(segment):
+                theme_counter[theme] += 1
+
+        return {
+            "segment_count": len(segments),
+            "segments": segments,
+            "regional_mentions": regional_mentions,
+            "top_themes": theme_counter.most_common(20),
+        }
+
+    def _build_regional_atlas(self) -> Dict[str, Any]:
+        """Combine curated geography with observed intake/transcript signals."""
+
+        atlas: Dict[str, Any] = {}
+        for key, value in REGIONAL_CONTEXT_DATA.items():
+            if isinstance(value, dict):
+                atlas[key] = {sub_key: list(sub_value) for sub_key, sub_value in value.items()}
+            else:
+                atlas[key] = list(value)
+
+        atlas["top_intake_locations"] = self.intake_registry.get("top_locations", [])
+        atlas["intake_themes"] = self.intake_registry.get("top_themes", [])
+        atlas["top_transcript_themes"] = self.transcript_registry.get("top_themes", [])
+
+        health_locations = self.health_report_summary.get("regional_mentions", {}) if self.health_report_summary else {}
+        atlas["top_health_report_locations"] = sorted(
+            health_locations.items(), key=lambda item: (-item[1], item[0])
+        )[:30]
+        atlas["health_priority_signals"] = self.health_report_summary.get("priority_signals", []) if self.health_report_summary else []
+
+        return atlas
+
+    @staticmethod
+    def _infer_themes(text: str) -> List[str]:
+        """Map free-text content onto high-level intake themes."""
+
+        themes: List[str] = []
+        lowered = text.lower()
+        for keyword, label in INTAKE_THEME_KEYWORDS.items():
+            if keyword in lowered and label not in themes:
+                themes.append(label)
+        return themes
 
     def _analyze_client_insights(self) -> Dict[str, Any]:
         """Analyze client intake data for enhanced context."""
@@ -465,15 +621,7 @@ class MultiAgentProcessor:
                 analyzer=analyzer,
             )
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error analyzing client insights: %s",
-                e,
-                agent="client_context_analysis",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Client context analysis unavailable",
-                details={"error": str(e)},
-            )
+            logger.error(f"Error analyzing client insights: {e}")
             return {}
 
     def _analyze_founder_insights(self) -> Dict[str, Any]:
@@ -489,15 +637,7 @@ class MultiAgentProcessor:
                 analyzer=analyzer,
             )
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error analyzing founder insights: %s",
-                e,
-                agent="founder_context_analysis",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Founder context analysis unavailable",
-                details={"error": str(e)},
-            )
+            logger.error(f"Error analyzing founder insights: {e}")
             return {}
 
     async def _extract_pdf_text(self, pdf_path: Path) -> Optional[Dict[str, Any]]:
@@ -514,15 +654,7 @@ class MultiAgentProcessor:
                         logger.info(f"✅ Successfully extracted {len(full_text)} characters from {pdf_path.name}")
                         return extraction_result
                     else:
-                        log_with_telemetry(
-                            logger.warning,
-                            "⚠️ Poor extraction quality from %s, retrying...",
-                            pdf_path.name,
-                            agent="pdf_extraction",
-                            severity=TelemetrySeverity.MAJOR,
-                            impact="Retrying extraction due to low quality",
-                            doc_id=pdf_path.name,
-                        )
+                        logger.warning(f"⚠️ Poor extraction quality from {pdf_path.name}, retrying...")
                         continue
                 elif extraction_result and isinstance(extraction_result, str):
                     # Fallback for simple string extraction
@@ -530,54 +662,19 @@ class MultiAgentProcessor:
                         logger.info(f"✅ Successfully extracted {len(extraction_result)} characters from {pdf_path.name}")
                         return {"archival_content": {"full_document_text_markdown": extraction_result}}
                     else:
-                        log_with_telemetry(
-                            logger.warning,
-                            "⚠️ Poor extraction quality from %s, retrying...",
-                            pdf_path.name,
-                            agent="pdf_extraction",
-                            severity=TelemetrySeverity.MAJOR,
-                            impact="Retrying extraction due to low quality",
-                            doc_id=pdf_path.name,
-                        )
+                        logger.warning(f"⚠️ Poor extraction quality from {pdf_path.name}, retrying...")
                         continue
                 else:
-                    log_with_telemetry(
-                        logger.warning,
-                        "⚠️ Invalid extraction result type from %s, retrying...",
-                        pdf_path.name,
-                        agent="pdf_extraction",
-                        severity=TelemetrySeverity.MAJOR,
-                        impact="Extraction result invalid - retrying",
-                        doc_id=pdf_path.name,
-                    )
+                    logger.warning(f"⚠️ Invalid extraction result type from {pdf_path.name}, retrying...")
                     continue
 
             except Exception as e:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ PDF extraction failed for %s (attempt %s): %s",
-                    pdf_path.name,
-                    attempt + 1,
-                    e,
-                    agent="pdf_extraction",
-                    severity=TelemetrySeverity.MAJOR,
-                    impact="PDF extraction attempt failed",
-                    doc_id=pdf_path.name,
-                    details={"error": str(e), "attempt": attempt + 1},
-                )
+                logger.error(f"❌ PDF extraction failed for {pdf_path.name} (attempt {attempt + 1}): {e}")
                 if attempt < self.retry_attempts - 1:
                     await asyncio.sleep(2 ** attempt)  # Exponential backoff
                     continue
 
-        log_with_telemetry(
-            logger.error,
-            "❌ All PDF extraction attempts failed for %s",
-            pdf_path.name,
-            agent="pdf_extraction",
-            severity=TelemetrySeverity.CRITICAL,
-            impact="PDF extraction aborted",
-            doc_id=pdf_path.name,
-        )
+        logger.error(f"❌ All PDF extraction attempts failed for {pdf_path.name}")
         logger.info(f"🔄 Trying fallback extraction for {pdf_path.name}")
         return self._extract_pdf_text_simple(pdf_path)
 
@@ -606,29 +703,11 @@ class MultiAgentProcessor:
                 logger.info(f"✅ Fallback extraction successful: {len(text)} characters")
                 return {"archival_content": {"full_document_text_markdown": text}}
             else:
-                log_with_telemetry(
-                    logger.warning,
-                    "⚠️ Fallback extraction too short: %s characters",
-                    len(text),
-                    agent="pdf_extraction_fallback",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="Fallback extraction produced insufficient text",
-                    doc_id=pdf_path.name,
-                )
+                logger.warning(f"⚠️ Fallback extraction too short: {len(text)} characters")
                 return None
 
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "❌ Fallback extraction failed for %s: %s",
-                pdf_path.name,
-                e,
-                agent="pdf_extraction_fallback",
-                severity=TelemetrySeverity.MINOR,
-                impact="Fallback extractor failed",
-                doc_id=pdf_path.name,
-                details={"error": str(e)},
-            )
+            logger.error(f"❌ Fallback extraction failed for {pdf_path.name}: {e}")
             return None
 
     def _get_pdf_file_size(self, pdf_path: Path) -> Optional[int]:
@@ -638,17 +717,7 @@ class MultiAgentProcessor:
             logger.debug(f"📏 PDF file size for {pdf_path.name}: {size} bytes")
             return size
         except OSError as exc:
-            log_with_telemetry(
-                logger.warning,
-                "⚠️ Unable to determine file size for %s: %s",
-                pdf_path.name,
-                exc,
-                agent="file_system",
-                severity=TelemetrySeverity.MINOR,
-                impact="PDF size unavailable",
-                doc_id=pdf_path.name,
-                details={"error": str(exc)},
-            )
+            logger.warning(f"⚠️ Unable to determine file size for {pdf_path.name}: {exc}")
             return None
 
     def _get_page_count_from_extraction(self, extraction_result: Any, pdf_path: Path) -> Optional[int]:
@@ -718,15 +787,7 @@ class MultiAgentProcessor:
                 logger.info("📋 No previous progress found, starting fresh")
                 return EnlitensKnowledgeBase()
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "❌ Error loading progress: %s",
-                e,
-                agent="progress_tracking",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Saved progress could not be restored",
-                details={"error": str(e), "temp_file": str(self.temp_file)},
-            )
+            logger.error(f"❌ Error loading progress: {e}")
             return EnlitensKnowledgeBase()
 
     async def _save_progress(self, knowledge_base: EnlitensKnowledgeBase,
@@ -745,25 +806,97 @@ class MultiAgentProcessor:
                     json.dump(knowledge_base.model_dump(), latest_f, indent=2, default=str)
                 os.replace(tmp_latest, latest_path)
             except Exception as latest_exc:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ Error updating latest knowledge base file: %s",
-                    latest_exc,
-                    agent="progress_tracking",
-                    severity=TelemetrySeverity.MAJOR,
-                    impact="Latest knowledge base not updated",
-                    details={"error": str(latest_exc), "target": str(latest_path)},
-                )
+                logger.error(f"❌ Error updating latest knowledge base file: {latest_exc}")
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "❌ Error saving progress: %s",
-                e,
-                agent="progress_tracking",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Progress checkpoint not persisted",
-                details={"error": str(e), "temp_file": str(self.temp_file)},
+            logger.error(f"❌ Error saving progress: {e}")
+
+    def _extract_document_passages(
+        self,
+        text: str,
+        document_id: str,
+        *,
+        max_passages: int = 8,
+        min_chars: int = 160,
+        max_chars: int = 600,
+    ) -> List[Dict[str, Any]]:
+        """Slice the document into reusable passages for downstream agents."""
+
+        if not text:
+            return []
+
+        normalized_paragraphs = [segment.strip() for segment in re.split(r"\n{2,}", text) if segment.strip()]
+        seen: set[str] = set()
+        passages: List[Dict[str, Any]] = []
+
+        for paragraph in normalized_paragraphs:
+            cleaned = " ".join(paragraph.split())
+            if len(cleaned) < min_chars:
+                continue
+            if cleaned in seen:
+                continue
+            seen.add(cleaned)
+
+            index = len(passages) + 1
+            snippet = cleaned[:max_chars]
+            metadata = {
+                "document_id": document_id,
+                "source_type": "document",
+                "chunk_index": index - 1,
+                "doc_type": "primary_source",
+            }
+
+            passages.append(
+                {
+                    "chunk_id": f"{document_id}::doc::{index}",
+                    "text": snippet,
+                    "document_id": document_id,
+                    "source_type": "document",
+                    "metadata": metadata,
+                }
             )
+
+            if len(passages) >= max_passages:
+                break
+
+        return passages
+
+    def _derive_verbatim_quotes(self, raw_text: Optional[str], max_quotes: int = 5) -> List[str]:
+        """Extract representative quotes from raw intake narratives."""
+
+        if not raw_text:
+            return []
+
+        quotes: List[str] = []
+        seen: set[str] = set()
+
+        quote_pattern = re.compile(r'[“\"]([^”\"]{30,320})[”\"]', re.DOTALL)
+        for match in quote_pattern.finditer(raw_text):
+            fragment = match.group(0).strip()
+            cleaned = " ".join(fragment.split())
+            if cleaned and cleaned not in seen:
+                quotes.append(cleaned)
+                seen.add(cleaned)
+            if len(quotes) >= max_quotes:
+                break
+
+        if len(quotes) < max_quotes:
+            sentences = re.split(r"(?<=[.!?])\s+", raw_text)
+            for sentence in sentences:
+                cleaned_sentence = " ".join(sentence.strip().split())
+                if len(cleaned_sentence) < 80:
+                    continue
+                if cleaned_sentence.lower().startswith(("note", "page", "chapter")):
+                    continue
+                normalized = cleaned_sentence
+                if not normalized.startswith(("\"", "“")):
+                    normalized = f'"{normalized}"'
+                if normalized not in seen:
+                    quotes.append(normalized)
+                    seen.add(normalized)
+                if len(quotes) >= max_quotes:
+                    break
+
+        return quotes[:max_quotes]
 
     async def _create_processing_context(self, text: str, document_id: str) -> Dict[str, Any]:
         """Create processing context for the supervisor."""
@@ -773,6 +906,18 @@ class MultiAgentProcessor:
 
         raw_client_context = client_analysis.get("raw_content") if isinstance(client_analysis, dict) else None
         raw_founder_context = founder_analysis.get("raw_content") if isinstance(founder_analysis, dict) else None
+
+        document_passages = self._extract_document_passages(text, document_id)
+
+        derived_quotes: List[str] = []
+        if isinstance(client_analysis, dict):
+            existing_quotes = client_analysis.get("verbatim_quotes") or []
+            if isinstance(existing_quotes, list):
+                derived_quotes.extend(str(quote).strip() for quote in existing_quotes if str(quote).strip())
+        if raw_client_context:
+            for quote in self._derive_verbatim_quotes(raw_client_context):
+                if quote not in derived_quotes:
+                    derived_quotes.append(quote)
 
         client_insights = {
             "challenges": self.st_louis_context["demographics"]["mental_health_challenges"],
@@ -785,6 +930,8 @@ class MultiAgentProcessor:
         }
         if raw_client_context:
             client_insights["raw_context"] = raw_client_context
+        if derived_quotes:
+            client_insights["verbatim_quotes"] = derived_quotes[:5]
 
         founder_insights = {
             "voice_characteristics": self.st_louis_context["founder_voice"],
@@ -803,7 +950,22 @@ class MultiAgentProcessor:
         if raw_founder_context:
             founder_insights["raw_context"] = raw_founder_context
 
-        context: Dict[str, Any] = {
+        document_localities = match_municipalities(text)
+        sorted_localities = sorted(
+            document_localities.items(), key=lambda item: (-item[1], item[0])
+        )[:20]
+        if sorted_localities:
+            client_insights["regional_focus"] = [name for name, _ in sorted_localities]
+
+        regional_atlas = copy.deepcopy(self.regional_atlas) if self.regional_atlas else {}
+        if regional_atlas and sorted_localities:
+            regional_atlas["document_localities"] = sorted_localities
+
+        intake_registry = self.intake_registry or {}
+        transcript_registry = self.transcript_registry or {}
+        health_summary = self.health_report_summary or {}
+
+        return {
             "document_id": document_id,
             "document_text": text,
             "client_insights": client_insights,
@@ -816,13 +978,13 @@ class MultiAgentProcessor:
             "raw_client_context": raw_client_context,
             "raw_founder_context": raw_founder_context,
             "processing_stage": "initial",
+            "document_passages": document_passages,
+            "intake_registry": intake_registry,
+            "transcript_registry": transcript_registry,
+            "regional_atlas": regional_atlas,
+            "health_report_summary": health_summary,
+            "document_locality_matches": sorted_localities,
         }
-
-        vector_status = getattr(self, "vector_store_status", None)
-        if vector_status is not None:
-            context["vector_store_status"] = dict(vector_status)
-
-        return context
 
     async def process_document(self, pdf_path: Path) -> Optional[EnlitensKnowledgeEntry]:
         """Process a single document through the complete multi-agent system."""
@@ -835,44 +997,19 @@ class MultiAgentProcessor:
             logger.info(f"📄 Extracting text from PDF: {pdf_path.name}")
             extraction_result = await self._extract_pdf_text(pdf_path)
             if not extraction_result:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ No text extracted from %s",
-                    document_id,
-                    agent="pdf_extraction",
-                    severity=TelemetrySeverity.CRITICAL,
-                    impact="Document aborted due to missing text",
-                    doc_id=document_id,
-                )
+                logger.error(f"❌ No text extracted from {document_id}")
                 return None
 
             # Extract the full text from the structured result
             if isinstance(extraction_result, dict) and 'archival_content' in extraction_result:
                 text = extraction_result['archival_content'].get('full_document_text_markdown', '')
                 if not text:
-                    log_with_telemetry(
-                        logger.error,
-                        "❌ No full text found in extraction result for %s",
-                        document_id,
-                        agent="pdf_extraction",
-                        severity=TelemetrySeverity.CRITICAL,
-                        impact="Extraction returned empty text",
-                        doc_id=document_id,
-                    )
+                    logger.error(f"❌ No full text found in extraction result for {document_id}")
                     return None
             elif isinstance(extraction_result, str):
                 text = extraction_result
             else:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ Unexpected extraction result type for %s: %s",
-                    document_id,
-                    type(extraction_result),
-                    agent="pdf_extraction",
-                    severity=TelemetrySeverity.CRITICAL,
-                    impact="Unsupported extraction result",
-                    doc_id=document_id,
-                )
+                logger.error(f"❌ Unexpected extraction result type for {document_id}: {type(extraction_result)}")
                 return None
 
             logger.info(f"✅ Text extracted successfully: {len(text)} characters")
@@ -884,46 +1021,27 @@ class MultiAgentProcessor:
             logger.info(f"🧬 Running entity extraction for {document_id}")
             entities = await self.extraction_team.extract_entities(extraction_result)
 
-            list_bucket_lengths = {
-                bucket: len(values)
-                for bucket, values in entities.items()
-                if isinstance(values, (list, tuple))
-            }
-            total_entity_count = sum(list_bucket_lengths.values())
+            total_entities = 0
+            if isinstance(entities, dict):
+                for value in entities.values():
+                    if value is None:
+                        continue
+                    if isinstance(value, int):
+                        total_entities += value
+                    elif isinstance(value, (list, tuple, set)):
+                        total_entities += len(value)
+                    elif isinstance(value, dict):
+                        total_entities += len(value)
+                    else:
+                        # Fallback: count unexpected scalar as single entity
+                        total_entities += 1
 
-            total_entities_payload = entities.get("total_entities")
-            per_category_counts: Dict[str, int] = dict(list_bucket_lengths)
-
-            if isinstance(total_entities_payload, dict):
-                per_category_from_payload = {
-                    bucket: count
-                    for bucket, count in total_entities_payload.items()
-                    if bucket != "total" and isinstance(count, int)
-                }
-                if per_category_from_payload:
-                    per_category_counts = per_category_from_payload
-                payload_total = total_entities_payload.get("total")
-                if isinstance(payload_total, int):
-                    total_entity_count = payload_total
-            elif isinstance(total_entities_payload, int):
-                total_entity_count = total_entities_payload
-
-            entity_count_summary = {
-                "total": total_entity_count,
-                "categories": per_category_counts,
-            }
-
-            logger.info(
-                "✅ Entity extraction complete: total=%s | categories=%s",
-                entity_count_summary["total"],
-                entity_count_summary["categories"],
-            )
+            logger.info(f"✅ Entity extraction complete: {total_entities} entities")
 
             # Create processing context
             logger.info(f"🔧 Creating processing context for {document_id}")
             context = await self._create_processing_context(text, document_id)
             context["extracted_entities"] = entities
-            context["entity_counts"] = entity_count_summary
             logger.info(f"✅ Processing context created")
 
             # Process through supervisor (multi-agent system)
@@ -934,89 +1052,69 @@ class MultiAgentProcessor:
 
             logger.info(f"⏱️ Supervisor processing completed in {processing_time:.2f}s")
 
-            if result and result.get("supervisor_status") == "completed":
-                result.setdefault("agent_outputs", {})["extracted_entities"] = entities
-
-                if self.embedding_ingestion:
-                    try:
-                        ingestion_metadata = {
-                            "document_id": document_id,
-                            "filename": pdf_path.name,
-                            "doc_type": context.get("doc_type"),
-                            "processing_timestamp": datetime.utcnow().isoformat(),
-                            "quality_score": result.get("quality_score"),
-                            "confidence_score": result.get("confidence_score"),
-                        }
-                        self.embedding_ingestion.ingest_document(
-                            document_id=document_id,
-                            full_text=result.get("document_text", text),
-                            agent_outputs=result.get("agent_outputs", {}),
-                            metadata=ingestion_metadata,
-                            rebuild=True,
-                        )
-                    except Exception as exc:
-                        log_with_telemetry(
-                            logger.warning,
-                            "⚠️ Vector ingestion failed for %s: %s",
-                            document_id,
-                            exc,
-                            agent="vector_ingestion",
-                            severity=TelemetrySeverity.MINOR,
-                            impact="Document skipped for vector ingestion",
-                            doc_id=document_id,
-                            details={"error": str(exc)},
-                        )
-
-                # Convert result to EnlitensKnowledgeEntry format
-                logger.info(f"🔄 Converting result to knowledge entry for {document_id}")
-                page_count = self._get_page_count_from_extraction(extraction_result, pdf_path)
-                knowledge_entry = await self._convert_to_knowledge_entry(
-                    result,
-                    document_id,
-                    processing_time,
-                    file_size=file_size_bytes,
-                    page_count=page_count,
-                    filename=pdf_path.name,
-                    fallback_full_text=text,
-                )
-
-                logger.info(f"✅ Document {document_id} processed successfully in {processing_time:.2f}s")
-                return knowledge_entry
-            else:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ Multi-agent processing failed for %s: %s",
-                    document_id,
-                    result,
-                    agent="multi_agent_supervisor",
-                    severity=TelemetrySeverity.CRITICAL,
-                    impact="Supervisor reported failure",
-                    doc_id=document_id,
-                )
+            if not result:
+                logger.error(f"❌ Multi-agent processing returned no result for {document_id}")
                 return None
 
-        except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "❌ Error processing document %s: %s",
+            supervisor_status = result.get("supervisor_status")
+            if supervisor_status not in {"completed", "completed_with_issues"}:
+                logger.error(f"❌ Multi-agent processing failed for {document_id}: {result}")
+                return None
+
+            if supervisor_status == "completed_with_issues":
+                logger.warning(
+                    "⚠️ Document %s completed with issues; persisting partial outputs",
+                    document_id,
+                )
+
+            result.setdefault("agent_outputs", {})["extracted_entities"] = entities
+
+            if self.embedding_ingestion:
+                try:
+                    ingestion_metadata = {
+                        "document_id": document_id,
+                        "filename": pdf_path.name,
+                        "doc_type": context.get("doc_type"),
+                        "processing_timestamp": datetime.utcnow().isoformat(),
+                        "quality_score": result.get("quality_score"),
+                        "confidence_score": result.get("confidence_score"),
+                        "supervisor_status": supervisor_status,
+                    }
+                    self.embedding_ingestion.ingest_document(
+                        document_id=document_id,
+                        full_text=result.get("document_text", text),
+                        agent_outputs=result.get("agent_outputs", {}),
+                        metadata=ingestion_metadata,
+                        rebuild=True,
+                    )
+                except Exception as exc:
+                    logger.warning("⚠️ Vector ingestion failed for %s: %s", document_id, exc)
+
+            # Convert result to EnlitensKnowledgeEntry format
+            logger.info(f"🔄 Converting result to knowledge entry for {document_id}")
+            page_count = self._get_page_count_from_extraction(extraction_result, pdf_path)
+            knowledge_entry = await self._convert_to_knowledge_entry(
+                result,
                 document_id,
-                e,
-                agent="multi_agent_processor",
-                severity=TelemetrySeverity.CRITICAL,
-                impact="Document processing crashed",
-                doc_id=document_id,
-                details={"error": str(e)},
+                processing_time,
+                file_size=file_size_bytes,
+                page_count=page_count,
+                filename=pdf_path.name,
+                fallback_full_text=text,
             )
+
+            logger.info(
+                "✅ Document %s processed with status %s in %.2fs",
+                document_id,
+                supervisor_status,
+                processing_time,
+            )
+            return knowledge_entry
+
+        except Exception as e:
+            logger.error(f"❌ Error processing document {document_id}: {e}")
             import traceback
-            log_with_telemetry(
-                logger.error,
-                "Full traceback: %s",
-                traceback.format_exc(),
-                agent="multi_agent_processor",
-                severity=TelemetrySeverity.CRITICAL,
-                impact="Traceback captured for diagnostics",
-                doc_id=document_id,
-            )
+            logger.error(f"Full traceback: {traceback.format_exc()}")
             return None
 
     async def _convert_to_knowledge_entry(
@@ -1167,16 +1265,8 @@ class MultiAgentProcessor:
             try:
                 blog_content = BlogContent.model_validate(blog_data or {}, context=blog_context)
             except Exception as exc:
-                log_with_telemetry(
-                    logger.warning,
-                    "⚠️ Failed to validate blog content for %s: %s",
-                    document_id,
-                    exc,
-                    agent="content_validation",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="Blog content validation fallback",
-                    doc_id=document_id,
-                    details={"error": str(exc)},
+                logger.warning(
+                    "⚠️ Failed to validate blog content for %s: %s", document_id, exc
                 )
                 blog_content = BlogContent()
             if blog_data:
@@ -1190,16 +1280,8 @@ class MultiAgentProcessor:
                 try:
                     client_profiles = ClientProfileSet.model_validate(client_profiles_data or {})
                 except Exception as exc:
-                    log_with_telemetry(
-                        logger.warning,
-                        "⚠️ Failed to validate client profiles for %s: %s",
-                        document_id,
-                        exc,
-                        agent="content_validation",
-                        severity=TelemetrySeverity.MINOR,
-                        impact="Client profile validation fallback",
-                        doc_id=document_id,
-                        details={"error": str(exc)},
+                    logger.warning(
+                        "⚠️ Failed to validate client profiles for %s: %s", document_id, exc
                     )
 
             entry = EnlitensKnowledgeEntry(
@@ -1226,47 +1308,20 @@ class MultiAgentProcessor:
                     entry = EnlitensKnowledgeEntry.model_validate(sanitized)
                     logger.info("🔧 Applied terminology sanitizer to knowledge entry: %s", document_id)
             except Exception as _san_exc:
-                log_with_telemetry(
-                    logger.warning,
-                    "Terminology sanitizer failed for %s: %s",
-                    document_id,
-                    _san_exc,
-                    agent="terminology_sanitizer",
-                    severity=TelemetrySeverity.MAJOR,
-                    impact="Terminology sanitizer skipped",
-                    doc_id=document_id,
-                    details={"error": str(_san_exc)},
-                )
+                logger.warning("Terminology sanitizer failed for %s: %s", document_id, _san_exc)
 
             # Log if any banned terms remain
             try:
                 dump_text = json.dumps(entry.model_dump(), ensure_ascii=False)
                 if contains_banned_terms(dump_text):
-                    log_with_telemetry(
-                        logger.warning,
-                        "⚠️ Banned terminology detected post-sanitize for %s",
-                        document_id,
-                        agent="terminology_sanitizer",
-                        severity=TelemetrySeverity.MAJOR,
-                        impact="Banned terminology present",
-                        doc_id=document_id,
-                    )
+                    logger.warning("⚠️ Banned terminology detected post-sanitize for %s", document_id)
             except Exception:
                 pass
 
             return entry
 
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error converting to knowledge entry: %s",
-                e,
-                agent="knowledge_entry_conversion",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Fallback knowledge entry generated",
-                doc_id=document_id,
-                details={"error": str(e)},
-            )
+            logger.error(f"Error converting to knowledge entry: {e}")
             # Return minimal valid entry with document text if available
             full_document_text = ""
             if isinstance(result, dict):
@@ -1299,16 +1354,12 @@ class MultiAgentProcessor:
         """Process the entire corpus using the multi-agent system."""
         start_time = time.time()  # Track processing start time
         failed_count = 0
-        pdf_files: List[Path] = []
-        current_document_index = -1
         try:
             logger.info("🚀 Starting MULTI-AGENT Enlitens Corpus Processing")
             logger.info(f"📁 Input directory: {self.input_dir}")
             logger.info(f"📄 Output file: {self.output_file}")
             logger.info(f"📊 Log file: {log_filename} (comprehensive log for all 344 files)")
             logger.info(f"🏙️ St. Louis context: {len(self.st_louis_context)} categories loaded")
-
-            clear_processing_status(self.status_file)
 
             # Check system resources
             await self._check_system_resources()
@@ -1319,18 +1370,7 @@ class MultiAgentProcessor:
             logger.info(f"📚 Found {total_files} PDF files to process")
 
             if total_files == 0:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ No PDF files found in input directory",
-                    agent="multi_agent_processor",
-                    severity=TelemetrySeverity.CRITICAL,
-                    impact="Corpus processing aborted",
-                )
-                write_processing_status(
-                    self.status_file,
-                    reason="No PDF files found in input directory",
-                    affected_documents=[],
-                )
+                logger.error("❌ No PDF files found in input directory")
                 return
 
             # Ensure the supervisor and all specialized agents are ready
@@ -1338,18 +1378,7 @@ class MultiAgentProcessor:
                 logger.info("🧠 Initializing multi-agent supervisor and specialized agents")
                 init_success = await self.supervisor.initialize()
                 if not init_success:
-                    log_with_telemetry(
-                        logger.error,
-                        "❌ Supervisor initialization failed; aborting corpus processing",
-                        agent="multi_agent_supervisor",
-                        severity=TelemetrySeverity.CRITICAL,
-                        impact="Supervisor unavailable",
-                    )
-                    write_processing_status(
-                        self.status_file,
-                        reason="Supervisor initialization failed",
-                        affected_documents=[pdf.stem for pdf in pdf_files],
-                    )
+                    logger.error("❌ Supervisor initialization failed; aborting corpus processing")
                     return
 
             self.knowledge_base = await self._load_progress()
@@ -1364,7 +1393,6 @@ class MultiAgentProcessor:
 
             # Process documents with multi-agent system
             for i, pdf_path in enumerate(pdf_files):
-                current_document_index = i
                 if pdf_path.stem in processed_docs:
                     logger.info(f"⏭️ Skipping already processed: {pdf_path.name}")
                     continue
@@ -1396,15 +1424,7 @@ class MultiAgentProcessor:
                         "last_duration": round(doc_duration, 2),
                     })
                 else:
-                    log_with_telemetry(
-                        logger.error,
-                        "❌ Failed to process: %s",
-                        pdf_path.name,
-                        agent="multi_agent_processor",
-                        severity=TelemetrySeverity.CRITICAL,
-                        impact="Document processing failed",
-                        doc_id=pdf_path.stem,
-                    )
+                    logger.error(f"❌ Failed to process: {pdf_path.name}")
                     failed_count += 1
                     post_monitor_stats({
                         "status": "processing",
@@ -1430,15 +1450,7 @@ class MultiAgentProcessor:
                     json.dump(self.knowledge_base.model_dump(), f, indent=2, default=str)
                 os.replace(tmp_final, self.output_file)
             except Exception as e:
-                log_with_telemetry(
-                    logger.error,
-                    "❌ Atomic write failed, falling back to direct write: %s",
-                    e,
-                    agent="progress_tracking",
-                    severity=TelemetrySeverity.MAJOR,
-                    impact="Atomic write failed",
-                    details={"error": str(e), "output_file": str(self.output_file)},
-                )
+                logger.error(f"❌ Atomic write failed, falling back to direct write: {e}")
                 with open(self.output_file, 'w', encoding='utf-8') as f:
                     json.dump(self.knowledge_base.model_dump(), f, indent=2, default=str)
 
@@ -1475,28 +1487,9 @@ class MultiAgentProcessor:
                 "runtime_seconds": round(processing_duration, 2),
             })
 
-            clear_processing_status(self.status_file)
-
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "❌ Error processing corpus: %s",
-                e,
-                agent="multi_agent_processor",
-                severity=TelemetrySeverity.CRITICAL,
-                impact="Corpus processing halted",
-                details={"error": str(e)},
-            )
+            logger.error(f"❌ Error processing corpus: {e}")
             post_monitor_stats({"status": "error", "error": str(e)})
-            remaining_docs: List[str] = []
-            if pdf_files:
-                start_index = current_document_index if 0 <= current_document_index < len(pdf_files) else 0
-                remaining_docs = [pdf.stem for pdf in pdf_files[start_index:]]
-            write_processing_status(
-                self.status_file,
-                reason=str(e),
-                affected_documents=remaining_docs,
-            )
             raise
         finally:
             # Clean up resources
@@ -1515,13 +1508,7 @@ class MultiAgentProcessor:
                 gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
                 logger.info(f"🔥 GPU: {gpu_name} ({gpu_memory:.1f}GB)")
             else:
-                log_with_telemetry(
-                    logger.warning,
-                    "⚠️ No GPU available - using CPU",
-                    agent="system_resources",
-                    severity=TelemetrySeverity.MINOR,
-                    impact="GPU acceleration unavailable",
-                )
+                logger.warning("⚠️ No GPU available - using CPU")
 
             # Memory information
             memory = psutil.virtual_memory()
@@ -1532,15 +1519,7 @@ class MultiAgentProcessor:
             logger.info(f"💽 Disk: {disk.free / 1e9:.1f}GB available")
 
         except Exception as e:
-            log_with_telemetry(
-                logger.warning,
-                "Could not check system resources: %s",
-                e,
-                agent="system_resources",
-                severity=TelemetrySeverity.MINOR,
-                impact="Resource check skipped",
-                details={"error": str(e)},
-            )
+            logger.warning(f"Could not check system resources: {e}")
 
     async def _cleanup_memory(self):
         """Clean up memory between processing batches."""
@@ -1559,15 +1538,7 @@ class MultiAgentProcessor:
             logger.info("🧹 Memory cleanup completed")
 
         except Exception as e:
-            log_with_telemetry(
-                logger.warning,
-                "Memory cleanup failed: %s",
-                e,
-                agent="memory_cleanup",
-                severity=TelemetrySeverity.MINOR,
-                impact="Memory cleanup skipped",
-                details={"error": str(e)},
-            )
+            logger.warning(f"Memory cleanup failed: {e}")
 
     async def _cleanup(self):
         """Clean up all resources."""
@@ -1588,15 +1559,7 @@ class MultiAgentProcessor:
             logger.info("✅ Cleanup completed")
 
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error during cleanup: %s",
-                e,
-                agent="resource_cleanup",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Cleanup encountered errors",
-                details={"error": str(e)},
-            )
+            logger.error(f"Error during cleanup: {e}")
 
     def _calculate_avg_confidence(self) -> float:
         """Calculate average confidence score across all processed documents."""
@@ -1622,15 +1585,7 @@ class MultiAgentProcessor:
             return total_confidence / count if count > 0 else 0.0
 
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error calculating average confidence: %s",
-                e,
-                agent="quality_metrics",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Confidence metric unavailable",
-                details={"error": str(e)},
-            )
+            logger.error(f"Error calculating average confidence: {e}")
             return 0.0
 
     def _count_total_retries(self) -> int:
@@ -1648,15 +1603,7 @@ class MultiAgentProcessor:
             return total_retries
 
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error counting retries: %s",
-                e,
-                agent="quality_metrics",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Retry statistics unavailable",
-                details={"error": str(e)},
-            )
+            logger.error(f"Error counting retries: {e}")
             return 0
 
     def _get_quality_breakdown(self) -> Dict[str, Dict[str, float]]:
@@ -1688,15 +1635,7 @@ class MultiAgentProcessor:
             return quality_stats
 
         except Exception as e:
-            log_with_telemetry(
-                logger.error,
-                "Error getting quality breakdown: %s",
-                e,
-                agent="quality_metrics",
-                severity=TelemetrySeverity.MAJOR,
-                impact="Quality breakdown unavailable",
-                details={"error": str(e)},
-            )
+            logger.error(f"Error getting quality breakdown: {e}")
             return {}
 
 async def main():
@@ -1713,34 +1652,12 @@ async def main():
 
     # Validate input directory
     if not os.path.exists(args.input_dir):
-        log_with_telemetry(
-            logger.error,
-            "❌ Input directory does not exist: %s",
-            args.input_dir,
-            agent="multi_agent_processor",
-            severity=TelemetrySeverity.CRITICAL,
-            impact="Run aborted due to missing input",
-        )
+        logger.error(f"❌ Input directory does not exist: {args.input_dir}")
         return
 
     # Create processor and run
     processor = MultiAgentProcessor(args.input_dir, args.output_file, args.st_louis_report)
-    run_status = "completed"
-    try:
-        await processor.process_corpus()
-    except Exception:
-        run_status = "failed"
-        raise
-    finally:
-        summary_snapshot = telemetry_recorder.get_summary_snapshot()
-        summary_path = telemetry_recorder.flush_summary()
-        post_monitor_stats(
-            {
-                "status": run_status,
-                "telemetry_summary": summary_snapshot,
-                "telemetry_summary_path": str(summary_path),
-            }
-        )
+    await processor.process_corpus()
 
 if __name__ == "__main__":
     # Set environment variables for optimal performance

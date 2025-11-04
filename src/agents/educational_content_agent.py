@@ -2,7 +2,7 @@
 
 import logging
 from itertools import cycle
-from typing import Dict, Any, Iterable, List
+from typing import Dict, Any, Iterable, List, Sequence
 
 from .base_agent import BaseAgent
 from src.models.enlitens_schemas import EducationalContent
@@ -47,10 +47,73 @@ class EducationalContentAgent(BaseAgent):
             )
             return False
 
+    def _render_client_profiles_block(self, profiles: Sequence[Any]) -> str:
+        if not profiles:
+            return "- No fictional client profiles available."
+        lines: List[str] = []
+        for profile in profiles[:3]:
+            if isinstance(profile, dict):
+                name = profile.get("profile_name", "Unnamed persona")
+                quote = profile.get("intake_reference", "")
+                regions = ", ".join(profile.get("regional_touchpoints", [])[:3])
+            else:
+                name = getattr(profile, "profile_name", "Unnamed persona")
+                quote = getattr(profile, "intake_reference", "")
+                regions = ", ".join(getattr(profile, "regional_touchpoints", [])[:3])
+            lines.append(f"- {name}: {quote} | Regions: {regions or 'unspecified'}")
+        return "\n".join(lines)
+
+    def _render_external_sources_block(self, sources: Sequence[Any]) -> str:
+        if not sources:
+            return "- No external research harvested yet."
+        lines: List[str] = []
+        for source in sources[:6]:
+            if isinstance(source, dict):
+                label = source.get("label", "[Ext]")
+                title = source.get("title", "Unnamed source")
+                summary = source.get("summary", source.get("snippet", ""))
+            else:
+                label = getattr(source, "label", "[Ext]")
+                title = getattr(source, "title", "Unnamed source")
+                summary = getattr(source, "summary", getattr(source, "snippet", ""))
+            lines.append(f"- {label} {title}: {summary}")
+        return "\n".join(lines)
+
+    def _render_intake_registry_block(self, intake_registry: Dict[str, Any]) -> str:
+        if not isinstance(intake_registry, dict) or not intake_registry:
+            return "- Intake registry unavailable."
+        lines: List[str] = []
+        top_locations = intake_registry.get("top_locations") or []
+        if top_locations:
+            lines.append("Top intake localities: " + ", ".join(name for name, _ in top_locations[:5]))
+        top_themes = intake_registry.get("top_themes") or []
+        if top_themes:
+            lines.append("Dominant intake themes: " + ", ".join(theme for theme, _ in top_themes[:5]))
+        return "\n".join(f"- {line}" for line in lines) if lines else "- Intake registry parsed but no high-signal entries."
+
+    def _render_health_priority_block(self, health_summary: Dict[str, Any]) -> str:
+        if not isinstance(health_summary, dict) or not health_summary:
+            return "- Health report data unavailable."
+        lines: List[str] = []
+        for label, _ in (health_summary.get("priority_signals") or [])[:5]:
+            lines.append(f"- Priority signal: {label}")
+        mentions = health_summary.get("regional_mentions") or {}
+        if mentions:
+            ordered = sorted(mentions.items(), key=lambda item: (-item[1], item[0]))
+            focus = ", ".join(name for name, _ in ordered[:5])
+            lines.append(f"- Hotspot regions: {focus}")
+        return "\n".join(lines) if lines else "- Health report parsed but no actionable signals."
+
     def _ensure_minimum_items(
         self,
         content: EducationalContent,
         research_content: Dict[str, Any],
+        *,
+        client_profiles: Sequence[Any],
+        external_sources: Sequence[Any],
+        intake_registry: Dict[str, Any],
+        health_summary: Dict[str, Any],
+        clinical_content: Dict[str, Any],
     ) -> List[str]:
         """Pad content lists to the minimum item count required by validation."""
 
@@ -77,6 +140,18 @@ class EducationalContentAgent(BaseAgent):
         for items in research_lists:
             if isinstance(items, list):
                 fallback_sources.extend(str(item).strip() for item in items if str(item).strip())
+
+        fallback_sources.extend(self._collect_profile_items(client_profiles, "support_recommendations"))
+        fallback_sources.extend(self._collect_profile_items(client_profiles, "masking_signals"))
+        fallback_sources.extend(self._collect_external_summaries(external_sources))
+        fallback_sources.extend(self._collect_intake_signals(intake_registry))
+        fallback_sources.extend(self._collect_health_signals(health_summary))
+        fallback_sources.extend(
+            str(item).strip()
+            for key in ("interventions", "guidelines")
+            for item in (clinical_content.get(key) or [])
+            if str(item).strip()
+        )
 
         if fallback_sources:
             fallback_cycle = cycle(fallback_sources)
@@ -108,12 +183,72 @@ class EducationalContentAgent(BaseAgent):
 
         return padded_fields
 
+    def _collect_profile_items(
+        self, profiles: Sequence[Any], field: str, max_items: int = 20
+    ) -> List[str]:
+        values: List[str] = []
+        for profile in profiles or []:
+            data = profile.get(field) if isinstance(profile, dict) else getattr(profile, field, None)
+            if isinstance(data, list):
+                for entry in data:
+                    text = str(entry).strip()
+                    if text:
+                        values.append(text)
+            elif isinstance(data, str) and data.strip():
+                values.append(data.strip())
+        return values[:max_items]
+
+    def _collect_external_summaries(self, sources: Sequence[Any]) -> List[str]:
+        lines: List[str] = []
+        for source in sources or []:
+            if isinstance(source, dict):
+                label = source.get("label", "[Ext]")
+                summary = source.get("summary") or source.get("snippet")
+            else:
+                label = getattr(source, "label", "[Ext]")
+                summary = getattr(source, "summary", getattr(source, "snippet", ""))
+            if summary:
+                lines.append(f"{summary} ({label})")
+        return lines
+
+    def _collect_intake_signals(self, intake_registry: Dict[str, Any]) -> List[str]:
+        signals: List[str] = []
+        if not isinstance(intake_registry, dict):
+            return signals
+        for theme, _ in (intake_registry.get("top_themes") or [])[:6]:
+            signals.append(f"Intake pattern highlight: {theme}")
+        for location, _ in (intake_registry.get("top_locations") or [])[:4]:
+            signals.append(f"Regional context to explain: {location}")
+        return signals
+
+    def _collect_health_signals(self, health_summary: Dict[str, Any]) -> List[str]:
+        signals: List[str] = []
+        if not isinstance(health_summary, dict):
+            return signals
+        for label, _ in (health_summary.get("priority_signals") or [])[:5]:
+            signals.append(f"Health priority reference: {label} [Source F1]")
+        mentions = health_summary.get("regional_mentions") or {}
+        for name in list(mentions.keys())[:4]:
+            signals.append(f"Community determinant: {name} [Source F1]")
+        return signals
+
     async def process(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Generate educational content from research."""
+        client_profiles: List[Any] = []
+        external_sources: List[Any] = []
+        clinical_content: Dict[str, Any] = {}
         try:
             document_text = context.get("document_text", "")[:8000]
             research_content = context.get("science_data", {}).get("research_content", {})
-            clinical_content = context.get("clinical_content", {})
+            clinical_content = context.get("clinical_content", {}) or {}
+            client_profile_bundle = context.get("client_profiles") or {}
+            client_profile_data = client_profile_bundle.get("client_profiles") if isinstance(client_profile_bundle, dict) else {}
+            client_profiles = client_profile_data.get("profiles") if isinstance(client_profile_data, dict) else []
+            external_sources = client_profile_data.get("external_sources") if isinstance(client_profile_data, dict) else []
+            profile_block = self._render_client_profiles_block(client_profiles)
+            external_block = self._render_external_sources_block(external_sources)
+            intake_block = self._render_intake_registry_block(context.get("intake_registry") or {})
+            health_block = self._render_health_priority_block(context.get("health_report_summary") or {})
             retrieved_block = self._render_retrieved_passages_block(
                 context.get("retrieved_passages"),
                 raw_client_context=context.get("raw_client_context"),
@@ -140,6 +275,7 @@ STRICT RULES:
 ✓ Use analogies and examples to make concepts accessible
 ✓ Clearly mark hypothetical examples as "[HYPOTHETICAL EXAMPLE]"
 ✓ When citing research, use exact findings from the source
+✓ When using external regional data, cite the corresponding [Ext #] tag
 ✗ DO NOT add neuroscience facts from your training data not in the source
 ✗ DO NOT generate practice statistics or client testimonials
 ✗ DO NOT fabricate research findings or statistics
@@ -156,6 +292,18 @@ RETRIEVED PASSAGES (quote verbatim and cite with [Source #]):
 
 CLINICAL APPLICATIONS:
 {clinical_content.get('interventions', [])}
+
+CLIENT PROFILES (fictional scenarios to tailor education):
+{profile_block}
+
+EXTERNAL REGIONAL DATA (cite with [Ext #] tags when referenced):
+{external_block}
+
+INTAKE REGISTRY HIGHLIGHTS:
+{intake_block}
+
+HEALTH REPORT SIGNALS:
+{health_block}
 
 Create comprehensive educational content for ALL sections below (5-10 items per section):
 
@@ -202,7 +350,15 @@ Attach [Source #] tags to any item that uses a retrieved passage so QA can trace
             padded_fields: List[str] = []
 
             if result:
-                padded_fields = self._ensure_minimum_items(result, research_content)
+                padded_fields = self._ensure_minimum_items(
+                    result,
+                    research_content,
+                    client_profiles=client_profiles,
+                    external_sources=external_sources,
+                    intake_registry=context.get("intake_registry") or {},
+                    health_summary=context.get("health_report_summary") or {},
+                    clinical_content=clinical_content,
+                )
                 quality = "high" if not padded_fields else "medium"
                 return {
                     "educational_content": result.model_dump(),
@@ -211,7 +367,15 @@ Attach [Source #] tags to any item that uses a retrieved passage so QA can trace
                 }
 
             fallback_content = EducationalContent()
-            padded_fields = self._ensure_minimum_items(fallback_content, research_content)
+            padded_fields = self._ensure_minimum_items(
+                fallback_content,
+                research_content,
+                client_profiles=client_profiles,
+                external_sources=external_sources,
+                intake_registry=context.get("intake_registry") or {},
+                health_summary=context.get("health_report_summary") or {},
+                clinical_content=clinical_content,
+            )
             quality = "low"
             return {
                 "educational_content": fallback_content.model_dump(),
