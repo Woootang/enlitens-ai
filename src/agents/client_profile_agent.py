@@ -763,7 +763,196 @@ OUTPUT REQUIREMENTS:
         entries = intake_registry.get("entries") if isinstance(intake_registry, dict) else None
         entries = entries or []
         locality_scores = {name.lower(): count for name, count in (document_localities or [])}
-        scored: List[Tuple[int, Dict[str, Any]]] = []
+        scored: List[Dict[str, Any]] = []
+
+        family_keywords = {
+            "mother",
+            "mom",
+            "mum",
+            "father",
+            "dad",
+            "parent",
+            "guardian",
+            "caregiver",
+            "spouse",
+            "husband",
+            "wife",
+            "partner",
+            "grandmother",
+            "grandfather",
+            "grandparent",
+            "aunt",
+            "uncle",
+            "cousin",
+            "sibling",
+            "brother",
+            "sister",
+            "son",
+            "daughter",
+        }
+        employment_keywords = {
+            "job",
+            "work",
+            "worker",
+            "shift",
+            "employer",
+            "boss",
+            "manager",
+            "coworker",
+            "coworkers",
+            "workplace",
+            "career",
+            "overtime",
+            "gig",
+            "freelance",
+            "teacher",
+            "nurse",
+            "retired",
+            "unemployed",
+            "laid off",
+            "factory",
+            "warehouse",
+        }
+        community_keywords = {
+            "church",
+            "library",
+            "community center",
+            "community centre",
+            "community college",
+            "community garden",
+            "mutual aid",
+            "food pantry",
+            "food bank",
+            "support group",
+            "neighborhood council",
+            "neighbourhood council",
+            "pta",
+            "ptsa",
+            "temple",
+            "mosque",
+            "synagogue",
+            "clinic",
+            "county services",
+            "rec center",
+            "recreation center",
+            "shelter",
+            "nonprofit",
+            "non-profit",
+            "ymca",
+        }
+        hobby_keywords = {
+            "hobby",
+            "hobbies",
+            "gaming",
+            "video game",
+            "music",
+            "choir",
+            "singing",
+            "guitar",
+            "piano",
+            "running",
+            "jogging",
+            "cycling",
+            "biking",
+            "gardening",
+            "garden",
+            "cooking",
+            "baking",
+            "sports",
+            "basketball",
+            "soccer",
+            "yoga",
+            "dance",
+            "dancing",
+            "craft",
+            "knitting",
+            "reading",
+            "book club",
+            "writing",
+            "poetry",
+            "coding club",
+            "art",
+            "painting",
+            "drawing",
+        }
+        emotional_keywords = {
+            "anxious",
+            "anxiety",
+            "stressed",
+            "stress",
+            "overwhelmed",
+            "burned out",
+            "burnt out",
+            "exhausted",
+            "worried",
+            "afraid",
+            "fearful",
+            "hopeful",
+            "hope",
+            "angry",
+            "frustrated",
+            "lonely",
+            "isolated",
+            "depressed",
+            "sad",
+            "relieved",
+            "excited",
+        }
+        rural_keywords = {
+            "rural",
+            "farm",
+            "farmland",
+            "county road",
+            "county line",
+            "barn",
+            "acre",
+            "acres",
+            "tractors",
+            "tractor",
+            "feed store",
+            "grain elevator",
+            "pasture",
+            "small town",
+            "village",
+            "unincorporated",
+            "agricultural",
+            "homestead",
+            "country life",
+            "4-h",
+            "co-op",
+        }
+        urban_keywords = {
+            "downtown",
+            "urban",
+            "city",
+            "metro",
+            "subway",
+            "light rail",
+            "bus line",
+            "transit",
+            "loft",
+            "apartment",
+            "apartments",
+            "high-rise",
+            "condo",
+            "streetcar",
+            "sidewalk",
+            "traffic",
+            "siren",
+            "skyscraper",
+            "commuter train",
+            "downtown loft",
+        }
+
+        def _contains_keyword(text: str, keywords: Sequence[str]) -> bool:
+            for keyword in keywords:
+                if " " in keyword or "-" in keyword:
+                    if keyword in text:
+                        return True
+                else:
+                    if re.search(rf"\b{re.escape(keyword)}\b", text):
+                        return True
+            return False
 
         for entry in entries:
             snippet = str(entry.get("snippet") or entry.get("text") or "").strip()
@@ -772,23 +961,88 @@ OUTPUT REQUIREMENTS:
             themes = entry.get("themes") or []
             regional_mentions = entry.get("regional_mentions") or {}
             score = len(snippet) // 80 + len(themes)
+            lowered_snippet = snippet.lower()
+            lowered_themes = [str(theme).lower() for theme in themes if str(theme).strip()]
+            combined_text = " ".join([lowered_snippet] + lowered_themes)
+            coverage_tags: set[str] = set()
+
+            if _contains_keyword(combined_text, family_keywords):
+                score += 5
+                coverage_tags.add("family_role")
+            if _contains_keyword(combined_text, employment_keywords):
+                score += 4
+                coverage_tags.add("employment_role")
+            if _contains_keyword(combined_text, community_keywords):
+                score += 3
+                coverage_tags.add("community_institution")
+            if _contains_keyword(combined_text, hobby_keywords):
+                score += 2
+                coverage_tags.add("hobby_interest")
+            if _contains_keyword(combined_text, emotional_keywords):
+                score += 4
+                coverage_tags.add("emotional_tone")
+
+            has_rural_cue = _contains_keyword(combined_text, rural_keywords)
+            has_urban_cue = _contains_keyword(combined_text, urban_keywords)
+            if has_rural_cue:
+                score += 3
+                coverage_tags.add("rural_cue")
+            if has_urban_cue:
+                score += 3
+                coverage_tags.add("urban_cue")
+
             for name, count in regional_mentions.items():
                 score += int(count)
                 if name and name.lower() in locality_scores:
                     score += 3
-            scored.append(
-                (
-                    score,
-                    {
-                        "snippet": snippet,
-                        "themes": [str(t).strip() for t in themes if str(t).strip()],
-                        "regional_mentions": {str(k): int(v) for k, v in regional_mentions.items() if k},
-                    },
-                )
-            )
+            payload = {
+                "snippet": snippet,
+                "themes": [str(t).strip() for t in themes if str(t).strip()],
+                "regional_mentions": {str(k): int(v) for k, v in regional_mentions.items() if k},
+                "coverage_tags": sorted(coverage_tags),
+                "contextual_cues": {"rural": has_rural_cue, "urban": has_urban_cue},
+            }
+            scored.append({"score": score, "payload": payload, "entry_id": len(scored)})
 
-        scored.sort(key=lambda item: item[0], reverse=True)
-        segments = [payload for _, payload in scored[:max_segments]]
+        sorted_entries = sorted(scored, key=lambda item: item["score"], reverse=True)
+
+        selected: List[Dict[str, Any]] = []
+        selected_ids: set[int] = set()
+
+        def _choose_best_with_tag(tag: str) -> None:
+            if len(selected) >= max_segments:
+                return
+            for record in sorted_entries:
+                if record["entry_id"] in selected_ids:
+                    continue
+                if tag in record["payload"].get("coverage_tags", []):
+                    selected.append(record)
+                    selected_ids.add(record["entry_id"])
+                    return
+
+        for locale_tag in ("rural_cue", "urban_cue"):
+            _choose_best_with_tag(locale_tag)
+
+        coverage_priority = (
+            "family_role",
+            "employment_role",
+            "community_institution",
+            "hobby_interest",
+            "emotional_tone",
+        )
+        for tag in coverage_priority:
+            _choose_best_with_tag(tag)
+
+        for record in sorted_entries:
+            if len(selected) >= max_segments:
+                break
+            if record["entry_id"] in selected_ids:
+                continue
+            selected.append(record)
+            selected_ids.add(record["entry_id"])
+
+        selected.sort(key=lambda item: item["score"], reverse=True)
+        segments = [record["payload"] for record in selected[:max_segments]]
 
         if not segments:
             for quote in fallback_quotes:
@@ -796,13 +1050,29 @@ OUTPUT REQUIREMENTS:
                     break
                 cleaned = quote.strip()
                 if cleaned:
-                    segments.append({"snippet": cleaned, "themes": [], "regional_mentions": {}})
+                    segments.append(
+                        {
+                            "snippet": cleaned,
+                            "themes": [],
+                            "regional_mentions": {},
+                            "coverage_tags": [],
+                            "contextual_cues": {},
+                        }
+                    )
 
         if not segments and retrieved_passages:
             for passage in retrieved_passages[:max_segments]:
                 text = self._summarize_text_block(passage.get("text"), max_chars=320)
                 if text:
-                    segments.append({"snippet": text, "themes": [], "regional_mentions": {}})
+                    segments.append(
+                        {
+                            "snippet": text,
+                            "themes": [],
+                            "regional_mentions": {},
+                            "coverage_tags": [],
+                            "contextual_cues": {},
+                        }
+                    )
 
         return segments[:max_segments]
 
