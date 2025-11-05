@@ -17,6 +17,19 @@ let ws = null;
 let isPaused = false;
 let charts = {};
 let latestJSON = null;
+let profileMetricsState = {
+  profile_count: 0,
+  unique_localities_count: 0,
+  unique_localities: [],
+  external_citations_count: 0,
+  prediction_errors_total: 0,
+  prediction_errors_by_profile: {},
+  expected_prediction_errors: 0,
+  disclaimer_status: 'missing',
+  disclaimer_failures: [],
+  alerts: [],
+  alert_level: 'pending'
+};
 
 // Initialize
 async function init() {
@@ -113,10 +126,16 @@ async function pollStats() {
         </p>
       `;
     }
-    
+
     // Update charts
     updateCharts(data);
-    
+
+    updateClientProfileMetrics(
+      data.client_profile_metrics || {},
+      data.client_profile_alerts || [],
+      data.client_profile_alert_level || 'ok'
+    );
+
     updateStatus('✅ Connected');
   } catch (error) {
     console.error('Failed to fetch stats:', error);
@@ -203,7 +222,7 @@ function setupCharts() {
 // Update charts
 function updateCharts(data) {
   const now = new Date().toLocaleTimeString();
-  
+
   // Progress chart
   if (charts.progress.data.labels.length > 20) {
     charts.progress.data.labels.shift();
@@ -223,6 +242,139 @@ function updateCharts(data) {
     charts.agents.data.datasets[0].data = [completed, running, pending];
     charts.agents.update('none');
   }
+}
+
+function applyStatusClass(element, statusClass) {
+  if (!element) return;
+  element.classList.remove('status-ok', 'status-warning', 'status-error');
+  if (statusClass) {
+    element.classList.add(statusClass);
+  }
+}
+
+function renderProfileAlerts(alerts, alertLevel, profileCount) {
+  const container = document.getElementById('profile-alerts');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!alerts || alerts.length === 0) {
+    const okDiv = document.createElement('div');
+    okDiv.className = 'profile-alert profile-alert--ok';
+    okDiv.textContent = profileCount
+      ? 'Client profiles cleared locality and safety thresholds.'
+      : 'Awaiting client profile payload.';
+    container.appendChild(okDiv);
+    return;
+  }
+
+  alerts.forEach((alert) => {
+    const alertDiv = document.createElement('div');
+    let levelClass = 'profile-alert--warning';
+    if (alertLevel === 'error' || alert.toLowerCase().includes('disclaimer')) {
+      levelClass = 'profile-alert--error';
+    }
+    alertDiv.className = `profile-alert ${levelClass}`;
+    alertDiv.textContent = alert;
+    container.appendChild(alertDiv);
+  });
+}
+
+function updateClientProfileMetrics(metrics = {}, alerts = [], alertLevel = 'ok') {
+  const normalized = {
+    profile_count: metrics.profile_count || 0,
+    unique_localities_count: metrics.unique_localities_count || 0,
+    unique_localities: metrics.unique_localities || [],
+    external_citations_count: metrics.external_citations_count || 0,
+    prediction_errors_total: metrics.prediction_errors_total || 0,
+    prediction_errors_by_profile: metrics.prediction_errors_by_profile || {},
+    expected_prediction_errors: metrics.expected_prediction_errors || 0,
+    disclaimer_status: metrics.disclaimer_status || 'missing',
+    disclaimer_failures: metrics.disclaimer_failures || [],
+    alerts: metrics.alerts || [],
+    alert_level: metrics.alert_level || 'ok'
+  };
+
+  profileMetricsState = normalized;
+
+  const effectiveAlerts = alerts && alerts.length ? alerts : normalized.alerts;
+  const effectiveAlertLevel = alertLevel || normalized.alert_level || 'ok';
+
+  const localitiesElement = document.getElementById('profile-localities-count');
+  if (localitiesElement) {
+    const localityStatus = normalized.unique_localities_count >= 3 ? 'status-ok' : 'status-warning';
+    applyStatusClass(localitiesElement, localityStatus);
+    localitiesElement.textContent = normalized.unique_localities_count.toString();
+  }
+
+  const localitiesListEl = document.getElementById('profile-localities-list');
+  if (localitiesListEl) {
+    if (normalized.unique_localities.length) {
+      localitiesListEl.textContent = normalized.unique_localities.slice(0, 5).join(', ');
+    } else {
+      localitiesListEl.textContent = effectiveAlerts.length
+        ? 'Review locality coverage'
+        : 'Awaiting locality signals';
+    }
+  }
+
+  const externalElement = document.getElementById('profile-external-count');
+  if (externalElement) {
+    const externalStatus = normalized.external_citations_count > 0 ? 'status-ok' : 'status-warning';
+    applyStatusClass(externalElement, externalStatus);
+    externalElement.textContent = normalized.external_citations_count.toString();
+  }
+
+  const externalListEl = document.getElementById('profile-external-list');
+  if (externalListEl) {
+    externalListEl.textContent = normalized.external_citations_count > 0
+      ? 'Verified [Ext #] sources available'
+      : 'No verified [Ext #] sources detected';
+  }
+
+  const predictionElement = document.getElementById('profile-prediction-errors');
+  if (predictionElement) {
+    const expected = normalized.expected_prediction_errors || (normalized.profile_count * 2);
+    const meetsExpectation = expected === 0 || normalized.prediction_errors_total >= expected;
+    const predictionStatus = meetsExpectation ? 'status-ok' : 'status-warning';
+    applyStatusClass(predictionElement, predictionStatus);
+    predictionElement.textContent = normalized.prediction_errors_total.toString();
+  }
+
+  const predictionBreakdownEl = document.getElementById('profile-prediction-errors-breakdown');
+  if (predictionBreakdownEl) {
+    const entries = Object.entries(normalized.prediction_errors_by_profile);
+    predictionBreakdownEl.textContent = entries.length
+      ? entries.map(([name, count]) => `${name}: ${count}`).join(' • ')
+      : 'Prediction errors not reported';
+  }
+
+  const disclaimerElement = document.getElementById('profile-disclaimer-status');
+  if (disclaimerElement) {
+    let statusClass = 'status-ok';
+    let label = '✅ Valid';
+    if (normalized.disclaimer_status === 'invalid') {
+      statusClass = 'status-error';
+      label = '⚠️ Review';
+    } else if (normalized.disclaimer_status === 'missing') {
+      statusClass = 'status-warning';
+      label = 'Pending';
+    }
+    applyStatusClass(disclaimerElement, statusClass);
+    disclaimerElement.textContent = label;
+  }
+
+  const disclaimerDetailsEl = document.getElementById('profile-disclaimer-details');
+  if (disclaimerDetailsEl) {
+    if (normalized.disclaimer_status === 'invalid' && normalized.disclaimer_failures.length) {
+      disclaimerDetailsEl.textContent = `Review disclaimers for: ${normalized.disclaimer_failures.join(', ')}`;
+    } else if (normalized.disclaimer_status === 'valid') {
+      disclaimerDetailsEl.textContent = 'All profiles include explicit fictional disclaimers.';
+    } else {
+      disclaimerDetailsEl.textContent = 'Fictional disclaimer review queue';
+    }
+  }
+
+  renderProfileAlerts(effectiveAlerts, effectiveAlertLevel, normalized.profile_count);
 }
 
 // Add log entry

@@ -201,6 +201,16 @@ def reset_dashboard_state(start_time: Optional[datetime] = None) -> None:
             "_processed_documents": set(),
             "_failed_documents": set(),
             "failed_documents": 0,
+            "client_profile_metrics": {
+                "profile_count": 0,
+                "unique_localities_count": 0,
+                "external_citations_count": 0,
+                "prediction_errors_total": 0,
+                "disclaimer_status": "missing",
+                "alerts": [],
+            },
+            "client_profile_alerts": [],
+            "client_profile_alert_level": "ok",
         }
     )
 
@@ -341,6 +351,19 @@ def update_dashboard_from_payload(payload: Dict[str, Any]) -> None:
 
     if "runtime_seconds" in payload:
         dashboard_state["runtime_seconds"] = payload["runtime_seconds"]
+
+    if "client_profile_metrics" in payload:
+        dashboard_state["client_profile_metrics"] = payload.get(
+            "client_profile_metrics", {}
+        )
+    if "client_profile_alerts" in payload:
+        dashboard_state["client_profile_alerts"] = payload.get(
+            "client_profile_alerts", []
+        )
+    if "client_profile_alert_level" in payload:
+        dashboard_state["client_profile_alert_level"] = payload.get(
+            "client_profile_alert_level", "ok"
+        )
 
 
 def serialize_recent(deq: deque) -> List[Dict[str, Any]]:
@@ -602,6 +625,9 @@ async def get_stats():
         },
         "quality_summary": quality_aggregator.summary(),
         "knowledge_base": knowledge_base_snapshot,
+        "client_profile_metrics": state.get("client_profile_metrics", {}),
+        "client_profile_alerts": state.get("client_profile_alerts", []),
+        "client_profile_alert_level": state.get("client_profile_alert_level", "ok"),
     }
 
 
