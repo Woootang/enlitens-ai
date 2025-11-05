@@ -41,7 +41,9 @@ class ClientProfileAgent(BaseAgent):
         self.constitution = EnlitensConstitution()
         self._prompt_principles: Sequence[str] = ("ENL-002", "ENL-003", "ENL-010")
         self.research_orchestrator: Optional[ExternalResearchOrchestrator] = None
-        self._fallback_disclaimer = "FICTIONAL CLIENT SCENARIO – INTERNAL USE ONLY"
+        self._fallback_disclaimer = (
+            "FICTIONAL COMPOSITE CASE STUDY – INTERNAL TRAINING USE ONLY. NOT A REAL CLIENT."
+        )
 
     async def initialize(self) -> bool:
         try:
@@ -138,7 +140,7 @@ class ClientProfileAgent(BaseAgent):
                 "  \"profiles\": [\n"
                 "    {\n"
                 "      \"profile_name\": str,\n"
-                "      \"fictional_disclaimer\": \"FICTIONAL CLIENT SCENARIO – internal use only\",\n"
+                "      \"fictional_disclaimer\": \"FICTIONAL COMPOSITE CASE STUDY – INTERNAL TRAINING USE ONLY. NOT A REAL CLIENT.\",\n"
                 "      \"intake_reference\": str,\n"
                 "      \"persona_overview\": str,\n"
                 "      \"research_reference\": str,\n"
@@ -169,6 +171,11 @@ class ClientProfileAgent(BaseAgent):
             prompt = f"""
 You are the Enlitens Client Profile Agent. Create three fictional personas that weave intake language, St. Louis locality, and cited research into actionable case studies without promising clinical outcomes.
 
+MANDATORY CONTEXT REMINDERS:
+• Always acknowledge the Delmar Divide dynamics when relevant and note cross-river (Illinois/Missouri) perspectives when present.
+• Speak with respect toward rural or conservative caregivers—never stereotype or dismiss their values.
+• Cite every research-derived insight with [Source #] or [Ext #] tags and keep tone empathetic and community-grounded.
+
 {constitution_block}
 
 INTAKE LANGUAGE TO HONOUR (reuse phrases verbatim inside quotes):
@@ -197,13 +204,15 @@ RETRIEVED PASSAGES WITH SOURCE TAGS:
 
 OUTPUT REQUIREMENTS:
 1. Produce exactly THREE distinct profiles in JSON.
-2. Every profile must include "fictional_disclaimer" explicitly stating it is a fictional scenario.
+2. Start each profile with a "fictional_disclaimer" field containing exactly: "FICTIONAL COMPOSITE CASE STUDY – INTERNAL TRAINING USE ONLY. NOT A REAL CLIENT." Place it before any narrative content.
 3. Anchor each persona to a *unique* municipality/neighbourhood or micro-community listed above. Avoid conflicting demographics.
 4. Each "intake_reference" must reuse the exact client phrasing inside quotes. If no quote exists, say "No direct intake quote provided" and flag the gap.
 5. "research_reference" AND "benefit_explanation" must each cite at least one [Source #] tag from the passages above.
-6. Reference external data with [Ext #] tags when you draw from the external research block.
-7. Use "support_recommendations" for focus areas only—never promise outcomes, cures, or success rates.
-8. Return JSON exactly in this shape (no commentary). Keep persona names short but evocative ("Bevo Mill sensory de-masker"):
+6. Reference external data with [Ext #] tags when you draw from the external research block and clarify fictionalization when extrapolating community detail.
+7. In "persona_overview", create clearly labeled subsections for: "Neighborhood & Daily Geography", "Family & Intergenerational History", "Economic Context & Access Gaps", "Sensory & Community Experiences", and "Local Supports (schools, leagues, churches, eateries)"—each grounded in the provided data.
+8. Use "support_recommendations" for focus areas only—never promise outcomes, cures, or success rates.
+9. Explicitly remind the reader within each profile that all personas are fictional composites when citing or paraphrasing sources.
+10. Return JSON exactly in this shape (no commentary). Keep persona names short but evocative ("Bevo Mill sensory de-masker"):
 {schema_hint}
 """
 
