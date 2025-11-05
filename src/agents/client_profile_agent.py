@@ -329,6 +329,25 @@ OUTPUT REQUIREMENTS:
 
             payload = response.model_dump()
             source_tags = self._collect_source_tags(response)
+            metrics = self._summarize_profile_metrics(
+                response,
+                document_localities=document_localities,
+            )
+            metrics.update(
+                {
+                    "source_tag_count": len(source_tags),
+                    "source_tags": sorted(source_tags),
+                }
+            )
+            log_with_telemetry(
+                logger.info,
+                "Client profiles generated successfully",
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Client profile set ready",
+                doc_id=document_id,
+                details={"metrics": metrics},
+            )
             return {
                 "client_profiles": payload,
                 "client_profile_summary": {
@@ -366,11 +385,31 @@ OUTPUT REQUIREMENTS:
                 external_sources=external_sources,
                 document_id=document_id,
             )
+            fallback_metrics = self._summarize_profile_metrics(
+                fallback,
+                document_localities=document_localities,
+            )
+            fallback_source_tags = self._collect_source_tags(fallback)
+            fallback_metrics.update(
+                {
+                    "source_tag_count": len(fallback_source_tags),
+                    "source_tags": sorted(fallback_source_tags),
+                }
+            )
+            log_with_telemetry(
+                logger.warning,
+                "ClientProfileAgent returned fallback profiles after exception",
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="Fallback client profiles used",
+                doc_id=context.get("document_id"),
+                details={"metrics": fallback_metrics},
+            )
             return {
                 "client_profiles": fallback.model_dump(),
                 "client_profile_summary": {
                     "intake_quotes_used": [p.intake_reference for p in fallback.profiles],
-                    "source_tags": sorted(self._collect_source_tags(fallback)),
+                    "source_tags": sorted(fallback_source_tags),
                     "external_sources_used": [
                         {
                             "label": src.label,
@@ -506,7 +545,7 @@ OUTPUT REQUIREMENTS:
         )
         document_localities = context.get("document_locality_matches") or []
         regional_atlas = context.get("regional_atlas") or {}
-        return self._fallback_profiles(
+        fallback_profiles = self._fallback_profiles(
             intake_quotes=intake_quotes,
             intake_segments=intake_segments or [],
             retrieved_passages=retrieved_passages,
@@ -519,6 +558,27 @@ OUTPUT REQUIREMENTS:
             external_sources=list(external_sources or []),
             document_id=document_id,
         )
+        fallback_metrics = self._summarize_profile_metrics(
+            fallback_profiles,
+            document_localities=document_localities,
+        )
+        fallback_source_tags = self._collect_source_tags(fallback_profiles)
+        fallback_metrics.update(
+            {
+                "source_tag_count": len(fallback_source_tags),
+                "source_tags": sorted(fallback_source_tags),
+            }
+        )
+        log_with_telemetry(
+            logger.warning,
+            "⚠️ ClientProfileAgent falling back to deterministic profiles",
+            agent=TELEMETRY_AGENT,
+            severity=TelemetrySeverity.MINOR,
+            impact="Client profiles fallback",
+            doc_id=context.get("document_id"),
+            details={"metrics": fallback_metrics},
+        )
+        return fallback_profiles
 
     # ------------------------------------------------------------------
     # Helpers
@@ -961,6 +1021,96 @@ OUTPUT REQUIREMENTS:
             shared_thread="Fictional personas demonstrating how regional systems intersect with neurodivergent masking",
             external_sources=external_list,
         )
+
+    def _summarize_profile_metrics(
+        self,
+        profiles: ClientProfileSet,
+        *,
+        document_localities: Sequence[Tuple[str, int]] | None = None,
+    ) -> Dict[str, Any]:
+        """Build monitoring metrics for generated client profiles."""
+
+        profile_list = list(getattr(profiles, "profiles", []) or [])
+        external_sources = list(getattr(profiles, "external_sources", []) or [])
+
+        unique_localities: List[str] = []
+        unique_keys: Set[str] = set()
+        prediction_errors_total = 0
+        prediction_errors_by_profile: Dict[str, int] = {}
+        disclaimer_failures: List[str] = []
+
+        for profile in profile_list:
+            localities = getattr(profile, "local_geography", []) or []
+            for locality in localities:
+                canonical = _canonicalize_label(locality)
+                if canonical and canonical not in unique_keys:
+                    unique_keys.add(canonical)
+                    unique_localities.append(locality)
+
+            errors = list(getattr(profile, "prediction_errors", []) or [])
+            prediction_errors_total += len(errors)
+            profile_name = getattr(profile, "profile_name", "profile")
+            prediction_errors_by_profile[profile_name] = len(errors)
+
+            disclaimer = str(getattr(profile, "fictional_disclaimer", "") or "")
+            if "fictional" not in disclaimer.lower():
+                disclaimer_failures.append(profile_name)
+
+        external_citations_count = sum(
+            1
+            for source in external_sources
+            if isinstance(getattr(source, "label", None), str)
+            and source.label.strip().startswith("[Ext")
+        )
+
+        document_locality_labels = sorted(
+            {
+                str(name).strip()
+                for name, _ in (document_localities or [])
+                if str(name).strip()
+            }
+        )
+
+        expected_prediction_errors = len(profile_list) * 2 if profile_list else 0
+        alerts: List[str] = []
+        if len(unique_keys) < max(3, len(profile_list)) and profile_list:
+            alerts.append("Fewer than 3 unique localities referenced across profiles")
+        if external_citations_count == 0 and profile_list:
+            alerts.append("No external [Ext #] sources attached to profiles")
+        if prediction_errors_total < expected_prediction_errors and profile_list:
+            alerts.append("Prediction error count below 2 per profile expectation")
+        if disclaimer_failures:
+            alerts.append(
+                "Fictional disclaimers missing or invalid for: "
+                + ", ".join(disclaimer_failures)
+            )
+
+        if not profile_list:
+            alerts.append("Client profiles missing from payload")
+
+        metrics: Dict[str, Any] = {
+            "profile_count": len(profile_list),
+            "unique_localities_count": len(unique_keys),
+            "unique_localities": unique_localities,
+            "document_localities_detected": document_locality_labels,
+            "external_citations_count": external_citations_count,
+            "prediction_errors_total": prediction_errors_total,
+            "prediction_errors_by_profile": prediction_errors_by_profile,
+            "expected_prediction_errors": expected_prediction_errors,
+            "disclaimer_status": "valid"
+            if not disclaimer_failures and profile_list
+            else ("invalid" if disclaimer_failures else "missing"),
+            "disclaimer_failures": disclaimer_failures,
+            "alerts": alerts,
+        }
+        if alerts:
+            if any("disclaimer" in alert.lower() for alert in alerts):
+                metrics["alert_level"] = "error"
+            else:
+                metrics["alert_level"] = "warning"
+        else:
+            metrics["alert_level"] = "ok"
+        return metrics
 
     def _collect_source_tags(self, profiles: ClientProfileSet) -> List[str]:
         tags: List[str] = []

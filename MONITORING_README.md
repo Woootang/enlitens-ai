@@ -151,6 +151,21 @@ The enhanced monitoring system provides comprehensive real-time visibility into 
    - Health check results before/after
    - Any remediation steps taken
 
+## Relaunch Review Procedure
+
+Whenever the multi-agent pipeline is relaunched after downtime, run a guarded ramp-up before resuming unattended batches:
+
+1. **Process documents one at a time** until three new knowledge entries have completed. Use the monitoring dashboard’s *Client Profile Quality* card to watch the following safeguards in real time:
+   - *Unique Localities* stays at three or more.
+   - *External Sources* reports at least one `[Ext #]` citation.
+   - *Prediction Errors* meets or exceeds two entries per persona (six total).
+   - *Disclaimer Status* remains ✅ Valid for every profile.
+2. **Inspect the generated JSON** for those first three documents. Confirm the locality arrays align with the St. Louis atlas, prediction errors are populated, and fictional disclaimers are present in each persona.
+3. **Acknowledge dashboard alerts**. If any warning appears (e.g., “Fewer than 3 unique localities”), pause the run, correct the upstream issue (intake mapping, retrieval connectors, or agent prompts), and reprocess the document before continuing.
+4. **Log the verification** in the operations notebook, including timestamps, document IDs, and any remediation performed.
+
+Only after these checks pass should bulk processing or automated schedulers be re-enabled.
+
 ## Usage
 
 ### Dashboard Navigation

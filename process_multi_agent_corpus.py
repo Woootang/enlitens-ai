@@ -28,7 +28,7 @@ import time
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
@@ -192,6 +192,113 @@ def post_monitor_stats(payload: Dict[str, Any]) -> None:
         logger.warning(f"Could not send stats to monitoring server: {e}")
     except Exception as e:
         logger.warning(f"An unexpected error occurred during monitoring stats: {e}")
+
+
+def _canonicalize_locality_label(value: str) -> str:
+    text = re.sub(r"[^\w\s]", " ", str(value or ""))
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def summarize_client_profile_metrics(client_profiles: Optional[Any]) -> Dict[str, Any]:
+    """Derive monitoring metrics from a ClientProfileSet payload."""
+
+    metrics: Dict[str, Any] = {
+        "profile_count": 0,
+        "unique_localities_count": 0,
+        "unique_localities": [],
+        "external_citations_count": 0,
+        "prediction_errors_total": 0,
+        "prediction_errors_by_profile": {},
+        "expected_prediction_errors": 0,
+        "disclaimer_status": "missing",
+        "disclaimer_failures": [],
+        "alerts": [],
+        "alert_level": "ok",
+    }
+
+    if client_profiles is None:
+        metrics["alerts"].append("Client profiles unavailable for this document")
+        metrics["alert_level"] = "warning"
+        return metrics
+
+    # Support both validated objects and raw dictionaries
+    if isinstance(client_profiles, dict):
+        try:
+            from src.models.enlitens_schemas import ClientProfileSet  # Local import to avoid circulars
+
+            client_profiles = ClientProfileSet.model_validate(client_profiles)
+        except Exception:
+            metrics["alerts"].append("Unable to parse client profile payload")
+            metrics["alert_level"] = "warning"
+            return metrics
+
+    profile_list = list(getattr(client_profiles, "profiles", []) or [])
+    external_sources = list(getattr(client_profiles, "external_sources", []) or [])
+
+    metrics["profile_count"] = len(profile_list)
+
+    unique_localities: List[str] = []
+    unique_keys: Set[str] = set()
+    prediction_errors_by_profile: Dict[str, int] = {}
+    disclaimer_failures: List[str] = []
+
+    for profile in profile_list:
+        localities = list(getattr(profile, "local_geography", []) or [])
+        for locality in localities:
+            canonical = _canonicalize_locality_label(locality)
+            if canonical and canonical not in unique_keys:
+                unique_keys.add(canonical)
+                unique_localities.append(locality)
+
+        errors = list(getattr(profile, "prediction_errors", []) or [])
+        metrics["prediction_errors_total"] += len(errors)
+        profile_name = getattr(profile, "profile_name", "profile")
+        prediction_errors_by_profile[profile_name] = len(errors)
+
+        disclaimer = str(getattr(profile, "fictional_disclaimer", "") or "")
+        if "fictional" not in disclaimer.lower():
+            disclaimer_failures.append(profile_name)
+
+    metrics["unique_localities"] = unique_localities
+    metrics["unique_localities_count"] = len(unique_keys)
+    metrics["prediction_errors_by_profile"] = prediction_errors_by_profile
+
+    metrics["external_citations_count"] = sum(
+        1
+        for source in external_sources
+        if isinstance(getattr(source, "label", None), str)
+        and source.label.strip().startswith("[Ext")
+    )
+
+    metrics["expected_prediction_errors"] = len(profile_list) * 2 if profile_list else 0
+
+    if not profile_list:
+        metrics["alerts"].append("Client profiles missing from knowledge entry")
+
+    if len(unique_keys) < max(3, len(profile_list)) and profile_list:
+        metrics["alerts"].append("Fewer than 3 unique localities referenced across client profiles")
+    if metrics["external_citations_count"] == 0 and profile_list:
+        metrics["alerts"].append("No external [Ext #] sources attached to client profiles")
+    if metrics["prediction_errors_total"] < metrics["expected_prediction_errors"] and profile_list:
+        metrics["alerts"].append("Prediction error coverage below 2 per profile expectation")
+
+    if disclaimer_failures:
+        metrics["disclaimer_status"] = "invalid"
+        metrics["disclaimer_failures"] = disclaimer_failures
+        metrics["alerts"].append(
+            "Fictional disclaimers require review for: " + ", ".join(disclaimer_failures)
+        )
+    elif profile_list:
+        metrics["disclaimer_status"] = "valid"
+    else:
+        metrics["disclaimer_status"] = "missing"
+
+    if metrics["alerts"]:
+        metrics["alert_level"] = "warning"
+        if any("disclaimer" in alert.lower() for alert in metrics["alerts"]):
+            metrics["alert_level"] = "error"
+
+    return metrics
 
 # Clean up old logs after logger is configured
 try:
@@ -1691,6 +1798,7 @@ class MultiAgentProcessor:
                     "verify connector configuration and research agent outputs."
                 )
                 logger.error(f"🚨 {alert_message}")
+                profile_metrics = summarize_client_profile_metrics(client_profiles)
                 post_monitor_stats(
                     {
                         "status": "alert",
@@ -1698,6 +1806,9 @@ class MultiAgentProcessor:
                         "document_id": document_id,
                         "filename": pdf_path.name,
                         "message": alert_message,
+                        "client_profile_metrics": profile_metrics,
+                        "client_profile_alerts": profile_metrics.get("alerts", []),
+                        "client_profile_alert_level": profile_metrics.get("alert_level", "warning"),
                     }
                 )
 
@@ -2011,22 +2122,38 @@ class MultiAgentProcessor:
                 if knowledge_entry:
                     self.knowledge_base.documents.append(knowledge_entry)
                     logger.info(f"✅ Successfully processed: {pdf_path.name}")
+                    profile_metrics = summarize_client_profile_metrics(
+                        getattr(knowledge_entry, "client_profiles", None)
+                    )
                     post_monitor_stats({
                         "status": "processing",
                         "documents_processed": len(self.knowledge_base.documents),
                         "documents_failed": failed_count,
                         "last_document": pdf_path.name,
                         "last_duration": round(doc_duration, 2),
+                        "document_id": getattr(
+                            getattr(knowledge_entry, "metadata", None),
+                            "document_id",
+                            pdf_path.stem,
+                        ),
+                        "client_profile_metrics": profile_metrics,
+                        "client_profile_alerts": profile_metrics.get("alerts", []),
+                        "client_profile_alert_level": profile_metrics.get("alert_level", "ok"),
                     })
                 else:
                     logger.error(f"❌ Failed to process: {pdf_path.name}")
                     failed_count += 1
+                    profile_metrics = summarize_client_profile_metrics(None)
                     post_monitor_stats({
                         "status": "processing",
                         "documents_processed": len(self.knowledge_base.documents),
                         "documents_failed": failed_count,
                         "last_document": pdf_path.name,
                         "last_error": "processing_failed",
+                        "document_id": pdf_path.stem,
+                        "client_profile_metrics": profile_metrics,
+                        "client_profile_alerts": profile_metrics.get("alerts", []),
+                        "client_profile_alert_level": profile_metrics.get("alert_level", "warning"),
                     })
 
                 # Save progress after each document
