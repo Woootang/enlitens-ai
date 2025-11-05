@@ -44,6 +44,11 @@ from src.utils.terminology import sanitize_structure, contains_banned_terms
 from src.context import REGIONAL_CONTEXT_DATA, match_municipalities
 from src.pipeline.optional_context_loader import analyze_optional_context
 from src.data.locality_loader import LocalityRecord, load_locality_reference
+from src.orchestration.research_orchestrator import (
+    ExternalResearchOrchestrator,
+    NullConnector,
+    ResearchQuery,
+)
 
 # Keyword buckets used to derive themes from intake narratives and transcripts
 INTAKE_THEME_KEYWORDS: Dict[str, str] = {
@@ -272,6 +277,7 @@ class MultiAgentProcessor:
         self.max_concurrent_documents = 1  # Sequential processing for memory management
         self.checkpoint_interval = 1  # Save after each document
         self.retry_attempts = 3
+        self._external_connector_status: List[Dict[str, Any]] = []
 
         logger.info("🚀 Multi-Agent Processor initialized")
 
@@ -1176,6 +1182,79 @@ class MultiAgentProcessor:
             logger.error(f"❌ Fallback extraction failed for {pdf_path.name}: {e}")
             return None
 
+    async def _validate_research_connectors(self) -> None:
+        """Ensure external research connectors are configured and responsive."""
+
+        orchestrator = ExternalResearchOrchestrator.from_settings()
+        connector_status: List[Dict[str, Any]] = []
+        active_connectors: List[str] = []
+
+        for connector in orchestrator.connectors:
+            descriptor = {
+                "name": getattr(connector, "name", connector.__class__.__name__),
+                "type": connector.__class__.__name__,
+            }
+            if hasattr(connector, "endpoint"):
+                descriptor["endpoint"] = getattr(connector, "endpoint")
+            if hasattr(connector, "command"):
+                descriptor["command"] = getattr(connector, "command")
+            connector_status.append(descriptor)
+            if not isinstance(connector, NullConnector):
+                active_connectors.append(descriptor["name"])
+
+        if not connector_status:
+            connector_status.append({"name": "null", "type": "NullConnector"})
+
+        self._external_connector_status = connector_status
+
+        readable_status = ", ".join(
+            f"{item['name']}[{item['type']}]" for item in connector_status
+        ) or "none"
+        logger.info("🔌 External research connectors configured: %s", readable_status)
+
+        if not active_connectors:
+            error_message = (
+                "External research connectors misconfigured: only NullConnector is active. "
+                "Set ENLITENS_RESEARCH_CONNECTORS with HTTP and/or MCP connector definitions."
+            )
+            logger.error("🚫 %s", error_message)
+            post_monitor_stats(
+                {
+                    "status": "error",
+                    "error": error_message,
+                    "research_connectors": connector_status,
+                }
+            )
+            raise RuntimeError(error_message)
+
+        probe_payload = {
+            "status": "startup_probe",
+            "research_connectors": connector_status,
+            "active_research_connectors": active_connectors,
+        }
+
+        probe_query = ResearchQuery(
+            topic="connectivity probe",
+            focus="startup validation",
+            max_results=1,
+            require_verification=False,
+        )
+
+        try:
+            hits = await asyncio.wait_for(
+                orchestrator.gather([probe_query]),
+                timeout=12.0,
+            )
+            probe_payload["research_probe_hits"] = len(hits)
+            logger.info(
+                "🔍 External research probe completed; %d hit(s) returned", len(hits)
+            )
+        except Exception as exc:
+            logger.warning("⚠️ External research probe encountered an issue: %s", exc)
+            probe_payload["research_probe_error"] = str(exc)
+
+        post_monitor_stats(probe_payload)
+
     def _get_pdf_file_size(self, pdf_path: Path) -> Optional[int]:
         """Return the file size for the provided PDF path."""
         try:
@@ -1599,6 +1678,29 @@ class MultiAgentProcessor:
                 supervisor_status,
                 processing_time,
             )
+
+            citations_present = bool(
+                getattr(knowledge_entry.research_content, "citations", [])
+            )
+            references_present = bool(
+                getattr(knowledge_entry.research_content, "references", [])
+            )
+            if not citations_present and not references_present:
+                alert_message = (
+                    f"Document {document_id} completed without external citations; "
+                    "verify connector configuration and research agent outputs."
+                )
+                logger.error(f"🚨 {alert_message}")
+                post_monitor_stats(
+                    {
+                        "status": "alert",
+                        "alert_type": "missing_external_citations",
+                        "document_id": document_id,
+                        "filename": pdf_path.name,
+                        "message": alert_message,
+                    }
+                )
+
             return knowledge_entry
 
         except Exception as e:
@@ -1850,6 +1952,9 @@ class MultiAgentProcessor:
             logger.info(f"📄 Output file: {self.output_file}")
             logger.info(f"📊 Log file: {log_filename} (comprehensive log for all 344 files)")
             logger.info(f"🏙️ St. Louis context: {len(self.st_louis_context)} categories loaded")
+
+            # Validate external research connectors before processing
+            await self._validate_research_connectors()
 
             # Check system resources
             await self._check_system_resources()
