@@ -30,6 +30,7 @@ from src.models.enlitens_schemas import (
     SocialMediaContent,
     WebsiteCopy,
 )
+from src.models.prediction_error import PredictionErrorEntry
 from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
 from src.retrieval.vector_store import QdrantVectorStore
 
@@ -75,6 +76,18 @@ def build_sample_entry(document_id: str = "doc-001") -> EnlitensKnowledgeEntry:
                     research_reference="[Source 1] explains auditory overload on commuters.",
                     benefit_explanation="[Source 1] backs vestibular regulation for this pattern.",
                     st_louis_alignment="[Source 1] plus STL Metro noise logs demand local adjustments.",
+                    prediction_errors=[
+                        PredictionErrorEntry(
+                            trigger_context="Assumes Metro rides always deplete regulation.",
+                            surprising_pivot="[Source 1] shows commuters who schedule sensory resets at the Arch grounds overlook.",
+                            intended_cognitive_effect="Encourage experimenting with restorative micro-pauses en route.",
+                        ),
+                        PredictionErrorEntry(
+                            trigger_context="Believes quiet spaces are unavailable downtown after work.",
+                            surprising_pivot="[Source 1] plus [Ext 1] cite library sensory hours near the Metro platform.",
+                            intended_cognitive_effect="Highlight civic assets that disrupt depletion narratives.",
+                        ),
+                    ],
                 ),
                 ClientProfile(
                     profile_name="After-school crash",
@@ -82,6 +95,18 @@ def build_sample_entry(document_id: str = "doc-001") -> EnlitensKnowledgeEntry:
                     research_reference="[Source 1] connects cortisol spikes to sensory debt.",
                     benefit_explanation="[Source 1] validates co-reg stops before homework.",
                     st_louis_alignment="[Source 1] and STL school density data show needed buffers.",
+                    prediction_errors=[
+                        PredictionErrorEntry(
+                            trigger_context="Assumes decompression can only happen at home.",
+                            surprising_pivot="[Source 1] documents playground sensory diets between school and home improving regulation.",
+                            intended_cognitive_effect="Encourage families to treat the pickup window as an intervention zone.",
+                        ),
+                        PredictionErrorEntry(
+                            trigger_context="Believes caregivers have to manage regulation alone.",
+                            surprising_pivot="[Source 1] plus [Ext 2] surface neighborhood carpool pods trading regulation duties.",
+                            intended_cognitive_effect="Shift the mindset toward community distributed support.",
+                        ),
+                    ],
                 ),
                 ClientProfile(
                     profile_name="Night shift hypervigilance",
@@ -89,6 +114,18 @@ def build_sample_entry(document_id: str = "doc-001") -> EnlitensKnowledgeEntry:
                     research_reference="[Source 1] documents auditory hypervigilance for night workers.",
                     benefit_explanation="[Source 1] shows decompression pods reduce sympathetic spikes.",
                     st_louis_alignment="[Source 1] paired with hospital siren counts justify hospital pods.",
+                    prediction_errors=[
+                        PredictionErrorEntry(
+                            trigger_context="Assumes recovery can only happen after reaching home.",
+                            surprising_pivot="[Source 1] references on-site dim rooms available before the commute.",
+                            intended_cognitive_effect="Prompt planning for immediate post-shift decompression.",
+                        ),
+                        PredictionErrorEntry(
+                            trigger_context="Believes every drive home is equally overwhelming.",
+                            surprising_pivot="[Source 1] plus [Ext 3] identify quieter riverfront routes for night shifts.",
+                            intended_cognitive_effect="Encourage experimentation with less triggering corridors.",
+                        ),
+                    ],
                 ),
             ]
         ),

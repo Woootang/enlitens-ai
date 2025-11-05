@@ -16,6 +16,7 @@ from src.models.enlitens_schemas import (
     ClientProfileSet,
     ExternalResearchSource,
 )
+from src.models.prediction_error import PredictionErrorEntry
 from src.orchestration.research_orchestrator import (
     ExternalResearchOrchestrator,
     ResearchHit,
@@ -145,6 +146,13 @@ class ClientProfileAgent(BaseAgent):
                 "      \"persona_overview\": str,\n"
                 "      \"research_reference\": str,\n"
                 "      \"benefit_explanation\": str,\n"
+                "      \"prediction_errors\": [\n"
+                "        {\n"
+                "          \"trigger_context\": str,\n"
+                "          \"surprising_pivot\": str,\n"
+                "          \"intended_cognitive_effect\": str\n"
+                "        }\n"
+                "      ],\n"
                 "      \"st_louis_alignment\": str | null,\n"
                 "      \"regional_touchpoints\": [str],\n"
                 "      \"masking_signals\": [str],\n"
@@ -209,10 +217,11 @@ OUTPUT REQUIREMENTS:
 4. Each "intake_reference" must reuse the exact client phrasing inside quotes. If no quote exists, say "No direct intake quote provided" and flag the gap.
 5. "research_reference" AND "benefit_explanation" must each cite at least one [Source #] tag from the passages above.
 6. Reference external data with [Ext #] tags when you draw from the external research block and clarify fictionalization when extrapolating community detail.
-7. In "persona_overview", create clearly labeled subsections for: "Neighborhood & Daily Geography", "Family & Intergenerational History", "Economic Context & Access Gaps", "Sensory & Community Experiences", and "Local Supports (schools, leagues, churches, eateries)"—each grounded in the provided data.
-8. Use "support_recommendations" for focus areas only—never promise outcomes, cures, or success rates.
-9. Explicitly remind the reader within each profile that all personas are fictional composites when citing or paraphrasing sources.
-10. Return JSON exactly in this shape (no commentary). Keep persona names short but evocative ("Bevo Mill sensory de-masker"):
+7. Populate "prediction_errors" with 2–4 locally grounded surprises that cite [Source #] or [Ext #] tags and describe the intended cognitive effect.
+8. In "persona_overview", create clearly labeled subsections for: "Neighborhood & Daily Geography", "Family & Intergenerational History", "Economic Context & Access Gaps", "Sensory & Community Experiences", and "Local Supports (schools, leagues, churches, eateries)"—each grounded in the provided data.
+9. Use "support_recommendations" for focus areas only—never promise outcomes, cures, or success rates.
+10. Explicitly remind the reader within each profile that all personas are fictional composites when citing or paraphrasing sources.
+11. Return JSON exactly in this shape (no commentary). Keep persona names short but evocative ("Bevo Mill sensory de-masker"):
 {schema_hint}
 """
 
@@ -316,6 +325,8 @@ OUTPUT REQUIREMENTS:
                 raise ValueError("Intake references must include quoted client language")
             if "fictional" not in profile.fictional_disclaimer.lower():
                 raise ValueError("Fictional disclaimer must clearly state the scenario is fictional")
+            if len(profile.prediction_errors) < 2:
+                raise ValueError("Each profile must include at least two prediction_errors entries")
 
         for source in profiles.external_sources:
             if "[Ext" not in source.label:
@@ -450,6 +461,7 @@ OUTPUT REQUIREMENTS:
             "persona_overview",
             "research_reference",
             "benefit_explanation",
+            "prediction_errors",
             "st_louis_alignment",
             "regional_touchpoints",
             "masking_signals",
@@ -467,6 +479,47 @@ OUTPUT REQUIREMENTS:
         if not raw_profiles:
             return None
 
+        def normalize_prediction_error_items(items: Any) -> List[Dict[str, str]]:
+            normalized: List[Dict[str, str]] = []
+            if isinstance(items, PredictionErrorEntry):
+                return [items.model_dump()]
+            if isinstance(items, list):
+                for item in items:
+                    normalized.extend(normalize_prediction_error_items(item))
+                return normalized
+            if isinstance(items, dict):
+                entry: Dict[str, str] = {}
+                for key in (
+                    "trigger_context",
+                    "surprising_pivot",
+                    "intended_cognitive_effect",
+                ):
+                    value = items.get(key)
+                    if value:
+                        entry[key] = str(value).strip()
+                if len(entry) == 3:
+                    normalized.append(entry)
+                return normalized
+            if isinstance(items, tuple) and len(items) >= 3:
+                entry = {
+                    "trigger_context": str(items[0]).strip(),
+                    "surprising_pivot": str(items[1]).strip(),
+                    "intended_cognitive_effect": str(items[2]).strip(),
+                }
+                if all(entry.values()):
+                    normalized.append(entry)
+            elif isinstance(items, str):
+                text = items.strip()
+                if text:
+                    normalized.append(
+                        {
+                            "trigger_context": text,
+                            "surprising_pivot": f"Reframe the assumption by citing local research around {text}.",
+                            "intended_cognitive_effect": "Spark curiosity instead of certainty about the intake narrative.",
+                        }
+                    )
+            return normalized
+
         def flatten_profile(value: Any) -> Dict[str, Any]:
             if isinstance(value, ClientProfile):
                 return value.model_dump()
@@ -474,14 +527,20 @@ OUTPUT REQUIREMENTS:
                 flattened: Dict[str, Any] = {}
                 for key, val in value.items():
                     if key in allowed_keys and val is not None:
-                        flattened[key] = val
+                        if key == "prediction_errors":
+                            flattened[key] = normalize_prediction_error_items(val)
+                        else:
+                            flattened[key] = val
                     elif isinstance(val, dict):
                         nested = flatten_profile(val)
                         for nested_key, nested_val in nested.items():
                             flattened.setdefault(nested_key, nested_val)
                     elif isinstance(val, list):
                         if key in allowed_keys:
-                            flattened[key] = [str(item).strip() for item in val if str(item).strip()]
+                            if key == "prediction_errors":
+                                flattened[key] = normalize_prediction_error_items(val)
+                            else:
+                                flattened[key] = [str(item).strip() for item in val if str(item).strip()]
                 return flattened
             if isinstance(value, list):
                 merged: Dict[str, Any] = {}
@@ -532,6 +591,8 @@ OUTPUT REQUIREMENTS:
                 profile["research_reference"] = f"{summary} {tag}".strip()
             if not profile.get("benefit_explanation"):
                 profile["benefit_explanation"] = f"{tag} clarifies how this research reframes the client's needs."
+            if not profile.get("prediction_errors"):
+                profile["prediction_errors"] = self._default_prediction_errors(tag)
             if profile.get("st_louis_alignment") and "[Source" not in str(profile["st_louis_alignment"]):
                 profile["st_louis_alignment"] = f"{profile['st_louis_alignment']} {tag}".strip()
             sanitized_profiles.append({key: profile.get(key) for key in allowed_keys if profile.get(key) is not None})
@@ -739,6 +800,10 @@ OUTPUT REQUIREMENTS:
                     unmet_needs=list(default_unmet),
                     support_recommendations=list(default_support),
                     cautionary_flags=list(default_flags),
+                    prediction_errors=[
+                        PredictionErrorEntry.model_validate(item)
+                        for item in self._default_prediction_errors(primary_source, neighbourhood)
+                    ],
                 )
             )
 
@@ -755,7 +820,42 @@ OUTPUT REQUIREMENTS:
         for profile in profiles.profiles:
             for field in (profile.research_reference, profile.benefit_explanation, profile.st_louis_alignment or ""):
                 tags.extend(pattern.findall(field))
+            for entry in getattr(profile, "prediction_errors", []):
+                if isinstance(entry, PredictionErrorEntry):
+                    tags.extend(pattern.findall(entry.surprising_pivot))
+                    tags.extend(pattern.findall(entry.intended_cognitive_effect))
         return tags
+
+    def _default_prediction_errors(
+        self,
+        source_tag: str,
+        locality: Optional[str] = None,
+    ) -> List[Dict[str, str]]:
+        anchor = locality or "St. Louis"
+        return [
+            {
+                "trigger_context": (
+                    f"Assumes {anchor} caregivers only find support through hospital systems."
+                ),
+                "surprising_pivot": (
+                    f"Cite {source_tag} plus library mutual-aid programs showing regulation rituals inside {anchor} third places."
+                ),
+                "intended_cognitive_effect": (
+                    "Nudge the reader to scout overlooked civic spaces that already support neurodivergent nervous systems."
+                ),
+            },
+            {
+                "trigger_context": (
+                    f"Believes every {anchor} commute drains sensory reserves beyond recovery."
+                ),
+                "surprising_pivot": (
+                    f"Reference {source_tag} alongside local transit hacks—quiet blocks, river overlooks, or Metro rest stops—that invert that certainty."
+                ),
+                "intended_cognitive_effect": (
+                    "Spark playful experimentation with micro-restorative pauses during the daily route."
+                ),
+            },
+        ]
 
     def _select_relevant_intake_segments(
         self,
@@ -1527,6 +1627,21 @@ OUTPUT REQUIREMENTS:
                 min_items=2,
                 max_items=6,
             )
+            primary_source = self._extract_first_source_tag(
+                profile.research_reference,
+                profile.benefit_explanation,
+                profile.st_louis_alignment,
+            )
+            locality_hint = None
+            if profile.regional_touchpoints:
+                locality_hint = profile.regional_touchpoints[0]
+            elif locality_names:
+                locality_hint = locality_names[0]
+            profile.prediction_errors = self._ensure_prediction_errors(
+                profile.prediction_errors,
+                default_source=primary_source,
+                locality_hint=locality_hint,
+            )
 
         merged_sources = self._merge_external_sources(response.external_sources, external_sources)
         response.profiles = profiles
@@ -1591,6 +1706,46 @@ OUTPUT REQUIREMENTS:
             unique = [self._strip_outcome_language(entry) for entry in fallback if entry][:min_items]
         return unique[:max_items]
 
+    def _ensure_prediction_errors(
+        self,
+        entries: Sequence[PredictionErrorEntry],
+        *,
+        default_source: str,
+        locality_hint: Optional[str] = None,
+    ) -> List[PredictionErrorEntry]:
+        normalized: List[PredictionErrorEntry] = []
+        seen: set[tuple[str, str]] = set()
+        for entry in entries or []:
+            try:
+                validated = entry if isinstance(entry, PredictionErrorEntry) else PredictionErrorEntry.model_validate(entry)
+            except Exception:
+                continue
+            key = (
+                validated.trigger_context.strip().lower(),
+                validated.surprising_pivot.strip().lower(),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(validated)
+
+        fallback_templates = self._default_prediction_errors(default_source, locality_hint)
+        for template in fallback_templates:
+            if len(normalized) >= 2:
+                break
+            try:
+                validated = PredictionErrorEntry.model_validate(template)
+            except Exception:
+                continue
+            key = (
+                validated.trigger_context.strip().lower(),
+                validated.surprising_pivot.strip().lower(),
+            )
+            if key not in seen:
+                seen.add(key)
+                normalized.append(validated)
+        return normalized[:5]
+
     def _merge_external_sources(
         self,
         existing: Sequence[ExternalResearchSource],
@@ -1616,3 +1771,13 @@ OUTPUT REQUIREMENTS:
         if max_items and len(merged) > max_items:
             merged = merged[:max_items]
         return merged
+
+    def _extract_first_source_tag(self, *fields: Optional[str]) -> str:
+        pattern = re.compile(r"\[Source[^\]]+\]")
+        for field in fields:
+            if not field:
+                continue
+            match = pattern.search(str(field))
+            if match:
+                return match.group(0)
+        return "[Source F1]"
