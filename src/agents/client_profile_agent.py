@@ -891,40 +891,149 @@ OUTPUT REQUIREMENTS:
                 "prompt_block": "- External research connectors not configured. Cite intake and PDF sources only.",
             }
 
+        def _format_locality_name(raw: Optional[str]) -> Optional[str]:
+            if not raw:
+                return None
+            cleaned = raw.strip()
+            if not cleaned:
+                return None
+            lowered = cleaned.lower()
+            if any(token in lowered for token in (" missouri", " mo", " illinois", " il")):
+                return cleaned
+            if "metro east" in lowered:
+                return f"{cleaned} Illinois"
+            return f"{cleaned} Missouri"
+
+        def _extract_locality_from_tags(tags: Any) -> Optional[str]:
+            if not tags:
+                return None
+            first = tags[0] if isinstance(tags, (list, tuple)) and tags else None
+            if isinstance(first, dict):
+                candidate = first.get("name") or first.get("locality") or first.get("label")
+                return _format_locality_name(candidate)
+            if isinstance(first, (list, tuple)) and first:
+                return _format_locality_name(str(first[0]))
+            if isinstance(first, str):
+                return _format_locality_name(first)
+            return None
+
         queries: List[ResearchQuery] = []
-        for name, _ in document_localities[:3]:
+        default_location = document_localities[0][0] if document_localities else "St. Louis"
+        theme_gaps = context.get("theme_gaps") or []
+        locality_records = context.get("locality_records") or {}
+        locality_gap_entries = []
+        if isinstance(locality_records, dict):
+            raw_gaps = locality_records.get("gaps") or []
+            if isinstance(raw_gaps, list):
+                locality_gap_entries = [entry for entry in raw_gaps if isinstance(entry, dict)]
+
+        for theme_gap in theme_gaps[:4]:
+            if not isinstance(theme_gap, dict):
+                continue
+            theme_name = theme_gap.get("theme")
+            if not theme_name:
+                continue
+            locality_from_tags = _extract_locality_from_tags(theme_gap.get("locality_tags"))
+            locality = locality_from_tags or _format_locality_name(default_location)
+            if not locality:
+                locality = "St. Louis Missouri"
+            topic = f"{locality} {theme_name.lower()} support networks"
             queries.append(
                 ResearchQuery(
-                    topic=f"neurodivergent burnout supports in {name}, Missouri",
+                    topic=topic,
+                    focus="theme_gap",
+                    location=locality,
+                    tags=["client_profile", "theme_gap"],
+                    max_results=5,
+                )
+            )
+            log_with_telemetry(
+                logger.info,
+                "Queued external research query for theme gap: %s",
+                topic,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Enriched research coverage for theme gap",
+                doc_id=context.get("document_id"),
+                details={
+                    "topic": topic,
+                    "query_reason": "theme_gap",
+                    "missing_sources": theme_gap.get("missing_sources"),
+                },
+            )
+
+        for gap in locality_gap_entries[:4]:
+            locality_name = gap.get("name")
+            if not locality_name:
+                continue
+            formatted_locality = _format_locality_name(locality_name) or locality_name
+            leading_theme = theme_gaps[0].get("theme") if theme_gaps and isinstance(theme_gaps[0], dict) else None
+            if isinstance(leading_theme, str) and leading_theme.strip():
+                descriptor = leading_theme.lower()
+                suffix = "support networks"
+            else:
+                descriptor = "community resource"
+                suffix = "directories"
+            topic = f"{formatted_locality} {descriptor} {suffix}"
+            queries.append(
+                ResearchQuery(
+                    topic=topic,
+                    focus="locality_gap",
+                    location=formatted_locality,
+                    tags=["client_profile", "locality_gap"],
+                    max_results=5,
+                )
+            )
+            log_with_telemetry(
+                logger.info,
+                "Queued external research query for locality gap: %s",
+                topic,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Enriched research coverage for locality gap",
+                doc_id=context.get("document_id"),
+                details={
+                    "topic": topic,
+                    "query_reason": "locality_gap",
+                    "signal_strength": gap.get("signal_strength"),
+                },
+            )
+
+        for name, _ in document_localities[:3]:
+            formatted = _format_locality_name(name) or name
+            queries.append(
+                ResearchQuery(
+                    topic=f"neurodivergent burnout supports in {formatted}",
                     focus="regional_context",
-                    location=name,
+                    location=formatted,
                     tags=["client_profile", "regional"],
-                    max_results=2,
+                    max_results=5,
                 )
             )
 
         for segment in intake_segments[:3]:
-            snippet = segment.get("snippet", "")
-            themes = ", ".join(segment.get("themes", [])[:3])
+            snippet = segment.get("snippet", "") if isinstance(segment, dict) else ""
+            themes = ", ".join(segment.get("themes", [])[:3]) if isinstance(segment, dict) else ""
             if snippet:
                 queries.append(
                     ResearchQuery(
                         topic=f"community resources for: {themes or snippet[:80]}",
                         focus="intake_theme",
-                        location=document_localities[0][0] if document_localities else "St. Louis",
+                        location=_format_locality_name(default_location) or default_location,
                         tags=["client_profile", "theme"],
-                        max_results=2,
+                        max_results=5,
                     )
                 )
 
         if not queries:
+            default_locality = _format_locality_name(default_location) or "St. Louis Missouri"
             queries.append(
                 ResearchQuery(
-                    topic="St. Louis neurodivergent adult support networks",
+                    topic=f"{default_locality} neurodivergent adult support networks",
                     focus="regional_context",
-                    location="St. Louis",
+                    location=default_locality,
                     tags=["fallback"],
-                    max_results=3,
+                    max_results=6,
                 )
             )
 
@@ -945,7 +1054,87 @@ OUTPUT REQUIREMENTS:
                 "prompt_block": "- External research service unavailable; rely on PDF citations.",
             }
 
-        if not hits:
+        combined_hits: List[ResearchHit] = list(hits)
+        minimum_expected_hits = min(len(queries), 3)
+        if len(combined_hits) < minimum_expected_hits:
+            fallback_queries: List[ResearchQuery] = []
+            if theme_gaps:
+                for theme_gap in theme_gaps[:2]:
+                    if not isinstance(theme_gap, dict):
+                        continue
+                    theme_name = theme_gap.get("theme")
+                    if not theme_name:
+                        continue
+                    fallback_queries.append(
+                        ResearchQuery(
+                            topic=f"Missouri public data on {theme_name.lower()} programs",
+                            focus="retry_broad",
+                            location="Missouri",
+                            tags=["client_profile", "retry", "theme_gap"],
+                            max_results=6,
+                        )
+                    )
+            if not fallback_queries:
+                default_locality = _format_locality_name(default_location) or "St. Louis Missouri"
+                fallback_queries.append(
+                    ResearchQuery(
+                        topic=f"{default_locality} civic resource directories",
+                        focus="retry_broad",
+                        location=default_locality,
+                        tags=["client_profile", "retry", "fallback"],
+                        max_results=6,
+                    )
+                )
+
+            log_with_telemetry(
+                logger.info,
+                "Retrying external research due to sparse initial hits (found=%s, expected=%s)",
+                len(combined_hits),
+                minimum_expected_hits,
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MINOR,
+                impact="Retrying external research with broader connectors",
+                doc_id=context.get("document_id"),
+                details={
+                    "initial_hits": len(combined_hits),
+                    "expected": minimum_expected_hits,
+                    "retry_queries": [query.topic for query in fallback_queries],
+                },
+            )
+
+            try:
+                retry_hits = await self.research_orchestrator.gather(fallback_queries)
+            except Exception as exc:  # pragma: no cover - defensive logging
+                log_with_telemetry(
+                    logger.warning,
+                    "External research retry failed: %s",
+                    exc,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.MAJOR,
+                    impact="External research retry failed",
+                    doc_id=context.get("document_id"),
+                )
+                retry_hits = []
+
+            if retry_hits:
+                existing_urls = {hit.url for hit in combined_hits}
+                for item in retry_hits:
+                    if item.url not in existing_urls:
+                        combined_hits.append(item)
+                        existing_urls.add(item.url)
+
+        if not combined_hits:
+            log_with_telemetry(
+                logger.warning,
+                "External research remained empty after retries",
+                agent=TELEMETRY_AGENT,
+                severity=TelemetrySeverity.MAJOR,
+                impact="External research gaps persist",
+                doc_id=context.get("document_id"),
+                details={
+                    "queries_attempted": [query.topic for query in queries],
+                },
+            )
             return {
                 "sources": [],
                 "prompt_block": "- No verified external sources surfaced; note this if context is thin.",
@@ -953,7 +1142,7 @@ OUTPUT REQUIREMENTS:
 
         sources: List[ExternalResearchSource] = []
         lines: List[str] = []
-        for idx, hit in enumerate(hits, start=1):
+        for idx, hit in enumerate(combined_hits, start=1):
             label = f"[Ext {idx}]"
             summary = self._summarize_text_block(hit.snippet or hit.summary, max_chars=220)
             verification = hit.verification_status if hasattr(hit, "verification_status") else "verified"
