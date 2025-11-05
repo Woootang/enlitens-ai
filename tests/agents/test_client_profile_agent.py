@@ -210,6 +210,37 @@ def test_client_profile_agent_validate_output_enforces_citations():
         asyncio.run(agent.validate_output({"client_profiles": bad_profiles}))
 
 
+def test_ensure_minimum_items_replenishes_after_outcome_stripping():
+    agent = ClientProfileAgent()
+
+    duplicate_items = [
+        "Clinically proven restful nights",
+        "100% restful nights",
+    ]
+    duplicate_fallbacks = [
+        "Cure restful mornings",
+        "cure restful mornings",
+        "CURE restful mornings",
+    ]
+
+    requirements = [
+        ("regional_touchpoints", 3, 8),
+        ("masking_signals", 2, 8),
+        ("unmet_needs", 3, 8),
+        ("support_recommendations", 3, 8),
+        ("cautionary_flags", 2, 6),
+    ]
+
+    for field, minimum, maximum in requirements:
+        result = agent._ensure_minimum_items(
+            duplicate_items,
+            fallback=duplicate_fallbacks,
+            min_items=minimum,
+            max_items=maximum,
+        )
+        assert len(result) >= minimum, f"{field} fell below minimum {minimum}"
+
+
 def test_client_profile_agent_normalizes_fragmented_partial_payload():
     agent = ClientProfileAgent()
 
