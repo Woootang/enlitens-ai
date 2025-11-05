@@ -43,6 +43,7 @@ from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
 from src.utils.terminology import sanitize_structure, contains_banned_terms
 from src.context import REGIONAL_CONTEXT_DATA, match_municipalities
 from src.pipeline.optional_context_loader import analyze_optional_context
+from src.data.locality_loader import LocalityRecord, load_locality_reference
 
 # Keyword buckets used to derive themes from intake narratives and transcripts
 INTAKE_THEME_KEYWORDS: Dict[str, str] = {
@@ -241,6 +242,11 @@ class MultiAgentProcessor:
 
         # St. Louis regional context
         self.st_louis_context = self._load_st_louis_context()
+        try:
+            self.locality_reference: Dict[str, LocalityRecord] = load_locality_reference()
+        except FileNotFoundError as exc:
+            logger.warning("Locality reference unavailable: %s", exc)
+            self.locality_reference = {}
 
         # Optional context assets
         (
@@ -258,6 +264,7 @@ class MultiAgentProcessor:
         self.health_report_summary = self._extract_health_report_summary()
         self.intake_registry = self._build_intake_registry(self.client_intake_text)
         self.transcript_registry = self._build_transcript_registry(self.transcript_text)
+        self.locality_research_backlog = self._identify_locality_backlog()
         self.regional_atlas = self._build_regional_atlas()
 
         # Processing configuration
@@ -575,6 +582,59 @@ class MultiAgentProcessor:
             "top_themes": theme_counter.most_common(20),
         }
 
+    def _identify_locality_backlog(self) -> List[Dict[str, Any]]:
+        """Determine high-signal localities missing from the reference table."""
+
+        if not self.locality_reference:
+            return []
+
+        known = set(self.locality_reference.keys())
+        backlog: Dict[str, Dict[str, Any]] = {}
+
+        def register(source: str, mapping: Dict[str, Any]) -> None:
+            for raw_name, raw_count in (mapping or {}).items():
+                if not raw_name:
+                    continue
+                try:
+                    count = int(raw_count)
+                except (TypeError, ValueError):
+                    continue
+                key = raw_name.strip().lower()
+                if key in known:
+                    continue
+                entry = backlog.setdefault(
+                    key,
+                    {
+                        "name": raw_name.strip(),
+                        "source_counts": {},
+                    },
+                )
+                entry["name"] = entry.get("name") or raw_name.strip()
+                entry["source_counts"][source] = entry["source_counts"].get(source, 0) + count
+
+        register("intake", self.intake_registry.get("location_counts", {}))
+        register("transcript", self.transcript_registry.get("regional_mentions", {}))
+        health_mentions = (
+            self.health_report_summary.get("regional_mentions", {})
+            if isinstance(self.health_report_summary, dict)
+            else {}
+        )
+        register("health_report", health_mentions)
+
+        backlog_list: List[Dict[str, Any]] = []
+        for entry in backlog.values():
+            signal = sum(entry["source_counts"].values())
+            backlog_list.append(
+                {
+                    "name": entry["name"],
+                    "source_counts": entry["source_counts"],
+                    "signal_strength": signal,
+                }
+            )
+
+        backlog_list.sort(key=lambda item: item["signal_strength"], reverse=True)
+        return backlog_list[:25]
+
     def _build_regional_atlas(self) -> Dict[str, Any]:
         """Combine curated geography with observed intake/transcript signals."""
 
@@ -595,7 +655,86 @@ class MultiAgentProcessor:
         )[:30]
         atlas["health_priority_signals"] = self.health_report_summary.get("priority_signals", []) if self.health_report_summary else []
 
+        atlas["locality_reference"] = [
+            record.to_dict() for record in sorted(self.locality_reference.values(), key=lambda item: item.name)
+        ]
+        atlas["locality_research_gaps"] = self.locality_research_backlog
+
         return atlas
+
+    def _compile_locality_signals(
+        self, document_localities: Dict[str, int]
+    ) -> Dict[str, Any]:
+        """Aggregate locality signals across document, intake, and transcript sources."""
+
+        matches: List[Dict[str, Any]] = []
+        gaps: List[Dict[str, Any]] = []
+
+        if not self.locality_reference:
+            return {"matches": matches, "gaps": gaps}
+
+        candidate_map: Dict[str, Dict[str, Any]] = {}
+
+        def register_counts(source: str, mapping: Dict[str, Any]) -> None:
+            for raw_name, raw_count in (mapping or {}).items():
+                if not raw_name:
+                    continue
+                try:
+                    count = int(raw_count)
+                except (TypeError, ValueError):
+                    continue
+                key = raw_name.strip().lower()
+                if key not in candidate_map:
+                    candidate_map[key] = {
+                        "display_name": raw_name.strip(),
+                        "document_mentions": 0,
+                        "intake_mentions": 0,
+                        "transcript_mentions": 0,
+                        "health_report_mentions": 0,
+                    }
+                candidate_map[key][f"{source}_mentions"] = candidate_map[key].get(f"{source}_mentions", 0) + count
+                if not candidate_map[key].get("display_name"):
+                    candidate_map[key]["display_name"] = raw_name.strip()
+
+        register_counts("document", document_localities)
+        register_counts("intake", self.intake_registry.get("location_counts", {}))
+        register_counts("transcript", self.transcript_registry.get("regional_mentions", {}))
+        health_mentions = (
+            self.health_report_summary.get("regional_mentions", {})
+            if isinstance(self.health_report_summary, dict)
+            else {}
+        )
+        register_counts("health_report", health_mentions)
+
+        for key, counts in candidate_map.items():
+            signal = (
+                counts.get("document_mentions", 0)
+                + 0.6 * counts.get("intake_mentions", 0)
+                + 0.6 * counts.get("transcript_mentions", 0)
+                + 0.4 * counts.get("health_report_mentions", 0)
+            )
+            record = self.locality_reference.get(key)
+            payload = {
+                "name": record.name if record else counts.get("display_name", key),
+                "document_mentions": counts.get("document_mentions", 0),
+                "intake_mentions": counts.get("intake_mentions", 0),
+                "transcript_mentions": counts.get("transcript_mentions", 0),
+                "health_report_mentions": counts.get("health_report_mentions", 0),
+                "signal_strength": round(signal, 2),
+            }
+            if record:
+                payload["locality"] = record.to_dict()
+                matches.append(payload)
+            else:
+                gaps.append(payload)
+
+        matches.sort(key=lambda item: item["signal_strength"], reverse=True)
+        gaps.sort(key=lambda item: item["signal_strength"], reverse=True)
+
+        return {
+            "matches": matches[:15],
+            "gaps": gaps[:15],
+        }
 
     @staticmethod
     def _infer_themes(text: str) -> List[str]:
@@ -957,9 +1096,24 @@ class MultiAgentProcessor:
         if sorted_localities:
             client_insights["regional_focus"] = [name for name, _ in sorted_localities]
 
+        locality_context = self._compile_locality_signals(document_localities)
+        if locality_context["matches"]:
+            client_insights["locality_briefings"] = [
+                {
+                    "name": match["name"],
+                    "jurisdiction": match["locality"].get("jurisdiction"),
+                    "median_income_band": match["locality"].get("median_income_band"),
+                    "demographic_descriptors": match["locality"].get("demographic_descriptors"),
+                    "signal_strength": match["signal_strength"],
+                }
+                for match in locality_context["matches"][:6]
+            ]
+
         regional_atlas = copy.deepcopy(self.regional_atlas) if self.regional_atlas else {}
         if regional_atlas and sorted_localities:
             regional_atlas["document_localities"] = sorted_localities
+        if regional_atlas and locality_context["matches"]:
+            regional_atlas["document_locality_context"] = locality_context["matches"]
 
         intake_registry = self.intake_registry or {}
         transcript_registry = self.transcript_registry or {}
@@ -971,6 +1125,7 @@ class MultiAgentProcessor:
             "client_insights": client_insights,
             "founder_insights": founder_insights,
             "st_louis_context": self.st_louis_context["demographics"],
+            "locality_context": locality_context,
             "insight_registry": {
                 "client": client_analysis,
                 "founder": founder_analysis,
@@ -984,6 +1139,7 @@ class MultiAgentProcessor:
             "regional_atlas": regional_atlas,
             "health_report_summary": health_summary,
             "document_locality_matches": sorted_localities,
+            "locality_research_gaps": locality_context["gaps"],
         }
 
     async def process_document(self, pdf_path: Path) -> Optional[EnlitensKnowledgeEntry]:
