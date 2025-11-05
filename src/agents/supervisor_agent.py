@@ -238,6 +238,9 @@ class SupervisorAgent(BaseAgent):
             regional_atlas=payload.get("regional_atlas"),
             health_report_summary=payload.get("health_report_summary"),
             document_locality_matches=payload.get("document_locality_matches"),
+            dominant_themes=payload.get("dominant_themes"),
+            theme_gaps=payload.get("theme_gaps"),
+            socioeconomic_contrast_flags=payload.get("socioeconomic_contrast_flags"),
         )
 
         state["skip_nodes"].update(plan_data["skip_nodes"])

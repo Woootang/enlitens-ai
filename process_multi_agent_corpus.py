@@ -28,7 +28,7 @@ import time
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
@@ -265,6 +265,7 @@ class MultiAgentProcessor:
         self.intake_registry = self._build_intake_registry(self.client_intake_text)
         self.transcript_registry = self._build_transcript_registry(self.transcript_text)
         self.locality_research_backlog = self._identify_locality_backlog()
+        self.theme_landscape = self._compile_theme_landscape()
         self.regional_atlas = self._build_regional_atlas()
 
         # Processing configuration
@@ -492,12 +493,27 @@ class MultiAgentProcessor:
                 theme_counter[bucket] += occurrences
 
         top_themes = theme_counter.most_common(15)
+        locality_weight = sum(regional_mentions.values()) if regional_mentions else 0
+        weighted_theme_signals: List[Dict[str, Any]] = []
+        for theme, count in top_themes:
+            weighted_theme_signals.append(
+                {
+                    "theme": theme,
+                    "frequency": count,
+                    "weighted_frequency": round(count + 0.5 * locality_weight, 2),
+                    "locality_tags": sorted(
+                        (regional_mentions or {}).items(),
+                        key=lambda item: (-item[1], item[0]),
+                    )[:10],
+                }
+            )
 
         return {
             "path": str(report_path),
             "highlights": highlights,
             "regional_mentions": regional_mentions,
             "priority_signals": top_themes,
+            "weighted_theme_signals": weighted_theme_signals,
         }
 
     def _build_intake_registry(self, raw_text: Optional[str]) -> Dict[str, Any]:
@@ -509,6 +525,7 @@ class MultiAgentProcessor:
         entries: List[Dict[str, Any]] = []
         location_counter: Counter[str] = Counter()
         theme_counter: Counter[str] = Counter()
+        theme_signals: Dict[str, Dict[str, Any]] = {}
 
         blocks = re.findall(r"\{([^{}]+)\}", raw_text, flags=re.DOTALL)
         for block in blocks:
@@ -521,8 +538,21 @@ class MultiAgentProcessor:
                 location_counter[name] += count
 
             themes = self._infer_themes(snippet)
+            locality_weight = sum(regional_mentions.values()) if regional_mentions else 0
             for theme in themes:
                 theme_counter[theme] += 1
+                signal_entry = theme_signals.setdefault(
+                    theme,
+                    {
+                        "frequency": 0,
+                        "weighted_frequency": 0.0,
+                        "localities": Counter(),
+                    },
+                )
+                signal_entry["frequency"] += 1
+                signal_entry["weighted_frequency"] += 1 + 0.5 * locality_weight
+                if regional_mentions:
+                    signal_entry["localities"].update(regional_mentions)
 
             entries.append(
                 {
@@ -534,12 +564,31 @@ class MultiAgentProcessor:
 
         top_locations = location_counter.most_common(30)
         top_themes = theme_counter.most_common(25)
+        weighted_theme_signals: List[Dict[str, Any]] = []
+        for theme, data in theme_signals.items():
+            locality_tags = sorted(
+                data.get("localities", {}).items(),
+                key=lambda item: (-item[1], item[0]),
+            )[:10]
+            weighted_theme_signals.append(
+                {
+                    "theme": theme,
+                    "frequency": data.get("frequency", 0),
+                    "weighted_frequency": round(data.get("weighted_frequency", 0.0), 2),
+                    "locality_tags": locality_tags,
+                }
+            )
+
+        weighted_theme_signals.sort(
+            key=lambda item: (-item.get("weighted_frequency", 0.0), item.get("theme", ""))
+        )
 
         return {
             "entry_count": len(entries),
             "top_locations": top_locations,
             "location_counts": dict(location_counter),
             "top_themes": top_themes,
+            "weighted_theme_signals": weighted_theme_signals,
             "entries": entries[:80],
         }
 
@@ -571,15 +620,284 @@ class MultiAgentProcessor:
         regional_mentions = match_municipalities(combined_text)
 
         theme_counter: Counter[str] = Counter()
+        theme_signals: Dict[str, Dict[str, Any]] = {}
         for segment in segments:
+            segment_localities = match_municipalities(segment)
+            locality_weight = sum(segment_localities.values()) if segment_localities else 0
             for theme in self._infer_themes(segment):
                 theme_counter[theme] += 1
+                signal_entry = theme_signals.setdefault(
+                    theme,
+                    {
+                        "frequency": 0,
+                        "weighted_frequency": 0.0,
+                        "localities": Counter(),
+                    },
+                )
+                signal_entry["frequency"] += 1
+                signal_entry["weighted_frequency"] += 1 + 0.5 * locality_weight
+                if segment_localities:
+                    signal_entry["localities"].update(segment_localities)
+
+        weighted_theme_signals: List[Dict[str, Any]] = []
+        for theme, data in theme_signals.items():
+            locality_tags = sorted(
+                data.get("localities", {}).items(),
+                key=lambda item: (-item[1], item[0]),
+            )[:10]
+            weighted_theme_signals.append(
+                {
+                    "theme": theme,
+                    "frequency": data.get("frequency", 0),
+                    "weighted_frequency": round(data.get("weighted_frequency", 0.0), 2),
+                    "locality_tags": locality_tags,
+                }
+            )
+
+        weighted_theme_signals.sort(
+            key=lambda item: (-item.get("weighted_frequency", 0.0), item.get("theme", ""))
+        )
 
         return {
             "segment_count": len(segments),
             "segments": segments,
             "regional_mentions": regional_mentions,
             "top_themes": theme_counter.most_common(20),
+            "weighted_theme_signals": weighted_theme_signals,
+        }
+
+    @staticmethod
+    def _normalize_locality_tags(locality_tags: Any) -> List[Tuple[str, float]]:
+        """Normalize locality tag structures into name/count tuples."""
+
+        if not locality_tags:
+            return []
+
+        normalized: List[Tuple[str, float]] = []
+        items: Iterable[Any]
+        if isinstance(locality_tags, dict):
+            items = locality_tags.items()
+        else:
+            items = locality_tags
+
+        for item in items:
+            name: Optional[str] = None
+            count_value: float = 1.0
+            if isinstance(item, dict):
+                name = str(item.get("name") or item.get("locality") or item.get("label") or "").strip()
+                raw_count = (
+                    item.get("count")
+                    or item.get("mentions")
+                    or item.get("signal_strength")
+                    or 1
+                )
+            elif isinstance(item, (tuple, list)) and len(item) >= 2:
+                name = str(item[0]).strip()
+                raw_count = item[1]
+            else:
+                name = str(item).strip()
+                raw_count = 1
+
+            if not name:
+                continue
+
+            try:
+                count_value = float(raw_count)
+            except (TypeError, ValueError):
+                count_value = 1.0
+
+            normalized.append((name, count_value))
+
+        return normalized
+
+    @staticmethod
+    def _income_band_to_value(band: Optional[str]) -> Optional[int]:
+        """Convert a textual income band into an approximate numeric value."""
+
+        if not band:
+            return None
+
+        normalized = band.lower().replace(",", "")
+        matches = re.findall(r"([0-9]+(?:\.[0-9]+)?)", normalized)
+        if not matches:
+            return None
+
+        try:
+            value = float(matches[0])
+        except ValueError:
+            return None
+
+        if "k" in normalized and value < 1000:
+            value *= 1000
+        elif "m" in normalized and value < 1_000_000:
+            value *= 1_000_000
+        elif value < 1000 and "000" in normalized:
+            value *= 1000
+
+        return int(value)
+
+    def _compile_theme_landscape(self) -> Dict[str, Any]:
+        """Aggregate theme signals across context assets with locality awareness."""
+
+        sources: Dict[str, Any] = {
+            "intake": (self.intake_registry or {}).get("weighted_theme_signals", []),
+            "transcript": (self.transcript_registry or {}).get("weighted_theme_signals", []),
+            "health_report": (self.health_report_summary or {}).get("weighted_theme_signals", []),
+        }
+
+        theme_map: Dict[str, Dict[str, Any]] = {}
+        for source, entries in sources.items():
+            if not isinstance(entries, list):
+                continue
+            for entry in entries:
+                theme = entry.get("theme")
+                if not theme:
+                    continue
+
+                try:
+                    weighted = float(entry.get("weighted_frequency", entry.get("frequency", 0.0)))
+                except (TypeError, ValueError):
+                    weighted = 0.0
+                try:
+                    frequency = float(entry.get("frequency", 0.0))
+                except (TypeError, ValueError):
+                    frequency = 0.0
+
+                record = theme_map.setdefault(
+                    theme,
+                    {
+                        "total_weight": 0.0,
+                        "sources": {},
+                        "locality_counter": Counter(),
+                    },
+                )
+                record["total_weight"] += weighted
+                record["sources"][source] = {
+                    "weighted_frequency": round(weighted, 2),
+                    "frequency": round(frequency, 2),
+                }
+                for name, count in self._normalize_locality_tags(entry.get("locality_tags")):
+                    record["locality_counter"][name] += count
+
+        if not theme_map:
+            return {
+                "dominant_themes": [],
+                "theme_gaps": [],
+                "socioeconomic_contrast_flags": [],
+            }
+
+        def _sorted_localities(counter: Counter) -> List[Tuple[str, float]]:
+            return sorted(counter.items(), key=lambda item: (-item[1], item[0]))[:10]
+
+        dominant_themes: List[Dict[str, Any]] = []
+        for theme, data in theme_map.items():
+            dominant_themes.append(
+                {
+                    "theme": theme,
+                    "total_weight": round(data["total_weight"], 2),
+                    "source_breakdown": data["sources"],
+                    "locality_tags": _sorted_localities(data["locality_counter"]),
+                }
+            )
+
+        dominant_themes.sort(
+            key=lambda item: (-item.get("total_weight", 0.0), item.get("theme", ""))
+        )
+
+        all_sources = [source for source in sources if isinstance(sources[source], list)]
+        theme_gaps: List[Dict[str, Any]] = []
+        for theme, data in theme_map.items():
+            present_sources = sorted(data["sources"].keys())
+            missing_sources = [source for source in all_sources if source not in data["sources"]]
+            if missing_sources and present_sources:
+                theme_gaps.append(
+                    {
+                        "theme": theme,
+                        "present_sources": present_sources,
+                        "missing_sources": missing_sources,
+                        "total_weight": round(data["total_weight"], 2),
+                        "locality_tags": _sorted_localities(data["locality_counter"]),
+                    }
+                )
+
+        theme_gaps.sort(
+            key=lambda item: (-item.get("total_weight", 0.0), item.get("theme", ""))
+        )
+
+        socioeconomic_flags: List[Dict[str, Any]] = []
+        locality_reference = getattr(self, "locality_reference", {}) or {}
+        for theme, data in theme_map.items():
+            locality_counter: Counter = data["locality_counter"]
+            if not locality_counter:
+                continue
+
+            profiles: List[Dict[str, Any]] = []
+            income_values: List[int] = []
+            delmar_detected = False
+            for name, count in locality_counter.items():
+                record = locality_reference.get(name.strip().lower())
+                profile = {
+                    "name": name,
+                    "signal_strength": round(float(count), 2),
+                }
+                if record:
+                    profile.update(
+                        {
+                            "median_income_band": record.median_income_band,
+                            "demographics": record.demographic_descriptors,
+                            "jurisdiction": record.jurisdiction,
+                        }
+                    )
+                    income_value = self._income_band_to_value(record.median_income_band)
+                    if income_value is not None:
+                        income_values.append(income_value)
+                    if "delmar" in record.name.lower() or "delmar" in record.demographic_descriptors.lower():
+                        delmar_detected = True
+                else:
+                    profile.update(
+                        {
+                            "median_income_band": None,
+                            "demographics": None,
+                            "jurisdiction": None,
+                        }
+                    )
+                profiles.append(profile)
+
+            profiles.sort(
+                key=lambda item: (-item.get("signal_strength", 0.0), item.get("name", ""))
+            )
+
+            income_gap: Optional[int] = None
+            if len(income_values) >= 2:
+                income_gap = max(income_values) - min(income_values)
+
+            indicators: List[str] = []
+            if income_gap is not None and income_gap >= 20_000:
+                indicators.append("income_gap")
+            if delmar_detected:
+                indicators.append("delmar_indicator")
+
+            if indicators:
+                socioeconomic_flags.append(
+                    {
+                        "theme": theme,
+                        "indicators": indicators,
+                        "estimated_income_gap": income_gap,
+                        "locality_profiles": profiles[:6],
+                    }
+                )
+
+        socioeconomic_flags.sort(
+            key=lambda item: (
+                -(item.get("estimated_income_gap") or 0),
+                item.get("theme", ""),
+            )
+        )
+
+        return {
+            "dominant_themes": dominant_themes,
+            "theme_gaps": theme_gaps,
+            "socioeconomic_contrast_flags": socioeconomic_flags,
         }
 
     def _identify_locality_backlog(self) -> List[Dict[str, Any]]:
@@ -655,10 +973,18 @@ class MultiAgentProcessor:
         )[:30]
         atlas["health_priority_signals"] = self.health_report_summary.get("priority_signals", []) if self.health_report_summary else []
 
+        if getattr(self, "theme_landscape", None):
+            atlas["dominant_themes"] = self.theme_landscape.get("dominant_themes", [])
+            atlas["theme_gaps"] = self.theme_landscape.get("theme_gaps", [])
+            atlas["socioeconomic_contrast_flags"] = self.theme_landscape.get(
+                "socioeconomic_contrast_flags", []
+            )
+
+        locality_reference = getattr(self, "locality_reference", {}) or {}
         atlas["locality_reference"] = [
-            record.to_dict() for record in sorted(self.locality_reference.values(), key=lambda item: item.name)
+            record.to_dict() for record in sorted(locality_reference.values(), key=lambda item: item.name)
         ]
-        atlas["locality_research_gaps"] = self.locality_research_backlog
+        atlas["locality_research_gaps"] = getattr(self, "locality_research_backlog", [])
 
         return atlas
 
@@ -670,7 +996,8 @@ class MultiAgentProcessor:
         matches: List[Dict[str, Any]] = []
         gaps: List[Dict[str, Any]] = []
 
-        if not self.locality_reference:
+        locality_reference = getattr(self, "locality_reference", {}) or {}
+        if not locality_reference:
             return {"matches": matches, "gaps": gaps}
 
         candidate_map: Dict[str, Dict[str, Any]] = {}
@@ -713,7 +1040,7 @@ class MultiAgentProcessor:
                 + 0.6 * counts.get("transcript_mentions", 0)
                 + 0.4 * counts.get("health_report_mentions", 0)
             )
-            record = self.locality_reference.get(key)
+            record = locality_reference.get(key)
             payload = {
                 "name": record.name if record else counts.get("display_name", key),
                 "document_mentions": counts.get("document_mentions", 0),
@@ -1109,15 +1436,17 @@ class MultiAgentProcessor:
                 for match in locality_context["matches"][:6]
             ]
 
-        regional_atlas = copy.deepcopy(self.regional_atlas) if self.regional_atlas else {}
+        regional_atlas_source = getattr(self, "regional_atlas", None)
+        regional_atlas = copy.deepcopy(regional_atlas_source) if regional_atlas_source else {}
         if regional_atlas and sorted_localities:
             regional_atlas["document_localities"] = sorted_localities
         if regional_atlas and locality_context["matches"]:
             regional_atlas["document_locality_context"] = locality_context["matches"]
 
-        intake_registry = self.intake_registry or {}
-        transcript_registry = self.transcript_registry or {}
-        health_summary = self.health_report_summary or {}
+        intake_registry = getattr(self, "intake_registry", {}) or {}
+        transcript_registry = getattr(self, "transcript_registry", {}) or {}
+        health_summary = getattr(self, "health_report_summary", {}) or {}
+        theme_landscape = getattr(self, "theme_landscape", {}) or {}
 
         return {
             "document_id": document_id,
@@ -1140,6 +1469,11 @@ class MultiAgentProcessor:
             "health_report_summary": health_summary,
             "document_locality_matches": sorted_localities,
             "locality_research_gaps": locality_context["gaps"],
+            "dominant_themes": theme_landscape.get("dominant_themes", []),
+            "theme_gaps": theme_landscape.get("theme_gaps", []),
+            "socioeconomic_contrast_flags": theme_landscape.get(
+                "socioeconomic_contrast_flags", []
+            ),
         }
 
     async def process_document(self, pdf_path: Path) -> Optional[EnlitensKnowledgeEntry]:

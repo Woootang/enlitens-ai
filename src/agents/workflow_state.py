@@ -108,6 +108,9 @@ class WorkflowState(TypedDict, total=False):
     regional_atlas: Optional[Dict[str, Any]]
     health_report_summary: Optional[Dict[str, Any]]
     document_locality_matches: Optional[List[Tuple[str, int]]]
+    dominant_themes: Optional[List[Dict[str, Any]]]
+    theme_gaps: Optional[List[Dict[str, Any]]]
+    socioeconomic_contrast_flags: Optional[List[Dict[str, Any]]]
 
     # Shared orchestration metadata - use Annotated to allow multiple updates
     stage: Annotated[str, _keep_last_value]
@@ -155,6 +158,9 @@ def create_initial_state(
     regional_atlas: Optional[Dict[str, Any]] = None,
     health_report_summary: Optional[Dict[str, Any]] = None,
     document_locality_matches: Optional[List[Tuple[str, int]]] = None,
+    dominant_themes: Optional[List[Dict[str, Any]]] = None,
+    theme_gaps: Optional[List[Dict[str, Any]]] = None,
+    socioeconomic_contrast_flags: Optional[List[Dict[str, Any]]] = None,
 ) -> WorkflowState:
     """Create a properly initialized workflow state."""
     return WorkflowState(
@@ -181,6 +187,9 @@ def create_initial_state(
         regional_atlas=regional_atlas,
         health_report_summary=health_report_summary,
         document_locality_matches=document_locality_matches,
+        dominant_themes=dominant_themes,
+        theme_gaps=theme_gaps,
+        socioeconomic_contrast_flags=socioeconomic_contrast_flags,
         science_result=None,
         context_result=None,
         client_profile_result=None,
