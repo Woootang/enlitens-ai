@@ -8,7 +8,9 @@ HALLUCINATION PREVENTION:
 - Validators block practice statistics and fabricated content
 """
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo, HttpUrl
+from functools import lru_cache
+from itertools import chain
+from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo, HttpUrl
 from typing import ClassVar, List, Optional, Dict, Any, Literal, Tuple
 from datetime import datetime
 import difflib
@@ -17,9 +19,81 @@ import re
 
 from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 from .prediction_error import PredictionErrorEntry
+from src.data.locality_loader import LocalityRecord, load_locality_reference
 
 
 logger = logging.getLogger(__name__)
+
+
+def _canonicalize_label(value: str) -> str:
+    """Normalise locality and asset labels for comparison."""
+
+    text = re.sub(r"[^\w\s]", " ", str(value or ""))
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+@lru_cache(maxsize=1)
+def _locality_index() -> Dict[str, LocalityRecord]:
+    """Return a canonical-name lookup for locality records."""
+
+    records = load_locality_reference()
+    index: Dict[str, LocalityRecord] = {}
+    for record in records.values():
+        key = _canonicalize_label(record.name)
+        if key:
+            index[key] = record
+    return index
+
+
+def _lookup_locality_record(value: str) -> Optional[LocalityRecord]:
+    """Match an arbitrary locality label against the reference dataset."""
+
+    if not value:
+        return None
+
+    index = _locality_index()
+    canonical = _canonicalize_label(value)
+    record = index.get(canonical)
+    if record:
+        return record
+
+    probes = []
+    for delimiter in ("-", "—", "–", "|", "/"):
+        if delimiter in value:
+            probes.append(value.split(delimiter, 1)[0].strip())
+    if "(" in value:
+        probes.append(value.split("(", 1)[0].strip())
+
+    for probe in probes:
+        candidate = index.get(_canonicalize_label(probe))
+        if candidate:
+            return candidate
+
+    return None
+
+
+@lru_cache(maxsize=1)
+def _global_asset_index() -> Dict[str, Dict[str, Any]]:
+    """Map canonical asset labels to their display text and localities."""
+
+    index: Dict[str, Dict[str, Any]] = {}
+    for record in _locality_index().values():
+        for asset in chain(
+            record.landmark_schools,
+            record.youth_sports_leagues,
+            record.community_centers,
+            record.health_resources,
+            record.signature_eateries,
+        ):
+            canonical = _canonicalize_label(asset)
+            if not canonical:
+                continue
+            entry = index.setdefault(
+                canonical,
+                {"label": asset, "localities": []},
+            )
+            entry["localities"].append(record.name)
+    return index
 
 
 class Citation(BaseModel):
@@ -529,6 +603,16 @@ class ClientProfile(BaseModel):
         description="Optional tie-in to St. Louis context or community realities, also citing [Source #] when applicable",
         json_schema_extra={"pattern": r"\[Source [^\]]+\]"},
     )
+    local_geography: List[str] = Field(
+        default_factory=list,
+        description="Primary neighbourhoods or municipalities anchoring this fictional persona",
+        json_schema_extra={"minItems": 3, "maxItems": 6},
+    )
+    community_connections: List[str] = Field(
+        default_factory=list,
+        description="Community assets tied to the listed localities (schools, centers, eateries, or health hubs)",
+        json_schema_extra={"minItems": 3, "maxItems": 10},
+    )
     regional_touchpoints: List[str] = Field(
         default_factory=list,
         description="Named neighbourhoods, schools, or community sites that shape the client's week",
@@ -618,6 +702,123 @@ class ClientProfile(BaseModel):
             raise ValueError("Research fields must not promise clinical outcomes")
         return cleaned
 
+    @field_validator("local_geography", mode="before")
+    @classmethod
+    def _coerce_local_geography(cls, value: Any) -> List[str]:
+        if value is None:
+            return []
+        if isinstance(value, (list, tuple, set)):
+            return list(value)
+        return [str(value)]
+
+    @field_validator("local_geography")
+    @classmethod
+    def ensure_local_geography_valid(
+        cls, values: List[str], info: ValidationInfo
+    ) -> List[str]:
+        cleaned = [str(item).strip() for item in values or [] if str(item).strip()]
+        if not cleaned:
+            raise ValueError("local_geography cannot be empty")
+
+        unique: List[str] = []
+        seen: set[str] = set()
+        missing: List[str] = []
+        for raw in cleaned:
+            record = _lookup_locality_record(raw)
+            if not record:
+                missing.append(raw)
+                continue
+            canonical = _canonicalize_label(record.name)
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            unique.append(record.name)
+
+        field_meta = ClientProfile.model_fields.get("local_geography")
+        extras = field_meta.json_schema_extra if field_meta and field_meta.json_schema_extra else {}
+        min_items = extras.get("minItems")
+        max_items = extras.get("maxItems")
+
+        if missing:
+            raise ValueError(
+                "local_geography entries not found in locality reference: "
+                + ", ".join(sorted(missing))
+            )
+        if min_items and len(unique) < min_items:
+            raise ValueError(f"local_geography requires at least {min_items} distinct entries")
+        if max_items and len(unique) > max_items:
+            unique = unique[:max_items]
+
+        return unique
+
+    @field_validator("community_connections", mode="before")
+    @classmethod
+    def _coerce_community_connections(cls, value: Any) -> List[str]:
+        if value is None:
+            return []
+        if isinstance(value, (list, tuple, set)):
+            return list(value)
+        return [str(value)]
+
+    @field_validator("community_connections")
+    @classmethod
+    def ensure_community_connections_valid(
+        cls, values: List[str], info: ValidationInfo
+    ) -> List[str]:
+        cleaned = [str(item).strip() for item in values or [] if str(item).strip()]
+        field_meta = ClientProfile.model_fields.get("community_connections")
+        extras = field_meta.json_schema_extra if field_meta and field_meta.json_schema_extra else {}
+        min_items = extras.get("minItems")
+        max_items = extras.get("maxItems")
+
+        if not cleaned:
+            required = min_items or 1
+            raise ValueError(
+                f"community_connections requires at least {required} entries tied to known localities"
+            )
+
+        localities = info.data.get("local_geography") if info else None
+        if not localities:
+            raise ValueError("community_connections requires local_geography context")
+
+        locality_keys = {_canonicalize_label(name) for name in localities}
+        asset_index = _global_asset_index()
+
+        unique: List[str] = []
+        seen: set[str] = set()
+        missing: List[str] = []
+        for raw in cleaned:
+            canonical = _canonicalize_label(raw)
+            asset_entry = asset_index.get(canonical)
+            if not asset_entry:
+                missing.append(raw)
+                continue
+            linked_localities = {
+                _canonicalize_label(name) for name in asset_entry.get("localities", [])
+            }
+            if not locality_keys.intersection(linked_localities):
+                missing.append(raw)
+                continue
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            unique.append(str(asset_entry.get("label", raw)))
+
+        if missing:
+            raise ValueError(
+                "community_connections entries not recognised for listed localities: "
+                + ", ".join(sorted(missing))
+            )
+
+        if min_items and len(unique) < min_items:
+            raise ValueError(
+                f"community_connections requires at least {min_items} distinct entries"
+            )
+        if max_items and len(unique) > max_items:
+            unique = unique[:max_items]
+
+        return unique
+
     @field_validator("prediction_errors")
     @classmethod
     def ensure_prediction_error_quality(
@@ -635,10 +836,12 @@ class ClientProfile(BaseModel):
             if key not in seen:
                 seen.add(key)
                 deduped.append(entry)
-        min_items = info.field_info.json_schema_extra.get("minItems") if info.field_info else None
+        field_meta = ClientProfile.model_fields.get("prediction_errors")
+        extras = field_meta.json_schema_extra if field_meta and field_meta.json_schema_extra else {}
+        min_items = extras.get("minItems")
         if min_items and len(deduped) < min_items:
             raise ValueError(f"prediction_errors requires at least {min_items} unique entries")
-        max_items = info.field_info.json_schema_extra.get("maxItems") if info.field_info else None
+        max_items = extras.get("maxItems")
         if max_items and len(deduped) > max_items:
             deduped = deduped[:max_items]
         return deduped
@@ -745,6 +948,41 @@ class ClientProfileSet(BaseModel):
         if max_items and len(unique_sources) > max_items:
             unique_sources = unique_sources[:max_items]
         return unique_sources
+
+    @model_validator(mode="after")
+    def ensure_locality_diversity(self) -> "ClientProfileSet":
+        if not self.profiles:
+            return self
+
+        locality_sets: List[set[str]] = []
+        for profile in self.profiles:
+            localities = getattr(profile, "local_geography", []) or []
+            canonical = {_canonicalize_label(name) for name in localities if name}
+            if canonical:
+                locality_sets.append(canonical)
+
+        if not locality_sets:
+            return self
+
+        shared = set.intersection(*locality_sets)
+        if shared:
+            index = _locality_index()
+            shared_names = [
+                index[key].name if key in index else key for key in sorted(shared)
+            ]
+            raise ValueError(
+                "Client profiles must not all reference the same locality: "
+                + ", ".join(shared_names)
+            )
+
+        union = set().union(*locality_sets)
+        if len(union) < len(self.profiles):
+            raise ValueError(
+                "Client profile set must reference at least "
+                f"{len(self.profiles)} distinct localities"
+            )
+
+        return self
 
 class DocumentMetadata(BaseModel):
     """Metadata for each processed document."""

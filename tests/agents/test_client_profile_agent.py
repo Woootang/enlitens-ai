@@ -1,10 +1,82 @@
 import asyncio
 
 import pytest
+from typing import Optional
 
 from src.agents.client_profile_agent import ClientProfileAgent
 from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
 from src.models.prediction_error import PredictionErrorEntry
+
+
+COMMUTER_LOCALITIES = ["Central West End", "Tower Grove South", "Delmar Loop"]
+COMMUTER_CONNECTIONS = ["Carondelet YMCA", "International Institute", "Pageant Community Room"]
+CAREGIVER_LOCALITIES = ["Kirkwood", "Webster Groves", "Ferguson"]
+CAREGIVER_CONNECTIONS = [
+    "Kirkwood Community Center",
+    "Webster Groves Recreation Complex",
+    "Ferguson Community Empowerment Center",
+]
+SHIFT_LOCALITIES = ["Florissant", "Clayton", "Maplewood Richmond Heights"]
+SHIFT_CONNECTIONS = [
+    "James J. Eagan Center",
+    "The Center of Clayton",
+    "THE HEIGHTS Community Center",
+]
+
+_DEFAULT_MASKING = ["Commute shutdown", "Hypervigilant jaw clench"]
+_DEFAULT_UNMET = [
+    "Predictable decompression",
+    "Transit sensory scouting",
+    "Community accountability for rest",
+]
+_DEFAULT_SUPPORT = [
+    "Schedule river overlook pauses",
+    "Coordinate with Metro sensory hours",
+    "Share scripts for requesting quiet cars",
+]
+_DEFAULT_FLAGS = ["Do not promise outcomes", "Fictional composite reminder"]
+
+
+def _profile_template(
+    *,
+    name: str,
+    intake: str,
+    research: str,
+    benefit: str,
+    alignment: str,
+    localities: list[str],
+    connections: list[str],
+    prediction_errors: list[PredictionErrorEntry],
+    masking: Optional[list[str]] = None,
+    unmet: Optional[list[str]] = None,
+    support: Optional[list[str]] = None,
+    flags: Optional[list[str]] = None,
+) -> ClientProfile:
+    persona_overview = (
+        "Neighborhood & Daily Geography: "
+        f"{localities[0]} anchors this FICTIONAL composite's week. "
+        "Family & Intergenerational History: Fictional caregivers process legacy stress. "
+        "Economic Context & Access Gaps: Highlights budget trade-offs without promising outcomes. "
+        "Sensory & Community Experiences: Maps overstimulation across civic spaces. "
+        "Local Supports (schools, leagues, churches, eateries): Draws on referenced community assets."
+    )
+    return ClientProfile(
+        profile_name=name,
+        fictional_disclaimer="FICTIONAL composite for internal research translation.",
+        intake_reference=intake,
+        persona_overview=persona_overview,
+        research_reference=research,
+        benefit_explanation=benefit,
+        st_louis_alignment=alignment,
+        local_geography=list(localities),
+        community_connections=list(connections),
+        regional_touchpoints=list(localities)[:3],
+        masking_signals=list(masking or _DEFAULT_MASKING),
+        unmet_needs=list(unmet or _DEFAULT_UNMET),
+        support_recommendations=list(support or _DEFAULT_SUPPORT),
+        cautionary_flags=list(flags or _DEFAULT_FLAGS),
+        prediction_errors=prediction_errors,
+    )
 
 
 class _RecordingOllamaClient:
@@ -23,12 +95,14 @@ class _RecordingOllamaClient:
 def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
     return ClientProfileSet(
         profiles=[
-            ClientProfile(
-                profile_name="Sensory rail commuter",
-                intake_reference='"The red line makes my skin buzz"',
-                research_reference=f"{source_tag} outlines how chronic transit noise overloads sensory gating.",
-                benefit_explanation=f"{source_tag} shows vestibular priming calms their commute shutdown spiral.",
-                st_louis_alignment=f"{source_tag} plus STL Metro complaints show we adapt local transit routines.",
+            _profile_template(
+                name="Sensory rail commuter",
+                intake='"The red line makes my skin buzz"',
+                research=f"{source_tag} outlines how chronic transit noise overloads sensory gating.",
+                benefit=f"{source_tag} shows vestibular priming calms their commute shutdown spiral.",
+                alignment=f"{source_tag} plus STL Metro complaints show we adapt local transit routines.",
+                localities=COMMUTER_LOCALITIES,
+                connections=COMMUTER_CONNECTIONS,
                 prediction_errors=[
                     PredictionErrorEntry(
                         trigger_context="Assumes the Metro commute is only depleting.",
@@ -42,12 +116,14 @@ def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
                     ),
                 ],
             ),
-            ClientProfile(
-                profile_name="After-school melter",
-                intake_reference='"By pickup time I am empty and shaking"',
-                research_reference=f"{source_tag} links cortisol spikes to afternoon classroom sensory debt.",
-                benefit_explanation=f"{source_tag} backs co-regulation stops before homework to prevent crashes.",
-                st_louis_alignment=f"{source_tag} + northside school overstimulation data justify flexible pickups.",
+            _profile_template(
+                name="After-school melter",
+                intake='"By pickup time I am empty and shaking"',
+                research=f"{source_tag} links cortisol spikes to afternoon classroom sensory debt.",
+                benefit=f"{source_tag} backs co-regulation stops before homework to prevent crashes.",
+                alignment=f"{source_tag} + northside school overstimulation data justify flexible pickups.",
+                localities=CAREGIVER_LOCALITIES,
+                connections=CAREGIVER_CONNECTIONS,
                 prediction_errors=[
                     PredictionErrorEntry(
                         trigger_context="Assumes after-school meltdown relief has to happen at home.",
@@ -61,12 +137,14 @@ def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
                     ),
                 ],
             ),
-            ClientProfile(
-                profile_name="Shift worker hypervigilance",
-                intake_reference='"Night sirens keep my jaw locked"',
-                research_reference=f"{source_tag} documents auditory hypervigilance during overnight shifts.",
-                benefit_explanation=f"{source_tag} validates low-light decompression pods after each shift.",
-                st_louis_alignment=f"{source_tag} and STL hospital siren density explain the neighbourhood plan.",
+            _profile_template(
+                name="Shift worker hypervigilance",
+                intake='"Night sirens keep my jaw locked"',
+                research=f"{source_tag} documents auditory hypervigilance during overnight shifts.",
+                benefit=f"{source_tag} validates low-light decompression pods after each shift.",
+                alignment=f"{source_tag} and STL hospital siren density explain the neighbourhood plan.",
+                localities=SHIFT_LOCALITIES,
+                connections=SHIFT_CONNECTIONS,
                 prediction_errors=[
                     PredictionErrorEntry(
                         trigger_context="Assumes post-shift shutdown must happen at home.",
@@ -179,8 +257,10 @@ def test_client_profile_agent_normalizes_fragmented_partial_payload():
     payload = result["client_profiles"]
 
     assert len(payload["profiles"]) == 3
-    assert payload["profiles"][1]["profile_name"] == "After-school melter"
-    assert payload["profiles"][2]["profile_name"] == "Shift worker hypervigilance"
+    for profile in payload["profiles"]:
+        assert "FICTIONAL" in profile["fictional_disclaimer"].upper()
+        assert len(profile["local_geography"]) >= 3
+        assert len(profile["community_connections"]) >= 3
 
     assert asyncio.run(agent.validate_output(result))
 
@@ -234,11 +314,12 @@ def test_client_profile_agent_backfills_missing_citations_from_retrieval():
 
     validated = ClientProfileSet.model_validate(payload)
     for idx, profile in enumerate(validated.profiles, start=1):
-        expected_tag = f"[Source {idx}]"
-        assert expected_tag in profile.research_reference
-        assert expected_tag in profile.benefit_explanation
+        expected_primary = f"[Source {idx}]"
+        expected_alt = f"[Source {idx % 3 + 1}]"
+        assert expected_primary in profile.research_reference
+        assert expected_alt in profile.benefit_explanation
         if profile.st_louis_alignment:
-            assert expected_tag in profile.st_louis_alignment
+            assert expected_primary in profile.st_louis_alignment
 
 
 def test_client_profile_agent_falls_back_when_partial_payload_invalid():
@@ -269,6 +350,209 @@ def test_client_profile_agent_falls_back_when_partial_payload_invalid():
     payload = result["client_profiles"]
 
     assert len(payload["profiles"]) == 3
-    assert payload["profiles"][0]["profile_name"] == "Transit sensory overload"
+    for profile in payload["profiles"]:
+        assert "FICTIONAL" in profile["fictional_disclaimer"].upper()
+        assert len(profile["local_geography"]) >= 3
+        assert len(profile["community_connections"]) >= 3
 
     assert asyncio.run(agent.validate_output(result))
+
+
+def test_post_process_profiles_backfills_missing_locality_data():
+    agent = ClientProfileAgent()
+    base_profiles = [
+        _profile_template(
+            name="Locality gap",
+            intake='"I never know which neighborhood supports me"',
+            research="[Source 1] explores local support gaps.",
+            benefit="[Source 1] highlights neighborhood-based regulation pivots.",
+            alignment="[Source 1] plus city data show where supports are thin.",
+            localities=COMMUTER_LOCALITIES,
+            connections=COMMUTER_CONNECTIONS,
+            prediction_errors=[
+                PredictionErrorEntry(
+                    trigger_context="Assumes support only exists downtown.",
+                    surprising_pivot="[Source 1] lifts up pocket resources in mixed-income corridors.",
+                    intended_cognitive_effect="Invite the reader to map overlooked anchors.",
+                ),
+                PredictionErrorEntry(
+                    trigger_context="Believes community hubs close after work hours.",
+                    surprising_pivot="[Source 1] plus [Ext 2] show late-evening sensory rooms in libraries.",
+                    intended_cognitive_effect="Spark curiosity about extended-hour assets.",
+                ),
+            ],
+        ),
+        _profile_template(
+            name="Caretaker baseline",
+            intake='"I juggle caregiver roles across the metro"',
+            research="[Source 2] examines distributed caregiving networks.",
+            benefit="[Source 2] validates rotating decompression rituals.",
+            alignment="[Source 2] plus carpool data map mutual-aid corridors.",
+            localities=CAREGIVER_LOCALITIES,
+            connections=CAREGIVER_CONNECTIONS,
+            prediction_errors=[
+                PredictionErrorEntry(
+                    trigger_context="Assumes regulation can only happen at home.",
+                    surprising_pivot="[Source 2] documents park-based sensory resets on the drive home.",
+                    intended_cognitive_effect="Invite the team to treat the commute as a co-regulation asset.",
+                ),
+                PredictionErrorEntry(
+                    trigger_context="Believes caregivers must shoulder the load solo.",
+                    surprising_pivot="[Source 2] plus [Ext 3] highlight neighborhood carpool circles sharing decompression.",
+                    intended_cognitive_effect="Encourage distributed networks for after-school support.",
+                ),
+            ],
+        ),
+        _profile_template(
+            name="Shift worker baseline",
+            intake='"Night sirens keep my jaw locked"',
+            research="[Source 3] documents auditory hypervigilance for night workers.",
+            benefit="[Source 3] shows decompression pods reduce sympathetic spikes.",
+            alignment="[Source 3] paired with hospital siren counts justify hospital pods.",
+            localities=SHIFT_LOCALITIES,
+            connections=SHIFT_CONNECTIONS,
+            prediction_errors=[
+                PredictionErrorEntry(
+                    trigger_context="Assumes decompression can't happen on site.",
+                    surprising_pivot="[Source 3] references chapels and dim rooms staff already use before commuting.",
+                    intended_cognitive_effect="Encourage immediate decompression rituals before leaving work.",
+                ),
+                PredictionErrorEntry(
+                    trigger_context="Believes every route home is equally loud.",
+                    surprising_pivot="[Source 3] plus [Ext 4] map river-adjacent drives with fewer sirens.",
+                    intended_cognitive_effect="Promote experimenting with quieter corridors.",
+                ),
+            ],
+        ),
+    ]
+
+    missing_data = base_profiles[0].model_dump()
+    missing_data.update(
+        {
+            "local_geography": [],
+            "community_connections": [],
+            "regional_touchpoints": [],
+        }
+    )
+    base_profiles[0] = ClientProfile.model_construct(**missing_data)
+
+    profile_set = ClientProfileSet(profiles=base_profiles)
+    processed = agent._post_process_profiles(
+        response=profile_set,
+        document_id="doc-1",
+        document_localities=[("Kirkwood", 4), ("The Ville", 2)],
+        external_sources=[],
+        regional_atlas={"stl_city_neighborhoods": ["The Ville", "Benton Park"]},
+    )
+
+    first = processed.profiles[0]
+    assert len(first.local_geography) >= 3
+    assert len(first.community_connections) >= 3
+    assert len(set(first.local_geography)) >= 3
+    assert len({conn.lower() for conn in first.community_connections}) >= 3
+
+
+def test_post_process_profiles_expands_sparse_locality_data():
+    agent = ClientProfileAgent()
+    sparse_profile = _profile_template(
+        name="Sparse locality",
+        intake='"We only visit Kirkwood"',
+        research="[Source 1] covers west county sensory hubs.",
+        benefit="[Source 1] maps rotating decompression stops.",
+        alignment="[Source 1] plus municipal data chart underused supports.",
+        localities=CAREGIVER_LOCALITIES,
+        connections=CAREGIVER_CONNECTIONS,
+        prediction_errors=[
+            PredictionErrorEntry(
+                trigger_context="Assumes only one neighborhood feels accessible.",
+                surprising_pivot="[Source 1] reveals overlapping supports in adjacent municipalities.",
+                intended_cognitive_effect="Encourage venturing beyond the default routine.",
+            ),
+            PredictionErrorEntry(
+                trigger_context="Believes bilingual support groups are rare.",
+                surprising_pivot="[Ext 2] documents Spanish-language circles at local community centers.",
+                intended_cognitive_effect="Highlight community stewardship in nearby towns.",
+            ),
+        ],
+    )
+    sparse_data = sparse_profile.model_dump()
+    sparse_data.update(
+        {
+            "local_geography": ["Kirkwood"],
+            "community_connections": ["Kirkwood Community Center"],
+        }
+    )
+    profile = ClientProfile.model_construct(**sparse_data)
+    profile_set = ClientProfileSet(
+        profiles=[profile, _profiles_payload().profiles[1], _profiles_payload().profiles[2]]
+    )
+
+    processed = agent._post_process_profiles(
+        response=profile_set,
+        document_id="doc-2",
+        document_localities=[("Kirkwood", 5), ("Webster Groves", 3)],
+        external_sources=[],
+        regional_atlas={"stl_city_neighborhoods": ["Maplewood"], "stl_county_municipalities": ["Clayton"]},
+    )
+
+    updated = processed.profiles[0]
+    assert "Kirkwood" in updated.local_geography
+    assert len(updated.local_geography) >= 3
+    assert "Kirkwood Community Center" in updated.community_connections
+    assert len(updated.community_connections) >= 3
+
+
+def test_post_process_profiles_preserves_rich_locality_data():
+    agent = ClientProfileAgent()
+    rich_profile = _profile_template(
+        name="Rich data",
+        intake='"Our week spans multiple neighborhoods"',
+        research="[Source 1] analyses multi-site sensory strategies.",
+        benefit="[Source 1] backs rotational support planning.",
+        alignment="[Source 1] with census data shows cross-municipality routines.",
+        localities=["Central West End", "Tower Grove South", "Delmar Loop", "Ferguson"],
+        connections=[
+            "Carondelet YMCA",
+            "International Institute",
+            "Pageant Community Room",
+            "Ferguson Community Empowerment Center",
+        ],
+        prediction_errors=[
+            PredictionErrorEntry(
+                trigger_context="Assumes the same three locales must carry all support.",
+                surprising_pivot="[Source 1] highlights rotating micro-rituals across cultural districts.",
+                intended_cognitive_effect="Encourage diversifying weekly anchors.",
+            ),
+            PredictionErrorEntry(
+                trigger_context="Believes commuting between neighborhoods adds stress.",
+                surprising_pivot="[Ext 3] maps quiet routes that turn travel into decompression time.",
+                intended_cognitive_effect="Reframe travel as restorative sequencing.",
+            ),
+        ],
+    )
+
+    profile_set = ClientProfileSet(
+        profiles=[rich_profile, _profiles_payload().profiles[0], _profiles_payload().profiles[1]]
+    )
+
+    processed = agent._post_process_profiles(
+        response=profile_set,
+        document_id="doc-3",
+        document_localities=[("Central West End", 4)],
+        external_sources=[],
+        regional_atlas={"stl_city_neighborhoods": ["The Ville"]},
+    )
+
+    enriched = processed.profiles[0]
+    assert enriched.local_geography[:4] == [
+        "Central West End",
+        "Tower Grove South",
+        "Delmar Loop",
+        "Ferguson",
+    ]
+    assert enriched.community_connections[:4] == [
+        "Carondelet YMCA",
+        "International Institute",
+        "Pageant Community Room",
+        "Ferguson Community Empowerment Center",
+    ]

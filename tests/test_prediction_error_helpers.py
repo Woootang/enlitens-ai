@@ -1,6 +1,7 @@
 from datetime import datetime
-from pathlib import Path
 import json
+from pathlib import Path
+from typing import Optional
 
 import pytest
 
@@ -31,6 +32,77 @@ from src.models.enlitens_schemas import (
 from src.models.prediction_error import PredictionErrorEntry
 
 
+COMMUTER_LOCALITIES = ["Central West End", "Tower Grove South", "Delmar Loop"]
+COMMUTER_CONNECTIONS = ["Carondelet YMCA", "International Institute", "Pageant Community Room"]
+CAREGIVER_LOCALITIES = ["Kirkwood", "Webster Groves", "Ferguson"]
+CAREGIVER_CONNECTIONS = [
+    "Kirkwood Community Center",
+    "Webster Groves Recreation Complex",
+    "Ferguson Community Empowerment Center",
+]
+SHIFT_LOCALITIES = ["Florissant", "Clayton", "Maplewood Richmond Heights"]
+SHIFT_CONNECTIONS = [
+    "James J. Eagan Center",
+    "The Center of Clayton",
+    "THE HEIGHTS Community Center",
+]
+
+_DEFAULT_MASKING = ["Commute shutdown", "Hypervigilant jaw clench"]
+_DEFAULT_UNMET = [
+    "Predictable decompression",
+    "Transit sensory scouting",
+    "Community accountability for rest",
+]
+_DEFAULT_SUPPORT = [
+    "Schedule river overlook pauses",
+    "Coordinate with Metro sensory hours",
+    "Share scripts for requesting quiet cars",
+]
+_DEFAULT_FLAGS = ["Do not promise outcomes", "Fictional composite reminder"]
+
+
+def _profile_template(
+    *,
+    name: str,
+    intake: str,
+    research: str,
+    benefit: str,
+    alignment: str,
+    localities: list[str],
+    connections: list[str],
+    prediction_errors: list[PredictionErrorEntry],
+    masking: Optional[list[str]] = None,
+    unmet: Optional[list[str]] = None,
+    support: Optional[list[str]] = None,
+    flags: Optional[list[str]] = None,
+) -> ClientProfile:
+    persona_overview = (
+        "Neighborhood & Daily Geography: "
+        f"{localities[0]} anchors this FICTIONAL composite's week. "
+        "Family & Intergenerational History: Fictional caregivers process legacy stress. "
+        "Economic Context & Access Gaps: Highlights budget trade-offs without promising outcomes. "
+        "Sensory & Community Experiences: Maps overstimulation across civic spaces. "
+        "Local Supports (schools, leagues, churches, eateries): Draws on referenced community assets."
+    )
+    return ClientProfile(
+        profile_name=name,
+        fictional_disclaimer="FICTIONAL composite for internal research translation.",
+        intake_reference=intake,
+        persona_overview=persona_overview,
+        research_reference=research,
+        benefit_explanation=benefit,
+        st_louis_alignment=alignment,
+        local_geography=list(localities),
+        community_connections=list(connections),
+        regional_touchpoints=list(localities)[:3],
+        masking_signals=list(masking or _DEFAULT_MASKING),
+        unmet_needs=list(unmet or _DEFAULT_UNMET),
+        support_recommendations=list(support or _DEFAULT_SUPPORT),
+        cautionary_flags=list(flags or _DEFAULT_FLAGS),
+        prediction_errors=prediction_errors,
+    )
+
+
 @pytest.fixture()
 def sample_knowledge_base(tmp_path: Path) -> Path:
     document_id = "kb-001"
@@ -55,12 +127,14 @@ def sample_knowledge_base(tmp_path: Path) -> Path:
         content_creation_ideas=ContentCreationIdeas(),
         client_profiles=ClientProfileSet(
             profiles=[
-                ClientProfile(
-                    profile_name="South City commuter",
-                    intake_reference='"The red line makes my skin buzz"',
-                    research_reference="[Source 1] discusses transit sensory overload.",
-                    benefit_explanation="[Source 1] highlights vestibular resets for commuters.",
-                    st_louis_alignment="[Source 1] plus STL Metro noise logs show localized action.",
+                _profile_template(
+                    name="South City commuter",
+                    intake='"The red line makes my skin buzz"',
+                    research="[Source 1] discusses transit sensory overload.",
+                    benefit="[Source 1] highlights vestibular resets for commuters.",
+                    alignment="[Source 1] plus STL Metro noise logs show localized action.",
+                    localities=COMMUTER_LOCALITIES,
+                    connections=COMMUTER_CONNECTIONS,
                     prediction_errors=[
                         PredictionErrorEntry(
                             trigger_context="Assumes every South City commute drains regulation.",
@@ -73,26 +147,15 @@ def sample_knowledge_base(tmp_path: Path) -> Path:
                             intended_cognitive_effect="Spark curiosity about civic assets hiding in plain sight.",
                         ),
                     ],
-                    regional_touchpoints=["South City", "Gateway Arch", "Central Library"],
-                    masking_signals=["Commute shutdown", "Hypervigilant jaw clench"],
-                    unmet_needs=[
-                        "Predictable decompression",
-                        "Transit sensory scouting",
-                        "Community accountability for rest",
-                    ],
-                    support_recommendations=[
-                        "Schedule river overlook pauses",
-                        "Coordinate with Metro sensory hours",
-                        "Share scripts for requesting quiet cars",
-                    ],
-                    cautionary_flags=["Do not promise outcomes", "Fictional composite reminder"],
                 ),
-                ClientProfile(
-                    profile_name="MetroEast caregiver",
-                    intake_reference='"By pickup time I am empty and shaking"',
-                    research_reference="[Source 2] links cortisol spikes to afternoon sensory debt.",
-                    benefit_explanation="[Source 2] shows carpool decompression rituals reduce crashes.",
-                    st_louis_alignment="[Source 2] plus [Ext 3] uplift Metro East after-school supports.",
+                _profile_template(
+                    name="MetroEast caregiver",
+                    intake='"By pickup time I am empty and shaking"',
+                    research="[Source 2] links cortisol spikes to afternoon sensory debt.",
+                    benefit="[Source 2] shows carpool decompression rituals reduce crashes.",
+                    alignment="[Source 2] plus [Ext 3] uplift Metro East after-school supports.",
+                    localities=CAREGIVER_LOCALITIES,
+                    connections=CAREGIVER_CONNECTIONS,
                     prediction_errors=[
                         PredictionErrorEntry(
                             trigger_context="Assumes regulation can only happen at home.",
@@ -105,19 +168,27 @@ def sample_knowledge_base(tmp_path: Path) -> Path:
                             intended_cognitive_effect="Encourage community-distributed support plans.",
                         ),
                     ],
-                    regional_touchpoints=["Fairmont City", "Granite City", "Bi-State carpool"],
-                    masking_signals=["After-school crash", "Sensory exhaustion"],
-                    unmet_needs=[
-                        "Shared regulation roles",
-                        "Bilingual caregiver scripts",
-                        "Predictable decompression rituals",
+                ),
+                _profile_template(
+                    name="North county connector",
+                    intake='"Night sirens keep my jaw locked"',
+                    research="[Source 3] documents auditory hypervigilance for night workers.",
+                    benefit="[Source 3] shows decompression pods reduce sympathetic spikes.",
+                    alignment="[Source 3] paired with hospital siren counts justify hospital pods.",
+                    localities=SHIFT_LOCALITIES,
+                    connections=SHIFT_CONNECTIONS,
+                    prediction_errors=[
+                        PredictionErrorEntry(
+                            trigger_context="Assumes decompression can't happen on site.",
+                            surprising_pivot="[Source 3] references chapels and dim rooms staff already use before commuting.",
+                            intended_cognitive_effect="Encourage immediate decompression rituals before leaving work.",
+                        ),
+                        PredictionErrorEntry(
+                            trigger_context="Believes every route home is equally loud.",
+                            surprising_pivot="[Ext 4] map river-adjacent drives with fewer sirens.",
+                            intended_cognitive_effect="Promote experimenting with quieter corridors.",
+                        ),
                     ],
-                    support_recommendations=[
-                        "Rotate decompression leads",
-                        "Use bilingual sensory prompts",
-                        "Plan restorative stops before homework",
-                    ],
-                    cautionary_flags=["Flag fictional composite", "Escalate acute risk language"],
                 ),
             ],
             shared_thread="Fictional personas translating research into transit and after-school pivots.",
@@ -137,7 +208,7 @@ def sample_knowledge_base(tmp_path: Path) -> Path:
 
 def test_load_prediction_error_records_reads_file(sample_knowledge_base: Path):
     records = load_prediction_error_records(path=sample_knowledge_base)
-    assert len(records) == 4
+    assert len(records) == 6
     assert any("[Source 1]" in record.entry.surprising_pivot for record in records)
     assert all(record.source_tags for record in records)
 
@@ -164,4 +235,4 @@ def test_filter_prediction_errors_by_locality_matches_case_insensitive(sample_kn
 def test_collect_prediction_error_index_groups_by_document(sample_knowledge_base: Path):
     index = collect_prediction_error_index(path=sample_knowledge_base)
     assert set(index.keys()) == {"kb-001"}
-    assert len(index["kb-001"]) == 4
+    assert len(index["kb-001"]) == 6
