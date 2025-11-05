@@ -81,6 +81,71 @@ def _merge_metadata(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, 
     return merged
 
 
+class LocalityMatchRecord(TypedDict, total=False):
+    """Aggregated locality match enriched with reference metadata."""
+
+    name: str
+    locality: Dict[str, Any]
+    document_mentions: int
+    intake_mentions: int
+    transcript_mentions: int
+    health_report_mentions: int
+    signal_strength: float
+
+
+class LocalityGapRecord(TypedDict, total=False):
+    """Locality signal without a supporting reference entry."""
+
+    name: str
+    document_mentions: int
+    intake_mentions: int
+    transcript_mentions: int
+    health_report_mentions: int
+    signal_strength: float
+
+
+class LocalityRecords(TypedDict, total=False):
+    """Structured locality context used by downstream agents."""
+
+    matches: List[LocalityMatchRecord]
+    gaps: List[LocalityGapRecord]
+
+
+class ThemeSourceBreakdown(TypedDict, total=False):
+    """Per-source contribution for a detected theme."""
+
+    weighted_frequency: float
+    frequency: float
+
+
+class DominantThemeRecord(TypedDict, total=False):
+    """Theme enriched with weights and locality tags."""
+
+    theme: str
+    total_weight: float
+    source_breakdown: Dict[str, ThemeSourceBreakdown]
+    locality_tags: List[Tuple[str, float]]
+
+
+class ThemeGapRecord(TypedDict, total=False):
+    """Theme that is missing signals from some context assets."""
+
+    theme: str
+    present_sources: List[str]
+    missing_sources: List[str]
+    total_weight: float
+    locality_tags: List[Tuple[str, float]]
+
+
+class SocioeconomicContrastFlag(TypedDict, total=False):
+    """Theme with divergent socioeconomic indicators across localities."""
+
+    theme: str
+    indicators: List[str]
+    estimated_income_gap: Optional[float]
+    locality_profiles: List[Dict[str, Any]]
+
+
 class WorkflowState(TypedDict, total=False):
     """TypedDict holding the shared workflow state across nodes.
 
@@ -89,6 +154,21 @@ class WorkflowState(TypedDict, total=False):
 
     The 'stage' field uses Annotated with a reducer to allow multiple agents
     to update it in the same step without raising InvalidUpdateError.
+
+    Locality/theme analytics fields expose the following schema:
+
+    * ``locality_records`` holds ``{"matches": [...], "gaps": [...]}`` where
+      ``matches`` provide :class:`LocalityMatchRecord` payloads enriched with
+      reference atlas metadata and ``gaps`` provide :class:`LocalityGapRecord`
+      entries highlighting unreferenced but high-signal localities.
+    * ``dominant_themes`` is a list of :class:`DominantThemeRecord` objects and
+      surfaces weighted signals by context source plus locality tags.
+    * ``theme_gaps`` mirrors ``dominant_themes`` but only includes themes that
+      are missing at least one source contribution. Each element is a
+      :class:`ThemeGapRecord`.
+    * ``socioeconomic_contrast_flags`` collects
+      :class:`SocioeconomicContrastFlag` records that detail the socioeconomic
+      tension observed between the highlighted localities for a theme.
     """
 
     # Required fields
@@ -108,9 +188,10 @@ class WorkflowState(TypedDict, total=False):
     regional_atlas: Optional[Dict[str, Any]]
     health_report_summary: Optional[Dict[str, Any]]
     document_locality_matches: Optional[List[Tuple[str, int]]]
-    dominant_themes: Optional[List[Dict[str, Any]]]
-    theme_gaps: Optional[List[Dict[str, Any]]]
-    socioeconomic_contrast_flags: Optional[List[Dict[str, Any]]]
+    locality_records: Optional[LocalityRecords]
+    dominant_themes: Optional[List[DominantThemeRecord]]
+    theme_gaps: Optional[List[ThemeGapRecord]]
+    socioeconomic_contrast_flags: Optional[List[SocioeconomicContrastFlag]]
 
     # Shared orchestration metadata - use Annotated to allow multiple updates
     stage: Annotated[str, _keep_last_value]
@@ -158,9 +239,10 @@ def create_initial_state(
     regional_atlas: Optional[Dict[str, Any]] = None,
     health_report_summary: Optional[Dict[str, Any]] = None,
     document_locality_matches: Optional[List[Tuple[str, int]]] = None,
-    dominant_themes: Optional[List[Dict[str, Any]]] = None,
-    theme_gaps: Optional[List[Dict[str, Any]]] = None,
-    socioeconomic_contrast_flags: Optional[List[Dict[str, Any]]] = None,
+    locality_records: Optional[LocalityRecords] = None,
+    dominant_themes: Optional[List[DominantThemeRecord]] = None,
+    theme_gaps: Optional[List[ThemeGapRecord]] = None,
+    socioeconomic_contrast_flags: Optional[List[SocioeconomicContrastFlag]] = None,
 ) -> WorkflowState:
     """Create a properly initialized workflow state."""
     return WorkflowState(
@@ -187,6 +269,7 @@ def create_initial_state(
         regional_atlas=regional_atlas,
         health_report_summary=health_report_summary,
         document_locality_matches=document_locality_matches,
+        locality_records=locality_records,
         dominant_themes=dominant_themes,
         theme_gaps=theme_gaps,
         socioeconomic_contrast_flags=socioeconomic_contrast_flags,
@@ -222,4 +305,64 @@ def as_dict(state: WorkflowState) -> Dict[str, Any]:
     """Convert state to a plain dict, with sets converted to lists for JSON compatibility."""
     data = dict(state)
     data["skip_nodes"] = list(data.get("skip_nodes", set()))
+
+    def _normalize_pairs(
+        entries: Optional[List[Any]], value_key: str
+    ) -> List[Dict[str, Any]]:
+        normalized: List[Dict[str, Any]] = []
+        if not isinstance(entries, list):
+            return normalized
+        for entry in entries:
+            if isinstance(entry, dict):
+                normalized.append(dict(entry))
+                continue
+            if isinstance(entry, (list, tuple)) and len(entry) == 2:
+                name, score = entry
+                normalized.append({"name": name, value_key: score})
+        return normalized
+
+    if "document_locality_matches" in data:
+        data["document_locality_matches"] = _normalize_pairs(
+            data.get("document_locality_matches"), "mentions"
+        )
+
+    if "locality_records" in data and isinstance(data["locality_records"], dict):
+        serialized_records: Dict[str, List[Dict[str, Any]]] = {}
+        for bucket, entries in data["locality_records"].items():
+            if not isinstance(entries, list):
+                continue
+            serialized_records[bucket] = [
+                dict(entry) for entry in entries if isinstance(entry, dict)
+            ]
+        data["locality_records"] = serialized_records
+
+    def _normalize_theme_entries(entries: Optional[List[Any]]) -> List[Dict[str, Any]]:
+        normalized: List[Dict[str, Any]] = []
+        if not isinstance(entries, list):
+            return normalized
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            item = dict(entry)
+            item["locality_tags"] = _normalize_pairs(
+                item.get("locality_tags"), "weight"
+            )
+            normalized.append(item)
+        return normalized
+
+    if "dominant_themes" in data:
+        data["dominant_themes"] = _normalize_theme_entries(data.get("dominant_themes"))
+
+    if "theme_gaps" in data:
+        data["theme_gaps"] = _normalize_theme_entries(data.get("theme_gaps"))
+
+    if "socioeconomic_contrast_flags" in data and isinstance(
+        data["socioeconomic_contrast_flags"], list
+    ):
+        normalized_flags: List[Dict[str, Any]] = []
+        for entry in data["socioeconomic_contrast_flags"]:
+            if isinstance(entry, dict):
+                normalized_flags.append(dict(entry))
+        data["socioeconomic_contrast_flags"] = normalized_flags
+
     return data

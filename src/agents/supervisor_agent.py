@@ -238,6 +238,9 @@ class SupervisorAgent(BaseAgent):
             regional_atlas=payload.get("regional_atlas"),
             health_report_summary=payload.get("health_report_summary"),
             document_locality_matches=payload.get("document_locality_matches"),
+            locality_records=(
+                payload.get("locality_records") or payload.get("locality_context")
+            ),
             dominant_themes=payload.get("dominant_themes"),
             theme_gaps=payload.get("theme_gaps"),
             socioeconomic_contrast_flags=payload.get("socioeconomic_contrast_flags"),
@@ -649,6 +652,10 @@ class SupervisorAgent(BaseAgent):
             "regional_atlas": state.get("regional_atlas"),
             "health_report_summary": state.get("health_report_summary"),
             "document_locality_matches": state.get("document_locality_matches"),
+            "locality_records": state.get("locality_records"),
+            "dominant_themes": state.get("dominant_themes"),
+            "theme_gaps": state.get("theme_gaps"),
+            "socioeconomic_contrast_flags": state.get("socioeconomic_contrast_flags"),
             "client_profiles": state.get("client_profile_result"),
         }
 
