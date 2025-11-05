@@ -642,6 +642,7 @@ class VLLMClient:
         *,
         model: Optional[str] = None,
         temperature: float = TEMPERATURE_FACTUAL,
+        top_p: Optional[float] = None,
         max_retries: int = 3,
         base_num_predict: int = 2048,
         max_num_predict: int = 8192,
@@ -667,7 +668,24 @@ class VLLMClient:
         )
         full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
 
-        cache_namespace = cache_prefix or f"{self._resolve_model(model)}:{response_model.__name__}"
+        effective_top_p = 0.9 if top_p is None else top_p
+
+        logger.debug(
+            "🧪 Structured generation requested for %s (temp=%s, top_p=%s)",
+            response_model.__name__,
+            temperature,
+            effective_top_p,
+        )
+
+        def _format_param(value: float) -> str:
+            text = f"{value:.4f}"
+            text = text.rstrip("0").rstrip(".")
+            return text or "0"
+
+        base_namespace = cache_prefix or f"{self._resolve_model(model)}:{response_model.__name__}"
+        cache_namespace = (
+            f"{base_namespace}|temp={_format_param(temperature)}|top_p={_format_param(effective_top_p)}"
+        )
         cache_chunk = cache_chunk_id or "global"
 
         if self.enable_prefix_caching:
@@ -675,9 +693,11 @@ class VLLMClient:
             if cached is not None:
                 try:
                     logger.info(
-                        "🔁 Using cached structured response for prefix '%s' chunk '%s'",
+                        "🔁 Using cached structured response for prefix '%s' chunk '%s' (temp=%s, top_p=%s)",
                         cache_namespace,
                         cache_chunk,
+                        temperature,
+                        effective_top_p,
                     )
                     return response_model.model_validate(cached)
                 except Exception as exc:  # pragma: no cover - defensive guard
@@ -721,7 +741,7 @@ class VLLMClient:
                     temperature=current_temperature,
                     num_predict=base_num_predict,
                     max_num_predict=max_num_predict,
-                    top_p=0.9,
+                    top_p=effective_top_p,
                     grammar=grammar,
                     response_format=(json_schema_rf if use_json_schema and json_schema_rf else "json_object"),
                 )
@@ -871,6 +891,7 @@ class VLLMClient:
                             model=self._resolve_model(model),
                             response_model=response_model,
                             temperature=current_temperature,
+                            top_p=effective_top_p,
                             validation_context=validation_context,
                         )
                         if partial is not None:
@@ -899,6 +920,7 @@ class VLLMClient:
         model: str,
         response_model: Type[BaseModel],
         temperature: float,
+        top_p: float,
         validation_context: Optional[Dict[str, Any]] = None,
     ) -> Optional[Dict[str, Any]]:
         """Build large JSON outputs by requesting one field at a time.
@@ -926,7 +948,7 @@ class VLLMClient:
                     temperature=temperature,
                     num_predict=1024,
                     system_prompt=system_prompt,
-                    top_p=0.9,
+                    top_p=top_p,
                     grammar=None,
                     response_format="json_object",
                 )

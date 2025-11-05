@@ -342,11 +342,17 @@ OUTPUT REQUIREMENTS:
         citation_map = context.get("citation_map") or {}
         source_segments = context.get("source_segments") or []
 
+        profile_temperature = getattr(self.settings.llm, "profile_temperature", 0.45)
+        if profile_temperature is None:
+            profile_temperature = 0.45
+        profile_top_p = getattr(self.settings.llm, "profile_top_p", None)
+
         try:
             raw_response = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ClientProfileSet,
-                temperature=0.15,
+                temperature=profile_temperature,
+                top_p=profile_top_p,
                 max_retries=3,
                 enforce_grammar=True,
                 **cache_kwargs,
