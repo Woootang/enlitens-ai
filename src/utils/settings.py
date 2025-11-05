@@ -39,6 +39,8 @@ class ProviderSettings:
     models: Dict[str, str] = field(default_factory=dict)
     local_weights_path: Optional[str] = None
     api_key: Optional[str] = None
+    profile_temperature: float = 0.45
+    profile_top_p: Optional[float] = None
     extra: Dict[str, Any] = field(default_factory=dict)
 
     def model_for(self, key: Optional[str]) -> Optional[str]:
@@ -121,6 +123,14 @@ def _load_env_overrides() -> Dict[str, Any]:
     if api_key:
         llm["api_key"] = api_key
 
+    profile_temperature = os.environ.get("LLM_PROFILE_TEMPERATURE")
+    if profile_temperature is not None:
+        llm["profile_temperature"] = profile_temperature
+
+    profile_top_p = os.environ.get("LLM_PROFILE_TOP_P")
+    if profile_top_p is not None:
+        llm["profile_top_p"] = profile_top_p
+
     for key, value in os.environ.items():
         if key.startswith("LLM_MODEL__"):
             llm["models"][key[len("LLM_MODEL__"):].replace("__", "-").lower()] = value
@@ -143,6 +153,21 @@ def _coerce_provider_settings(data: Dict[str, Any]) -> ProviderSettings:
     endpoints = llm_data.get("endpoints", {}) or {}
     llm_data["endpoints"] = {str(key).replace("_", "-").lower(): value for key, value in endpoints.items() if value}
 
+    def _coerce_float(value: Any) -> Optional[float]:
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            logger.warning("Invalid float for profile generation setting: %s", value)
+            return None
+
+    profile_temperature = _coerce_float(llm_data.get("profile_temperature"))
+    if profile_temperature is None:
+        profile_temperature = 0.45
+
+    profile_top_p = _coerce_float(llm_data.get("profile_top_p"))
+
     return ProviderSettings(
         provider=str(llm_data.get("provider", "vllm")).lower(),
         base_url=llm_data.get("base_url"),
@@ -153,6 +178,8 @@ def _coerce_provider_settings(data: Dict[str, Any]) -> ProviderSettings:
         models=llm_data.get("models", {}),
         local_weights_path=llm_data.get("local_weights_path"),
         api_key=llm_data.get("api_key"),
+        profile_temperature=profile_temperature,
+        profile_top_p=profile_top_p,
         extra={key: value for key, value in llm_data.items() if key not in {
             "provider",
             "base_url",
@@ -163,6 +190,8 @@ def _coerce_provider_settings(data: Dict[str, Any]) -> ProviderSettings:
             "models",
             "local_weights_path",
             "api_key",
+            "profile_temperature",
+            "profile_top_p",
         }},
     )
 
