@@ -6,11 +6,14 @@ import hashlib
 import json
 import logging
 import re
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from functools import lru_cache
+from itertools import chain
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from pydantic import ValidationError
 
 from .base_agent import BaseAgent
+from src.data.locality_loader import LocalityRecord, load_locality_reference
 from src.models.enlitens_schemas import (
     ClientProfile,
     ClientProfileSet,
@@ -28,6 +31,86 @@ from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
 
 logger = logging.getLogger(__name__)
 TELEMETRY_AGENT = "client_profile_agent"
+
+
+def _canonicalize_label(value: str) -> str:
+    text = re.sub(r"[^\w\s]", " ", str(value or ""))
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+@lru_cache(maxsize=1)
+def _locality_index() -> Dict[str, LocalityRecord]:
+    records = load_locality_reference()
+    index: Dict[str, LocalityRecord] = {}
+    for record in records.values():
+        key = _canonicalize_label(record.name)
+        if key:
+            index[key] = record
+    return index
+
+
+def _match_locality(label: str) -> Optional[LocalityRecord]:
+    if not label:
+        return None
+
+    index = _locality_index()
+    canonical = _canonicalize_label(label)
+    record = index.get(canonical)
+    if record:
+        return record
+
+    probes: List[str] = []
+    for delimiter in ("-", "—", "–", "|", "/"):
+        if delimiter in label:
+            probes.append(label.split(delimiter, 1)[0].strip())
+    if "(" in label:
+        probes.append(label.split("(", 1)[0].strip())
+
+    for probe in probes:
+        candidate = index.get(_canonicalize_label(probe))
+        if candidate:
+            return candidate
+
+    return None
+
+
+@lru_cache(maxsize=1)
+def _global_asset_index() -> Dict[str, Dict[str, Any]]:
+    index: Dict[str, Dict[str, Any]] = {}
+    for record in _locality_index().values():
+        canonical_locality = _canonicalize_label(record.name)
+        for asset in chain(
+            record.landmark_schools,
+            record.youth_sports_leagues,
+            record.community_centers,
+            record.health_resources,
+            record.signature_eateries,
+        ):
+            canonical_asset = _canonicalize_label(asset)
+            if not canonical_asset:
+                continue
+            entry = index.setdefault(
+                canonical_asset,
+                {"label": asset, "localities": set()},
+            )
+            entry["localities"].add(canonical_locality)
+    return index
+
+
+def _assets_for_records(records: Sequence[LocalityRecord]) -> Dict[str, str]:
+    mapping: Dict[str, str] = {}
+    for record in records:
+        for asset in chain(
+            record.landmark_schools,
+            record.youth_sports_leagues,
+            record.community_centers,
+            record.health_resources,
+            record.signature_eateries,
+        ):
+            canonical = _canonicalize_label(asset)
+            if canonical and canonical not in mapping:
+                mapping[canonical] = asset
+    return mapping
 
 
 class ClientProfileAgent(BaseAgent):
@@ -463,6 +546,8 @@ OUTPUT REQUIREMENTS:
             "benefit_explanation",
             "prediction_errors",
             "st_louis_alignment",
+            "local_geography",
+            "community_connections",
             "regional_touchpoints",
             "masking_signals",
             "unmet_needs",
@@ -595,6 +680,42 @@ OUTPUT REQUIREMENTS:
                 profile["prediction_errors"] = self._default_prediction_errors(tag)
             if profile.get("st_louis_alignment") and "[Source" not in str(profile["st_louis_alignment"]):
                 profile["st_louis_alignment"] = f"{profile['st_louis_alignment']} {tag}".strip()
+            if not profile.get("local_geography"):
+                profile["local_geography"] = [
+                    "Central West End",
+                    "Tower Grove South",
+                    "Delmar Loop",
+                ]
+            if not profile.get("community_connections"):
+                profile["community_connections"] = [
+                    "Carondelet YMCA",
+                    "International Institute",
+                    "Pageant Community Room",
+                ]
+            if not profile.get("regional_touchpoints"):
+                profile["regional_touchpoints"] = profile["local_geography"][:3]
+            if not profile.get("masking_signals"):
+                profile["masking_signals"] = [
+                    "Masking to sustain professional identity",
+                    "Hypervigilance around social slip-ups",
+                ]
+            if not profile.get("unmet_needs"):
+                profile["unmet_needs"] = [
+                    "Predictable sensory decompression windows",
+                    "Peer community normalising neurodivergent parenting",
+                    "Trauma-informed professional mentorship",
+                ]
+            if not profile.get("support_recommendations"):
+                profile["support_recommendations"] = [
+                    "Map accessible co-working or library zones for deep work",
+                    "Schedule restorative time anchored to neighbourhood assets",
+                    "Translate research findings into scripts for family system conversations",
+                ]
+            if not profile.get("cautionary_flags"):
+                profile["cautionary_flags"] = [
+                    "Fictional scenario: do not infer outcomes",
+                    "Escalate if client references acute crisis or harm",
+                ]
             sanitized_profiles.append({key: profile.get(key) for key in allowed_keys if profile.get(key) is not None})
 
         normalized["profiles"] = sanitized_profiles
@@ -713,9 +834,6 @@ OUTPUT REQUIREMENTS:
     ) -> ClientProfileSet:
         """Deterministic fallback when LLM output is unavailable."""
 
-        primary_source = source_tags[0] if source_tags else "[Source F1]"
-        alt_source = source_tags[1] if source_tags and len(source_tags) > 1 else primary_source
-
         def pick_locations(count: int) -> List[str]:
             picks: List[str] = []
             locality_pairs = list(document_localities or [])
@@ -751,7 +869,14 @@ OUTPUT REQUIREMENTS:
             return quote
 
         locations = pick_locations(3)
+        atlas_neighbourhoods: List[str] = []
+        if regional_atlas:
+            atlas_neighbourhoods.extend(regional_atlas.get("stl_city_neighborhoods", [])[:10])
+            atlas_neighbourhoods.extend(regional_atlas.get("stl_county_municipalities", [])[:10])
+            atlas_neighbourhoods.extend(regional_atlas.get("metro_east_communities", [])[:10])
+        document_locality_pairs = list(document_localities or [])
         profiles: List[ClientProfile] = []
+        dataset_records = list(_locality_index().values())
         default_masking = [
             "High masking in professional settings",
             "Delayed interoceptive awareness",
@@ -775,12 +900,37 @@ OUTPUT REQUIREMENTS:
         for idx in range(3):
             neighbourhood = locations[idx]
             quote = choose_quote(idx)
+            if source_tags:
+                primary_source = source_tags[idx % len(source_tags)]
+                alt_source = source_tags[(idx + 1) % len(source_tags)]
+            else:
+                primary_source = "[Source F1]"
+                alt_source = primary_source
             persona_name = f"{neighbourhood} fictional scenario"
             overview = (
                 f"Fictional vignette following a resident of {neighbourhood} balancing masking, family systems, and professional pressure."
             )
             stl_alignment = (
                 f"{primary_source} plus {neighbourhood} municipal data highlight how commute, school placement, and civic systems compound burnout."
+            )
+            seeded_localities = [(neighbourhood, 3 - idx)] + document_locality_pairs
+            if dataset_records:
+                offset = (idx * 3) % len(dataset_records)
+                for j in range(min(3, len(dataset_records))):
+                    record = dataset_records[(offset + j) % len(dataset_records)]
+                    seeded_localities.append((record.name, 1))
+            local_geography = self._ensure_local_geography(
+                [neighbourhood],
+                document_localities=seeded_localities,
+                atlas_neighbourhoods=atlas_neighbourhoods,
+                min_items=3,
+                max_items=6,
+            )
+            community_connections = self._ensure_community_connections(
+                [],
+                local_geography=local_geography,
+                min_items=3,
+                max_items=10,
             )
             profiles.append(
                 ClientProfile(
@@ -791,11 +941,9 @@ OUTPUT REQUIREMENTS:
                     research_reference=f"{primary_source} evidence surfaces mechanisms relevant to this intake theme.",
                     benefit_explanation=f"{alt_source} maps interventions that resonate with this client's masking pattern.",
                     st_louis_alignment=stl_alignment,
-                    regional_touchpoints=[
-                        neighbourhood,
-                        "Local library sensory room",
-                        "Neighborhood co-working hub",
-                    ],
+                    local_geography=local_geography,
+                    community_connections=community_connections,
+                    regional_touchpoints=local_geography[:3],
                     masking_signals=list(default_masking),
                     unmet_needs=list(default_unmet),
                     support_recommendations=list(default_support),
@@ -1582,9 +1730,27 @@ OUTPUT REQUIREMENTS:
             if profile.st_louis_alignment:
                 profile.st_louis_alignment = self._strip_outcome_language(profile.st_louis_alignment)
 
+            profile.local_geography = self._ensure_local_geography(
+                getattr(profile, "local_geography", []),
+                document_localities=document_localities,
+                atlas_neighbourhoods=atlas_neighbourhoods,
+                min_items=3,
+                max_items=6,
+            )
+            profile.community_connections = self._ensure_community_connections(
+                getattr(profile, "community_connections", []),
+                local_geography=profile.local_geography,
+                min_items=3,
+                max_items=10,
+            )
             profile.regional_touchpoints = self._ensure_minimum_items(
                 profile.regional_touchpoints,
-                fallback=(locality_names[:1] + atlas_neighbourhoods[:4] + ["Local sensory-friendly café"]),
+                fallback=(
+                    profile.local_geography[:3]
+                    + locality_names[:1]
+                    + atlas_neighbourhoods[:4]
+                    + ["Local sensory-friendly café"]
+                ),
                 min_items=3,
                 max_items=8,
             )
@@ -1632,10 +1798,10 @@ OUTPUT REQUIREMENTS:
                 profile.benefit_explanation,
                 profile.st_louis_alignment,
             )
-            locality_hint = None
-            if profile.regional_touchpoints:
+            locality_hint = profile.local_geography[0] if profile.local_geography else None
+            if not locality_hint and profile.regional_touchpoints:
                 locality_hint = profile.regional_touchpoints[0]
-            elif locality_names:
+            elif not locality_hint and locality_names:
                 locality_hint = locality_names[0]
             profile.prediction_errors = self._ensure_prediction_errors(
                 profile.prediction_errors,
@@ -1646,7 +1812,7 @@ OUTPUT REQUIREMENTS:
         merged_sources = self._merge_external_sources(response.external_sources, external_sources)
         response.profiles = profiles
         response.external_sources = merged_sources
-        return response
+        return ClientProfileSet.model_validate(response.model_dump())
 
     def _ensure_unique_profile_names(self, profiles: Sequence[ClientProfile], document_id: str) -> None:
         seen: set[str] = set()
@@ -1704,6 +1870,137 @@ OUTPUT REQUIREMENTS:
                 unique.append(cleaned)
         if not unique:
             unique = [self._strip_outcome_language(entry) for entry in fallback if entry][:min_items]
+        return unique[:max_items]
+
+    def _ensure_local_geography(
+        self,
+        items: Optional[Sequence[str]],
+        *,
+        document_localities: Sequence[Tuple[str, int]],
+        atlas_neighbourhoods: Sequence[str],
+        min_items: int,
+        max_items: int,
+    ) -> List[str]:
+        unique: List[str] = []
+        seen: Set[str] = set()
+        for entry in items or []:
+            record = _match_locality(entry)
+            if not record:
+                continue
+            canonical = _canonicalize_label(record.name)
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            unique.append(record.name)
+
+        fallback_candidates: List[str] = []
+        for name, _count in document_localities:
+            record = _match_locality(name)
+            if record:
+                fallback_candidates.append(record.name)
+        for name in atlas_neighbourhoods:
+            record = _match_locality(name)
+            if record:
+                fallback_candidates.append(record.name)
+        for record in _locality_index().values():
+            fallback_candidates.append(record.name)
+
+        for candidate in fallback_candidates:
+            if len(unique) >= min_items:
+                break
+            canonical = _canonicalize_label(candidate)
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            unique.append(candidate)
+
+        if len(unique) < min_items:
+            for entry in items or []:
+                canonical = _canonicalize_label(entry)
+                if canonical in seen:
+                    continue
+                seen.add(canonical)
+                unique.append(str(entry))
+                if len(unique) >= min_items:
+                    break
+
+        if len(unique) < min_items:
+            defaults = ["Central West End", "Tower Grove South", "Delmar Loop"]
+            for candidate in defaults:
+                if len(unique) >= min_items:
+                    break
+                canonical = _canonicalize_label(candidate)
+                if canonical in seen:
+                    continue
+                seen.add(canonical)
+                unique.append(candidate)
+
+        return unique[:max_items]
+
+    def _ensure_community_connections(
+        self,
+        items: Optional[Sequence[str]],
+        *,
+        local_geography: Sequence[str],
+        min_items: int,
+        max_items: int,
+    ) -> List[str]:
+        locality_records: List[LocalityRecord] = []
+        locality_keys: Set[str] = set()
+        for locality in local_geography:
+            record = _match_locality(locality)
+            if record:
+                locality_records.append(record)
+                locality_keys.add(_canonicalize_label(record.name))
+
+        allowed_assets = _assets_for_records(locality_records)
+        global_assets = _global_asset_index()
+
+        unique: List[str] = []
+        seen: Set[str] = set()
+        for entry in items or []:
+            canonical = _canonicalize_label(entry)
+            label = None
+            if canonical in allowed_assets:
+                label = allowed_assets[canonical]
+            else:
+                asset_entry = global_assets.get(canonical)
+                if asset_entry and asset_entry["localities"] & locality_keys:
+                    label = str(asset_entry["label"])
+            if not label or canonical in seen:
+                continue
+            seen.add(canonical)
+            unique.append(label)
+
+        fallback_pool: List[str] = []
+        for record in locality_records:
+            fallback_pool.extend(
+                record.community_centers
+                + record.health_resources
+                + record.landmark_schools
+                + record.signature_eateries
+                + record.youth_sports_leagues
+            )
+
+        for asset in fallback_pool:
+            if len(unique) >= min_items:
+                break
+            canonical = _canonicalize_label(asset)
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            unique.append(asset)
+
+        if len(unique) < min_items:
+            for asset_entry in global_assets.values():
+                if len(unique) >= min_items:
+                    break
+                canonical = _canonicalize_label(asset_entry["label"])
+                if canonical in seen:
+                    continue
+                seen.add(canonical)
+                unique.append(str(asset_entry["label"]))
+
         return unique[:max_items]
 
     def _ensure_prediction_errors(

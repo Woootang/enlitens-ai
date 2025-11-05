@@ -6,6 +6,8 @@ import asyncio
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from typing import Optional
+
 from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
 from src.models.prediction_error import PredictionErrorEntry
 
@@ -81,6 +83,76 @@ _register_stub(
     EmbeddingIngestion=_StubEmbeddingIngestionPipeline,
 )
 
+COMMUTER_LOCALITIES = ["Central West End", "Tower Grove South", "Delmar Loop"]
+COMMUTER_CONNECTIONS = ["Carondelet YMCA", "International Institute", "Pageant Community Room"]
+CAREGIVER_LOCALITIES = ["Kirkwood", "Webster Groves", "Ferguson"]
+CAREGIVER_CONNECTIONS = [
+    "Kirkwood Community Center",
+    "Webster Groves Recreation Complex",
+    "Ferguson Community Empowerment Center",
+]
+SHIFT_LOCALITIES = ["Florissant", "Clayton", "Maplewood Richmond Heights"]
+SHIFT_CONNECTIONS = [
+    "James J. Eagan Center",
+    "The Center of Clayton",
+    "THE HEIGHTS Community Center",
+]
+
+_DEFAULT_MASKING = ["Commute shutdown", "Hypervigilant jaw clench"]
+_DEFAULT_UNMET = [
+    "Predictable decompression",
+    "Transit sensory scouting",
+    "Community accountability for rest",
+]
+_DEFAULT_SUPPORT = [
+    "Schedule river overlook pauses",
+    "Coordinate with Metro sensory hours",
+    "Share scripts for requesting quiet cars",
+]
+_DEFAULT_FLAGS = ["Do not promise outcomes", "Fictional composite reminder"]
+
+
+def _profile_template(
+    *,
+    name: str,
+    intake: str,
+    research: str,
+    benefit: str,
+    alignment: str,
+    localities: list[str],
+    connections: list[str],
+    prediction_errors: list[PredictionErrorEntry],
+    masking: Optional[list[str]] = None,
+    unmet: Optional[list[str]] = None,
+    support: Optional[list[str]] = None,
+    flags: Optional[list[str]] = None,
+) -> ClientProfile:
+    persona_overview = (
+        "Neighborhood & Daily Geography: "
+        f"{localities[0]} anchors this FICTIONAL composite's week. "
+        "Family & Intergenerational History: Fictional caregivers process legacy stress. "
+        "Economic Context & Access Gaps: Highlights budget trade-offs without promising outcomes. "
+        "Sensory & Community Experiences: Maps overstimulation across civic spaces. "
+        "Local Supports (schools, leagues, churches, eateries): Draws on referenced community assets."
+    )
+    return ClientProfile(
+        profile_name=name,
+        fictional_disclaimer="FICTIONAL composite for internal research translation.",
+        intake_reference=intake,
+        persona_overview=persona_overview,
+        research_reference=research,
+        benefit_explanation=benefit,
+        st_louis_alignment=alignment,
+        local_geography=list(localities),
+        community_connections=list(connections),
+        regional_touchpoints=list(localities)[:3],
+        masking_signals=list(masking or _DEFAULT_MASKING),
+        unmet_needs=list(unmet or _DEFAULT_UNMET),
+        support_recommendations=list(support or _DEFAULT_SUPPORT),
+        cautionary_flags=list(flags or _DEFAULT_FLAGS),
+        prediction_errors=prediction_errors,
+    )
+
 from process_multi_agent_corpus import MultiAgentProcessor
 
 
@@ -145,12 +217,14 @@ def test_convert_to_knowledge_entry_includes_client_profiles():
 
     profile_set = ClientProfileSet(
         profiles=[
-            ClientProfile(
-                profile_name="Transit sensory overload",
-                intake_reference='"The red line makes my skin buzz"',
-                research_reference="[Source 1] explains auditory overload on commuters.",
-                benefit_explanation="[Source 1] backs vestibular regulation for this pattern.",
-                st_louis_alignment="[Source 1] plus STL Metro noise logs demand local adjustments.",
+            _profile_template(
+                name="Transit sensory overload",
+                intake='"The red line makes my skin buzz"',
+                research="[Source 1] explains auditory overload on commuters.",
+                benefit="[Source 1] backs vestibular regulation for this pattern.",
+                alignment="[Source 1] plus STL Metro noise logs demand local adjustments.",
+                localities=COMMUTER_LOCALITIES,
+                connections=COMMUTER_CONNECTIONS,
                 prediction_errors=[
                     PredictionErrorEntry(
                         trigger_context="Assumes Metro commutes only drain.",
@@ -164,12 +238,14 @@ def test_convert_to_knowledge_entry_includes_client_profiles():
                     ),
                 ],
             ),
-            ClientProfile(
-                profile_name="After-school crash",
-                intake_reference='"By pickup time I am empty and shaking"',
-                research_reference="[Source 1] connects cortisol spikes to sensory debt.",
-                benefit_explanation="[Source 1] validates co-reg stops before homework.",
-                st_louis_alignment="[Source 1] and STL school density data show needed buffers.",
+            _profile_template(
+                name="After-school crash",
+                intake='"By pickup time I am empty and shaking"',
+                research="[Source 1] connects cortisol spikes to sensory debt.",
+                benefit="[Source 1] validates co-reg stops before homework.",
+                alignment="[Source 1] and STL school density data show needed buffers.",
+                localities=CAREGIVER_LOCALITIES,
+                connections=CAREGIVER_CONNECTIONS,
                 prediction_errors=[
                     PredictionErrorEntry(
                         trigger_context="Assumes regulation can only happen at home.",
@@ -183,12 +259,14 @@ def test_convert_to_knowledge_entry_includes_client_profiles():
                     ),
                 ],
             ),
-            ClientProfile(
-                profile_name="Night shift hypervigilance",
-                intake_reference='"Night sirens keep my jaw locked"',
-                research_reference="[Source 1] documents auditory hypervigilance for night workers.",
-                benefit_explanation="[Source 1] shows decompression pods reduce sympathetic spikes.",
-                st_louis_alignment="[Source 1] paired with hospital siren counts justify hospital pods.",
+            _profile_template(
+                name="Night shift hypervigilance",
+                intake='"Night sirens keep my jaw locked"',
+                research="[Source 1] documents auditory hypervigilance for night workers.",
+                benefit="[Source 1] shows decompression pods reduce sympathetic spikes.",
+                alignment="[Source 1] paired with hospital siren counts justify hospital pods.",
+                localities=SHIFT_LOCALITIES,
+                connections=SHIFT_CONNECTIONS,
                 prediction_errors=[
                     PredictionErrorEntry(
                         trigger_context="Assumes decompression can't happen on site.",
