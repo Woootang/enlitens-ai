@@ -16,6 +16,7 @@ import logging
 import re
 
 from src.monitoring.error_telemetry import TelemetrySeverity, log_with_telemetry
+from .prediction_error import PredictionErrorEntry
 
 
 logger = logging.getLogger(__name__)
@@ -515,6 +516,14 @@ class ClientProfile(BaseModel):
         description="Why the cited research benefits this client, explicitly citing [Source #]",
         json_schema_extra={"pattern": r"\[Source [^\]]+\]"},
     )
+    prediction_errors: List[PredictionErrorEntry] = Field(
+        ...,
+        description=(
+            "Unexpected-yet-relevant pivots that challenge intake assumptions while staying"
+            " grounded in St. Louis life and cited research."
+        ),
+        json_schema_extra={"minItems": 2, "maxItems": 5},
+    )
     st_louis_alignment: Optional[str] = Field(
         None,
         description="Optional tie-in to St. Louis context or community realities, also citing [Source #] when applicable",
@@ -608,6 +617,31 @@ class ClientProfile(BaseModel):
         if any(term in lowered for term in cls._OUTCOME_BLOCKLIST):
             raise ValueError("Research fields must not promise clinical outcomes")
         return cleaned
+
+    @field_validator("prediction_errors")
+    @classmethod
+    def ensure_prediction_error_quality(
+        cls, entries: List[PredictionErrorEntry], info: ValidationInfo
+    ) -> List[PredictionErrorEntry]:
+        if not entries:
+            raise ValueError("prediction_errors must include at least two entries")
+        deduped: List[PredictionErrorEntry] = []
+        seen: set[tuple[str, str]] = set()
+        for entry in entries:
+            key = (
+                entry.trigger_context.strip().lower(),
+                entry.surprising_pivot.strip().lower(),
+            )
+            if key not in seen:
+                seen.add(key)
+                deduped.append(entry)
+        min_items = info.field_info.json_schema_extra.get("minItems") if info.field_info else None
+        if min_items and len(deduped) < min_items:
+            raise ValueError(f"prediction_errors requires at least {min_items} unique entries")
+        max_items = info.field_info.json_schema_extra.get("maxItems") if info.field_info else None
+        if max_items and len(deduped) > max_items:
+            deduped = deduped[:max_items]
+        return deduped
 
     @field_validator(
         "regional_touchpoints",

@@ -4,6 +4,7 @@ import pytest
 
 from src.agents.client_profile_agent import ClientProfileAgent
 from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
+from src.models.prediction_error import PredictionErrorEntry
 
 
 class _RecordingOllamaClient:
@@ -28,6 +29,18 @@ def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
                 research_reference=f"{source_tag} outlines how chronic transit noise overloads sensory gating.",
                 benefit_explanation=f"{source_tag} shows vestibular priming calms their commute shutdown spiral.",
                 st_louis_alignment=f"{source_tag} plus STL Metro complaints show we adapt local transit routines.",
+                prediction_errors=[
+                    PredictionErrorEntry(
+                        trigger_context="Assumes the Metro commute is only depleting.",
+                        surprising_pivot=f"{source_tag} cites riders who recharge by stopping at the quiet Riverfront Trail lookout.",
+                        intended_cognitive_effect="Invite the team to scout calming micro-routines within public transit.",
+                    ),
+                    PredictionErrorEntry(
+                        trigger_context="Believes noise-cancelling headphones are the only option.",
+                        surprising_pivot=f"{source_tag} plus [Ext 1] show library sensory hours align with commute schedules.",
+                        intended_cognitive_effect="Spark curiosity about civic spaces that extend the commute decompression arc.",
+                    ),
+                ],
             ),
             ClientProfile(
                 profile_name="After-school melter",
@@ -35,6 +48,18 @@ def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
                 research_reference=f"{source_tag} links cortisol spikes to afternoon classroom sensory debt.",
                 benefit_explanation=f"{source_tag} backs co-regulation stops before homework to prevent crashes.",
                 st_louis_alignment=f"{source_tag} + northside school overstimulation data justify flexible pickups.",
+                prediction_errors=[
+                    PredictionErrorEntry(
+                        trigger_context="Assumes after-school meltdown relief has to happen at home.",
+                        surprising_pivot=f"{source_tag} cites playground sensory diets at Fairground Park that defuse cortisol spikes.",
+                        intended_cognitive_effect="Encourage designers to see the pickup route as an intervention zone.",
+                    ),
+                    PredictionErrorEntry(
+                        trigger_context="Believes teachers control the entire afternoon regulation arc.",
+                        surprising_pivot=f"{source_tag} plus [Ext 2] highlight mutual-aid carpool pods sharing decompression roles.",
+                        intended_cognitive_effect="Shift the frame toward distributed caregiver ecosystems.",
+                    ),
+                ],
             ),
             ClientProfile(
                 profile_name="Shift worker hypervigilance",
@@ -42,6 +67,18 @@ def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
                 research_reference=f"{source_tag} documents auditory hypervigilance during overnight shifts.",
                 benefit_explanation=f"{source_tag} validates low-light decompression pods after each shift.",
                 st_louis_alignment=f"{source_tag} and STL hospital siren density explain the neighbourhood plan.",
+                prediction_errors=[
+                    PredictionErrorEntry(
+                        trigger_context="Assumes post-shift shutdown must happen at home.",
+                        surprising_pivot=f"{source_tag} references hospital chapels offering sensory dimming before the drive home.",
+                        intended_cognitive_effect="Open the reader to on-site decompression rituals.",
+                    ),
+                    PredictionErrorEntry(
+                        trigger_context="Believes siren exposure is unavoidable in South City nights.",
+                        surprising_pivot=f"{source_tag} plus [Ext 3] map quieter river routes for night-shift commutes.",
+                        intended_cognitive_effect="Prompt planning for alternate sensory corridors.",
+                    ),
+                ],
             ),
         ],
         shared_thread="Research-backed sensory relief for St. Louis nervous systems",
@@ -79,6 +116,7 @@ def test_client_profile_agent_prompt_references_intake_and_sources():
         assert "[Source 1]" in profile["research_reference"]
         assert "[Source 1]" in profile["benefit_explanation"]
         assert '"' in profile["intake_reference"]
+        assert len(profile["prediction_errors"]) >= 2
 
 
 def test_client_profile_agent_validate_output_enforces_citations():

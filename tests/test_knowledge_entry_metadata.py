@@ -7,6 +7,7 @@ import asyncio
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
+from src.models.prediction_error import PredictionErrorEntry
 
 
 # Provide minimal stubs for optional dependencies used during module import
@@ -150,6 +151,18 @@ def test_convert_to_knowledge_entry_includes_client_profiles():
                 research_reference="[Source 1] explains auditory overload on commuters.",
                 benefit_explanation="[Source 1] backs vestibular regulation for this pattern.",
                 st_louis_alignment="[Source 1] plus STL Metro noise logs demand local adjustments.",
+                prediction_errors=[
+                    PredictionErrorEntry(
+                        trigger_context="Assumes Metro commutes only drain.",
+                        surprising_pivot="[Source 1] highlights riders scripting sensory resets at the Arch overlook.",
+                        intended_cognitive_effect="Encourage scouting for restorative pauses mid-commute.",
+                    ),
+                    PredictionErrorEntry(
+                        trigger_context="Believes quiet spaces aren't accessible downtown.",
+                        surprising_pivot="[Source 1] plus [Ext 1] surface library sensory-friendly hours near the platform.",
+                        intended_cognitive_effect="Shift mindset toward civic supports hiding in plain sight.",
+                    ),
+                ],
             ),
             ClientProfile(
                 profile_name="After-school crash",
@@ -157,6 +170,18 @@ def test_convert_to_knowledge_entry_includes_client_profiles():
                 research_reference="[Source 1] connects cortisol spikes to sensory debt.",
                 benefit_explanation="[Source 1] validates co-reg stops before homework.",
                 st_louis_alignment="[Source 1] and STL school density data show needed buffers.",
+                prediction_errors=[
+                    PredictionErrorEntry(
+                        trigger_context="Assumes regulation can only happen at home.",
+                        surprising_pivot="[Source 1] documents park-based sensory resets on the drive home.",
+                        intended_cognitive_effect="Invite the team to treat the commute as a co-regulation asset.",
+                    ),
+                    PredictionErrorEntry(
+                        trigger_context="Believes caregivers must shoulder the load solo.",
+                        surprising_pivot="[Source 1] plus [Ext 2] highlight neighborhood carpool circles sharing decompression.",
+                        intended_cognitive_effect="Encourage distributed networks for after-school support.",
+                    ),
+                ],
             ),
             ClientProfile(
                 profile_name="Night shift hypervigilance",
@@ -164,6 +189,18 @@ def test_convert_to_knowledge_entry_includes_client_profiles():
                 research_reference="[Source 1] documents auditory hypervigilance for night workers.",
                 benefit_explanation="[Source 1] shows decompression pods reduce sympathetic spikes.",
                 st_louis_alignment="[Source 1] paired with hospital siren counts justify hospital pods.",
+                prediction_errors=[
+                    PredictionErrorEntry(
+                        trigger_context="Assumes decompression can't happen on site.",
+                        surprising_pivot="[Source 1] references chapels and dim rooms staff already use before commuting.",
+                        intended_cognitive_effect="Encourage immediate decompression rituals before leaving work.",
+                    ),
+                    PredictionErrorEntry(
+                        trigger_context="Believes every route home is equally loud.",
+                        surprising_pivot="[Source 1] plus [Ext 3] map river-adjacent drives with fewer sirens.",
+                        intended_cognitive_effect="Promote experimenting with quieter corridors.",
+                    ),
+                ],
             ),
         ]
     )
