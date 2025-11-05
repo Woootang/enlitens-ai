@@ -22,6 +22,7 @@ from src.models.enlitens_schemas import (
 from src.models.prediction_error import PredictionErrorEntry
 from src.orchestration.research_orchestrator import (
     ExternalResearchOrchestrator,
+    NullConnector,
     ResearchHit,
     ResearchQuery,
 )
@@ -113,6 +114,10 @@ def _assets_for_records(records: Sequence[LocalityRecord]) -> Dict[str, str]:
     return mapping
 
 
+class MissingResearchConnectorsError(RuntimeError):
+    """Raised when no actionable research connectors are configured."""
+
+
 class ClientProfileAgent(BaseAgent):
     """Agent that grounds research passages in real client intake language."""
 
@@ -138,9 +143,31 @@ class ClientProfileAgent(BaseAgent):
                 )
             if self.research_orchestrator is None:
                 self.research_orchestrator = ExternalResearchOrchestrator.from_settings()
+
+            connectors = list(getattr(self.research_orchestrator, "connectors", []))
+            if not connectors or all(isinstance(connector, NullConnector) for connector in connectors):
+                connector_names = [connector.__class__.__name__ for connector in connectors] or ["None"]
+                log_with_telemetry(
+                    logger.error,
+                    "External research connectors unavailable for %s",
+                    self.name,
+                    agent=TELEMETRY_AGENT,
+                    severity=TelemetrySeverity.CRITICAL,
+                    impact="External research connectors misconfigured",
+                    details={
+                        "configured_connectors": connector_names,
+                        "hint": "Set ENLITENS_RESEARCH_CONNECTORS with at least one HTTP, MCP, or static connector.",
+                    },
+                )
+                raise MissingResearchConnectorsError(
+                    "External research connectors misconfigured: only NullConnector instances are configured. "
+                    "Set ENLITENS_RESEARCH_CONNECTORS with at least one HTTP, MCP, or static connector."
+                )
             self.is_initialized = True
             logger.info("✅ %s agent initialized", self.name)
             return True
+        except MissingResearchConnectorsError:
+            raise
         except Exception as exc:  # pragma: no cover - defensive logging
             log_with_telemetry(
                 logger.error,

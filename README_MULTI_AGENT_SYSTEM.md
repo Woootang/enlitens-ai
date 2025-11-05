@@ -48,6 +48,18 @@ sudo apt install nvidia-driver-535
 pip install -r requirements.txt
 ```
 
+### 1a. Configure External Research Connectors (Required)
+```bash
+# Define at least one HTTP, MCP, or static connector before running the pipeline
+export ENLITENS_RESEARCH_CONNECTORS='[
+  {"type": "http", "endpoint": "https://api.example.com/search"}
+]'
+```
+
+Refer to `docs/configuration.md` for full connector configuration examples. The
+pipeline will abort during initialization if every connector resolves to the
+`NullConnector` fallback.
+
 ### 2. vLLM Setup
 ```bash
 # Install vLLM

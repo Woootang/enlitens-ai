@@ -4,6 +4,11 @@ import pytest
 from typing import Optional
 
 from src.agents.client_profile_agent import ClientProfileAgent
+from src.orchestration.research_orchestrator import (
+    ExternalResearchOrchestrator,
+    NullConnector,
+    StaticConnector,
+)
 from src.models.enlitens_schemas import ClientProfile, ClientProfileSet
 from src.models.prediction_error import PredictionErrorEntry
 
@@ -90,6 +95,51 @@ class _RecordingOllamaClient:
         if callable(factory):
             return factory()
         return factory
+
+
+class _HealthyOllamaClient:
+    def __init__(self, *, default_model):
+        self.default_model = default_model
+
+    async def check_connection(self):
+        return True
+
+
+@pytest.mark.asyncio
+async def test_initialize_raises_when_only_null_research_connectors(monkeypatch):
+    agent = ClientProfileAgent()
+
+    monkeypatch.setattr(
+        "src.agents.client_profile_agent.OllamaClient",
+        _HealthyOllamaClient,
+    )
+
+    monkeypatch.setattr(
+        ExternalResearchOrchestrator,
+        "from_settings",
+        classmethod(lambda cls: ExternalResearchOrchestrator(connectors=[NullConnector()])),
+    )
+
+    with pytest.raises(RuntimeError, match="NullConnector"):
+        await agent.initialize()
+
+
+@pytest.mark.asyncio
+async def test_initialize_succeeds_with_real_research_connector(monkeypatch):
+    agent = ClientProfileAgent()
+
+    monkeypatch.setattr(
+        "src.agents.client_profile_agent.OllamaClient",
+        _HealthyOllamaClient,
+    )
+
+    monkeypatch.setattr(
+        ExternalResearchOrchestrator,
+        "from_settings",
+        classmethod(lambda cls: ExternalResearchOrchestrator(connectors=[StaticConnector([])])),
+    )
+
+    assert await agent.initialize()
 
 
 def _profiles_payload(source_tag: str = "[Source 1]") -> ClientProfileSet:
