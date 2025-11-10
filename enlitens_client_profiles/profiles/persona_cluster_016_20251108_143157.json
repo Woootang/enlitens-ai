@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "profile_id": "cluster-016-persona",
+    "persona_name": "Anxious and Overwhelmed Returner",
+    "persona_tagline": "Seeking tools to manage anxiety and ADHD after life changes and career stress.",
+    "created_at": "2025-11-08 20:31:42.060154",
+    "source_documents": [
+      "cluster_16",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "ADHD",
+      "therapy returner",
+      "work stress",
+      "imposter syndrome",
+      "life changes"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "28-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, adjusting to post-pandemic work life, potentially recently moved or experiencing relationship stress.",
+    "occupation": "Office worker/Professional (9-5 job)",
+    "education": "Bachelor's Degree",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban environment. Parents were well-meaning but potentially dismissive of her emotional needs, prioritizing achievement and external validation. Her ADHD symptoms were likely present but overlooked or attributed to 'laziness' or 'lack of focus'.",
+    "adolescence": "Experienced social anxiety and struggled to keep up with schoolwork. Developed perfectionistic tendencies to compensate for feeling 'behind' her peers. May have experimented with self-medication (e.g., caffeine, excessive studying) to manage ADHD symptoms. Felt pressure to conform to societal expectations.",
+    "early_adulthood": "College was a mixed bag \u2013 exciting newfound independence but also overwhelming. Landed a stable job after graduation but constantly felt like she was 'faking it' and one mistake away from being exposed as a fraud. Started experiencing panic attacks and generalized anxiety.",
+    "family_structure": "Two-parent household with one or two siblings. Parents are still together but may have a strained relationship. She feels a sense of obligation to maintain a facade of normalcy for the sake of her family.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "Academic pressure",
+      "Social anxiety",
+      "Imposter syndrome",
+      "Detrimental work experiences"
+    ],
+    "educational_journey": "Attended public schools. College was challenging, requiring significant effort to maintain grades. May have switched majors or taken longer than expected to graduate. Feels a sense of relief to be finished with formal education but also anxieties about career progression.",
+    "pivotal_moments": [
+      "Receiving a performance review that triggered imposter syndrome",
+      "Experiencing a significant life change (e.g., move, relationship breakup)",
+      "Realizing the extent to which her ADHD impacts her daily functioning",
+      "Acknowledging the need for professional help to manage her anxiety and ADHD symptoms",
+      "Making the decision to return to therapy"
+    ],
+    "intergenerational_patterns": "Potentially a family history of anxiety or undiagnosed ADHD. Her mother or another female relative may have also struggled with similar issues, which were minimized or dismissed."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety",
+      "Imposter Syndrome"
+    ],
+    "diagnosis_journey": "Suspected ADHD for a while but didn't pursue diagnosis until recently, perhaps prompted by work struggles. May have initially sought help for anxiety and then realized that ADHD was a significant underlying factor. Diagnosis process may have been validating but also overwhelming, leading to feelings of grief and anger about missed opportunities.",
+    "how_it_shows_up": "Procrastination, difficulty focusing, feeling overwhelmed by tasks, racing thoughts, difficulty managing emotions, perfectionism, avoidance, negative self-talk, struggles with time management, disorganization, feeling like she's constantly 'behind'. Hyperfocus on tasks she enjoys, but struggles to initiate tasks she finds boring or challenging. Difficulty regulating emotions, leading to outbursts of frustration or tearfulness.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to operate in a state of chronic stress, leading to burnout and exhaustion. Difficulty relaxing and shutting off her mind. Prone to anxiety spirals and catastrophizing.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Problem-solving skills",
+      "Empathy",
+      "Hyperfocus on areas of interest",
+      "Resilience"
+    ],
+    "current_coping_strategies": [
+      "Overworking",
+      "People-pleasing",
+      "Avoidance",
+      "Caffeine",
+      "Scrolling social media",
+      "Retail therapy",
+      "Trying to 'tough it out'"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative thinking",
+      "Problem-solving under pressure",
+      "Connecting with others"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Planning",
+      "Prioritization",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars and to-do lists (which she often forgets to check)",
+      "Setting reminders on her phone",
+      "Relying on others to help her stay on track",
+      "Trying to 'power through' tasks, leading to burnout"
+    ],
+    "sensory_profile": "Sensitive to bright lights and loud noises. Prefers soft, comfortable clothing. May be easily overwhelmed by strong smells or textures. Finds repetitive movements calming (e.g., fidgeting, tapping her foot).",
+    "food_sensory_details": "Dislikes foods with mixed textures (e.g., chunky salsa, fruit yogurt with bits). Prefers bland, predictable flavors. Safe foods include plain pasta with butter, grilled chicken (specifically the breast), and specific brands of granola bars (e.g., Kind bars, but only certain flavors). Avoids anything with visible fat or gristle. Texture of raw tomatoes is aversive, only eats them cooked in sauces. Skips meals when overwhelmed or anxious, then binges on sugary snacks in the evening."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment in a suburban area of St. Louis County, MO. May live alone or with a partner.",
+    "work_school_situation": "Works a 9-5 office job in a corporate setting. May be feeling disillusioned with her career and questioning her long-term goals.",
+    "commute_daily_rhythms": "Drives to work, experiences traffic congestion. Spends a significant portion of her day sitting at a desk, which exacerbates her anxiety and restlessness. Struggles to maintain a healthy work-life balance.",
+    "local_stressors": [
+      "Traffic",
+      "Workplace politics",
+      "Cost of living",
+      "Lack of affordable housing",
+      "Feeling disconnected from her community"
+    ],
+    "safe_spaces": [
+      "Her apartment",
+      "Spending time in nature (e.g., Forest Park)",
+      "Coffee shops (e.g. Kaldi's)"
+    ],
+    "support_system": "Has a few close friends, but may feel hesitant to burden them with her struggles. May have a supportive partner or family member, but also struggles to communicate her needs effectively."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Anxiety has progressed over the past 6 months after some detrimental work experiences. Struggling with imposter syndrome and generalized anxiety towards relationships. ADHD is roadblocking her life.",
+    "what_they_want_to_change": [
+      "Manage anxiety and ADHD symptoms",
+      "Improve relationships",
+      "Develop healthier coping mechanisms",
+      "Build confidence",
+      "Find more joy and fulfillment in life",
+      "Progress and better herself, not just survive each day."
+    ],
+    "whats_in_the_way": [
+      "Imposter syndrome",
+      "Perfectionism",
+      "Fear of failure",
+      "Lack of self-compassion",
+      "Difficulty asking for help",
+      "Time constraints",
+      "Financial concerns",
+      "Past negative experiences with therapy"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I've been struggling with some major imposter's syndrome and generalized anxiety towards my relationships, and it's something I'm beginning to realize I need help with.",
+    "quote_hope": "I want to get back to a place of enjoying life again, progressing and bettering myself, not just surviving each day.",
+    "quotes_additional": [
+      "I have tried therapy a few times in the past - but haven\u2019t found the one yet.",
+      "I'm seeking rather intense therapy that challenges me to get outside of myself and comfort zone."
+    ],
+    "liz_clinical_narrative": "Alison, Freya, and others like them represent a common thread: bright, capable individuals struggling under the weight of anxiety and undiagnosed or undertreated ADHD. They've likely experienced professional setbacks that have amplified their existing feelings of inadequacy. My approach would focus on creating a safe space for them to explore their inner critic, develop self-compassion, and learn practical tools for managing their ADHD symptoms. Together, we'd work to dismantle the negative thought patterns that fuel their anxiety and empower them to embrace their strengths and build a more fulfilling life.",
+    "therapy_preferences": "Online options, especially in the evening or weekend. Seeking rather intense therapy that challenges her to get outside of her comfort zone. Wants someone who understands ADHD."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you feeling overwhelmed and anxious, like you're just trying to survive each day?",
+      "Do you suspect you might have ADHD but haven't been diagnosed?",
+      "We offer neurodivergent-affirming therapy to help you manage your anxiety and ADHD symptoms and build a more fulfilling life."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety therapy St. Louis",
+      "Imposter syndrome therapy",
+      "Neurodivergent therapy",
+      "Online therapy St. Louis"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Clayton",
+      "Webster Groves",
+      "Kirkwood"
+    ],
+    "content_angles": [
+      "5 signs you might have undiagnosed ADHD",
+      "How to manage anxiety and imposter syndrome at work",
+      "The benefits of neurodivergent-affirming therapy"
+    ]
+  }
+}

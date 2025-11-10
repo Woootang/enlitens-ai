@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "profile_id": "cluster-040-persona",
+    "persona_name": "Frustrated & Volatile Preteen",
+    "persona_tagline": "Navigating explosive emotions and communication breakdowns.",
+    "created_at": "2025-11-08 20:43:13.514189",
+    "source_documents": [
+      "cluster_40",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "autism",
+      "ADHD",
+      "child",
+      "emotional dysregulation",
+      "verbal aggression"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "11-12",
+    "gender": "Male",
+    "pronouns": "He/Him",
+    "orientation": "Not applicable",
+    "ethnicity": "Not specified, assume Caucasian due to location and lack of specification",
+    "current_life_situation": "Student, living with parents and brother",
+    "occupation": "Student",
+    "education": "6th Grade",
+    "locality": "Suburban St. Louis, MO",
+    "cultural_faith_identities": [
+      "Not specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Ian's early childhood was marked by a growing awareness that he was 'different'. While not overtly chaotic, the household followed routines that didn't always make sense to him. His parents, well-meaning but neurotypical, struggled to understand his intense focus on specific interests and his meltdowns when routines were disrupted. His sensitivities to sounds and textures were often dismissed as 'pickiness'. There was an underlying sense of pressure to conform.",
+    "adolescence": "Entering adolescence, Ian's challenges intensified. The increased social demands of middle school, coupled with academic expectations, overwhelmed him. His frustration manifested as verbal outbursts directed towards his family. He began to isolate himself, spending hours engrossed in video games as a way to escape the overwhelming sensory input and social pressures.",
+    "early_adulthood": "N/A",
+    "family_structure": "Nuclear family: mother, father, and younger brother. Parents are seemingly supportive but struggle to understand his neurodivergence. Sibling rivalry is present, exacerbated by Ian's emotional outbursts.",
+    "formative_adversities": [
+      "Frequent misunderstandings and misinterpretations by parents and teachers.",
+      "Social isolation and bullying due to perceived 'weirdness'.",
+      "Internalized shame and guilt over emotional outbursts.",
+      "Sensory overload in school and public environments.",
+      "Difficulty expressing needs and feelings effectively."
+    ],
+    "educational_journey": "Started in public elementary school. Academic performance is inconsistent, excelling in subjects aligning with his special interests but struggling with others. Frequent disruptions in class due to sensory sensitivities and difficulty regulating emotions. Possible consideration for IEP/504 plan.",
+    "pivotal_moments": [
+      "Being diagnosed with Autism and ADHD \u2013 a moment of validation, but also fear and uncertainty.",
+      "A particularly intense meltdown that resulted in hurtful words spoken to his younger brother, leading to deep regret.",
+      "A teacher who showed genuine understanding and empathy, creating a safe space in the classroom.",
+      "Discovering a passion for coding, providing a sense of accomplishment and control.",
+      "Experiencing bullying and social rejection, leading to increased anxiety and self-doubt."
+    ],
+    "intergenerational_patterns": "Possible undiagnosed neurodivergence in one or both parents, leading to a cycle of misunderstanding and communication challenges. A family history of suppressing emotions and avoiding conflict."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autism",
+      "ADHD"
+    ],
+    "diagnosis_journey": "A gradual process. Early signs of 'differentness' were noticed by parents and teachers. Initial concerns were dismissed as 'just being a kid'. As Ian's challenges intensified, his parents sought professional help. Testing and evaluation led to the diagnoses of Autism and ADHD around age 9. The diagnosis provided some clarity, but also raised questions and concerns.",
+    "how_it_shows_up": "Difficulty expressing himself positively, verbal aggression towards family members, self-deprecating talk, emotional dysregulation, sensory sensitivities, difficulty with social cues, intense focus on special interests, impulsivity, hyperactivity, inattention.",
+    "nervous_system_pattern": "Highly reactive nervous system. Easily overwhelmed by sensory input and social demands. Prone to fight-or-flight responses when stressed. Difficulty returning to a calm state after emotional outbursts.",
+    "strengths_superpowers": [
+      "Intense focus and hyper-fixation on areas of interest, leading to deep knowledge and expertise.",
+      "Exceptional pattern recognition and problem-solving skills.",
+      "Honesty and authenticity.",
+      "Creativity and imagination.",
+      "Strong sense of justice."
+    ],
+    "current_coping_strategies": [
+      "Withdrawing and isolating himself.",
+      "Engaging in special interests (video games, coding) as a form of escape.",
+      "Verbal outbursts as a way to release pent-up frustration.",
+      "Seeking reassurance and validation from parents.",
+      "Limited awareness of healthy coping mechanisms."
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong focus on preferred tasks.",
+      "Good long-term memory for facts and details in preferred areas."
+    ],
+    "ef_friction_points": [
+      "Emotional regulation, particularly controlling verbal outbursts.",
+      "Planning and organization.",
+      "Task initiation, especially for non-preferred activities.",
+      "Working memory, leading to difficulty following multi-step instructions.",
+      "Inhibition, resulting in impulsive behavior."
+    ],
+    "ef_workarounds": [
+      "Visual schedules for daily routines.",
+      "Timers to manage transitions between activities.",
+      "Quiet space for sensory breaks.",
+      "Pre-planned scripts for social interactions.",
+      "External prompts and reminders."
+    ],
+    "sensory_profile": "Highly sensitive to sounds, textures, and smells. Overwhelmed by loud noises, bright lights, and strong odors. Avoids certain clothing textures and food consistencies. Seeks out proprioceptive input (e.g., weighted blanket) for calming.",
+    "food_sensory_details": "Avoids foods with mixed textures (e.g., casseroles, stews). Only eats chicken if it's a specific brand of frozen chicken tenders, cooked until *just* crispy, served at room temperature. Refuses to eat any green vegetables except for raw baby spinach which he eats plain, one leaf at a time. Safe foods include plain Cheerios (must be in the yellow box), specific brand of white cheddar cheese crackers (absolutely no off-brands), and peeled apples (but only if they are Fuji apples). Gags at the smell of cooked onions or garlic. Refuses to drink milk or any beverage that is not clear."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban St. Louis, in a two-story house with a yard.",
+    "work_school_situation": "Attends middle school. Struggles with social interactions and academic demands. Experiences bullying and teasing from classmates.",
+    "commute_daily_rhythms": "Bus to school. Afternoons are spent playing video games, doing homework (with parental prompting), and engaging in special interests.",
+    "local_stressors": [
+      "Overcrowded school environment.",
+      "Social pressures from peers.",
+      "Lack of understanding and support from some teachers.",
+      "Sensory overload in public places (e.g., grocery stores, shopping malls)."
+    ],
+    "safe_spaces": [
+      "His bedroom.",
+      "Online gaming communities.",
+      "The library (quiet space).",
+      "Nature trails in a nearby park."
+    ],
+    "support_system": "Parents, but their understanding is limited. School counselor. Potentially a therapist (seeking initial consultation)."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Ian is having issues expressing himself in a positive manner. He's very harmful in his words to his parents, brother, and self.",
+    "what_they_want_to_change": [
+      "Improve communication skills.",
+      "Reduce verbal aggression towards family members.",
+      "Develop healthy coping mechanisms for managing emotions.",
+      "Increase self-esteem and self-acceptance.",
+      "Improve social skills and reduce social isolation."
+    ],
+    "whats_in_the_way": [
+      "Difficulty identifying and expressing emotions.",
+      "Impulsivity and lack of self-control.",
+      "Sensory sensitivities and sensory overload.",
+      "Negative self-talk and low self-esteem.",
+      "Lack of understanding and support from others.",
+      "Anxiety and fear of social rejection."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "He's very harmful in his words to his parents, brother, and self.",
+    "quote_hope": "I want to be able to talk to my family without yelling.",
+    "quotes_additional": [
+      "Why can't people just leave me alone?",
+      "I hate being different.",
+      "It's not fair."
+    ],
+    "liz_clinical_narrative": "Ian is a bright and sensitive young man who is struggling to navigate the complexities of adolescence while also managing the challenges of Autism and ADHD. His verbal outbursts are a manifestation of deep frustration and emotional pain. He desperately wants to connect with his family and peers, but he lacks the skills and support to do so effectively. Therapy can provide Ian with a safe and supportive space to explore his emotions, develop healthy coping mechanisms, and learn effective communication skills. By understanding his neurodivergence and building on his strengths, Ian can learn to manage his emotions, improve his relationships, and thrive.",
+    "therapy_preferences": "Therapist who is knowledgeable about Autism and ADHD. Individual therapy. Play-based therapy. Visual aids and communication supports. A calm and quiet therapy environment. Focus on developing coping skills and emotional regulation strategies. Family therapy to improve communication and understanding."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your child struggling with explosive emotions and communication breakdowns? We provide neurodivergent-affirming therapy to help children like Ian learn to manage their emotions and build stronger relationships.",
+      "Does your child's ADHD or Autism make it difficult for them to express themselves in a positive way? Our therapists understand the unique challenges faced by neurodivergent children and families.",
+      "Help your child find their voice! We offer a safe and supportive space for children with Autism and ADHD to develop healthy coping mechanisms and improve their communication skills."
+    ],
+    "primary_keywords": [
+      "autism therapy st louis",
+      "ADHD therapy st louis",
+      "child therapy st louis",
+      "emotional regulation",
+      "verbal aggression",
+      "neurodivergent affirming therapy",
+      "teen counseling",
+      "social skills training",
+      "communication skills"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves",
+      "Ladue",
+      "Clayton"
+    ],
+    "content_angles": [
+      "How to support a child with emotional dysregulation.",
+      "Understanding the connection between Autism, ADHD, and verbal aggression.",
+      "Creating a sensory-friendly home environment for a child with sensory sensitivities.",
+      "Building communication bridges with a neurodivergent child.",
+      "The benefits of neurodivergent-affirming therapy for children and families."
+    ]
+  }
+}

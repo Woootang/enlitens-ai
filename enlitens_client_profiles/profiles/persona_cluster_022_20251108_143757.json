@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "profile_id": "cluster-019-persona",
+    "persona_name": "The Overwhelmed Juggler",
+    "persona_tagline": "Balancing ADHD, anxiety, and life's transitions.",
+    "created_at": "2025-11-08 20:37:39.739626",
+    "source_documents": [
+      "cluster_19",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "anxiety",
+      "overwhelm",
+      "relationship",
+      "job switch",
+      "long distance"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "30-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Managing ADHD, anxiety, and a long-distance relationship while navigating a new job.",
+    "occupation": "Marketing Specialist",
+    "education": "Bachelor's Degree in Communications",
+    "locality": "Webster Groves, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class household in suburban St. Louis. Her parents were loving but often stressed due to financial instability. Her mom, undiagnosed ADHD, struggled with organization and impulsivity, creating a chaotic home environment. Meals were often whatever was quickest and easiest.",
+    "adolescence": "Anxious and eager to please, she excelled academically but struggled socially. Felt like she was always 'too much' or 'not enough'. Developed perfectionistic tendencies to compensate for feeling 'different'. Started binge eating in response to social anxiety and academic pressure.",
+    "early_adulthood": "College was a mixed bag. The freedom was exhilarating, but the lack of structure led to procrastination and last-minute cramming. Relationships were intense and short-lived, marked by impulsivity and emotional reactivity. Landed a good job after graduation but felt constantly overwhelmed by the demands.",
+    "family_structure": "Two parents, one younger brother. Parents are still married but have a strained relationship. Close to her brother, who has always been a source of support. Her maternal grandmother lived with them on and off, adding to the chaotic environment.",
+    "formative_adversities": [
+      "Financial instability in childhood",
+      "Emotional neglect due to parents' stress",
+      "Social anxiety and bullying in middle school",
+      "Unstable romantic relationships in early adulthood",
+      "Late ADHD diagnosis at age 32"
+    ],
+    "educational_journey": "Attended public schools in Webster Groves. Excelled in high school, earning good grades despite feeling overwhelmed. Went to a local university, majoring in Communications. Struggled with executive function in college, but managed to graduate with honors.",
+    "pivotal_moments": [
+      "Getting diagnosed with ADHD at 32, realizing her struggles had a name.",
+      "Ending a tumultuous relationship that was marked by emotional reactivity and impulsivity.",
+      "Switching jobs to a less demanding role after experiencing burnout.",
+      "Starting a long-distance relationship, forcing her to confront her anxiety and communication issues.",
+      "Discovering the power of mindfulness and self-compassion through online resources."
+    ],
+    "intergenerational_patterns": "Her mother likely had undiagnosed ADHD, leading to a chaotic home environment. A pattern of anxiety and perfectionism runs in the family, likely as a coping mechanism for underlying neurodivergence."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety"
+    ],
+    "diagnosis_journey": "Suspected something was 'off' for years but dismissed it as just being 'quirky'. Started researching ADHD after seeing a friend's social media post. Took online quizzes and felt a strong resonance. Finally sought a formal diagnosis at 32 after experiencing severe burnout. The diagnosis was validating but also overwhelming, leading to a period of grief and self-reproach.",
+    "how_it_shows_up": "Difficulty concentrating, especially in meetings or when working on complex tasks. Impulsive and emotional eating, particularly when stressed or bored. Overwhelmed by clutter and messes. Procrastination and difficulty starting tasks. Tendency to overcommit and then feel resentful. Anxiety manifests as racing thoughts, physical tension, and difficulty sleeping.",
+    "nervous_system_pattern": "Highly sensitive and reactive. Easily overwhelmed by sensory input and emotional stressors. Tends to oscillate between hyperarousal and hypoarousal. Seeks stimulation but easily becomes overstimulated.",
+    "strengths_superpowers": [
+      "Creativity and innovative thinking",
+      "High energy and enthusiasm (when not overwhelmed)",
+      "Strong empathy and intuition",
+      "Ability to hyperfocus on tasks that interest her",
+      "Resilience and adaptability"
+    ],
+    "current_coping_strategies": [
+      "Scrolling on phone to avoid tasks",
+      "Emotional eating (especially sugary snacks)",
+      "Avoidance of overwhelming situations",
+      "Ruminating on anxious thoughts",
+      "Trying to 'power through' instead of asking for help"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Idea generation",
+      "Connecting with others",
+      "Crisis management (in short bursts)"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Sustained attention",
+      "Organization and planning",
+      "Emotional regulation",
+      "Impulse control"
+    ],
+    "ef_workarounds": [
+      "Using a planner (but often forgetting to use it)",
+      "Setting alarms and reminders (which she often ignores)",
+      "Trying to break down tasks into smaller steps (but getting lost in the details)",
+      "Seeking external accountability (but feeling ashamed when she doesn't meet expectations)"
+    ],
+    "sensory_profile": "Highly sensitive to noise, especially sudden or high-pitched sounds. Prefers soft, comfortable clothing. Dislikes bright lights and strong smells. Craves tactile stimulation (e.g., fidgeting with objects, hugging).",
+    "food_sensory_details": "Prefers foods with consistent textures and mild flavors. Safe foods include: plain Cheerios (must be original), specific brand of gluten-free crackers (Ritz-like), grilled chicken (must be room temperature, no skin). Avoids anything slimy (like okra or cooked mushrooms) or with visible fat. Dislikes strong spices or overly sweet desserts. Binges on sugary snacks (especially chocolate chip cookies from Schnucks bakery) when stressed. Often skips meals when overwhelmed by work or anxiety."
+  },
+  "current_life_context": {
+    "where_they_live": "Rents a small apartment in Webster Groves, St. Louis. The apartment is cluttered and disorganized, which contributes to her feelings of overwhelm.",
+    "work_school_situation": "Works as a Marketing Specialist for a local non-profit. Recently switched jobs to reduce stress, but still finds the workload challenging. Working remotely 3 days a week.",
+    "commute_daily_rhythms": "On office days, wakes up early, rushes to get ready, and commutes 30 minutes by car. On remote days, struggles to establish a routine and often works from bed.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living",
+      "Lack of affordable childcare (if she were to have children)",
+      "Feeling isolated from friends and family due to long-distance relationship"
+    ],
+    "safe_spaces": [
+      "Her brother's house",
+      "Local coffee shop (wearing noise-canceling headphones)",
+      "Walking in a nearby park"
+    ],
+    "support_system": "Close to her brother, who is her primary support. Has a few close friends, but struggles to maintain relationships due to her anxiety and overwhelm. Her partner lives in another state, making it difficult to connect in person."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feels overwhelmed by ADHD, anxiety, job switch, and long-distance relationship. Wants to develop better coping strategies and improve her overall well-being.",
+    "what_they_want_to_change": [
+      "Improve focus and concentration",
+      "Reduce anxiety and manage stress",
+      "Develop healthier eating habits",
+      "Improve organization and time management skills",
+      "Strengthen her long-distance relationship",
+      "Feel more in control of her life"
+    ],
+    "whats_in_the_way": [
+      "ADHD and anxiety",
+      "Lack of structure and routine",
+      "Perfectionism and fear of failure",
+      "Procrastination and avoidance",
+      "Negative self-talk",
+      "Long-distance relationship challenges",
+      "Limited access to affordable therapy"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I will tell myself every morning that I will do certain things, no scroll on my phone, not over eat, etc.. and within like 2 hours it's already lost.",
+    "quote_hope": "I just want to feel more in control and less overwhelmed.",
+    "quotes_additional": [
+      "Just adhd, anxiety, overwhelm, job switch, long distance relationship, a lot"
+    ],
+    "liz_clinical_narrative": "This client presents with a constellation of challenges common in late-diagnosed ADHD. The overwhelm is palpable, stemming from years of masking and struggling without understanding the underlying neurodivergence. Her anxiety exacerbates the executive function challenges, leading to a cycle of procrastination, avoidance, and self-criticism. The long-distance relationship adds another layer of complexity, requiring intentional communication and emotional regulation skills. Therapy will focus on psychoeducation, developing practical coping strategies, and cultivating self-compassion. We will explore her sensory sensitivities and create personalized workarounds to manage overwhelm and build sustainable routines. EMDR may be helpful in processing earlier relational trauma.",
+    "therapy_preferences": "Practical, solution-focused therapy with a strong emphasis on coping skills. Prefers a therapist who is knowledgeable about ADHD and anxiety. Values empathy, non-judgment, and a collaborative approach."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Feeling overwhelmed by ADHD, anxiety, and life transitions? You're not alone. We offer neurodivergent-affirming therapy to help you thrive.",
+      "Struggling to balance work, relationships, and your mental health? Our therapists understand the unique challenges you face.",
+      "Ready to break free from the cycle of overwhelm and build a life that feels more manageable? Contact us today for a free consultation."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety treatment St. Louis",
+      "Neurodivergent therapist St. Louis",
+      "Long-distance relationship counseling",
+      "Overwhelm coping strategies",
+      "Executive function coaching"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "St. Louis County",
+      "Schnucks",
+      "Local parks in Webster Groves"
+    ],
+    "content_angles": [
+      "The unique challenges of late-diagnosed ADHD",
+      "How anxiety exacerbates executive function difficulties",
+      "Building a thriving long-distance relationship",
+      "Simple strategies for managing overwhelm",
+      "Creating a sensory-friendly home environment"
+    ]
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "profile_id": "cluster-041-persona",
+    "persona_name": "The Supportive Sibling",
+    "persona_tagline": "Navigating life with neurodivergence alongside loved ones.",
+    "created_at": "2025-11-08 20:43:30.284931",
+    "source_documents": [
+      "cluster_41",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "supportive",
+      "sibling",
+      "neurodivergent-affirming"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Living with partner, working full-time, supporting neurodivergent sibling",
+    "occupation": "Administrative Assistant",
+    "education": "Associate's Degree",
+    "locality": "South City, St. Louis",
+    "cultural_faith_identities": [
+      "Christian, non-denominational"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a working-class family in South City, St. Louis, with a younger sibling who displayed clear signs of neurodivergence early on. Home life was stable but focused on practical matters rather than emotional expression. Parents worked long hours to make ends meet, leaving her to often care for her younger sibling.",
+    "adolescence": "Her teenage years were largely defined by her role as a caretaker and advocate for her sibling. She often felt responsible for keeping her sibling on track with school and managing their emotional outbursts. While her peers were focused on social events and dating, she was researching support groups and interventions for her sibling. She excelled academically, driven by a desire to create a better future for both of them.",
+    "early_adulthood": "After high school, she attended community college to stay close to home and continue supporting her family. She worked part-time to help with expenses while juggling her studies and her sibling's needs. She began to experience feelings of resentment and burnout, realizing that her own dreams and aspirations were being put on hold. She started dating her current partner, who provided her with much-needed emotional support and encouragement.",
+    "family_structure": "Two-parent household with a younger brother. Parents were hardworking but emotionally distant. She took on a parental role towards her brother from a young age.",
+    "formative_adversities": [
+      "Emotional neglect due to parents' work demands",
+      "Responsibility for caring for neurodivergent sibling from a young age",
+      "Financial strain on the family",
+      "Feeling invisible and unheard within her own family",
+      "Internalized guilt for having needs and desires separate from her sibling."
+    ],
+    "educational_journey": "Attended local public schools. Did well academically. Attended community college. Considered transferring to a four-year university but decided against it due to family obligations.",
+    "pivotal_moments": [
+      "Her brother's initial diagnosis of ADHD and later suspected autism",
+      "A family crisis that required her to step up and take on even more responsibility",
+      "A conversation with her partner where she admitted feeling overwhelmed and resentful",
+      "Realizing that she needs to prioritize her own well-being in order to effectively support her sibling",
+      "Deciding to seek therapy to address her own emotional needs and develop healthier coping mechanisms"
+    ],
+    "intergenerational_patterns": "Her mother also took on a caretaker role within her own family, sacrificing her own needs for the sake of others. This pattern of self-sacrifice has been passed down through generations. There is also a strong possibility of undiagnosed neurodivergence on her father's side of the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible undiagnosed ADHD (inattentive type)"
+    ],
+    "diagnosis_journey": "She has long suspected that she may have ADHD, but has not pursued a formal diagnosis due to focusing on the needs of her sibling. She experiences anxiety related to her responsibilities and her own unmet needs.",
+    "how_it_shows_up": "Procrastination, difficulty focusing on her own tasks, feeling overwhelmed by responsibilities, anxiety, perfectionism, difficulty setting boundaries, feeling resentful and guilty, social anxiety",
+    "nervous_system_pattern": "High-strung, easily overwhelmed, tendency to people-please, difficulty relaxing and unwinding, chronic tension in shoulders and neck, difficulty sleeping",
+    "strengths_superpowers": [
+      "Empathy",
+      "Patience",
+      "Organization",
+      "Advocacy",
+      "Problem-solving",
+      "Loyalty",
+      "Responsibility"
+    ],
+    "current_coping_strategies": [
+      "People-pleasing",
+      "Perfectionism",
+      "Overworking",
+      "Avoiding difficult conversations",
+      "Isolating herself when overwhelmed",
+      "Trying to control situations",
+      "Seeking reassurance from others"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Task initiation when it benefits others",
+      "Planning and organization when it comes to her sibling's needs",
+      "Attention to detail when focused on a task she finds meaningful"
+    ],
+    "ef_friction_points": [
+      "Procrastination on personal tasks",
+      "Difficulty prioritizing her own needs",
+      "Trouble staying focused when bored or uninterested",
+      "Poor time management when it comes to personal commitments",
+      "Difficulty making decisions for herself",
+      "Emotional regulation when feeling overwhelmed"
+    ],
+    "ef_workarounds": [
+      "Using a planner to track appointments and deadlines",
+      "Breaking down large tasks into smaller, more manageable steps",
+      "Setting timers to stay on track",
+      "Seeking support from her partner when feeling overwhelmed",
+      "Using rewards to motivate herself"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights, prefers calm and quiet environments, enjoys soft textures and comfortable clothing, dislikes strong smells, tends to be a visual learner",
+    "food_sensory_details": "Prefers bland foods with minimal texture. Safe foods include plain pasta with butter, grilled chicken breast (only if cooked until completely dry), goldfish crackers, and vanilla yogurt (specific brand: Dannon). Avoids anything with strong flavors, sauces, or visible fat. Dislikes creamy textures and anything that feels slimy in her mouth. Often skips meals when stressed or overwhelmed, relying on snacks to get through the day. Finds it easier to eat when distracted, like when watching TV."
+  },
+  "current_life_context": {
+    "where_they_live": "Small apartment in South City, close to her family and her brother's school.",
+    "work_school_situation": "Works full-time as an administrative assistant at a local company. The job is stable but unfulfilling. Feels stuck in her current role.",
+    "commute_daily_rhythms": "Drives to work each day. Commute is relatively short but can be stressful due to traffic. Spends her evenings helping her sibling with homework and managing household chores. Often feels exhausted by the end of the day.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living in St. Louis",
+      "Lack of affordable mental health resources",
+      "Limited job opportunities in her field",
+      "Concerns about her sibling's future"
+    ],
+    "safe_spaces": [
+      "Her apartment",
+      "Her partner's home",
+      "Quiet coffee shops",
+      "Local parks",
+      "Online support groups"
+    ],
+    "support_system": "Her partner, her brother, a few close friends, online support groups. Her parents are supportive but not emotionally available."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "I will be with Sparkle at this time during the phone call :)",
+    "what_they_want_to_change": [
+      "Prioritize her own needs and well-being",
+      "Develop healthier coping mechanisms for stress and anxiety",
+      "Set boundaries with her family and others",
+      "Explore her own interests and passions",
+      "Pursue personal and professional goals",
+      "Improve her self-esteem and self-worth",
+      "Learn to accept herself and her neurodivergence"
+    ],
+    "whats_in_the_way": [
+      "Guilt",
+      "Fear of disappointing others",
+      "Perfectionism",
+      "Lack of time and energy",
+      "Financial constraints",
+      "Difficulty asking for help",
+      "Negative self-talk",
+      "Past trauma"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "",
+    "quote_hope": "",
+    "quotes_additional": [
+      "I will be with Sparkle at this time during the phone call :)"
+    ],
+    "liz_clinical_narrative": "This client is navigating a complex web of responsibilities and emotional demands. She's spent so long caring for others that she's lost sight of her own needs and desires. Her anxiety and potential ADHD symptoms are exacerbated by the constant pressure she puts on herself. Therapy can provide a safe space for her to explore her own identity, develop healthier coping mechanisms, and set boundaries that protect her well-being. We can work together to help her recognize her strengths, challenge her negative self-talk, and rediscover her passions. It's time for her to prioritize herself and create a life that is both fulfilling and sustainable.",
+    "therapy_preferences": "Neurodivergent-affirming therapist, empathetic and understanding approach, solution-focused therapy, cognitive behavioral therapy, mindfulness-based techniques, family therapy"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a caregiver struggling with burnout and anxiety? Enlitens provides neurodivergent-affirming therapy to help you prioritize your own well-being.",
+      "Are you feeling overwhelmed by the demands of caring for a loved one with neurodivergence? Enlitens can help you develop healthier coping mechanisms and set boundaries.",
+      "It's time to put yourself first. Enlitens offers a safe and supportive space for you to explore your own needs and desires."
+    ],
+    "primary_keywords": [
+      "caregiver burnout",
+      "anxiety",
+      "neurodivergent-affirming therapy",
+      "St. Louis",
+      "adult ADHD",
+      "boundary setting",
+      "self-care"
+    ],
+    "local_entities": [
+      "South City",
+      "St. Louis",
+      "community resources",
+      "support groups"
+    ],
+    "content_angles": [
+      "The challenges of being a caregiver for a neurodivergent loved one",
+      "How to prioritize your own well-being while caring for others",
+      "The importance of setting boundaries in relationships"
+    ]
+  }
+}

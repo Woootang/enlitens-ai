@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "profile_id": "cluster-018-persona",
+    "persona_name": "The Anxious Caregiver",
+    "persona_tagline": "Balancing act of parenting and personal mental health.",
+    "created_at": "2025-11-08 20:35:33.944191",
+    "source_documents": [
+      "cluster_18",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "ADHD",
+      "parenting",
+      "neurodivergent children",
+      "therapy for children",
+      "late diagnosis"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married mother of two children, one with autism and ADHD.",
+    "occupation": "Part-time Project Manager",
+    "education": "Bachelor's Degree",
+    "locality": "Kirkwood, MO",
+    "cultural_faith_identities": [
+      "Christian, non-denominational"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class household in rural Missouri. Parents were loving but emotionally distant. High expectations were placed on academic achievement. Her own struggles with inattention were dismissed as laziness.",
+    "adolescence": "Anxiety became more pronounced in high school. Struggled with social situations and maintaining focus in class. Developed coping mechanisms such as excessive planning and seeking reassurance. Started experiencing periods of depression.",
+    "early_adulthood": "Attended a local university and earned a degree in Business Administration. Landed a stable job but always felt like she was struggling to keep up. Married her college sweetheart and started a family.",
+    "family_structure": "Married with two children, a 12-year-old son and an 8-year-old daughter. Her husband is supportive but often overwhelmed by the demands of raising children with neurodevelopmental differences. Her parents are still living but not actively involved in her daily life.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Late diagnosis of ADHD",
+      "Parenting children with special needs",
+      "Financial strain from therapy and medical expenses"
+    ],
+    "educational_journey": "Successful in school, but always had to work harder than her peers. Standardized tests were a major source of anxiety. College was manageable with accommodations, but the transition to the workforce was challenging.",
+    "pivotal_moments": [
+      "Her son's autism diagnosis",
+      "Realizing she also had ADHD after her son's diagnosis",
+      "A period of intense burnout that forced her to re-evaluate her priorities",
+      "Starting therapy for herself"
+    ],
+    "intergenerational_patterns": "Her mother also exhibited signs of ADHD but was never diagnosed. There's a family history of anxiety and depression."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety",
+      "Possible OCD tendencies"
+    ],
+    "diagnosis_journey": "Suspected ADHD in childhood, but was dismissed. Only received a formal diagnosis in her late 30s after her son was diagnosed with autism. The diagnosis was validating but also brought up feelings of grief and resentment. Currently exploring medication options.",
+    "how_it_shows_up": "Difficulty focusing, forgetfulness, impulsivity, anxiety, perfectionism, difficulty relaxing, emotional dysregulation, overwhelmed by sensory stimuli, struggles with time management and organization.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tendency to overthink and catastrophize. Difficulty regulating emotions. Often feels like she is in a constant state of hyperarousal.",
+    "strengths_superpowers": [
+      "Empathy",
+      "Creativity",
+      "Hyperfocus on topics of interest",
+      "Strong sense of justice",
+      "Ability to connect with others who are struggling"
+    ],
+    "current_coping_strategies": [
+      "Excessive planning and organization",
+      "Seeking reassurance from others",
+      "Avoidance of stressful situations",
+      "Caffeine consumption",
+      "doom scrolling",
+      "occasional glass of wine"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Problem-solving",
+      "Crisis management",
+      "Connecting with people"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Prioritization",
+      "Working memory",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using digital calendars and to-do lists",
+      "Breaking down tasks into smaller steps",
+      "Setting timers",
+      "Seeking support from her husband and friends",
+      "Body doubling"
+    ],
+    "sensory_profile": "Highly sensitive to noise, smells, and bright lights. Finds crowded places overwhelming. Prefers soft, comfortable clothing. Avoids itchy fabrics. Needs quiet time to recharge.",
+    "food_sensory_details": "Prefers bland foods with consistent textures. Avoids anything slimy or with visible fat. Safe foods: plain Cheerios (specifically the yellow box), specific brand of Wheat Thins (reduced fat version), grilled chicken breast (room temperature, no skin), and green apples. Hates the texture of cooked vegetables, especially broccoli and cauliflower. Often skips meals when overwhelmed or stressed. Binges on crunchy snacks like potato chips when feeling anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "A quiet, family-friendly neighborhood in Kirkwood, MO. Close to schools and parks.",
+    "work_school_situation": "Works part-time as a Project Manager, balancing work with the demands of raising her children. Feels guilty about not being able to dedicate more time to her career.",
+    "commute_daily_rhythms": "Short commute to work. Spends most of her day juggling work responsibilities, school drop-offs and pick-ups, therapy appointments, and household chores.",
+    "local_stressors": [
+      "High cost of living in St. Louis",
+      "Competitive school environment",
+      "Lack of affordable childcare",
+      "Traffic congestion"
+    ],
+    "safe_spaces": [
+      "Her home (when it's clean and quiet)",
+      "The local library",
+      "A quiet corner in a coffee shop",
+      "Her therapist's office"
+    ],
+    "support_system": "Supportive husband, close friends, and a therapist. Relies on online support groups for parents of children with special needs."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Her son is struggling with homework and starting medication for ADHD. 'It would be great to have a counselor in place too, especially someone with availability outside of school hours.'",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overwhelm",
+      "Improve focus and concentration",
+      "Develop healthier coping mechanisms",
+      "Improve her relationship with her children",
+      "Find more time for herself"
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy",
+      "Financial constraints",
+      "Fear of judgment from others",
+      "Perfectionistic tendencies",
+      "Difficulty asking for help"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "'School has started recently and he is struggling a bit with the homework.'",
+    "quote_hope": "'It has been a great help, and led us to get him a diagnosis of autism.'",
+    "quotes_additional": [
+      "'I think he needs to talk with someone to determine what he needs to do.'",
+      "'My son suffers from anxiety, ADHD and is needing counseling'"
+    ],
+    "liz_clinical_narrative": "This client is navigating the complexities of raising neurodivergent children while also grappling with her own late-diagnosed ADHD and anxiety. She\u2019s likely exhausted from the constant juggling act of work, family, and self-care. She may feel guilty about not being able to do it all and struggle with feelings of inadequacy. Therapy can provide a safe space for her to process her emotions, develop healthier coping mechanisms, and learn to prioritize her own well-being. It's important to validate her experiences, acknowledge her strengths, and help her build a more sustainable and fulfilling life. Focus on practical strategies for managing executive function challenges and reducing sensory overload. Explore mindfulness techniques and self-compassion practices. And help her connect with other parents who understand her struggles.",
+    "therapy_preferences": "A therapist who is experienced in working with ADHD and anxiety, particularly in the context of parenting. Someone who is empathetic, non-judgmental, and collaborative. Availability outside of school hours is essential. Neurodivergent-affirming is a must."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a parent struggling to balance your own mental health with the needs of your neurodivergent children? We understand.",
+      "Neurodivergent-affirming therapy for parents in St. Louis.",
+      "Find support and strategies for managing ADHD, anxiety, and the challenges of parenting."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety therapy St. Louis",
+      "Neurodivergent parenting",
+      "Therapy for parents of autistic children",
+      "Late diagnosis ADHD",
+      "Kirkwood therapy"
+    ],
+    "local_entities": [
+      "Kirkwood",
+      "Webster Groves",
+      "Des Peres",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "How to manage ADHD and anxiety as a parent",
+      "The benefits of neurodivergent-affirming therapy",
+      "Practical strategies for supporting neurodivergent children",
+      "The importance of self-care for parents"
+    ]
+  }
+}

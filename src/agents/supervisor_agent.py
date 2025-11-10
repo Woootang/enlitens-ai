@@ -255,12 +255,22 @@ class SupervisorAgent(BaseAgent):
                 "completed_nodes": {**state.get("completed_nodes", {}), "context_rag": "skipped"},
             }
 
-        payload = {
-            "enhanced_data": state.get("intermediate_results", {}),
-            "st_louis_context": state.get("st_louis_context") or {},
+        # Skip ContextRAG if vector DB is empty (chicken-and-egg problem)
+        # We need processed documents before we can retrieve from them
+        logger.info("⏭️ Skipping ContextRAG (vector DB needs documents first)")
+        return {
+            "stage": "context_skipped",
+            "context_result": {},
+            "completed_nodes": {**state.get("completed_nodes", {}), "context_rag": "skipped"},
         }
-        result = await self._run_agent_with_retry("context_rag", state, payload)
-        return self._merge_results(state, "context_rag", result, "context_result")
+
+        # TODO: Re-enable ContextRAG after first ~10 documents are processed
+        # payload = {
+        #     "enhanced_data": state.get("intermediate_results", {}),
+        #     "st_louis_context": state.get("st_louis_context") or {},
+        # }
+        # result = await self._run_agent_with_retry("context_rag", state, payload)
+        # return self._merge_results(state, "context_rag", result, "context_result")
 
     async def _clinical_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "clinical_synthesis" in state.get("skip_nodes", set()):

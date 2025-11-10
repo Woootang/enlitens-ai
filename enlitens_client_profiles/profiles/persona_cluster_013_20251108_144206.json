@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "profile_id": "cluster-035-persona",
+    "persona_name": "Overwhelmed Graduate, Long-Distance Love",
+    "persona_tagline": "Navigating new career and international relationship while questioning medication.",
+    "created_at": "2025-11-08 20:41:50.488938",
+    "source_documents": [
+      "cluster_35",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "recent graduate",
+      "anxiety",
+      "medication hesitant",
+      "long-distance relationship",
+      "overwhelmed"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "22-25",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "White",
+    "current_life_situation": "Recently graduated, starting a corporate job, in a long-distance relationship.",
+    "occupation": "Entry-level Corporate Employee",
+    "education": "Bachelor's Degree",
+    "locality": "Central West End, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class, suburban household in St. Louis County. Both parents were present but emotionally distant, focusing on achievement and academics. Home life was stable but lacked warmth and open communication.",
+    "adolescence": "Excelled academically, putting immense pressure on herself to maintain a perfect GPA. Socially awkward and struggled to connect with peers, often feeling like an outsider. Developed anxiety around performance and social situations. School became a refuge from the emotional coldness at home.",
+    "early_adulthood": "College was a mix of academic success and overwhelming stress. Struggled with time management and organization, often pulling all-nighters to meet deadlines. Experimented with alcohol and partying to cope with anxiety and loneliness. Landed a corporate job after graduation, feeling both excited and terrified.",
+    "family_structure": "Two-parent household with one younger brother. Parents were high-achieving professionals who prioritized career success. Little emotional support or validation provided at home. Sibling rivalry was present, contributing to feelings of inadequacy.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "High expectations and pressure to perform",
+      "Social isolation in adolescence",
+      "Difficulty managing stress and anxiety"
+    ],
+    "educational_journey": "Attended highly competitive public schools in St. Louis County. Excelled academically but struggled with executive function and organization. Attended a prestigious university, majoring in Business Administration. Graduated with honors but feeling burnt out and uncertain about the future.",
+    "pivotal_moments": [
+      "Getting accepted into her dream college: Felt like validation of her hard work, but also increased pressure.",
+      "First panic attack during a college exam: Realized she needed to address her anxiety.",
+      "Meeting her girlfriend online: Opened up a new world of connection and vulnerability, but also brought new challenges.",
+      "Starting her corporate job: Overwhelmed by the demands and expectations, questioning her abilities.",
+      "Considering medication for anxiety: Acknowledging that her current coping strategies are not sustainable."
+    ],
+    "intergenerational_patterns": "Her mother also struggled with anxiety and perfectionism, modeling a pattern of suppressing emotions and prioritizing achievement. Grandfather was a workaholic with little time for family, contributing to a cycle of emotional distance and unmet needs."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible ADHD"
+    ],
+    "diagnosis_journey": "Suspects she has ADHD but has not been formally diagnosed. Has been researching symptoms and relates to difficulties with focus, organization, and impulsivity. Hesitant to seek diagnosis due to stigma and fear of medication.",
+    "how_it_shows_up": "Overwhelmed by new job, difficulty focusing, struggles with time management, procrastination, anxiety, racing thoughts, difficulty unwinding, ruminating on past mistakes, constantly second-guessing herself.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Prone to anxiety and panic attacks. Difficulty regulating emotions and managing stress. Sympathetic nervous system is often activated, leading to chronic tension and fatigue.",
+    "strengths_superpowers": [
+      "High intelligence and academic ability",
+      "Strong work ethic and determination",
+      "Creative problem-solving skills",
+      "Empathy and compassion for others",
+      "Loyal and supportive friend"
+    ],
+    "current_coping_strategies": [
+      "Overworking to compensate for perceived shortcomings",
+      "Procrastinating and then cramming to meet deadlines",
+      "Isolating herself when feeling overwhelmed",
+      "Scrolling social media to numb emotions",
+      "Ruminating on negative thoughts and feelings"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "High intellectual capacity",
+      "Strong analytical skills",
+      "Good long-term memory"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks",
+      "Trouble prioritizing and organizing",
+      "Poor time management skills",
+      "Easily distracted",
+      "Struggles with planning and execution",
+      "Overwhelmed by large projects"
+    ],
+    "ef_workarounds": [
+      "Using a planner (sporadically)",
+      "Making lists (that she often loses)",
+      "Setting alarms (that she ignores)",
+      "Trying to break down tasks into smaller steps (but getting lost in the details)"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Avoids crowded places and overwhelming sensory environments. Finds comfort in routine and predictability.",
+    "food_sensory_details": "Highly particular about food textures. Dislikes anything slimy or mushy, such as cooked spinach or overripe bananas. Prefers foods that are crunchy or crispy. Safe foods include: air-fried chicken tenders (only if perfectly crispy), plain rice cakes, specific brand of pretzel sticks (Rold Gold thin pretzels), and unsweetened applesauce (only Motts). Will skip meals entirely if overwhelmed, often forgetting to eat until she feels faint. Occasionally binges on processed snacks when stressed, particularly potato chips and cookies."
+  },
+  "current_life_context": {
+    "where_they_live": "Small apartment in the Central West End, close to her work. Chooses the area for its walkability and proximity to amenities, but finds it can be overwhelming at times.",
+    "work_school_situation": "Works as a junior analyst at a large corporation downtown. Feels overwhelmed by the demands of the job and struggles to keep up with her responsibilities.",
+    "commute_daily_rhythms": "Takes the MetroLink to work, which she finds stressful due to crowds and delays. Spends most of her day at a desk, feeling restless and unfulfilled. Comes home exhausted and struggles to unwind.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living in the city",
+      "Pressure to succeed in her career",
+      "Social isolation",
+      "Lack of affordable mental health resources"
+    ],
+    "safe_spaces": [
+      "Her apartment (when it's clean and organized)",
+      "Quiet coffee shops",
+      "Forest Park (when it's not too crowded)",
+      "Video calls with her girlfriend"
+    ],
+    "support_system": "Her girlfriend in Amsterdam/Pakistan is her primary source of emotional support. Struggles to connect with colleagues and feels isolated at work. Maintains limited contact with her family due to strained relationships."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling overwhelmed by her new job and the challenges of a long-distance relationship. Questioning whether she needs medication for anxiety and wants to explore alternative coping strategies.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and stress",
+      "Improve time management and organization",
+      "Develop healthier coping mechanisms",
+      "Strengthen her relationship with her girlfriend",
+      "Gain clarity about her career path",
+      "Determine if medication is right for her"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism and fear of failure",
+      "Procrastination and avoidance",
+      "Difficulty asking for help",
+      "Lack of self-compassion",
+      "Stigma surrounding mental health and medication",
+      "Limited financial resources"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"I'm just feeling a little overwhelmed... started corporate job\"",
+    "quote_hope": "\"Being in a relationship brings up things you don't know you need to work on.\"",
+    "quotes_additional": [
+      "thinking about meds, if I need it or not"
+    ],
+    "liz_clinical_narrative": "It sounds like you're carrying a lot right now, and it's understandable to feel overwhelmed. Starting a new job while navigating a long-distance relationship can be incredibly challenging, especially when you're also questioning whether medication is the right path for you. It takes courage to acknowledge these struggles and seek support. We can work together to explore your anxiety, develop coping strategies that resonate with you, and help you make informed decisions about your mental health journey. I want to create a safe space for you to explore those \"things you don't know you need to work on\" and help you build a life that feels more manageable and fulfilling. You're not alone in this.",
+    "therapy_preferences": "Cognitive Behavioral Therapy (CBT), mindfulness-based techniques, talk therapy, solution-focused therapy, someone who understands the challenges of being a young professional."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Feeling overwhelmed after graduation? We help young professionals navigate the transition to corporate life and manage anxiety.",
+      "Is long-distance love bringing up unexpected challenges? Our therapists can help you strengthen your relationship and build emotional resilience.",
+      "Questioning whether medication is right for you? We offer neurodivergent-affirming therapy to explore your options and find coping strategies that work for you."
+    ],
+    "primary_keywords": [
+      "anxiety",
+      "long-distance relationship",
+      "recent graduate",
+      "corporate job",
+      "medication hesitant",
+      "ADHD",
+      "overwhelmed",
+      "young professional",
+      "St. Louis therapy"
+    ],
+    "local_entities": [
+      "Central West End",
+      "Clayton",
+      "Downtown St. Louis",
+      "Washington University",
+      "Forest Park",
+      "MetroLink"
+    ],
+    "content_angles": [
+      "The unique challenges of long-distance relationships and mental health",
+      "How to navigate the transition from college to corporate life with anxiety",
+      "Alternatives to medication for managing anxiety and ADHD"
+    ]
+  }
+}

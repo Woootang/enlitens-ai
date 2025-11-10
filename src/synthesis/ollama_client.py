@@ -25,8 +25,8 @@ from src.utils.settings import get_settings
 logger = logging.getLogger(__name__)
 
 VLLM_DEFAULT_URL = "http://localhost:8000/v1"
-VLLM_DEFAULT_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
-MONITORING_MODEL = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
+VLLM_DEFAULT_MODEL = "/home/antons-gs/enlitens-ai/models/qwen2.5-14b-instruct-awq"
+MONITORING_MODEL = "/home/antons-gs/enlitens-ai/models/qwen2.5-14b-instruct-awq"
 
 
 class VLLMClient:

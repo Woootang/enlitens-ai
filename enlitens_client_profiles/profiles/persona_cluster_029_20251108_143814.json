@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "profile_id": "cluster-029-persona",
+    "persona_name": "Anxious Executive Functioning Teen",
+    "persona_tagline": "Navigating the complexities of adolescence with undiagnosed ADHD.",
+    "created_at": "2025-11-08 20:37:57.224115",
+    "source_documents": [
+      "cluster_29",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "teen",
+      "executive functioning",
+      "time blindness",
+      "organization",
+      "social difficulties",
+      "sleep issues"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "14-16",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Questioning",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "High school student living with parents",
+    "occupation": "Student",
+    "education": "High School",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a comfortable, upper-middle-class home in Webster Groves, Sarah always felt like she was trying to keep up. Her parents valued academic achievement, and while loving, they struggled to understand her distractibility and frequent disorganization. Her room was always a mess, and she frequently lost things, leading to frustration and scolding.",
+    "adolescence": "In adolescence, Sarah\u2019s struggles intensified. High school brought increased academic pressure and social expectations. She excelled when interested but struggled with rote tasks and maintaining focus. Socially, she found it hard to connect with peers, often missing social cues and feeling awkward in group settings. Sleep became a battleground, with racing thoughts keeping her awake at night.",
+    "early_adulthood": "N/A - Still a teen.",
+    "family_structure": "Two-parent household with one younger brother. Parents are both professionals \u2013 her mother is a lawyer, and her father is an engineer. The family is outwardly successful but struggles with internal communication, especially around Sarah's challenges.",
+    "formative_adversities": [
+      "Frequent moving as a child (elementary school changes)",
+      "Difficulty with social integration",
+      "Internalized pressure to succeed academically",
+      "Being consistently told she was 'not living up to her potential'"
+    ],
+    "educational_journey": "Started in a private elementary school before transitioning to the Webster Groves public school system. While intelligent, she found the structure overwhelming and struggled with homework completion and test preparation. Showed flashes of brilliance in creative writing and art classes, but these were often overshadowed by her struggles in other subjects.",
+    "pivotal_moments": [
+      "Being diagnosed with anxiety in middle school, which partially explained some of her struggles but didn't fully address the root cause.",
+      "Failing a major history test due to forgetting about it entirely, leading to a significant drop in her grades and increased parental pressure.",
+      "Having a close friend group dissolve due to Sarah's inconsistent communication and forgetfulness.",
+      "Discovering online communities of people with ADHD and realizing her struggles might align with their experiences."
+    ],
+    "intergenerational_patterns": "Sarah's maternal grandfather was described as 'eccentric' and 'easily distracted,' potentially hinting at undiagnosed neurodivergence in previous generations."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (suspected, undiagnosed)",
+      "Anxiety"
+    ],
+    "diagnosis_journey": "Sarah's journey began with a diagnosis of anxiety in middle school. While medication helped manage some of the symptoms, it didn't address the underlying issues of executive dysfunction and inattention. After stumbling upon online resources about ADHD, Sarah began to suspect she might have it. She has brought this up to her parents, who are initially dismissive but willing to explore the possibility further.",
+    "how_it_shows_up": "Executive functioning challenges manifest as difficulty with organization, time management, and task initiation. She forgets important dates and assignments, struggles to keep her room tidy, and often feels overwhelmed by the sheer volume of tasks she needs to complete. Socially, she misses social cues, interrupts conversations, and has difficulty maintaining friendships due to forgetfulness and inconsistent communication. She also has trouble falling asleep due to racing thoughts and difficulty winding down.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to fluctuate between hyperarousal (restlessness, fidgeting) and hypoarousal (sluggishness, withdrawal). Difficulty regulating emotions, leading to outbursts of frustration and tearfulness.",
+    "strengths_superpowers": [
+      "Creative thinking",
+      "Strong intuition",
+      "Ability to hyperfocus on topics of interest",
+      "Empathy and compassion"
+    ],
+    "current_coping_strategies": [
+      "Procrastination",
+      "Avoidance of overwhelming tasks",
+      "Seeking reassurance from parents",
+      "Spending excessive time online",
+      "Using music to block out distractions"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Problem-solving in creative domains",
+      "Connecting seemingly unrelated ideas",
+      "Ability to think outside the box"
+    ],
+    "ef_friction_points": [
+      "Time blindness",
+      "Difficulty prioritizing tasks",
+      "Poor planning and organization skills",
+      "Forgetfulness",
+      "Task initiation",
+      "Staying focused"
+    ],
+    "ef_workarounds": [
+      "Using multiple alarms (which she often snoozes or ignores)",
+      "Trying to use planners (but forgetting to update them)",
+      "Relying on parents for reminders (which causes friction)"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Seeks out tactile stimulation (fidgeting, playing with hair). Overwhelmed by strong smells.",
+    "food_sensory_details": "Avoids foods with mixed textures, such as casseroles or stews. Dislikes anything slimy or mushy. Textures are extremely important. Safe foods include: plain pasta with butter (specific brand of butter), air-popped popcorn (no butter or salt), and certain brands of granola bars (specifically Nature Valley Oats 'n Honey). Refuses to eat meat with visible fat. Only eats chicken nuggets if they are McDonald's brand and eaten immediately after purchase (cannot be reheated). Skips meals when overwhelmed or stressed."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban home in Webster Groves, MO",
+    "work_school_situation": "High school student attending Webster Groves High School. Academically struggling in some areas, excelling in others. Feels immense pressure to maintain a certain GPA.",
+    "commute_daily_rhythms": "Walks to school on most days. After school, attends extracurricular activities (drama club) or spends time with friends (inconsistently). Evenings are spent on homework (often procrastinated) and screen time.",
+    "local_stressors": [
+      "Academic pressure at Webster Groves High School",
+      "Social expectations within her peer group",
+      "Parental expectations for academic success",
+      "Lack of understanding about her struggles"
+    ],
+    "safe_spaces": [
+      "Her bedroom (despite its disorganization)",
+      "The school's drama club",
+      "Online communities of people with ADHD"
+    ],
+    "support_system": "Parents (who are well-meaning but sometimes unhelpful), a few close friends (but struggles with maintaining these relationships), school counselor."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Parents are seeking therapy to address Sarah's executive functioning difficulties, social challenges, and sleep problems, hoping to provide her with the support she needs to succeed in high school.",
+    "what_they_want_to_change": [
+      "Improve executive functioning skills (organization, time management)",
+      "Reduce anxiety and stress",
+      "Improve social skills and build stronger friendships",
+      "Improve sleep habits",
+      "Gain a better understanding of herself and her struggles"
+    ],
+    "whats_in_the_way": [
+      "Lack of self-awareness",
+      "Resistance to change",
+      "Fear of failure",
+      "Procrastination",
+      "Perfectionism",
+      "Difficulty asking for help",
+      "Lack of parental understanding",
+      "Internalized stigma surrounding mental health"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I forget things, have a lot of difficulty socially, and have a lot of trouble falling asleep.",
+    "quote_hope": "I think if I understood what was going on, I could actually do better.",
+    "quotes_additional": [
+      "My teen needs help with her executive functioning, time blindness, organization, etc.",
+      "She shows signs of needing some further support that I would love to assess."
+    ],
+    "liz_clinical_narrative": "Sarah is a bright and capable young woman who is struggling to navigate the complexities of adolescence. Her executive functioning challenges, coupled with underlying anxiety, are significantly impacting her academic performance, social relationships, and overall well-being. She presents as overwhelmed, frustrated, and lacking in self-confidence. A comprehensive assessment is crucial to determine the extent of her neurodivergence and develop a tailored treatment plan that addresses her specific needs. It will be important to work collaboratively with Sarah and her parents to create a supportive environment that fosters self-compassion, reduces stigma, and empowers her to embrace her unique strengths.",
+    "therapy_preferences": "Individual therapy, family therapy (to improve communication), psychoeducation about ADHD and executive functioning, strategies for managing anxiety, support for improving social skills."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your teen struggling with organization, time management, and focus? We specialize in supporting neurodivergent teens in the St. Louis area.",
+      "Does your teen forget important dates, struggle with social cues, and have difficulty falling asleep? Enlitens provides neurodivergent-affirming therapy to help teens thrive.",
+      "Executive functioning challenges can significantly impact a teen's academic performance and social relationships. We offer compassionate and effective therapy to help your teen overcome these obstacles."
+    ],
+    "primary_keywords": [
+      "teen executive functioning",
+      "ADHD therapy St. Louis",
+      "anxiety in teens",
+      "time blindness",
+      "organization skills for teens",
+      "neurodivergent therapy",
+      "social skills for teens"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "St. Louis County",
+      "Kirkwood",
+      "Rock Hill",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "Executive functioning tips for teens",
+      "Understanding ADHD in girls",
+      "How to support a teen with time blindness"
+    ]
+  }
+}

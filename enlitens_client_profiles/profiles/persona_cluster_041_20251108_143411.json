@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "profile_id": "cluster-041-persona",
+    "persona_name": "Late-Diagnosed Teen Navigating Identity and Anxiety",
+    "persona_tagline": "Finding self-acceptance amidst anxiety, autism, and societal pressures.",
+    "created_at": "2025-11-08 20:33:53.806874",
+    "source_documents": [
+      "cluster_41",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "autism",
+      "anxiety",
+      "teen",
+      "late diagnosis",
+      "identity",
+      "family conflict"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "15-18",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Likely LGBTQ+",
+    "ethnicity": "Not specified, assume Caucasian",
+    "current_life_situation": "High school student, virtual or hybrid learning",
+    "occupation": "Student",
+    "education": "High school",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up, Maya always felt different, but couldn't pinpoint why. Her parents, while loving, often dismissed her sensitivities as 'being dramatic' or 'attention-seeking.' She was a sensitive child, easily overwhelmed by loud noises and social situations. She often retreated into books and imaginative play as a way to cope. There was a subtle pressure to conform and 'be normal,' leading her to mask her true self from a young age. Financial stability was present, but emotional attunement was lacking.",
+    "adolescence": "Adolescence brought increased social pressures and a growing awareness of her differences. Navigating friendships and romantic relationships became increasingly difficult. School became a source of anxiety, with sensory overload and social expectations contributing to frequent absences. She began experiencing symptoms of depression and anxiety, leading to increasing struggles in school and at home. Family conflicts intensified as she pushed back against expectations and struggled to express her needs.",
+    "early_adulthood": "N/A - still in adolescence",
+    "family_structure": "Two-parent household, potentially divorced or strained relationship between parents. Siblings may or may not be present, but if they are, there's a sense of comparison and feeling like the 'difficult' child. Possible intergenerational trauma or undiagnosed neurodivergence in family members, leading to a lack of understanding and support.",
+    "formative_adversities": [
+      "Late diagnosis of autism and ADHD",
+      "Masking and suppressing her true self",
+      "Social isolation and bullying",
+      "Family conflicts and lack of understanding",
+      "Academic struggles and school refusal"
+    ],
+    "educational_journey": "Started in public school, but struggled with sensory overload and social anxiety. Frequent absences and academic difficulties led to evaluation and eventual diagnosis. Transitioned to virtual homeschool in hopes of improving academic performance and reducing anxiety. Still struggles with motivation and focus, despite the change in environment.",
+    "pivotal_moments": [
+      "Realizing she was different from her peers and not understanding why.",
+      "Receiving her autism and ADHD diagnosis, providing some explanation but also raising new questions.",
+      "Experiencing a panic attack at school and realizing she needed help.",
+      "Advocating for herself and asking her parents to find her a therapist.",
+      "Discovering online communities of autistic individuals and realizing she wasn't alone."
+    ],
+    "intergenerational_patterns": "Possible undiagnosed neurodivergence in parents or other family members. A history of suppressing emotions and conforming to societal expectations. Potential for generational trauma related to mental health and identity."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autism",
+      "ADHD",
+      "Anxiety",
+      "Depression",
+      "Potentially LGBTQ+"
+    ],
+    "diagnosis_journey": "Maya suspected something was different about her for years, but her concerns were often dismissed. It wasn't until her academic struggles and increasing anxiety led to a formal evaluation that she received her autism and ADHD diagnoses. The diagnosis process was both validating and overwhelming, providing some answers but also raising new questions about her identity and future. She feels a mix of relief and anger that it took so long to be understood.",
+    "how_it_shows_up": "Anxiety manifests as panic attacks, social anxiety, and obsessive thoughts. Autism leads to sensory sensitivities, difficulty with social communication, and intense special interests. ADHD contributes to inattention, impulsivity, and difficulty with executive function. Depression results in low mood, lack of motivation, and feelings of hopelessness. She struggles with masking and code-switching, leading to exhaustion and burnout.",
+    "nervous_system_pattern": "Highly sensitive and easily overwhelmed. Prone to hyperarousal and fight-or-flight responses. Difficulty regulating emotions and sensory input. Tends to internalize stress and anxiety, leading to physical symptoms such as headaches and stomachaches.",
+    "strengths_superpowers": [
+      "Intense focus on special interests",
+      "Creativity and imagination",
+      "Empathy and compassion",
+      "Strong sense of justice",
+      "Unique perspective and problem-solving skills"
+    ],
+    "current_coping_strategies": [
+      "Withdrawing from social situations",
+      "Engaging in special interests",
+      "Seeking reassurance from parents",
+      "Using fidget toys",
+      "Listening to music",
+      "Virtual homeschooling"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Hyperfocus on areas of interest",
+      "Good long-term memory for details related to special interests",
+      "Creative problem-solving within areas of expertise"
+    ],
+    "ef_friction_points": [
+      "Difficulty with planning and organization",
+      "Trouble initiating and completing tasks",
+      "Poor time management",
+      "Difficulty with transitions",
+      "Emotional regulation challenges",
+      "Focusing in non-preferred settings"
+    ],
+    "ef_workarounds": [
+      "Using visual schedules and timers",
+      "Breaking down tasks into smaller steps",
+      "Creating a dedicated workspace",
+      "Seeking support from parents or teachers",
+      "Utilizing fidget toys or sensory tools"
+    ],
+    "sensory_profile": "Highly sensitive to sensory input. Overwhelmed by loud noises, bright lights, strong smells, and certain textures. Seeks out calming sensory experiences such as soft blankets, quiet spaces, and gentle movements. Avoids crowded places and situations with high sensory stimulation.",
+    "food_sensory_details": "Avoids foods with mixed textures, such as casseroles or stews. Prefers foods that are easily identifiable and separated on the plate. Safe foods include plain pasta with butter, grilled cheese sandwiches (crusts removed, specific brand of cheddar), and crunchy snacks like potato chips (only Lay's classic, nothing flavored) and pretzels (Rold Gold sticks only). Dislikes anything slimy or mushy, such as yogurt or pudding. Only drinks water, and it must be ice cold. Sometimes skips meals altogether when overwhelmed or anxious, leading to nutritional deficiencies. Struggles with trying new foods due to fear of the unknown texture or taste."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban home in St. Louis County, likely with parents or other family members.",
+    "work_school_situation": "Virtual homeschool student, potentially working a part-time job for limited hours.",
+    "commute_daily_rhythms": "No commute due to virtual school. Daily routine consists of online classes, homework, and engaging in special interests. Limited social interaction outside of online communities. Spends a lot of time in her room, creating a safe and comfortable space.",
+    "local_stressors": [
+      "Family conflicts",
+      "Social isolation",
+      "Academic pressure",
+      "Sensory overload in public spaces",
+      "Lack of understanding from peers and adults"
+    ],
+    "safe_spaces": [
+      "Her bedroom",
+      "Online communities",
+      "Nature (parks, gardens)",
+      "Library"
+    ],
+    "support_system": "Parents (though potentially strained relationship), online friends, therapist (hopefully), potentially a supportive teacher or family member."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Recently diagnosed and struggling to understand her autism and ADHD. Experiencing increased anxiety and depression, leading to academic difficulties and social isolation. Wants to learn coping strategies and develop a stronger sense of self-acceptance.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and panic attacks",
+      "Improve academic performance",
+      "Develop stronger social skills",
+      "Increase self-esteem and confidence",
+      "Find a sense of belonging and acceptance",
+      "Stop 'masking' and be her authentic self",
+      "Improve family communication"
+    ],
+    "whats_in_the_way": [
+      "Lack of understanding from family members",
+      "Social anxiety and fear of judgment",
+      "Difficulty with executive function and organization",
+      "Sensory sensitivities and overwhelm",
+      "Negative self-talk and limiting beliefs",
+      "Trauma from past experiences of bullying or social rejection"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I feel like I'm two different people driving 'the bus.'",
+    "quote_hope": "After reading your bio you seem perfect for her. (She agreed) if possible we would like to set up a session, if you are currently taking on new clients.",
+    "quotes_additional": [
+      "She has been struggling with wanting to be accepted and being 'different'",
+      "She also navigates trauma and difficulties with her father (my ex-husband) both as a result of the divorce and with him not fully understanding her autism."
+    ],
+    "liz_clinical_narrative": "Maya's story is one of seeking understanding and acceptance in a world that often feels overwhelming. Her recent diagnoses of autism and ADHD have shed light on her struggles, but also opened up new avenues for self-discovery. It's clear that years of masking and suppressing her true self have taken a toll, leading to anxiety, depression, and a sense of disconnection. My hope is to create a safe and supportive space where Maya can explore her identity, develop coping strategies, and cultivate a deeper sense of self-compassion. Together, we can work to navigate the challenges she faces and empower her to embrace her unique strengths and abilities.",
+    "therapy_preferences": "Prefers in-person therapy appointments for the human connection. Needs a therapist who is knowledgeable about autism and ADHD, affirming of LGBTQ+ identities, and experienced in working with teens. Values authenticity, empathy, and a non-judgmental approach."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Neurodivergent-affirming therapy for teens in St. Louis. Supporting autistic and ADHD teens in navigating anxiety, identity, and family challenges.",
+      "Are you a teen struggling with anxiety, autism, or ADHD? Find a safe and supportive space to be yourself.",
+      "Therapy for teens who feel different. We understand the unique challenges faced by neurodivergent individuals."
+    ],
+    "primary_keywords": [
+      "autism therapy St. Louis",
+      "ADHD therapy St. Louis",
+      "teen anxiety therapy",
+      "neurodivergent therapist St. Louis",
+      "LGBTQ+ affirming therapist",
+      "late diagnosis autism",
+      "PDA autism"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Ladue",
+      "Clayton",
+      "Webster Groves",
+      "Kirkwood",
+      "Rock Hill",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "The importance of early diagnosis of autism and ADHD",
+      "How to support autistic teens in navigating social situations",
+      "Creating a sensory-friendly home environment for autistic individuals"
+    ]
+  }
+}

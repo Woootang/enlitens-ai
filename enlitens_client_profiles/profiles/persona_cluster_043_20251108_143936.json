@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "profile_id": "cluster-025-persona",
+    "persona_name": "Overwhelmed Trauma-Informed Homeschooling Mother",
+    "persona_tagline": "Reclaiming Calm and Identity Amidst Chaos.",
+    "created_at": "2025-11-08 20:39:19.485814",
+    "source_documents": [
+      "cluster_25",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "trauma",
+      "homeschooling",
+      "motherhood",
+      "DID",
+      "sensory sensitivities"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "30-40",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married mother of four, homeschooling.",
+    "occupation": "Homeschooling Parent",
+    "education": "Some College",
+    "locality": "Suburban St. Louis, Missouri",
+    "cultural_faith_identities": [
+      "Christian"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a chaotic household with inconsistent parenting. Father was emotionally distant, while mother struggled with her own mental health issues and was often overwhelmed. Frequent arguments and a general sense of instability were common.",
+    "adolescence": "Experienced significant bullying in middle school for being 'different' and 'weird'. Developed strong interests in creative writing and art as a form of escape. Started experiencing dissociative symptoms but dismissed them as teenage angst.",
+    "early_adulthood": "Married young, hoping for stability. Started a family quickly, but the pressures of motherhood exacerbated underlying mental health issues. Felt increasingly isolated and disconnected from her own identity. Trauma resurfaced after childbirth.",
+    "family_structure": "Married with four children. Strained relationship with her own parents. Husband is supportive but often works long hours, leaving her to manage the household and homeschooling responsibilities alone.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Bullying in school",
+      "Early marriage and motherhood",
+      "Postpartum depression",
+      "Traumatic birth experiences",
+      "Medical gaslighting regarding physical health"
+    ],
+    "educational_journey": "Attended multiple schools due to family moves. Struggled with traditional classroom settings due to sensory sensitivities and difficulty focusing. Found solace in homeschooling her own children, tailoring the curriculum to their individual needs and learning styles.",
+    "pivotal_moments": [
+      "The birth of her first child triggered a cascade of unresolved trauma.",
+      "A dismissive doctor minimized her physical symptoms (seizures), leading to further feelings of invalidation.",
+      "Discovering information about DID on social media resonated deeply and prompted her to seek professional help.",
+      "Deciding to homeschool her children offered a sense of control and purpose, but also increased her stress levels.",
+      "Experiencing a mental health crisis that required hospitalization."
+    ],
+    "intergenerational_patterns": "Her mother also struggled with undiagnosed mental health issues, creating a pattern of emotional unavailability and inconsistent parenting. There is a history of medical gaslighting within the family, with members' health concerns often dismissed or minimized."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (late-diagnosed)",
+      "Possible DID (self-diagnosed, seeking confirmation)",
+      "Anxiety",
+      "Depression",
+      "CPTSD"
+    ],
+    "diagnosis_journey": "Self-diagnosed ADHD after recognizing symptoms in her children and researching online. Sought professional evaluation and received confirmation in her late 30s. Suspects DID based on her experiences and research, but needs a formal diagnosis. The process of seeking diagnosis has been frustrating, with some professionals being dismissive of her concerns.",
+    "how_it_shows_up": "Difficulty regulating emotions, impulsivity, hyperfixations, memory problems, disorganization, sensory overload, dissociation, flashbacks, nightmares, intrusive thoughts, chronic fatigue, physical pain. Difficulty managing daily tasks and maintaining a consistent routine. Struggles with self-doubt and imposter syndrome.",
+    "nervous_system_pattern": "High sympathetic nervous system activation. Easily triggered by stress and sensory input. Tends to fluctuate between hyperarousal and hypoarousal states. Struggles to regulate her nervous system and find a sense of safety.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Empathy",
+      "Intuition",
+      "Resilience",
+      "Ability to connect with children on their level",
+      "Passionate about learning and personal growth"
+    ],
+    "current_coping_strategies": [
+      "Trying to implement routines and schedules (often unsuccessfully)",
+      "Sensory regulation techniques (e.g., noise-canceling headphones, weighted blanket)",
+      "Journaling",
+      "Online support groups",
+      "Medication (for ADHD and anxiety)",
+      "Avoiding overwhelming situations when possible"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Connecting with children's needs",
+      "Hyperfocus on topics of interest"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Prioritization",
+      "Emotional regulation",
+      "Working memory",
+      "Planning and sequencing"
+    ],
+    "ef_workarounds": [
+      "Using visual timers",
+      "Breaking down tasks into smaller steps",
+      "Setting reminders",
+      "Creating designated spaces for specific activities",
+      "Seeking help from her husband or friends when overwhelmed"
+    ],
+    "sensory_profile": "Highly sensitive to noise, light, and textures. Avoids crowded or chaotic environments. Prefers soft, comfortable clothing. Finds solace in nature and quiet spaces. Experiences sensory overload easily, leading to meltdowns or shutdowns.",
+    "food_sensory_details": "Avoids foods with mixed textures, like casseroles or stews. Has a strong aversion to anything slimy or overly processed. Safe foods include: plain, air-popped popcorn (no butter), specific brand of organic chicken broth (Pacific Foods), room-temperature, oven-baked chicken breast seasoned only with salt and pepper, peeled cucumbers, and crunchy romaine lettuce. Texture is paramount \u2013 even slight variations in consistency can make a food inedible. Skips meals when overwhelmed or stressed, then binges on safe foods later. Only drinks water from a specific type of glass."
+  },
+  "current_life_context": {
+    "where_they_live": "A modest suburban home in St. Louis County, Missouri, close to parks and libraries.",
+    "work_school_situation": "Full-time homeschooling parent. Feels immense pressure to provide her children with a well-rounded education while also managing her own mental health challenges.",
+    "commute_daily_rhythms": "No traditional commute. Days are spent managing household chores, homeschooling, and attending to the needs of her children. Feels constantly 'on' and struggles to find time for herself.",
+    "local_stressors": [
+      "Traffic congestion in St. Louis",
+      "Limited access to affordable and neurodivergent-affirming healthcare",
+      "Pressure to conform to societal expectations of motherhood",
+      "Lack of understanding and support from extended family"
+    ],
+    "safe_spaces": [
+      "Her bedroom (when quiet and undisturbed)",
+      "Local library",
+      "Nature trails in nearby parks",
+      "Online support groups"
+    ],
+    "support_system": "Limited support system. Husband is supportive but works long hours. Struggles to connect with other parents due to social anxiety and sensory sensitivities. Relies heavily on online support groups for connection and validation."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "\"Im struggling with regulating myself, keep up with daily task, managing to stay calm when my kids are having big feelings, and also figuring out what i want to do with my life/ learning about who i am.\"",
+    "what_they_want_to_change": [
+      "Process trauma and integrate fragmented memories.",
+      "Develop healthier coping mechanisms for managing stress and emotional dysregulation.",
+      "Gain a formal diagnosis for DID and access appropriate treatment.",
+      "Improve her ability to regulate her own emotions so she can respond to her children with patience and empathy.",
+      "Rediscover her sense of self and pursue her own interests and passions.",
+      "Establish healthier boundaries with family and friends.",
+      "Improve physical health and reduce seizure frequency."
+    ],
+    "whats_in_the_way": [
+      "Lack of access to affordable and specialized therapy.",
+      "Internalized stigma surrounding mental illness.",
+      "Difficulty trusting mental health professionals due to past experiences of medical gaslighting.",
+      "Overwhelm and executive dysfunction make it difficult to prioritize self-care.",
+      "Financial constraints limit her ability to access childcare and other support services.",
+      "The constant demands of motherhood and homeschooling leave her feeling depleted and exhausted.",
+      "Fear of judgment from others."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"Entire life big T trauma combined with little t constantly in fight.\"",
+    "quote_hope": "\"learning about who i am.\"",
+    "quotes_additional": [
+      "\"Someone who believes what i have going on in my life not just something I think i have from TikTok.\"",
+      "\"physical health impacted (seizures but told not real and to just stop\""
+    ],
+    "liz_clinical_narrative": "This client presents with a complex tapestry of trauma, neurodivergence, and the overwhelming demands of motherhood. It's clear that she's carrying a significant burden and has been invalidated by medical professionals in the past. Her self-awareness and desire to understand herself, particularly the possibility of DID, is a testament to her resilience. Our work together would focus on creating a safe and validating space for her to process her trauma, explore her identity, and develop coping mechanisms for managing her sensory sensitivities and emotional dysregulation. We'd also work collaboratively to identify and address the barriers that are preventing her from accessing the support and care she needs and deserves. My priority would be to empower her to reclaim her sense of self and create a life that feels more manageable and fulfilling.",
+    "therapy_preferences": "Trauma-informed therapy, EMDR, parts work, somatic experiencing, neurodivergent-affirming approach, validation, empathy, a therapist who understands DID, a therapist who is willing to challenge medical gaslighting."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a homeschooling mom struggling with overwhelm and past trauma?",
+      "Find a therapist who understands neurodivergence and complex trauma.",
+      "Reclaim your calm and rediscover your identity."
+    ],
+    "primary_keywords": [
+      "trauma therapy St. Louis",
+      "neurodivergent therapist St. Louis",
+      "homeschooling mom burnout",
+      "DID therapy St. Louis",
+      "sensory processing sensitivity",
+      "medical gaslighting"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves",
+      "Clayton"
+    ],
+    "content_angles": [
+      "Understanding and managing sensory overload as a homeschooling parent.",
+      "How to find a therapist who validates your experiences and understands DID.",
+      "Creating a trauma-informed homeschooling environment for your children."
+    ]
+  }
+}

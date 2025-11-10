@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "profile_id": "cluster-049-persona",
+    "persona_name": "The 'Pushing It Down' Mom",
+    "persona_tagline": "Recognizing my own struggles while supporting my daughter.",
+    "created_at": "2025-11-08 20:45:34.901811",
+    "source_documents": [
+      "cluster_49",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "neurodivergent",
+      "mother",
+      "late-diagnosis",
+      "self-discovery"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mom of one daughter",
+    "occupation": "Elementary School Teacher",
+    "education": "Master's Degree in Education",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a stable, middle-class household in rural Missouri. Parents were loving but emotionally reserved. Emphasis on achievement and fitting in. Suppressed any 'quirks' to avoid standing out.",
+    "adolescence": "Excelled academically but struggled socially. Felt like an outsider despite having friends. Developed perfectionistic tendencies. Started experiencing anxiety and mild depression, which she internalized and hid.",
+    "early_adulthood": "Went to a state university, studied education. Met her husband in college. Focused on building a 'normal' life \u2013 marriage, career, house in the suburbs. Started feeling increasingly overwhelmed by the demands of work and family.",
+    "family_structure": "Nuclear family: mom, dad, younger brother. Parents are still married. Close relationship with her brother, but they don't often discuss deeper emotional issues.",
+    "formative_adversities": [
+      "Emotional neglect (parents were not attuned to her emotional needs)",
+      "Pressure to conform and achieve",
+      "Internalized anxiety and depression",
+      "Suppressed her true self"
+    ],
+    "educational_journey": "Straight-A student throughout elementary and high school. Graduated valedictorian. Attended University of Missouri - Columbia for undergrad and graduate school. Always felt pressure to perform.",
+    "pivotal_moments": [
+      "Realizing that her daughter might be neurodivergent",
+      "Recognizing similar traits in herself",
+      "Experiencing a significant period of burnout at work",
+      "Seeking therapy for her daughter and then realizing she also needed it"
+    ],
+    "intergenerational_patterns": "Her mother was also likely neurodivergent but never diagnosed. Her mother exhibited similar traits of suppressing emotions and masking to fit in."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Likely ADHD, possibly mild Autism Spectrum Disorder (self-suspected)",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Initially sought therapy for her daughter after noticing some behaviors that seemed 'different.' During the process, she started recognizing similar patterns in herself, leading to the realization that she might also be neurodivergent. Exploring the possibility of formal diagnosis but feels conflicted.",
+    "how_it_shows_up": "Difficulty focusing, especially on tasks she finds boring. Procrastination, impulsivity, and emotional dysregulation. Struggles with organization and time management. Masks her difficulties at work and in social situations, leading to exhaustion. 'Pushing them down'.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Sympathetic nervous system dominance. Tends to overthink and ruminate. Difficulty relaxing and 'turning off' her brain.",
+    "strengths_superpowers": [
+      "Empathy and compassion",
+      "Creativity and outside-the-box thinking",
+      "Strong sense of justice",
+      "Ability to connect with children",
+      "Resilience and determination"
+    ],
+    "current_coping_strategies": [
+      "Caffeine",
+      "Scrolling social media",
+      "Overworking",
+      "Avoiding difficult situations",
+      "Retail therapy"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Hyperfocus on topics of interest",
+      "Creativity and problem-solving",
+      "Ability to connect with children"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks",
+      "Procrastination",
+      "Poor time management",
+      "Disorganization",
+      "Emotional dysregulation",
+      "Masking"
+    ],
+    "ef_workarounds": [
+      "Using a planner (but often forgetting to use it)",
+      "Setting reminders (which she often ignores)",
+      "Relying on her husband to help with household tasks"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Easily overwhelmed by strong smells. Craves sensory input through fidgeting and movement.",
+    "food_sensory_details": "Very particular about food textures. Dislikes anything mushy or slimy, like cooked spinach or overripe bananas. Only eats bananas if they are slightly green. Safe foods include: crunchy peanut butter on Triscuits, plain Cheerios with whole milk, and grilled chicken (specifically Tyson brand) cut into small, bite-sized pieces. Avoids anything with visible fat or gristle. Drinks only room-temperature water."
+  },
+  "current_life_context": {
+    "where_they_live": "Owns a house in Webster Groves, MO, a suburb of St. Louis. Desirable school district, but feels pressure to 'keep up' with the other families.",
+    "work_school_situation": "Works as a third-grade teacher at a local elementary school. Enjoys working with children but feels overwhelmed by the administrative tasks and constant demands. Considering taking a leave of absence to focus on her mental health.",
+    "commute_daily_rhythms": "Drives 20 minutes to work each day. Listens to podcasts on her commute to try to de-stress. After work, she picks up her daughter from school and juggles dinner, homework, and household chores.",
+    "local_stressors": [
+      "Pressure to conform to suburban expectations",
+      "Competitive school environment",
+      "High cost of living",
+      "Traffic congestion"
+    ],
+    "safe_spaces": [
+      "Her daughter's bedroom (where they can be silly and uninhibited)",
+      "The local library",
+      "Walking in the park"
+    ],
+    "support_system": "Her husband is supportive but doesn't fully understand her struggles. Has a few close friends but feels hesitant to share her true feelings. Seeking therapy to build a stronger support system."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Recognizing her own struggles while supporting her daughter. Wants to understand herself better and develop healthier coping mechanisms.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overwhelm",
+      "Improve emotional regulation",
+      "Develop healthier coping strategies",
+      "Stop masking and embrace her true self",
+      "Improve her relationship with her daughter"
+    ],
+    "whats_in_the_way": [
+      "Fear of judgment",
+      "Internalized stigma around mental health",
+      "Lack of time and energy",
+      "Difficulty prioritizing self-care",
+      "Perfectionism"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "There are little characteristics that my daughter has always had that raise a flag that she may be on the spectrum...Some of these characteristics, I know I had as well, maybe still have but push them down.",
+    "quote_hope": "Booking the next session for myself.",
+    "quotes_additional": [],
+    "liz_clinical_narrative": "This client is experiencing a profound moment of self-discovery, triggered by her daughter's journey. She's spent a lifetime suppressing her own needs and conforming to societal expectations, leading to burnout and emotional exhaustion. Her willingness to seek help for herself, after initially focusing on her daughter, is a testament to her strength and resilience. Therapy will provide a safe space to explore her neurodivergent identity, develop healthier coping mechanisms, and cultivate self-compassion. It\u2019s about peeling back the layers of masking and finally allowing her authentic self to emerge and thrive.",
+    "therapy_preferences": "Neurodivergent-affirming therapist. Someone who understands late diagnosis and masking. Focus on self-compassion and acceptance. Practical strategies for managing anxiety and improving executive function."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a mom who's starting to recognize your own struggles while supporting your child?",
+      "Feeling burned out from years of masking and trying to fit in?",
+      "Neurodivergent-affirming therapy for moms in St. Louis"
+    ],
+    "primary_keywords": [
+      "late-diagnosed ADHD",
+      "neurodivergent mom",
+      "masking",
+      "burnout",
+      "anxiety",
+      "St. Louis therapy"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Rock Hill",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "The unique challenges of late-diagnosed neurodivergence in women",
+      "How to support your neurodivergent child without sacrificing your own well-being",
+      "Breaking free from the pressure to conform and embrace your authentic self"
+    ]
+  }
+}

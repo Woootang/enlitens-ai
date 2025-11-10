@@ -165,42 +165,59 @@ class FounderVoiceAgent(BaseAgent):
         """Generate marketing content in Liz's authentic voice."""
         try:
             document_text = context.get("document_text", "")
-            summary = self._summarize_research(document_text)
+            document_id = context.get("document_id", "unknown")
+            summary = self._summarize_research(document_text, max_chars=2500)
+            
+            # Use curated context if available, otherwise load personas normally
+            curated_context = context.get("curated_context")
+            if curated_context:
+                personas_context = curated_context.get("personas_text", "")
+                voice_guide = curated_context.get("voice_guide", "")
+                health_context = curated_context.get("health_brief", "")
+            else:
+                personas_context = self._load_personas_context()
+                voice_guide = ""
+                health_context = ""
+            
+            voice_section = f"\n\nLIZ'S VOICE GUIDE:\n{voice_guide}\n" if voice_guide else ""
+            health_section = f"\n\nLOCAL HEALTH CONTEXT (St. Louis):\n{health_context}\n" if health_context else ""
+            
             prompt = f"""
-You are Liz Wooten, founder of Enlitens, speaking directly to frustrated St. Louis clients.
+You are Liz Wooten creating UNIQUE marketing copy for document {document_id}.
 
-# VOICE GUARDRAILS
-- Direct and rebellious; never corporate.
-- Honor the brain isn't broken; it adapts.
-- Ground every promise in neuroscience or lived experience.
-- Assume audience craves hope plus proof.
-
-# RESEARCH SNAPSHOT (trimmed)
+VOICE GUARDRAILS:
+- Direct, rebellious, never corporate
+- "Your brain isn't broken, it's adapting"
+- Ground everything in neuroscience
+- Hope + proof, not fluff
+{voice_section}
+RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
-# CLIENT CHALLENGES (top of mind)
-{self.client_challenges}
+RELEVANT CLIENT PROFILES (10 selected for THIS paper):
+{personas_context}
+{health_section}
+CRITICAL: Generate COMPLETELY UNIQUE copy for THIS document.
+- Reference THIS document's specific findings
+- Use varied language and angles
+- NO generic templates or repetitive phrases
+- Each headline/tagline must be distinct
 
-# TASK
-Craft bold marketing assets that turn this research into action.
-- 3-5 headlines (≤18 words).
-- 3-5 taglines with rebel flair.
-- 3-5 value propositions tying neuroscience to relief.
-- 3-5 benefits mixing emotional relief + tangible wins.
-- 3-5 pain points echoing client language.
+Generate 3-5 items for each:
+- headlines: Punchy, research-specific (≤18 words)
+- taglines: Rebel flair, tied to THIS research
+- value_propositions: THIS research → relief
+- benefits: Emotional + tangible from THIS research
+- pain_points: Real client language
 
-NOTE: Do NOT generate social proof, testimonials, credentials, or practice statistics (FTC violation).
-Only reference research findings from the provided context.
-
-Avoid repetition. Keep copy punchy; no bullets/numbers in strings.
-Respond with JSON matching MarketingContent schema (NO social_proof field).
+NO social proof, testimonials, or practice stats (FTC).
+Return ONLY valid JSON.
 """
 
-            llama_client = self.ollama_client.clone_with_model("llama3.1:8b")
-
-            raw_notes = await llama_client.generate_text(
+            # Use default Qwen model (no llama fallback)
+            raw_notes = await self.ollama_client.generate_text(
                 prompt=prompt,
-                temperature=0.6,  # LOWERED from 0.75: Research optimal for creative
+                temperature=0.85,  # Higher temp for more variation
                 num_predict=1024
             )
             logger.debug(
@@ -280,6 +297,48 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                 lines.append(stripped)
         return "\n".join(lines)
 
+    def _load_personas_context(self, max_personas: int = 10) -> str:
+        """Load a sample of client personas to inform content generation."""
+        try:
+            import glob
+            from pathlib import Path
+            
+            personas_dir = Path("/home/antons-gs/enlitens-ai/enlitens_client_profiles/profiles")
+            persona_files = list(personas_dir.glob("persona_*.json"))
+            
+            if not persona_files:
+                logger.warning("No persona files found")
+                return "No client profiles available."
+            
+            # Load a random sample
+            import random
+            sample_files = random.sample(persona_files, min(max_personas, len(persona_files)))
+            
+            personas_summary = []
+            for pfile in sample_files:
+                try:
+                    with open(pfile, 'r') as f:
+                        persona = json.load(f)
+                    
+                    # Extract key info
+                    demo = persona.get('demographics', {})
+                    challenges = persona.get('current_challenges', {})
+                    
+                    summary = f"- {demo.get('age_range', 'Adult')} with {', '.join(challenges.get('primary_concerns', [])[:2])}"
+                    personas_summary.append(summary)
+                except Exception as e:
+                    logger.debug(f"Failed to load persona {pfile}: {e}")
+                    continue
+            
+            if not personas_summary:
+                return "Client profiles: Adults with ADHD, anxiety, trauma, and autism seeking neuroscience-based support."
+            
+            return "Real client profiles:\n" + "\n".join(personas_summary[:10])
+            
+        except Exception as e:
+            logger.warning(f"Failed to load personas: {e}")
+            return "Client profiles: Adults with ADHD, anxiety, trauma, and autism seeking neuroscience-based support."
+
     async def _generate_seo_content(self, clinical_data: Dict[str, Any],
                                   context: Dict[str, Any]) -> SEOContent:
         """Generate SEO content optimized for St. Louis mental health searches."""
@@ -344,64 +403,65 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
         """Generate website copy that converts visitors to clients."""
         try:
             document_text = context.get("document_text", "")
-            summary = self._summarize_research(document_text, max_chars=1500)
+            document_id = context.get("document_id", "unknown")
+            summary = self._summarize_research(document_text, max_chars=2500)
+
+            # Load personas for context
+            personas_context = self._load_personas_context()
 
             prompt = f"""
-You are Liz Wooten writing website copy that converts St. Louis visitors into clients.
-Your website needs to speak directly to people who've tried traditional therapy and want something different.
+You are Liz Wooten writing UNIQUE website copy for document {document_id}.
+Each document requires COMPLETELY DIFFERENT copy based on its specific research findings.
 
-RESEARCH CONTEXT:
+RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
-CLINICAL INSIGHTS:
+CLINICAL INSIGHTS FROM THIS DOCUMENT:
 {clinical_data}
 
-Website Goals:
-- Convert visitors who are frustrated with traditional approaches
-- Show immediate understanding of their struggles
-- Present neuroscience as the clear solution
-- Build trust through authenticity and expertise
-- Address objections and skepticism
+REAL CLIENT PROFILES (use these to inform tone and pain points):
+{personas_context}
 
-St. Louis Context:
-- Clients often feel misunderstood by traditional providers
-- Many have treatment-resistant conditions
-- They want practical help, not just "coping skills"
-- Skeptical of "one size fits all" approaches
+CRITICAL RULES:
+1. DO NOT use generic templates or examples
+2. Every piece of copy MUST be unique to THIS document's research
+3. Reference specific findings from the research above
+4. Use different client pain points for each document
+5. Vary your language, structure, and approach
 
-CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
+Generate 3-5 UNIQUE paragraph-length STRINGS (NOT objects) for each field:
 
-Generate 3-8 paragraph-length strings for each field. Each string should be a complete, substantial piece of content.
+about_sections: [
+  "Full paragraph from Liz's perspective about THIS research...",
+  "Another unique paragraph...",
+  ...
+]
 
-{{
-  "about_sections": [
-    "I started Enlitens after watching countless clients struggle through years of traditional therapy without real change. The missing piece wasn't more talk therapy—it was understanding how their brains actually work. Now I combine neuroscience assessment with targeted interventions that create lasting change, not just coping skills.",
-    "Another about paragraph...",
-    ...
-  ],
-  "feature_descriptions": [
-    "Bottom-Up Neuroscience Assessment: Unlike traditional therapy questionnaires, we measure your actual nervous system responses through interoceptive awareness evaluation, sensory processing analysis, and executive function testing to understand how your brain uniquely processes the world.",
-    ...
-  ],
-  "benefit_statements": [
-    "Reduce anxiety attacks by understanding and regulating your nervous system responses rather than just managing symptoms.",
-    ...
-  ],
-  "faq_content": [
-    "Q: How is this different from regular therapy? A: Traditional therapy focuses on thoughts and behaviors. We start with your neurobiology—how your brain actually processes information—and build interventions that work with your unique wiring, not against it.",
-    ...
-  ],
-  "service_descriptions": [
-    "ADHD Executive Function Support: Comprehensive neuroscience-based assessment of working memory, attention systems, and dopamine regulation, followed by targeted interventions including environmental modifications, cognitive strategies, and nervous system regulation techniques tailored to your specific executive function profile.",
-    ...
-  ]
-}}
+feature_descriptions: [
+  "Service Name: Full description of service relevant to THIS research...",
+  ...
+]
 
-NOTE: Testimonials field REMOVED for FTC compliance (16 CFR Part 465 - no AI-generated testimonials).
+benefit_statements: [
+  "Complete sentence describing benefit from THIS research...",
+  ...
+]
 
-Use Liz's direct, authentic voice. Ground everything in neuroscience. Address real St. Louis client pain points.
+faq_content: [
+  "Q: Question? A: Full answer addressing THIS research...",
+  "Q: Another question? A: Another full answer...",
+  ...
+]
 
-RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
+service_descriptions: [
+  "Service Name: Complete paragraph describing service for THIS research...",
+  ...
+]
+
+CRITICAL: Each item must be a SINGLE STRING, not an object with fields.
+Use Liz's voice. Ground in THIS document's findings.
+
+RETURN ONLY VALID JSON with string arrays.
 """
 
             response = await self._structured_generation(
@@ -409,7 +469,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 response_model=WebsiteCopy,
                 context=context,
                 suffix="founder_website",
-                temperature=0.6,  # Research optimal for creative content (lowered from 0.7)
+                temperature=0.8,  # Higher temp for more variation
                 max_retries=3,
                 use_cot_prompt=False,
             )
@@ -425,87 +485,49 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
         """Generate blog content that establishes thought leadership."""
         try:
             document_text = context.get("document_text", "")
-            summary = self._summarize_research(document_text, max_chars=1500)
+            document_id = context.get("document_id", "unknown")
+            summary = self._summarize_research(document_text, max_chars=2500)
+            
+            # Load personas
+            personas_context = self._load_personas_context()
 
             prompt = f"""
-You are Liz Wooten writing blog content that positions Enlitens as the neuroscience therapy leader in St. Louis.
-Your blog should educate, challenge traditional approaches, and drive inquiries.
+You are Liz Wooten writing UNIQUE blog content for document {document_id}.
 
-RESEARCH CONTEXT:
+RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
-CLINICAL INSIGHTS:
+CLINICAL INSIGHTS FROM THIS DOCUMENT:
 {clinical_data}
 
-Blog Strategy:
-- Establish expertise in neuroscience-based therapy
-- Challenge traditional mental health narratives
-- Provide immediate value to readers
-- Drive calls-to-action naturally
-- Target specific St. Louis mental health concerns
+REAL CLIENT PROFILES:
+{personas_context}
 
-Content Focus:
-- ADHD and executive function challenges
-- Anxiety and emotional regulation
-- Trauma and PTSD recovery
-- Autism and neurodiversity
-- Treatment-resistant conditions
+CRITICAL RULES:
+1. Generate content UNIQUE to THIS document's research
+2. Reference specific findings from THIS document
+3. NO generic templates - vary language and structure
+4. Use different client scenarios from the personas
+5. Each article idea must be distinct and research-specific
 
-CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
+Generate 5-10 UNIQUE items for each field:
 
-Generate 5-10 strings for each field below:
+article_ideas: Titles based on THIS document's findings
+blog_outlines: Structures specific to THIS research
+talking_points: Key messages from THIS document
+expert_quotes: Liz's perspective on THIS research
+statistics: ONLY from THIS document's research (with citations)
+case_studies: Hypothetical examples based on THIS research
+how_to_guides: Practical exercises from THIS research
+myth_busting: Myths challenged by THIS research
 
-{{
-  "article_ideas": [
-    "Why Your ADHD Meds Stopped Working (And What Neuroscience Says to Do Next)",
-    "The Real Reason Your Anxiety Spikes at Night (Brain Science Explains)",
-    ...
-  ],
-  "blog_outlines": [
-    "Intro explaining ADHD executive function challenges, three evidence-based strategies (working memory support, dopamine regulation, environmental modifications), practical implementation steps, conclusion with next actions.",
-    ...
-  ],
-  "talking_points": [
-    "Your brain isn't broken—it's responding to an environment it wasn't designed for.",
-    "Neuroplasticity means change is always possible, no matter your age or diagnosis.",
-    ...
-  ],
-  "expert_quotes": [
-    "I started Enlitens because I was tired of watching brilliant, capable people told they were 'broken' when their brains just work differently.",
-    ...
-  ],
-  "statistics": [
-    {{"claim": "According to Smith et al. (2023), 67% of participants showed improved executive function after 8 weeks of neurofeedback training", "citation": {{"quote": "Sixty-seven percent of participants demonstrated statistically significant improvements in executive function measures", "source_id": "doc_id", "source_title": "Study Name", "page_or_section": "pg 12"}}}},
-    ...
-  ],
-  "case_studies": [
-    "[HYPOTHETICAL EXAMPLE] Client with treatment-resistant anxiety learned their symptoms were sensory processing differences. Using interoceptive awareness training and bottom-up regulation, they reduced panic attacks by 80% in 8 weeks.",
-    ...
-  ],
-  "how_to_guides": [
-    "5-Minute Brain Reset for Anxiety: Quick bilateral stimulation exercise using alternate nostril breathing to activate parasympathetic nervous system, reducing cortisol and restoring executive function.",
-    ...
-  ],
-  "myth_busting": [
-    "Myth: ADHD is caused by poor parenting. Reality: Neuroscience shows ADHD involves differences in dopamine regulation and prefrontal cortex development. What This Means: Parents aren't to blame; brains just work differently and need different support strategies.",
-    ...
-  ]
-}}
+STATISTICS: Must cite THIS document with exact quotes
+CASE STUDIES: Mark "[HYPOTHETICAL]" and base on THIS research
+NO practice data, testimonials, or fabricated scenarios
 
-CRITICAL STATISTICS RULES:
-- Statistics MUST include proper citations with exact quotes from research papers
-- Format: {{"claim": "According to [Author] ([Year]), [statistic]", "citation": {{"quote": "exact quote", "source_id": "doc_id", ...}}}}
-- NEVER generate Enlitens practice statistics or client outcome data
-- Only cite published research findings from provided documents
+Use Liz's voice. Ground in THIS document's neuroscience. Make it unique and valuable.
 
-CASE STUDY RULES:
-- ALL case studies must be marked as "[HYPOTHETICAL EXAMPLE]"
-- NO real client names, testimonials, or specific practice data
-- Base examples on research findings, not fabricated scenarios
-
-Use Liz's rebellious, direct voice. Ground everything in neuroscience. Make it shareable and valuable.
-
-RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
+RETURN ONLY VALID JSON.
 """
 
             response = await self._structured_generation(
@@ -513,10 +535,10 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 response_model=BlogContent,
                 context=context,
                 suffix="founder_blog",
-                temperature=0.6,  # LOWERED from 0.65: Research optimal for creative content
+                temperature=0.85,  # Higher temp for more variation
                 max_retries=3,
                 use_cot_prompt=False,
-                validation_context={'source_text': document_text},  # CRITICAL: Enable citation verification
+                validation_context={'source_text': document_text},
             )
 
             return response or BlogContent()
@@ -529,69 +551,47 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                                            context: Dict[str, Any]) -> SocialMediaContent:
         """Generate social media content that builds community."""
         try:
+            document_text = context.get("document_text", "")
+            document_id = context.get("document_id", "unknown")
+            summary = self._summarize_research(document_text, max_chars=2000)
+            
+            # Load personas
+            personas_context = self._load_personas_context()
+            
             prompt = f"""
-You are Liz Wooten creating social media content that builds Enlitens' community in St. Louis.
-Your social media should feel like a conversation with a trusted friend who really gets it.
+You are Liz Wooten creating UNIQUE social media content for document {document_id}.
 
-Social Media Goals:
-- Build trust and authenticity
-- Show understanding of daily struggles
-- Share hope through neuroscience
-- Drive engagement and inquiries
-- Position as the "rebel" in mental health
+RESEARCH FROM THIS SPECIFIC DOCUMENT:
+{summary}
 
-Clinical Data:
+CLINICAL DATA FROM THIS DOCUMENT:
 {clinical_data}
 
-Content Style:
-- Short, punchy, and relatable
-- Mix of education and inspiration
-- Questions that encourage comments
-- Real talk about real challenges
-- Hopeful without being cheesy
+REAL CLIENT PROFILES:
+{personas_context}
 
-CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
+CRITICAL RULES:
+1. Content must be UNIQUE to THIS document's research
+2. Reference specific findings from THIS document
+3. Use different client scenarios from personas
+4. NO generic templates - vary language and tone
+5. Each post idea must be distinct and research-specific
 
-Generate 5-10 strings for each field below:
+Generate 5-10 UNIQUE STRINGS (NOT objects) for each field:
 
-{{
-  "post_ideas": [
-    "Share your morning brain fog story—explain it's not laziness, it's your prefrontal cortex taking 90 minutes to fully wake up. Include 3 neuroscience-based wake-up strategies.",
-    ...
-  ],
-  "captions": [
-    "Your ADHD brain isn't broken. It's wired for novelty-seeking and responds differently to dopamine. That's not a disorder—that's a different operating system. Learn to work WITH your brain, not against it.",
-    ...
-  ],
-  "quotes": [
-    "Traditional therapy asks 'what's wrong with you?' Neuroscience asks 'what happened TO you, and how did your brain adapt?'",
-    ...
-  ],
-  "hashtags": [
-    "#NeuroscienceTherapy #STLTherapist #ADHDSupport #TraumaInformed #BrainBasedHealing #StLouisMentalHealth",
-    ...
-  ],
-  "story_ideas": [
-    "Film morning routine showing sensory regulation techniques—demonstrate bilateral stimulation, explain vagus nerve activation in voiceover.",
-    ...
-  ],
-  "reel_ideas": [
-    "30-second explanation of why your anxiety spikes at bedtime—show how cortisol rhythm works, demonstrate 3-minute reset technique.",
-    ...
-  ],
-  "carousel_content": [
-    "5 signs your anxiety is actually sensory processing differences: 1-overwhelmed by noise 2-need alone time to recharge 3-difficulty in crowds 4-sensitive to textures 5-emotional after busy days.",
-    ...
-  ],
-  "poll_questions": [
-    "What time of day is your ADHD brain sharpest? A) Morning (7-10am) B) Midday (10am-2pm) C) Afternoon (2-6pm) D) Evening/Night (after 6pm)",
-    ...
-  ]
-}}
+post_ideas: ["Post idea based on THIS research...", ...]
+captions: ["Caption tied to THIS research...", ...]
+quotes: ["Liz's quote about THIS research...", ...]
+hashtags: ["#HashtagSet1 #HashtagSet2", ...]
+story_ideas: ["Story demonstrating THIS research...", ...]
+reel_ideas: ["Reel explaining THIS research...", ...]
+carousel_content: ["Slide 1: Content from THIS research...", "Slide 2: More content...", ...]
+poll_questions: ["Poll question about THIS research? A) Option B) Option...", ...]
 
-Write as Liz - conversational, direct, and caring. Balance education with empathy.
+CRITICAL: Each item must be a SINGLE STRING, not an object with title/description fields.
+Write as Liz - conversational, direct, caring. Ground in THIS document's neuroscience.
 
-RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
+RETURN ONLY VALID JSON with string arrays.
 """
 
             response = await self._structured_generation(
@@ -599,7 +599,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 response_model=SocialMediaContent,
                 context=context,
                 suffix="founder_social",
-                temperature=0.6,  # Higher creativity for social media
+                temperature=0.85,  # Higher creativity for social media
                 max_retries=3,
                 use_cot_prompt=False,
             )
@@ -614,71 +614,56 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                                     context: Dict[str, Any]) -> ContentCreationIdeas:
         """Generate content creation ideas for ongoing marketing."""
         try:
+            # Get research summary for THIS specific document
+            research_summary = context.get('research_summary', '')[:2500]
+            document_id = context.get('document_id', 'unknown')
+            
+            # Get curated context
+            curated_context = context.get('curated_context', {})
+            personas_context = curated_context.get('personas_context', '')[:1000]
+            
             prompt = f"""
-You are Liz Wooten brainstorming content ideas that will establish Enlitens as St. Louis's neuroscience therapy leader.
-Your content should drive inquiries while building long-term trust and authority.
+You are Liz Wooten brainstorming UNIQUE content ideas based on THIS SPECIFIC research paper.
+
+DOCUMENT ID: {document_id}
+
+RESEARCH SUMMARY (THIS PAPER ONLY):
+{research_summary}
+
+SELECTED CLIENT PERSONAS:
+{personas_context}
+
+YOUR TASK:
+Generate content ideas that are 100% SPECIFIC to THIS research paper's findings.
+DO NOT use generic Enlitens topics. DO NOT repeat ideas from other papers.
+EVERY idea must reference THIS paper's unique findings, methods, or implications.
 
 Content Strategy:
-- Address real pain points from client intakes
-- Challenge traditional therapy narratives
-- Showcase neuroscience as the solution
-- Build email list and inquiries
-- Create shareable, valuable content
+- Connect THIS research's findings to client personas
+- Challenge traditional therapy narratives using THIS paper's evidence
+- Showcase THIS research as neuroscience-backed solution
+- Create shareable content about THIS specific study
 
-Clinical Data:
-{clinical_data}
+CRITICAL REQUIREMENTS:
+1. EVERY topic/idea MUST reference THIS paper's specific findings
+2. NO generic "ADHD" or "anxiety" topics unless THIS paper discusses them
+3. NO repetition of standard Enlitens topics
+4. Focus on what makes THIS research unique and newsworthy
+5. Generate 10 COMPLETELY DIFFERENT ideas for each category
 
-Content Goals:
-- Weekly blog posts and social media
-- Monthly webinars and workshops
-- Quarterly educational events
-- Ongoing email nurturing sequences
-
-CRITICAL: You MUST return ONLY valid JSON. NO markdown, NO headers, NO formatting.
-
-Generate 5-10 strings for each field below:
+RETURN ONLY VALID JSON. NO markdown, NO headers, NO formatting.
 
 {{
-  "topic_ideas": [
-    "How Neuroscience Explains Why Your Anxiety Gets Worse at Night",
-    "The ADHD-Trauma Connection Most Therapists Miss",
-    ...
-  ],
-  "angle_ideas": [
-    "Your brain isn't broken—it's responding to an environment it wasn't designed for",
-    "Why medication alone won't fix executive dysfunction (and what will)",
-    ...
-  ],
-  "hook_ideas": [
-    "If you've tried 5+ therapists and nothing worked, this is why...",
-    "Your ADHD diagnosis might be missing the real problem",
-    ...
-  ],
-  "series_ideas": [
-    "The Neuroscience of Self-Regulation: 4-part series on brain-body connection",
-    "Breaking the ADHD Cycle: Weekly tips for executive function",
-    ...
-  ],
-  "collaboration_ideas": [
-    "Partner with Washington University on epigenetics webinar",
-    "Co-host workshop with St. Louis Parks on nature and neuroplasticity",
-    ...
-  ],
-  "trend_ideas": [
-    "Back-to-school stress and brain development",
-    "Post-pandemic mental health and neural networks",
-    ...
-  ],
-  "seasonal_ideas": [
-    "Spring allergies and brain inflammation connection",
-    "Summer outdoor activities for nervous system regulation",
-    ...
-  ]
+  "topic_ideas": [10 unique strings based on THIS research],
+  "angle_ideas": [10 unique strings based on THIS research],
+  "hook_ideas": [10 unique strings based on THIS research],
+  "series_ideas": [10 unique strings based on THIS research],
+  "collaboration_ideas": [10 unique strings based on THIS research],
+  "trend_ideas": [10 unique strings based on THIS research],
+  "seasonal_ideas": [10 unique strings based on THIS research]
 }}
 
-Focus on content that directly addresses ADHD, anxiety, trauma challenges and drives inquiries.
-
-RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
+REMEMBER: If you generate ANY generic topic not tied to THIS paper, you have FAILED.
 """
 
             response = await self._structured_generation(
@@ -686,7 +671,7 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
                 response_model=ContentCreationIdeas,
                 context=context,
                 suffix="founder_ideas",
-                temperature=0.6,
+                temperature=0.95,  # Increased for more variation
                 max_retries=3,
                 use_cot_prompt=False,
             )

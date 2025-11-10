@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "profile_id": "cluster-023-persona",
+    "persona_name": "The Masked Master",
+    "persona_tagline": "Exhausted from being the person everyone expects.",
+    "created_at": "2025-11-08 20:38:45.786176",
+    "source_documents": [
+      "cluster_23",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "masking",
+      "ADHD",
+      "Autism Traits",
+      "burnout",
+      "complex grief",
+      "emotion regulation"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, working professional, parent",
+    "occupation": "Project Manager",
+    "education": "Master's Degree in Counseling (though not currently practicing)",
+    "locality": "Kirkwood, MO",
+    "cultural_faith_identities": [
+      "Christian (culturally)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a seemingly stable, middle-class household. However, emotional needs were often overlooked. Performance was highly valued, and any sign of weakness or imperfection was met with disapproval, setting the stage for a lifetime of masking. Money was usually available, but emotional resources were scarce.",
+    "adolescence": "Excelled academically, driven by a need for external validation. Socially awkward but learned to mimic popular behaviors. Started to experience anxiety and depression, which were dismissed as teenage angst. Began to develop elaborate systems for organization and studying, driven by an underlying feeling of chaos.",
+    "early_adulthood": "Pursued a Master's degree in Counseling, driven by a genuine desire to help others, but also a subconscious need to understand herself. Found the work emotionally draining and struggled with the lack of clear structure and boundaries. Left the field after a few years, feeling like a failure.",
+    "family_structure": "Raised by two parents who stayed married but were emotionally distant. One younger brother who always seemed to be the 'golden child.' Experienced the death of a grandparent during college, which was the first significant loss in her life. Married to a supportive but oblivious partner.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High expectations and pressure to perform",
+      "Loss of grandparent",
+      "Burnout from counseling career",
+      "Toxic work environment"
+    ],
+    "educational_journey": "Straight-A student throughout school. Excelled in college, driven by a need to prove herself. Found graduate school challenging due to the subjective nature of the material and the lack of clear-cut answers. Never felt like she truly belonged in academia.",
+    "pivotal_moments": [
+      "Grandparent's death during college \u2013 faced mortality and grief for the first time, feeling unprepared and unsupported.",
+      "Leaving the counseling field \u2013 marked a significant loss of identity and purpose, leading to feelings of shame and failure.",
+      "ADHD diagnosis at 38 \u2013 provided a framework for understanding her lifelong struggles but also triggered a period of grief and anger.",
+      "Realizing potential Autism traits - explains masking.",
+      "Current toxic workplace - drives her to seek help."
+    ],
+    "intergenerational_patterns": "Her mother was also likely neurodivergent but undiagnosed and unacknowledged. There's a pattern of suppressing emotions and prioritizing external appearances within the family. A history of anxiety and depression runs in the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (late-diagnosed)",
+      "Suspects Autism Traits",
+      "Anxiety",
+      "Depression",
+      "Complex Grief",
+      "RSD (Rejection Sensitive Dysphoria)"
+    ],
+    "diagnosis_journey": "Suspected something was different from a young age, but attributed it to personality quirks. Began researching ADHD after witnessing similar traits in her child. Sought a formal diagnosis at 38 after experiencing significant burnout and feeling overwhelmed by her responsibilities. The diagnosis was both validating and devastating, triggering a period of grief for the years lost and the struggles endured. Now suspecting Autism.",
+    "how_it_shows_up": "Perfectionism, overthinking, difficulty relaxing, struggles with organization and time management, tendency to overcommit, masking her true feelings and needs, difficulty asserting boundaries, emotional dysregulation, rejection sensitivity, negative self-talk ('I should be able to handle this'), complex grief around parenting and how life's been.",
+    "nervous_system_pattern": "High sympathetic nervous system activation, constantly scanning for threats and potential failures. Tendency to freeze or fawn in stressful situations. Difficulty accessing the parasympathetic nervous system, leading to chronic stress and burnout.",
+    "strengths_superpowers": [
+      "High intelligence and analytical skills",
+      "Strong empathy and compassion",
+      "Ability to connect with others on a deep level (when not masking)",
+      "Creative problem-solving skills",
+      "Resilience and determination"
+    ],
+    "current_coping_strategies": [
+      "Masking (though increasingly exhausting)",
+      "Overworking",
+      "Seeking external validation",
+      "Isolating herself when overwhelmed",
+      "Binge-watching TV",
+      "Occasional glass of wine to unwind",
+      "Trying to implement organizational systems (often unsuccessfully)"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "High intelligence",
+      "Hyperfocus on topics of interest",
+      "Strong verbal reasoning skills"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks",
+      "Poor working memory",
+      "Trouble with task switching",
+      "Time blindness",
+      "Emotional regulation challenges",
+      "Organization and planning difficulties"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars and to-do lists (though often overwhelming)",
+      "Setting alarms and reminders",
+      "Breaking down tasks into smaller steps (sometimes)",
+      "Seeking help from others (reluctantly)",
+      "Body doubling (when possible)"
+    ],
+    "sensory_profile": "Highly sensitive to noise and bright lights. Prefers soft, comfortable clothing. Avoids crowded or chaotic environments. Finds repetitive movements calming (e.g., knitting, fidgeting). Sensitive to certain textures and smells.",
+    "food_sensory_details": "Dislikes foods with mixed textures (e.g., casseroles, stews). Prefers foods that are easily separated and identifiable. Safe foods include plain rice cakes (Quaker brand, lightly salted), rotisserie chicken (only if skin is removed and it's been refrigerated), and very specific brands of yogurt (Fage plain Greek yogurt with a drizzle of honey). Avoids anything slimy or with visible fat. Can only drink water if it\u2019s ice-cold and from a specific type of water bottle (Hydro Flask). Skips meals when overwhelmed or stressed, then binges on crunchy snacks (e.g., potato chips, pretzels) late at night."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a suburban home in Kirkwood with her husband and two children.",
+    "work_school_situation": "Works full-time as a Project Manager in a highly demanding and politically charged environment. Feels constantly stressed and overwhelmed by the workload and the need to navigate complex relationships.",
+    "commute_daily_rhythms": "Drives 30 minutes each way to work, listening to podcasts or audiobooks to distract herself from the traffic. Spends most of her day in meetings or working on the computer. Comes home exhausted and struggles to balance work and family responsibilities.",
+    "local_stressors": [
+      "Competitive school district",
+      "High cost of living",
+      "Pressure to maintain a perfect image",
+      "Lack of affordable childcare"
+    ],
+    "safe_spaces": [
+      "Her backyard garden",
+      "Her bedroom (when she can get it to herself)",
+      "The local library"
+    ],
+    "support_system": "Limited support system. Husband is supportive but doesn't fully understand her struggles. Has a few close friends but hesitates to burden them with her problems. Family lives out of state."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling overwhelmed and burned out. Realizing she can't keep masking forever. Wants to understand herself better and develop healthier coping mechanisms. The toxic work environment is the breaking point.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and stress",
+      "Improve emotional regulation",
+      "Develop healthier coping strategies",
+      "Learn to assert boundaries",
+      "Stop masking and be her authentic self",
+      "Find more joy and fulfillment in life",
+      "Navigate complex grief"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of judgment",
+      "Difficulty asking for help",
+      "Lack of time and energy",
+      "Overwhelming responsibilities",
+      "Internalized ableism",
+      "Toxic work environment"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"Really really good at masking but it's getting exhausting.\"",
+    "quote_hope": "\"Trying not to perpetuate cycles.\"",
+    "quotes_additional": [
+      "\"Difficulties in knowing and doing the work.\"",
+      "\"Complex grief around parenting and how life's been.\"",
+      "\"Since ADHD dx seeing patterns of Autism traits.\""
+    ],
+    "liz_clinical_narrative": "This client embodies the quiet struggle of someone who has always strived for perfection, masking their neurodivergence to fit in. They've achieved external success, but at a great personal cost. Now, the weight of their experiences, coupled with the demands of their current life, has become unbearable. We'll work collaboratively to unpack the layers of masking, identify their unmet needs, and develop strategies for self-compassion and authenticity. I want to help them find a way to live a life that honors their true self, not the person they think they should be. It's time to rewrite the narrative from one of striving and depletion, to one of acceptance, growth, and genuine well-being.",
+    "therapy_preferences": "Neurodivergent-affirming therapist, someone who understands masking and late diagnosis, practical strategies for managing ADHD/Autism traits, focus on self-compassion and acceptance."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you exhausted from pretending to be someone you're not? Our neurodivergent-affirming therapists can help you unmask and embrace your authentic self.",
+      "Do you struggle with feeling like you're not good enough, despite your accomplishments? We understand the unique challenges of late-diagnosed ADHD and Autism traits.",
+      "We provide a safe and supportive space for you to explore your identity, develop coping strategies, and build a life that aligns with your values."
+    ],
+    "primary_keywords": [
+      "Late-diagnosed ADHD",
+      "Autism traits masking",
+      "Burnout",
+      "Neurodivergent therapy St. Louis",
+      "Emotion regulation",
+      "Complex grief",
+      "Toxic workplace stress",
+      "Demand avoidant"
+    ],
+    "local_entities": [
+      "Kirkwood",
+      "Webster Groves",
+      "Des Peres",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "The hidden cost of masking: Recognizing and addressing burnout in neurodivergent adults.",
+      "Late diagnosis: Navigating the emotional impact of discovering your neurodivergence later in life.",
+      "Unmasking your authentic self: A guide to self-acceptance and self-compassion for neurodivergent individuals."
+    ]
+  }
+}

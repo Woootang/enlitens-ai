@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "profile_id": "cluster-045-persona",
+    "persona_name": "The Re-Engaging Professional",
+    "persona_tagline": "Navigating Burnout and Reconnecting with Purpose",
+    "created_at": "2025-11-08 20:39:36.422748",
+    "source_documents": [
+      "cluster_45",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "ASD",
+      "Burnout",
+      "Professional",
+      "Father"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Male",
+    "pronouns": "He/Him",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, father of a young child",
+    "occupation": "Attorney",
+    "education": "Law Degree",
+    "locality": "Clayton, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban neighborhood. Parents were generally supportive, but highly focused on achievement and academics. Lots of pressure to perform well in school and extracurricular activities. Emotional expression was often discouraged; feelings were seen as a distraction from goals.",
+    "adolescence": "Excelled academically, but struggled socially. Felt like an outsider, even among friends. Developed intense special interests, which were often met with confusion or dismissal by peers. Started masking heavily to fit in, leading to internal exhaustion.",
+    "early_adulthood": "Driven to succeed, he excelled in college and law school. The structure and clear expectations of academia provided a sense of control and accomplishment. Started to rely heavily on caffeine and all-nighters to keep up with the workload. Neglected self-care in pursuit of professional goals.",
+    "family_structure": "Two-parent household with one younger sister. Father was a successful businessman, mother was a stay-at-home mom who volunteered extensively. Family valued appearances and maintaining a polished image.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High academic pressure",
+      "Social isolation during adolescence",
+      "Constant need to mask"
+    ],
+    "educational_journey": "Excellent student throughout elementary, middle, and high school. Attended a prestigious university and then a top-tier law school. Academic achievements were a primary source of validation.",
+    "pivotal_moments": [
+      "Being diagnosed with ADHD as an adult",
+      "Experiencing a significant burnout and identity collapse",
+      "Becoming a father and wanting to be fully present for his son",
+      "Realizing the need to explore a possible ASD diagnosis"
+    ],
+    "intergenerational_patterns": "Possible undiagnosed neurodivergence in the family, contributing to a lack of understanding and support for his own challenges. Emphasis on achievement and suppressing emotions was passed down through generations."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (diagnosed 2021)",
+      "Suspecting ASD"
+    ],
+    "diagnosis_journey": "Initially diagnosed with ADHD in 2021 after struggling with focus and organization in his legal career. The diagnosis provided some relief but didn't fully explain his experiences. Over the past six months, he's started to suspect that ASD might be a more accurate fit, especially after his wife's ADHD evaluation. He's currently seeking an evaluation to explore this possibility.",
+    "how_it_shows_up": "Difficulty with executive functioning, leading to challenges with organization, time management, and task completion. Intense focus on areas of interest, but struggles with tasks he finds boring or repetitive. Social anxiety and difficulty reading social cues. Sensory sensitivities, particularly to loud noises and bright lights. Burnout manifests as emotional exhaustion, cynicism, and a sense of detachment.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tendency to overthink and ruminate. Difficulty relaxing and unwinding. Sensory overload leads to meltdowns or shutdowns.",
+    "strengths_superpowers": [
+      "Exceptional analytical skills",
+      "Strong attention to detail when engaged",
+      "High level of intellectual ability",
+      "Passionate advocacy for his clients"
+    ],
+    "current_coping_strategies": [
+      "CBT (currently ineffective for executive functioning)",
+      "Caffeine",
+      "Overworking",
+      "Avoidance of overwhelming situations"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Hyperfocus on tasks of interest",
+      "Strong long-term memory",
+      "Excellent problem-solving skills"
+    ],
+    "ef_friction_points": [
+      "Procrastination on tasks he dislikes",
+      "Difficulty initiating tasks",
+      "Poor time management",
+      "Organization difficulties",
+      "Burnout from trying to 'enforce' rigid structures"
+    ],
+    "ef_workarounds": [
+      "Lists (often abandoned)",
+      "Calendar reminders (frequently ignored)",
+      "Trying to force himself to follow routines (unsustainable)"
+    ],
+    "sensory_profile": "Sensitive to loud noises, bright lights, and strong smells. Prefers quiet, dimly lit environments. Finds certain textures irritating, especially scratchy fabrics. Seeks out deep pressure and weighted blankets for comfort.",
+    "food_sensory_details": "Avoids mixed textures like casseroles or stews. Dislikes foods with a mushy texture, such as overripe bananas or cooked spinach. Safe foods include: plain, dry toast (lightly buttered, no crusts), specific brand of protein bars (Quest, cookies and cream flavor), and crispy, slightly burnt bacon. Only drinks water if it's ice-cold. Avoids anything overly sweet or artificial tasting. Skips meals when stressed or overwhelmed, then binges on high-fat, salty foods late at night."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a modern condo in Clayton, chosen for its proximity to his office and perceived safety.",
+    "work_school_situation": "Works as an attorney at a private law firm. Feels pressure to maintain a successful image and meet demanding expectations. Secretly hates enforcing rules, but feels trapped by his career path.",
+    "commute_daily_rhythms": "Drives to work, battling rush-hour traffic. Spends long hours at the office, often working late into the evening. Struggles to disconnect from work when he's at home.",
+    "local_stressors": [
+      "High-pressure work environment",
+      "Traffic congestion",
+      "Keeping up with appearances in an affluent community",
+      "Feeling disconnected from his son"
+    ],
+    "safe_spaces": [
+      "His home office (when he can actually relax)",
+      "The library (quiet and predictable)",
+      "Nature trails (solitude)"
+    ],
+    "support_system": "His wife (also ADHD, undergoing evaluation), but struggles to communicate his needs effectively. Limited social connections outside of work."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Experiencing burnout and an identity collapse. Wants to reconnect with his 4-year-old son and be a more present father. Seeking clarity on whether ASD is a more accurate diagnosis.",
+    "what_they_want_to_change": [
+      "Reduce burnout and improve work-life balance",
+      "Develop healthier coping mechanisms",
+      "Improve emotional regulation",
+      "Strengthen his relationship with his son",
+      "Gain a better understanding of himself and his neurodivergence"
+    ],
+    "whats_in_the_way": [
+      "Fear of judgment from colleagues and family",
+      "Internalized pressure to succeed",
+      "Difficulty prioritizing self-care",
+      "Lack of awareness of his own needs",
+      "Executive dysfunction challenges",
+      "Sensory overload"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"Wanting to reengage 4 yo son...Trying to enforce.\"",
+    "quote_hope": "I want to be present for my son. I don't want to just be a stressed-out lawyer all the time.",
+    "quotes_additional": [
+      "\"6 months ago burnout and identity collapse\"",
+      "\"ADHD 2021 thinking ASD makes more sense.\"",
+      "\"Current tx with talk therapy and cbt not effective with executive functioning.\""
+    ],
+    "liz_clinical_narrative": "This individual presents with a complex interplay of ADHD, suspected ASD, and significant burnout. The pressure to maintain a high-achieving professional identity has led to a collapse of self and a desire to reconnect with his role as a father. His experience highlights the challenges of late diagnosis and the need for neurodivergent-affirming support that addresses both executive functioning difficulties and sensory sensitivities. Therapy will focus on building self-awareness, developing healthy coping strategies, and fostering a sense of authenticity and self-compassion. Exploring the possibility of ASD and tailoring interventions to his specific sensory needs will be crucial.",
+    "therapy_preferences": "Neurodivergent-affirming therapist with experience in ADHD and ASD. Prefers a structured approach with clear goals and actionable strategies. Values empathy, understanding, and a non-judgmental environment."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a high-achieving professional experiencing burnout and questioning your identity?",
+      "Is your ADHD diagnosis not fully explaining your struggles? Explore the possibility of ASD.",
+      "Reconnect with your loved ones and find joy in your life again."
+    ],
+    "primary_keywords": [
+      "ADHD burnout",
+      "ASD diagnosis adult",
+      "executive dysfunction therapy",
+      "neurodivergent attorney",
+      "reconnecting with family",
+      "sensory overload St. Louis"
+    ],
+    "local_entities": [
+      "Clayton",
+      "Central West End",
+      "St. Louis County Bar Association"
+    ],
+    "content_angles": [
+      "The hidden struggles of neurodivergent professionals",
+      "Understanding sensory overload and its impact on daily life",
+      "How to reconnect with your children when you're experiencing burnout"
+    ]
+  }
+}

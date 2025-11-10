@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "profile_id": "cluster-017-persona",
+    "persona_name": "The Overwhelmed Perfectionist",
+    "persona_tagline": "Striving for excellence, struggling with the cost.",
+    "created_at": "2025-11-08 20:37:09.610967",
+    "source_documents": [
+      "cluster_17",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "perfectionism",
+      "sensory sensitivities",
+      "gifted",
+      "school avoidance"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "16-18",
+    "gender": "Female",
+    "pronouns": "She/her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "High school student living in a split-household family",
+    "occupation": "Student",
+    "education": "High School",
+    "locality": "Clayton, MO",
+    "cultural_faith_identities": [
+      "None Specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in an upper-middle-class household in Clayton, MO. High expectations were subtly communicated through praise for achievements and quiet disappointment for anything less. The environment was stable but lacked emotional attunement; feelings were often dismissed as \u2018being dramatic.\u2019",
+    "adolescence": "Became increasingly aware of her 'gifted' label, feeling pressure to maintain it. Developed intense performance anxiety in school and extracurricular activities. Started masking heavily to fit in, suppressing sensory sensitivities and emotional needs. The divorce of her parents at age 15 increased anxiety and created a sense of instability.",
+    "early_adulthood": "N/A",
+    "family_structure": "Parents divorced when she was 15. Lives primarily with her mother but spends weekends with her father. Has one younger brother who she feels is favored by her father.",
+    "formative_adversities": [
+      "Parental divorce",
+      "High academic expectations",
+      "Emotional neglect",
+      "Sensory overload",
+      "Performance Anxiety"
+    ],
+    "educational_journey": "Attended a highly competitive private school in St. Louis. Excelled academically in elementary school, but began to struggle with anxiety and perfectionism in middle school. Frequent headaches and stomachaches started in 8th grade, often leading to school absences. Teachers noted her intelligence but also expressed concern about her anxiety.",
+    "pivotal_moments": [
+      "Being labeled 'gifted' in elementary school, creating pressure to constantly achieve",
+      "Parents' divorce at age 15, shattering her sense of stability",
+      "Failing a test for the first time in middle school, triggering intense self-criticism",
+      "A teacher gently suggesting counseling due to her anxiety",
+      "Experiencing a panic attack before a major presentation, leading to school avoidance"
+    ],
+    "intergenerational_patterns": "Her mother also struggles with anxiety and perfectionism, often placing unrealistic expectations on herself and her children. Her grandmother was known for being highly critical and demanding."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible ADHD (undiagnosed)",
+      "Sensory Processing Sensitivity"
+    ],
+    "diagnosis_journey": "Currently diagnosed with 'fear of failure' anxiety. Family is exploring possible ADHD diagnosis due to attention issues and difficulty regulating emotions. The physical symptoms of anxiety (stomach pain, headaches) have led to medical consultations and a prescription for Lexapro.",
+    "how_it_shows_up": "Masks well in public and at school, but experiences intense anxiety, stomach pain, and headaches. Has trouble regulating emotions and managing sensory input. Experiences 'attention issues' due to 'thinking of what is next'. Struggles with perfectionism and fear of failure. Feels the need to punch herself or needs a tight hug when overwhelmed.",
+    "nervous_system_pattern": "High-strung, hypervigilant. Nervous system is easily overwhelmed by sensory input and emotional stress. Tends toward fight-or-flight response.",
+    "strengths_superpowers": [
+      "High intelligence",
+      "Creativity",
+      "Empathy",
+      "Strong work ethic",
+      "Attention to detail"
+    ],
+    "current_coping_strategies": [
+      "Masking",
+      "Avoiding situations that trigger anxiety",
+      "Seeking tight hugs",
+      "Lexapro",
+      "Seeking therapy"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong planning skills when not overwhelmed",
+      "Good at memorization",
+      "Detail-oriented"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks due to perfectionism",
+      "Trouble focusing when overwhelmed with anxiety",
+      "Poor emotional regulation",
+      "Difficulty transitioning between tasks",
+      "Procrastination"
+    ],
+    "ef_workarounds": [
+      "Creating detailed schedules and to-do lists (often unrealistically ambitious)",
+      "Using noise-canceling headphones to reduce sensory overload",
+      "Seeking reassurance from others",
+      "Avoiding challenging tasks altogether"
+    ],
+    "sensory_profile": "Highly sensitive to noise, textures, and smells. Overwhelmed by crowded or chaotic environments. Prefers quiet, predictable routines. Certain fabrics and clothing textures are particularly irritating.",
+    "food_sensory_details": "Avoids foods with mixed textures like casseroles or stews. Dislikes anything slimy or with visible fat. Only eats chicken if it's grilled, not fried, and preferably room temperature or slightly cool. Safe foods include plain Cheerios, specific brand of saltine crackers (Premium brand only), peeled apples (no skin), and plain pasta with butter. Skips meals when overwhelmed or anxious, leading to further physical discomfort. Hates the smell of fish cooking."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a two-story house in Clayton, MO, with her mother and younger brother. Her father lives in a nearby apartment.",
+    "work_school_situation": "Currently a junior in high school. Missing school frequently due to anxiety and physical symptoms. Worried about falling behind and jeopardizing her future.",
+    "commute_daily_rhythms": "Drives to school most days, but often calls her mother to pick her up early due to anxiety. Spends most evenings doing homework or worrying about school. Weekends are split between her parents' houses.",
+    "local_stressors": [
+      "Competitive school environment",
+      "High expectations from parents and teachers",
+      "Social pressures",
+      "Parental conflict"
+    ],
+    "safe_spaces": [
+      "Her bedroom",
+      "Her grandmother's garden",
+      "A quiet corner of the library"
+    ],
+    "support_system": "Mother, father, a few close friends, family doctor. Seeking additional support through therapy."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Intense anxiety and physical symptoms (stomach pain, nausea) are preventing her from attending school and impacting her quality of life.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and physical symptoms",
+      "Improve school attendance",
+      "Develop healthier coping mechanisms",
+      "Improve emotional regulation",
+      "Reduce perfectionism and fear of failure"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of failure",
+      "Sensory sensitivities",
+      "Lack of coping skills",
+      "Family dynamics",
+      "School environment"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "She\u2019s excellent at masking, but I\u2019m tuned in to know something is up.",
+    "quote_hope": "We are looking for some therapy!",
+    "quotes_additional": [
+      "Dealing with a lot of attention issues due to 'thinking of what is next'",
+      "Overwhelmed needs to punch herself or needs a tight hug",
+      "Anxiety and depression that is manifesting as intense stomach pain and nausea"
+    ],
+    "liz_clinical_narrative": "This young woman is carrying an enormous weight of expectations, both internal and external. The constant pressure to achieve and maintain a perfect facade has taken a significant toll on her physical and mental well-being. Her anxiety manifests as debilitating physical symptoms, leading to school avoidance and further distress. It's clear she's incredibly intelligent and capable, but her nervous system is in overdrive. Our work together will focus on unpacking these pressures, developing healthier coping mechanisms, and creating a safe space for her to explore her emotions and sensory experiences without judgment. By validating her experiences and empowering her with practical strategies, we can help her reclaim her life and thrive, not just survive.",
+    "therapy_preferences": "Neurodivergent-affirming, somatic-based approach, talk therapy, mindfulness, sensory integration techniques."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is anxiety and stomach pain keeping your child from school?",
+      "Is your 'gifted' child struggling with perfectionism and overwhelm?",
+      "Neurodivergent-affirming therapy for teens in St. Louis."
+    ],
+    "primary_keywords": [
+      "teen anxiety therapy",
+      "school avoidance",
+      "perfectionism",
+      "gifted child anxiety",
+      "sensory sensitivities"
+    ],
+    "local_entities": [
+      "Clayton, MO",
+      "St. Louis County private schools",
+      "Washington University in St. Louis"
+    ],
+    "content_angles": [
+      "The hidden struggles of gifted children",
+      "How sensory sensitivities impact anxiety",
+      "Creating a safe space for neurodivergent teens"
+    ]
+  }
+}

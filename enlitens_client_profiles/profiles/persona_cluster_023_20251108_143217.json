@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "profile_id": "cluster-023-persona",
+    "persona_name": "Navigating Neurodivergence: The Emerging Adult",
+    "persona_tagline": "Seeking clarity and coping skills while juggling college, identity, and late diagnoses.",
+    "created_at": "2025-11-08 20:31:57.865066",
+    "source_documents": [
+      "cluster_23",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "neurodivergent",
+      "college student",
+      "late diagnosis",
+      "anxiety",
+      "depression",
+      "executive dysfunction",
+      "identity exploration"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "20-35",
+    "gender": "Varied (Female, Non-binary)",
+    "pronouns": "She/Her, They/Them",
+    "orientation": "Varied (Queer identities present)",
+    "ethnicity": "Varied (Asian-American included)",
+    "current_life_situation": "College student, Single Parent, Newly in a relationship",
+    "occupation": "Student, Part-time work, Early career professionals",
+    "education": "Undergraduate, Some graduate studies",
+    "locality": "St. Louis City, University City, Clayton",
+    "cultural_faith_identities": [
+      "Varied"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Often characterized by underlying anxiety and a feeling of 'not fitting in.' Many experienced a pressure to conform, leading to masking and delayed self-discovery. For some, there may have been a chaotic home environment, possibly due to undiagnosed neurodivergence in family members or financial instability. Others grew up in more structured environments but felt stifled and misunderstood.",
+    "adolescence": "Adolescence brought increased social pressure and a growing awareness of being different. This often manifested as anxiety, depression, and social isolation. Academic struggles may have emerged despite underlying intelligence. Some experienced bullying or social rejection. This is where many began to suspect something was different, researching online and self-diagnosing.",
+    "early_adulthood": "Early adulthood is marked by a pursuit of higher education or career. The demands of college or early career often exacerbated existing anxieties and executive function challenges. Relationships become more complex, highlighting social difficulties. Late diagnoses (ADHD, Autism) provide some answers but also bring new questions about identity and the past.",
+    "family_structure": "Varied family structures, including single-parent households, immigrant families, and families with undiagnosed neurodivergence. Some experienced divorce or loss of a parent. The family dynamic often involves a pressure to succeed and conform, with limited understanding of neurodivergent needs. Some feel a sense of responsibility for caring for family members.",
+    "formative_adversities": [
+      "Late diagnosis of ADHD or Autism",
+      "Academic struggles",
+      "Social isolation and bullying",
+      "Family pressure to conform",
+      "Identity confusion",
+      "Financial instability",
+      "Cultural/language barriers within the family"
+    ],
+    "educational_journey": "Varied educational experiences, ranging from academic success despite underlying challenges to significant struggles due to executive function difficulties. Some changed schools frequently or experienced disruptions in their education. College is a common goal, but the transition can be overwhelming.",
+    "pivotal_moments": [
+      "Self-discovery through online research and self-diagnosis",
+      "Formal diagnosis of ADHD or Autism",
+      "Starting college or a new job",
+      "Entering a new relationship or experiencing a significant relationship change",
+      "Realizing the impact of neurodivergence on past experiences"
+    ],
+    "intergenerational_patterns": "Potential for undiagnosed neurodivergence in parents or other family members. Patterns of anxiety, depression, and difficulty coping with stress may be present across generations. Cultural expectations and communication styles can also contribute to family challenges."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autism Spectrum Disorder (ASD)",
+      "Attention-Deficit/Hyperactivity Disorder (ADHD)",
+      "Anxiety",
+      "Depression",
+      "Gender Identity Exploration",
+      "Queer Identity"
+    ],
+    "diagnosis_journey": "Many experienced a long and confusing journey to diagnosis, often starting with a feeling of 'not fitting in' or struggling with anxiety and depression. Online research and self-diagnosis are common first steps. The formal diagnosis process can be validating but also emotionally challenging, bringing up questions about the past and future. Some are currently in the process of seeking a formal diagnosis.",
+    "how_it_shows_up": "Executive function challenges (difficulty with organization, time management, and task initiation). Social difficulties (challenges with communication, understanding social cues, and forming relationships). Sensory sensitivities (sensitivity to noise, light, textures, and smells). Emotional dysregulation (difficulty managing emotions and experiencing intense emotional reactions). Impulsivity (acting without thinking). Hyperfixations (intense focus on specific interests). Struggles with masking and authenticity.",
+    "nervous_system_pattern": "Often dysregulated, with a tendency towards hyperarousal or hypoarousal. Difficulty regulating emotions and managing stress. Sensory overload is common, leading to shutdowns or meltdowns. May experience chronic anxiety and difficulty relaxing.",
+    "strengths_superpowers": [
+      "Strong pattern recognition skills",
+      "Creative problem-solving abilities",
+      "Intense focus and dedication to interests",
+      "High levels of empathy and compassion",
+      "Unique perspectives and insights"
+    ],
+    "current_coping_strategies": [
+      "Seeking therapy",
+      "Online support groups and communities",
+      "Medication",
+      "Self-medication (cannabis use mentioned)",
+      "Engaging in special interests",
+      "Masking and camouflaging",
+      "Avoidance",
+      "Routines and rituals"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Hyperfocus on areas of interest",
+      "Adaptability when motivated",
+      "Strong long-term memory",
+      "Ability to think outside the box"
+    ],
+    "ef_friction_points": [
+      "Difficulty with planning and organization",
+      "Procrastination and task initiation",
+      "Time management challenges",
+      "Difficulty prioritizing tasks",
+      "Forgetfulness and distractibility",
+      "Emotional regulation",
+      "Difficulty transitioning between tasks"
+    ],
+    "ef_workarounds": [
+      "Using planners and to-do lists",
+      "Setting timers and reminders",
+      "Breaking down tasks into smaller steps",
+      "Creating visual schedules",
+      "Seeking support from friends or family",
+      "Using assistive technology",
+      "Body doubling"
+    ],
+    "sensory_profile": "Highly variable. Some are hypersensitive to stimuli (noise, light, textures), while others are hyposensitive (seeking out sensory input). Sensory overload is a common trigger for anxiety and meltdowns. Proprioceptive and vestibular seeking behaviors may be present (e.g., fidgeting, rocking, spinning).",
+    "food_sensory_details": "Significant texture aversions are common. May avoid foods that are slimy, mushy, or have mixed textures. Specific brands and preparations are often preferred. For example, only eats Kraft mac and cheese, prepared exactly according to the box, no deviation. Safe foods might include plain pasta with butter, grilled chicken (only if it is not dry), and specific brands of crackers (Ritz or Wheat Thins). Some may have difficulty tolerating strong smells or flavors. Binge eating may occur as a coping mechanism for stress or emotional dysregulation. Meal skipping is common when overwhelmed or busy. May have difficulty with meal planning and preparation due to executive function challenges."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartments or shared housing in University City, Clayton, or other areas near universities. Some may live at home with family.",
+    "work_school_situation": "Full-time or part-time student, often working part-time jobs to support themselves. May be experiencing burnout due to the demands of school and work.",
+    "commute_daily_rhythms": "Commuting to campus or work by car, public transportation (MetroLink), or walking. Daily routines are often disrupted by executive function challenges and sensory sensitivities. May struggle to maintain a consistent sleep schedule.",
+    "local_stressors": [
+      "Academic pressure",
+      "Financial stress",
+      "Social isolation",
+      "Sensory overload in crowded environments",
+      "Navigating public transportation",
+      "Uncertainty about the future"
+    ],
+    "safe_spaces": [
+      "Their room or apartment",
+      "Quiet coffee shops or libraries",
+      "Online communities and support groups",
+      "Nature (parks and gardens)",
+      "Friends' homes"
+    ],
+    "support_system": "Varied. May have supportive friends or family members, but often feel misunderstood or isolated. Online communities and support groups provide a sense of belonging and validation. Some are seeking therapy to build coping skills and improve their mental health."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking support to navigate late diagnoses, manage anxiety and depression, improve executive function skills, and explore their identity. Some are also seeking support for relationship challenges and family conflicts.",
+    "what_they_want_to_change": [
+      "Improve emotional regulation",
+      "Develop better coping skills for anxiety and depression",
+      "Enhance executive function skills (organization, time management, task initiation)",
+      "Build stronger social connections",
+      "Explore their identity (gender, sexuality, neurodivergence)",
+      "Improve communication skills",
+      "Reduce burnout and stress"
+    ],
+    "whats_in_the_way": [
+      "Executive function challenges",
+      "Anxiety and depression",
+      "Social anxiety",
+      "Sensory sensitivities",
+      "Lack of understanding from family and friends",
+      "Financial constraints",
+      "Fear of judgment or rejection",
+      "Difficulty asking for help"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I\u2019m also still working through a lot of confusing feelings around gender and queerness.",
+    "quote_hope": "I\u2019m looking for an autism specialist to complement my current therapist. I think it\u2019s at the root of a lot of other issues I have (depression, anxiety, etc.) and would like to address it now.",
+    "quotes_additional": [
+      "I am looking for someone to help with stress and coping skills as well as problem solving.",
+      "I have had therapists in the past couple of years for treating depression, cannabis substance use, and eating disorders (before I was diagnosed with ADHD).",
+      "I\u2019m looking to try out a new therapist, the one I currently have is nice but they didn\u2019t seem to have a great depth of knowledge on Autism or able to offer a ton of resources."
+    ],
+    "liz_clinical_narrative": "It takes incredible courage to reach out and seek support, especially when you're juggling so much \u2013 college, identity exploration, and navigating recent diagnoses. It sounds like you're feeling pulled in many directions, and it's understandable that you're experiencing anxiety and overwhelm. My goal is to create a safe and affirming space where you can explore your experiences, develop coping skills, and connect with your authentic self. We'll work together to understand how your neurodivergence impacts your life and build strategies to address your specific challenges. I'm here to listen, validate, and empower you on your journey towards greater well-being. You don't have to do this alone.",
+    "therapy_preferences": "Neurodivergent-affirming therapist with expertise in Autism and ADHD. Someone who understands the challenges of late diagnosis and can provide practical strategies for managing executive function and sensory sensitivities. A therapist who is also knowledgeable about gender and sexuality would be beneficial."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a college student struggling with anxiety, depression, or ADHD? Our neurodivergent-affirming therapists can help you develop coping skills and thrive.",
+      "Navigating a late diagnosis of Autism or ADHD? We understand the unique challenges you face and offer specialized support.",
+      "Explore your identity in a safe and affirming space. Our therapists are trained to support individuals on their journey of self-discovery."
+    ],
+    "primary_keywords": [
+      "neurodivergent therapy st louis",
+      "adhd therapy college students",
+      "autism therapy st louis",
+      "late diagnosis adhd",
+      "executive function coaching",
+      "sensory processing issues",
+      "gender identity therapy st louis"
+    ],
+    "local_entities": [
+      "Washington University in St. Louis",
+      "University City",
+      "Clayton",
+      "Central West End",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "The unique challenges of being a neurodivergent college student",
+      "Navigating a late diagnosis of ADHD or Autism: What to expect",
+      "Sensory processing issues: Tips for managing sensory overload"
+    ]
+  }
+}

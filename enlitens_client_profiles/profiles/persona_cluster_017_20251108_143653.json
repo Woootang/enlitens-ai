@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "profile_id": "cluster-017-persona",
+    "persona_name": "Seeking Clarity and Support",
+    "persona_tagline": "Navigating life with potential ADHD/ASD while balancing family and career.",
+    "created_at": "2025-11-08 20:36:40.781830",
+    "source_documents": [
+      "cluster_17",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "adhd assessment",
+      "asd assessment",
+      "insurance",
+      "adult",
+      "new patients"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-55",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, possibly a parent",
+    "occupation": "Various - likely office/healthcare worker based on insurance",
+    "education": "Likely at least some college, possibly a degree",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Christian or non-religious"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up, Sarah's household was stable but emotionally distant. Her parents, while well-meaning, prioritized achievement and conformity. Emotions were often downplayed, and Sarah learned to mask her sensitivities and intense interests to fit in. She was a 'good girl' who excelled academically but struggled with underlying anxiety and a feeling of being different.",
+    "adolescence": "Adolescence was marked by increasing social anxiety and a feeling of being overwhelmed. Sarah excelled academically, but struggled with organization and time management. She started to notice she was different from her peers. Social gatherings were exhausting, and she often retreated to books and solitary activities.",
+    "early_adulthood": "In early adulthood, Sarah pursued a practical career path, seeking stability and security. She married, had children, and focused on building a 'normal' life. However, she increasingly felt overwhelmed and burned out trying to juggle work, family, and social expectations. The 'good girl' mask started to crack.",
+    "family_structure": "Grew up in a two-parent household with one younger sibling. Parents were focused on providing a stable life and emphasized academic achievement. Emotionally reserved family dynamic.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "Pressure to conform",
+      "Social anxiety",
+      "Burnout in adulthood"
+    ],
+    "educational_journey": "Successful academic career with some challenges with executive functions. Attended a 4 year university and obtained a bachelors degree.",
+    "pivotal_moments": [
+      "Realizing she was different from her peers in college.",
+      "Becoming a parent and feeling overwhelmed by the demands.",
+      "Experiencing professional burnout and questioning her career path.",
+      "Coming across information about ADHD/ASD in adults and realizing it resonated with her."
+    ],
+    "intergenerational_patterns": "Sarah's mother likely had undiagnosed anxiety or ADHD. A pattern of prioritizing stability and suppressing emotions was passed down through generations."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (suspected)",
+      "ASD (suspected)",
+      "Anxiety"
+    ],
+    "diagnosis_journey": "Sarah has always felt different, but attributed it to personality quirks. After years of struggling with executive dysfunction, anxiety, and feeling overwhelmed, she started researching ADHD and autism in adults. She realized her experiences closely aligned with the symptoms and is now seeking a formal diagnosis to better understand herself and access appropriate support.",
+    "how_it_shows_up": "Difficulty with organization, time management, and task initiation. Overwhelmed by sensory input and social situations. Struggles with emotional regulation and experiences anxiety. Hyperfocuses on specific interests. Difficulty maintaining relationships.",
+    "nervous_system_pattern": "High-strung, easily overwhelmed nervous system. Prone to anxiety and burnout. Seeks out routines and predictability to feel safe.",
+    "strengths_superpowers": [
+      "Strong attention to detail when interested",
+      "High level of empathy",
+      "Creative problem-solving skills",
+      "Loyalty and dedication"
+    ],
+    "current_coping_strategies": [
+      "Overworking to compensate for executive dysfunction",
+      "Avoiding social situations",
+      "Seeking comfort in routines",
+      "Self-medicating with caffeine or alcohol",
+      "Relying on partners/family for support"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Hyperfocus on tasks of interest",
+      "Good long-term memory",
+      "Strong verbal reasoning skills"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks",
+      "Procrastination",
+      "Poor time management",
+      "Difficulty with organization and planning",
+      "Trouble with working memory"
+    ],
+    "ef_workarounds": [
+      "Using lists and calendars (but often forgetting to check them)",
+      "Seeking external accountability",
+      "Breaking down tasks into smaller steps (sometimes)",
+      "Relying on others to manage schedules"
+    ],
+    "sensory_profile": "Highly sensitive to noise, light, and textures. Prefers soft, comfortable clothing. Avoids crowded places and strong smells. Seeks out quiet and predictable environments.",
+    "food_sensory_details": "Prefers bland, predictable foods. Avoids anything with a slimy or mushy texture, like cooked mushrooms or overripe bananas. Safe foods include: chicken tenders (specific brand, Tyson), plain pasta with butter, Cheerios (original), graham crackers. Only eats fruit if it is perfectly ripe. Skips meals when overwhelmed or stressed, and then binges on safe foods later."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban neighborhood in St. Louis County, MO",
+    "work_school_situation": "Works full-time in an office setting, potentially in healthcare administration. Feeling increasingly burned out and considering a career change.",
+    "commute_daily_rhythms": "Drives to work, battling traffic. Daily routine involves juggling work responsibilities, household chores, and family obligations. Feels constantly rushed and overwhelmed.",
+    "local_stressors": [
+      "Traffic congestion",
+      "Rising cost of living",
+      "Lack of affordable childcare",
+      "Pressure to maintain a certain social image"
+    ],
+    "safe_spaces": [
+      "Her home (when quiet)",
+      "Local library",
+      "Nature trails"
+    ],
+    "support_system": "Support system is limited. She is married, but her partner doesn't fully understand her struggles. She has a few close friends, but feels hesitant to burden them with her problems."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking clarity and understanding regarding potential ADHD/ASD diagnosis. \"I wanted to be evaluated for ADHD and or autism.\"",
+    "what_they_want_to_change": [
+      "Gain a formal diagnosis and access appropriate support.",
+      "Improve executive function skills.",
+      "Reduce anxiety and overwhelm.",
+      "Develop healthier coping mechanisms.",
+      "Improve relationships with family and friends.",
+      "Find a career path that aligns with her strengths and values."
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy.",
+      "Financial constraints related to therapy and assessment costs.",
+      "Fear of judgment and stigma.",
+      "Difficulty advocating for her needs.",
+      "Lack of understanding and support from family and friends."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"I'm reaching out to see if your accepting new patients. I wanted to be evaluated for ADHD and or autism.\"",
+    "quote_hope": "\"I've been looking for a new therapist with experience with adhd and asd, among other things.\"",
+    "quotes_additional": [
+      "\"Do you do these for adults?\"",
+      "\"I was wondering if you are accepting new patients and take insurance.\""
+    ],
+    "liz_clinical_narrative": "Sarah, it sounds like you've been on a long journey trying to understand yourself. The feeling of being different, the struggles with organization and overwhelm \u2013 these are significant challenges. It takes courage to reach out and seek an assessment, and I want you to know that I'm here to support you every step of the way. We can work together to explore your experiences, identify your strengths, and develop coping strategies that help you thrive. Insurance can be a big hurdle, and we can discuss options. My goal is to create a safe and affirming space where you can feel seen, heard, and understood.",
+    "therapy_preferences": "Seeking a therapist with experience in ADHD and ASD assessments for adults. Prefers a therapist who is empathetic, understanding, and validating."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you an adult woman struggling with feeling overwhelmed or different?",
+      "Neurodivergent-affirming therapy for women in St. Louis",
+      "ADHD and Autism assessments for adults."
+    ],
+    "primary_keywords": [
+      "adult adhd assessment st louis",
+      "adult autism assessment st louis",
+      "neurodiversity therapy st louis",
+      "insurance accepting therapist st louis"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves",
+      "Clayton"
+    ],
+    "content_angles": [
+      "Blog post: 'Is it ADHD or Autism? Understanding the Differences in Adults'",
+      "Webinar: 'Navigating Life with Neurodivergence: Strategies for Success'",
+      "Client testimonial: 'How therapy helped me understand my ADHD and live a more fulfilling life'"
+    ]
+  }
+}

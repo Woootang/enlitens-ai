@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "profile_id": "cluster-028-persona",
+    "persona_name": "Amelia, The Deep-Thinking Middle Schooler",
+    "persona_tagline": "Navigating middle school nuance with autism and ADHD.",
+    "created_at": "2025-11-08 20:40:04.669867",
+    "source_documents": [
+      "cluster_28",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "autism",
+      "ADHD",
+      "middle school",
+      "literal",
+      "nuance",
+      "anxiety",
+      "depression",
+      "sensory overload"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "11-12",
+    "gender": "Female",
+    "pronouns": "They/Them (preferred by parent, but may still be exploring)",
+    "orientation": "Questioning",
+    "ethnicity": "Not specified, assume White for St. Louis",
+    "current_life_situation": "Middle school student, living with parents",
+    "occupation": "Student",
+    "education": "6th grade",
+    "locality": "Suburban St. Louis, MO",
+    "cultural_faith_identities": [
+      "Not specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Amelia grew up in a relatively stable, middle-class home in the suburbs. Their parents, though loving, were often stressed and preoccupied with work, which created a sense of emotional distance. While there was no overt abuse or neglect, Amelia often felt misunderstood and struggled to articulate their needs. They often retreated into their own world of creative pursuits.",
+    "adolescence": "Entering middle school has been a tumultuous experience for Amelia. The social complexities and academic pressures have exacerbated their anxiety and depression. They are struggling to navigate the unwritten rules of social interaction and often feel like an outsider. The literal interpretation of language often leads to misunderstandings and feelings of isolation.",
+    "early_adulthood": "N/A",
+    "family_structure": "Two-parent household with at least one sibling (inferred from parent's mention of 'daughter'). Parents are supportive but perhaps struggling to fully understand Amelia's neurodivergence. Sibling dynamics are likely complex, potentially involving competition or misunderstandings.",
+    "formative_adversities": [
+      "Late diagnosis of autism, leading to years of feeling 'different' without understanding why",
+      "Social isolation and bullying due to difficulty understanding social cues",
+      "Academic struggles related to ADHD and executive function challenges",
+      "Anxiety and depression related to feeling overwhelmed and misunderstood"
+    ],
+    "educational_journey": "Elementary school was challenging but manageable. Middle school has been significantly more difficult due to increased social demands and academic rigor. Amelia may have experienced bullying or social exclusion. Struggles with organization and time management related to ADHD have impacted academic performance.",
+    "pivotal_moments": [
+      "The autism diagnosis: a moment of validation but also fear and uncertainty",
+      "A particularly hurtful social interaction that highlighted their difficulty with nuance",
+      "A moment of creative expression (e.g., writing, art) that provided a sense of belonging and purpose",
+      "The realization that their current therapist isn't the right fit"
+    ],
+    "intergenerational_patterns": "It is possible that one or both parents also have undiagnosed neurodivergent traits, leading to a lack of understanding or validation of Amelia's experiences. There may be a family history of anxiety or depression."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autism",
+      "ADHD",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Amelia's autism diagnosis came relatively recently, likely within the past year. This followed years of feeling 'different' and struggling with social interactions. The ADHD diagnosis may have come earlier, but the autism diagnosis provided a new lens through which to understand their challenges. They may have experienced a sense of relief and validation but also confusion and uncertainty.",
+    "how_it_shows_up": "Amelia is highly creative and deep-thinking. They struggle with understanding social norms and nuanced conversations. They are very literal in their interpretation of language. Sensory overload is a significant issue. They experience anxiety and depression, particularly in social situations and academic settings. Difficulty connecting with peers is a major challenge.",
+    "nervous_system_pattern": "High sympathetic nervous system activation, leading to anxiety and sensory overload. Tendency to become easily overwhelmed and shut down. Difficulty regulating emotions.",
+    "strengths_superpowers": [
+      "Exceptional creativity and imagination",
+      "Deep thinking and intellectual curiosity",
+      "Strong sense of justice and fairness",
+      "Ability to focus intensely on areas of interest"
+    ],
+    "current_coping_strategies": [
+      "Withdrawing from social situations",
+      "Engaging in creative activities (e.g., writing, art)",
+      "Seeking reassurance from parents",
+      "Fidgeting or stimming to regulate sensory input",
+      "Avoidance of challenging situations"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong imagination",
+      "Creativity",
+      "Hyperfocus on interests"
+    ],
+    "ef_friction_points": [
+      "Difficulty with organization and planning",
+      "Challenges with time management",
+      "Trouble prioritizing tasks",
+      "Difficulty with transitions",
+      "Literal interpretation leading to miscommunication and overwhelm"
+    ],
+    "ef_workarounds": [
+      "Using visual schedules",
+      "Breaking down tasks into smaller steps",
+      "Setting timers to manage time",
+      "Seeking assistance from parents or teachers"
+    ],
+    "sensory_profile": "Highly sensitive to sensory input. Overwhelmed by loud noises, bright lights, and strong smells. Seeks out quiet, calming environments. May have specific tactile sensitivities (e.g., uncomfortable clothing textures).",
+    "food_sensory_details": "Prefers foods with predictable textures. Avoids anything overly chewy, slimy, or with mixed textures. Safe foods include plain pasta (specifically Barilla brand spaghetti, cooked al dente), lightly salted potato chips (Lay's classic only), and applesauce (Mott's, unsweetened). Will only eat chicken if it is grilled, cut into small pieces, and room temperature. Highly sensitive to the smell of cooked onions. Skips meals when overwhelmed or anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban home in the St. Louis area, likely in a school district with good resources.",
+    "work_school_situation": "Attending middle school, struggling with academics and social interactions.",
+    "commute_daily_rhythms": "School bus ride is a significant source of stress due to noise and social interaction. After school, spends time on creative pursuits or withdrawn in their room.",
+    "local_stressors": [
+      "Middle school social dynamics",
+      "Academic pressure",
+      "Sensory overload in crowded environments",
+      "Misunderstandings with peers and teachers"
+    ],
+    "safe_spaces": [
+      "Their bedroom",
+      "Library or quiet corner at school",
+      "Nature (e.g., park, garden)",
+      "Creative spaces (e.g., art studio)"
+    ],
+    "support_system": "Parents are supportive but may not fully understand their experiences. Seeking a therapist who is younger and more relatable. May have a few close friends who understand and accept them."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Amelia feels disconnected from their current therapist and wants someone younger who can better understand their experiences. Their parents are seeking a therapist who can help Amelia navigate the challenges of middle school and their neurodivergence.",
+    "what_they_want_to_change": [
+      "Improve social skills and build stronger relationships",
+      "Reduce anxiety and depression",
+      "Develop better coping strategies for sensory overload",
+      "Improve academic performance",
+      "Feel more understood and accepted"
+    ],
+    "whats_in_the_way": [
+      "Difficulty understanding social cues and norms",
+      "Sensory sensitivities",
+      "Executive function challenges (e.g., organization, time management)",
+      "Anxiety and fear of social rejection",
+      "Lack of self-confidence",
+      "Feeling misunderstood by peers and adults"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "It mostly shows up in how literal they are and how they miss some nuance when speaking with others.",
+    "quote_hope": "Amelia wants someone a bit younger to connect with.",
+    "quotes_additional": [
+      "Amelia is amazingly creative and incredibly deep thinking.",
+      "Definitely loves connecting with others but also gets sensory overload easily."
+    ],
+    "liz_clinical_narrative": "Amelia is a bright, creative young person navigating the complexities of middle school while also understanding their recent autism diagnosis. Their literal thinking style and sensitivity to social nuance can make it challenging to connect with peers, leading to feelings of isolation and anxiety. A therapeutic relationship built on trust and understanding can empower Amelia to develop coping strategies for sensory overload, improve their social skills, and cultivate a stronger sense of self-acceptance. By creating a safe space to explore their feelings and experiences, Amelia can learn to embrace their unique strengths and navigate the world with greater confidence.",
+    "therapy_preferences": "Prefers a therapist who is younger, relatable, and understands neurodiversity. Values empathy, acceptance, and a strengths-based approach. May benefit from creative therapies (e.g., art therapy, music therapy)."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Neurodivergent-affirming therapy for teens in St. Louis",
+      "Helping teens with autism and ADHD thrive",
+      "Find a therapist who understands your unique challenges"
+    ],
+    "primary_keywords": [
+      "autism therapy St Louis",
+      "ADHD therapy St Louis",
+      "teen therapy St Louis",
+      "neurodivergent therapist St Louis",
+      "therapy for social anxiety teens",
+      "therapy for middle schoolers St Louis"
+    ],
+    "local_entities": [
+      "Kirkwood",
+      "Webster Groves",
+      "Clayton",
+      "Ladue",
+      "Rock Hill",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "Tips for navigating middle school with autism and ADHD",
+      "How to find a therapist who understands neurodiversity",
+      "Creating a sensory-friendly environment for your teen"
+    ]
+  }
+}

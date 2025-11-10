@@ -173,7 +173,7 @@ def _build_settings() -> Settings:
     provider_settings = _coerce_provider_settings(data)
 
     if not provider_settings.default_model:
-        provider_settings.default_model = "/home/antons-gs/enlitens-ai/models/mistral-7b-instruct"
+        provider_settings.default_model = "/home/antons-gs/enlitens-ai/models/qwen2.5-14b-instruct-awq"
 
     if not provider_settings.base_url:
         provider_settings.base_url = "http://localhost:8000/v1"

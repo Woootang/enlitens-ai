@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "profile_id": "cluster-044-persona",
+    "persona_name": "The Overwhelmed Parent Navigating Neurodivergence",
+    "persona_tagline": "Seeking support for my child's struggles while grappling with my own neurodivergence.",
+    "created_at": "2025-11-08 20:37:25.778302",
+    "source_documents": [
+      "cluster_44",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "parenting",
+      "anxiety",
+      "sensory",
+      "emotional regulation",
+      "neurodivergence"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of one or two children, feeling overwhelmed and stretched thin.",
+    "occupation": "Part-time Project Manager",
+    "education": "Bachelor's Degree",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "Christian"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban home. Parents were loving but somewhat strict and emotionally distant. High expectations for academic achievement. Learned to suppress emotions to maintain peace.",
+    "adolescence": "Developed anxiety in middle school, possibly related to social pressures and academic stress. Started experiencing sensory sensitivities (loud noises, scratchy clothes) but didn't understand why. Became withdrawn and struggled with self-esteem.",
+    "early_adulthood": "Went to college, but struggled to keep up with the workload and social demands. Masked her struggles, leading to burnout. Met her future spouse and found solace in their relationship. Started a career, but felt unfulfilled and constantly on edge.",
+    "family_structure": "Two parents, older brother who was considered the 'golden child.' Felt pressure to measure up. Now married with one or two children.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High academic pressure",
+      "undiagnosed neurodivergence",
+      "bullying in middle school"
+    ],
+    "educational_journey": "Straight-A student in elementary school, but grades slipped in middle and high school due to anxiety and executive function challenges. Managed to graduate college, but felt constantly behind and overwhelmed.",
+    "pivotal_moments": [
+      "Her child's diagnosis forced her to examine her own struggles.",
+      "Experienced a panic attack at work, realizing she couldn't continue masking.",
+      "Started researching neurodiversity and realized it resonated deeply with her experiences.",
+      "Sought therapy for her child and began to consider therapy for herself."
+    ],
+    "intergenerational_patterns": "Mom also likely had undiagnosed anxiety and sensory sensitivities. A pattern of suppressing emotions and prioritizing external expectations over personal well-being."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Sensory Processing Disorder",
+      "Potential ADHD (undiagnosed)",
+      "Depression"
+    ],
+    "diagnosis_journey": "Initially diagnosed with anxiety and depression in her early 20s. Sensory Processing Disorder diagnosed later in life, after her child was diagnosed. Suspects she may also have ADHD, but hasn't pursued a formal diagnosis due to fear of stigma and the effort required.",
+    "how_it_shows_up": "Overwhelmed easily by sensory input, such as loud noises, bright lights, and strong smells. Struggles with emotional regulation, leading to outbursts of anger or tears. Difficulty focusing and staying organized. Procrastination and avoidance of tasks. Perfectionistic tendencies and fear of failure. 'Getting overwhelmed'",
+    "nervous_system_pattern": "High-strung and easily activated. Tendency to be hypervigilant and scan for potential threats. Difficulty relaxing and unwinding. Often feels on edge and irritable.",
+    "strengths_superpowers": [
+      "Highly empathetic and compassionate",
+      "Creative problem-solver",
+      "Detail-oriented",
+      "Strong sense of justice",
+      "Resilient and determined"
+    ],
+    "current_coping_strategies": [
+      "Avoidance of stressful situations",
+      "Over-planning and scheduling",
+      "Seeking reassurance from others",
+      "Using screens to distract from anxiety",
+      "Emotional eating"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong pattern recognition",
+      "Creative thinking",
+      "Excellent long-term memory"
+    ],
+    "ef_friction_points": [
+      "Difficulty with task initiation",
+      "Procrastination",
+      "Poor time management",
+      "Disorganization",
+      "Difficulty prioritizing tasks",
+      "emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using visual timers",
+      "Breaking down tasks into smaller steps",
+      "Setting reminders on her phone",
+      "Seeking help from others",
+      "Creating routines"
+    ],
+    "sensory_profile": "Highly sensitive to loud noises, bright lights, strong smells, and certain textures. Avoids crowded places and situations where she can't control her environment. Seeks out quiet and calming spaces. Finds comfort in soft textures and gentle movements.",
+    "food_sensory_details": "Avoids foods with slimy or mushy textures, such as cooked mushrooms or overripe bananas. Prefers foods that are crunchy or crispy. Only eats chicken if it's grilled and cooled to room temperature. Safe foods: plain Cheerios (specific yellow box brand), Ritz crackers, and unflavored yogurt. Skips meals when overwhelmed or stressed. Binge eats on chips and pretzels when anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a two-story house in Webster Groves, MO. Appreciates the quiet neighborhood and access to parks and green spaces.",
+    "work_school_situation": "Works part-time as a Project Manager, but finds it challenging to balance work and family responsibilities. Feels constantly behind and overwhelmed. Considers quitting her job to focus on her children's needs.",
+    "commute_daily_rhythms": "Short commute to work. Spends most of her day juggling work tasks, managing her children's schedules, and trying to keep the house organized. Feels exhausted and depleted by the end of the day.",
+    "local_stressors": [
+      "High cost of living in St. Louis",
+      "Competitive school environment",
+      "Lack of affordable childcare",
+      "Traffic congestion"
+    ],
+    "safe_spaces": [
+      "Her backyard garden",
+      "The local library",
+      "Her bedroom with the door closed"
+    ],
+    "support_system": "Her spouse is supportive but often overwhelmed himself. Has a few close friends, but struggles to maintain those relationships due to time constraints. Feels isolated and alone in her struggles."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Looking to get her son into therapy to help him work through some of his feelings and find some self confidence and coping strategies for when things get difficult. She also realizes she needs help with getting overwhelmed. Recognizing her own anxiety and sensory issues are impacting her ability to parent effectively.",
+    "what_they_want_to_change": [
+      "Develop better coping strategies for anxiety and sensory overload.",
+      "Improve emotional regulation skills.",
+      "Learn how to manage her time and prioritize tasks effectively.",
+      "Reduce feelings of overwhelm and burnout.",
+      "Improve her relationship with her children.",
+      "Gain self-confidence and self-acceptance."
+    ],
+    "whats_in_the_way": [
+      "Fear of judgment and stigma",
+      "Lack of time and resources",
+      "Difficulty asking for help",
+      "Perfectionistic tendencies",
+      "Executive function challenges",
+      "Sensory sensitivities"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I need help with getting overwhelmed.",
+    "quote_hope": "We are looking to get him into therapy to help him work through some of his feelings and find some self confidence and coping strategies for when things get difficult.",
+    "quotes_additional": [
+      "He is having behavior troubles at school and at home.",
+      "He is having some challenges with emotional regulation, anxiety, some perseverance concerns, with a touch of sensory issues."
+    ],
+    "liz_clinical_narrative": "This parent is experiencing significant overwhelm, likely stemming from a combination of their child's struggles and their own undiagnosed neurodivergence. They are seeking support for their child, but also implicitly acknowledging their own need for help. It is essential to create a safe and non-judgmental space where they can explore their feelings and develop effective coping strategies. Therapy can help them understand their sensory sensitivities, improve emotional regulation skills, and build self-compassion. By addressing their own needs, they will be better equipped to support their child and create a more harmonious family environment.",
+    "therapy_preferences": "Seeking a therapist who is experienced in working with neurodivergent children and adults. Values empathy, understanding, and a non-judgmental approach. Prefers a therapist who can provide practical tools and strategies for managing anxiety and sensory overload."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Supporting Neurodivergent Families in St. Louis",
+      "Is Your Child Struggling with Emotional Regulation? We Can Help.",
+      "Overwhelmed? Find Sensory-Informed Therapy."
+    ],
+    "primary_keywords": [
+      "anxiety therapy St. Louis",
+      "sensory processing disorder children",
+      "emotional regulation support",
+      "neurodivergent parenting",
+      "overwhelmed parent therapy"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Rock Hill",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "Tips for managing sensory overload at home",
+      "Understanding emotional regulation in children",
+      "How to support a neurodivergent child",
+      "Self-care strategies for overwhelmed parents"
+    ]
+  }
+}

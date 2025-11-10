@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "profile_id": "cluster-049-persona",
+    "persona_name": "Anxious Parent Seeking Support for Child",
+    "persona_tagline": "Navigating childhood anxiety and Tricare.",
+    "created_at": "2025-11-08 20:44:17.456490",
+    "source_documents": [
+      "cluster_49",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "parenting",
+      "tricare",
+      "childhood anxiety"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "30-40",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of one child experiencing anxiety",
+    "occupation": "Part-time teacher",
+    "education": "Bachelor's Degree in Education",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Christian"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Sarah grew up in a stable, middle-class home in rural Missouri. Her parents were loving but somewhat emotionally distant, prioritizing academics and achievement over emotional expression. She felt pressured to excel in school and be 'well-behaved'.",
+    "adolescence": "In high school, Sarah excelled academically but struggled socially. She experienced some bullying for being 'a teacher's pet' and developed social anxiety. She found solace in books and spent much of her free time reading and studying.",
+    "early_adulthood": "Sarah attended a small, private college and obtained a degree in Education. She met her husband, Mark, during her junior year. They married shortly after graduation and moved to St. Louis County when Mark secured a job at Boeing. Sarah began her teaching career in a local elementary school.",
+    "family_structure": "Sarah was raised by both of her biological parents. She has one younger brother, with whom she maintains a cordial but not particularly close relationship. Her maternal grandmother lived nearby and was a significant source of support during her childhood.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "Social bullying in high school",
+      "Financial strain during college",
+      "Struggled with infertility for 3 years before conceiving her daughter"
+    ],
+    "educational_journey": "Excellent student, always prioritized academics. Attended a small private college and received a degree in education. Experienced some social isolation during her school years.",
+    "pivotal_moments": [
+      "Being bullied in high school, leading to social anxiety",
+      "Meeting her husband, providing stability and emotional support",
+      "Struggling with infertility, creating anxiety around motherhood",
+      "Her daughter's birth, bringing immense joy but also increased anxiety",
+      "Witnessing her daughter's anxiety, triggering her own past struggles"
+    ],
+    "intergenerational_patterns": "Sarah's mother was also prone to anxiety, although it was never formally diagnosed. Sarah recognizes similar patterns in herself and is determined to help her daughter develop healthier coping mechanisms."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible undiagnosed ADHD tendencies"
+    ],
+    "diagnosis_journey": "Sarah has never been formally diagnosed with any mental health conditions, but she has always struggled with anxiety, particularly social anxiety and perfectionism. She suspects she may have some undiagnosed ADHD traits, but has never sought an official evaluation. She is now motivated to seek help for her daughter and potentially for herself as well.",
+    "how_it_shows_up": "Anxiety manifests as excessive worrying, difficulty sleeping, and physical symptoms like stomachaches. She tends to overthink situations and catastrophize potential outcomes. Possible ADHD traits show up as difficulty focusing, procrastination, and disorganization.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to operate in a state of chronic stress. Seeks control and predictability to manage anxiety.",
+    "strengths_superpowers": [
+      "Highly empathetic and attuned to her daughter's emotions",
+      "Organized and detail-oriented (when not overwhelmed)",
+      "Dedicated and committed to her family",
+      "Creative problem-solver"
+    ],
+    "current_coping_strategies": [
+      "Avoidance of social situations",
+      "Overplanning and control",
+      "Seeking reassurance from her husband",
+      "Reading and watching TV to distract herself",
+      "Occasional use of over-the-counter sleep aids"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Planning",
+      "Organization (when not overwhelmed)",
+      "Task initiation (sometimes)"
+    ],
+    "ef_friction_points": [
+      "Task completion",
+      "Impulse control",
+      "Emotional regulation",
+      "Focus",
+      "Procrastination",
+      "Overwhelm"
+    ],
+    "ef_workarounds": [
+      "Using a planner and to-do lists",
+      "Breaking down tasks into smaller steps",
+      "Setting timers to stay on track",
+      "Seeking help from her husband with household tasks"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers calm and quiet environments. Avoids crowded places and strong smells. Enjoys soft textures and gentle touch.",
+    "food_sensory_details": "Dislikes foods with slimy textures, such as okra or cooked mushrooms. Prefers foods that are bland and easy to chew. Safe foods include: plain pasta with butter, grilled chicken (specifically Tyson brand), Cheerios with milk (skim only), and saltine crackers (Nabisco brand). Avoids anything with visible fat or gristle. Often skips meals when feeling anxious or overwhelmed."
+  },
+  "current_life_context": {
+    "where_they_live": "Modest single-family home in a quiet suburban neighborhood in St. Louis County.",
+    "work_school_situation": "Part-time elementary school teacher, working 3 days a week. Spends the remaining time caring for her daughter and managing household responsibilities.",
+    "commute_daily_rhythms": "Short commute to the local elementary school. Her daily routine revolves around her daughter's school schedule and activities. Mornings are often rushed and stressful, while evenings are more relaxed.",
+    "local_stressors": [
+      "High cost of living in St. Louis County",
+      "Competitive school environment",
+      "Concerns about school safety",
+      "Traffic congestion during commute hours"
+    ],
+    "safe_spaces": [
+      "Her home",
+      "Local library",
+      "Her daughter's school (when she's volunteering)",
+      "Quiet parks and nature trails"
+    ],
+    "support_system": "Her husband is her primary source of support. She also has a few close friends and family members who live nearby. She relies on online parenting groups for advice and support."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Her daughter has developed anxiety at bedtime, and she is concerned about its impact on her daughter's well-being.",
+    "what_they_want_to_change": [
+      "Reduce her daughter's anxiety",
+      "Develop healthier coping mechanisms for her daughter",
+      "Gain a better understanding of anxiety and how to support her daughter",
+      "Address her own anxiety and potential ADHD traits",
+      "Create a more peaceful and supportive home environment"
+    ],
+    "whats_in_the_way": [
+      "Limited financial resources (dependent on Tricare coverage)",
+      "Time constraints due to work and family responsibilities",
+      "Fear of judgment or stigma associated with mental health",
+      "Difficulty finding a therapist who accepts Tricare and specializes in childhood anxiety",
+      "Her own anxiety and avoidance tendencies"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "My daughter has developed anxiety at bedtime.",
+    "quote_hope": "Please let me know as soon as you can.",
+    "quotes_additional": [],
+    "liz_clinical_narrative": "Sarah's reaching out because she's witnessing her child struggle with anxiety, a struggle she knows all too well. Seeing her daughter's distress has brought Sarah's own anxieties to the forefront, prompting her to seek support not just for her daughter, but perhaps, for herself too. Navigating Tricare can be a hurdle, but it's a testament to Sarah's commitment to finding the right care. We can help Sarah create a toolbox of strategies for both her and her daughter. It\u2019s about understanding the root of the anxiety, building resilience, and creating a safe and supportive environment where they both can thrive. We'll work collaboratively, respecting her values and priorities, to empower her to be the parent she wants to be and to find her own inner peace.",
+    "therapy_preferences": "Seeking a therapist who accepts Tricare, specializes in childhood anxiety, and is empathetic and understanding. Open to exploring her own mental health concerns as well."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your child struggling with anxiety? We accept Tricare and offer compassionate, neurodivergent-affirming therapy.",
+      "Bedtime battles got you down? We can help your child manage anxiety and create a peaceful bedtime routine.",
+      "Supporting anxious children is possible. We provide specialized therapy for children and their parents in St. Louis, MO."
+    ],
+    "primary_keywords": [
+      "childhood anxiety",
+      "Tricare therapy St. Louis",
+      "anxiety in children",
+      "parenting anxious child",
+      "bedtime anxiety children"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves",
+      "Rock Hill",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "How to support a child with anxiety",
+      "Understanding childhood anxiety",
+      "Tricare coverage for therapy in St. Louis"
+    ]
+  }
+}

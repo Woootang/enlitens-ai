@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "profile_id": "cluster-002-persona",
+    "persona_name": "The Overwhelmed ADHD Intern",
+    "persona_tagline": "Navigating professional demands while managing ADHD.",
+    "created_at": "2025-11-08 20:31:26.153910",
+    "source_documents": [
+      "cluster_2",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "Professional",
+      "Anxiety",
+      "Executive Dysfunction",
+      "Young Adult"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "23-28",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Psyd student in internship",
+    "occupation": "Psychology Intern",
+    "education": "Doctoral Student (Psyd)",
+    "locality": "Central West End, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban home. Parents were loving but often stressed due to financial pressures. Her mother worked long hours, and her father struggled with undiagnosed ADHD, leading to household chaos and inconsistent routines. Always felt she had to be the 'responsible' one.",
+    "adolescence": "Excelled academically but struggled with organization and time management. Socially awkward, often feeling like she didn't quite fit in. Developed anxiety around deadlines and tests, leading to frequent panic attacks before big exams. Started self-medicating with caffeine and energy drinks to cope.",
+    "early_adulthood": "Entered college with high hopes but quickly became overwhelmed by the unstructured environment. Struggled to keep up with coursework, leading to feelings of inadequacy and imposter syndrome. Finally sought an ADHD diagnosis in her junior year, which provided some relief but also a sense of lost time and missed opportunities.",
+    "family_structure": "Two-parent household with one younger brother. Parents are still married but have a strained relationship. Brother is successful but often dismissive of her struggles.",
+    "formative_adversities": [
+      "Financial instability in childhood",
+      "Father's undiagnosed ADHD and resulting household chaos",
+      "Academic pressure",
+      "Social isolation during adolescence",
+      "Late ADHD diagnosis"
+    ],
+    "educational_journey": "Attended a competitive high school, then a four-year university, and is now pursuing a Psyd. Faced academic challenges due to ADHD, requiring extra time and accommodations.",
+    "pivotal_moments": [
+      "Receiving her ADHD diagnosis in college",
+      "Failing a major exam and realizing she needed help",
+      "Starting her internship and feeling the pressure of real-world application",
+      "Having a panic attack during a presentation",
+      "Realizing she needs therapy to manage her ADHD effectively"
+    ],
+    "intergenerational_patterns": "Father's undiagnosed ADHD led to chaotic home environment. Her mother's anxiety was also a significant factor in her upbringing."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety"
+    ],
+    "diagnosis_journey": "Suspected ADHD throughout childhood but was dismissed as 'just being creative' or 'not applying herself.' Finally sought testing during college after repeated academic struggles. Diagnosis provided validation but also sparked feelings of resentment and grief over the years lost.",
+    "how_it_shows_up": "Procrastination, difficulty focusing, impulsivity, anxiety, perfectionism, feeling overwhelmed by tasks, difficulty managing time and deadlines, emotional dysregulation, hyperfocus on certain tasks, struggles with transitions.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tendency towards fight-or-flight response. Difficulty regulating emotions and shutting off racing thoughts. Sensory overload in busy environments.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Empathy",
+      "Hyperfocus on topics of interest",
+      "Problem-solving",
+      "Resilience"
+    ],
+    "current_coping_strategies": [
+      "Caffeine",
+      "Exercise (sporadically)",
+      "Procrastination followed by frantic bursts of work",
+      "Avoidance of overwhelming tasks",
+      "Trying to implement rigid schedules that are quickly abandoned",
+      "doomscrolling"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Generating new ideas",
+      "Connecting with clients empathetically"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Prioritization",
+      "Emotional regulation",
+      "Working memory"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars (digital and paper)",
+      "Setting alarms and reminders",
+      "Breaking down large tasks into smaller steps (often inconsistently)",
+      "Seeking extensions on deadlines",
+      "Body doubling with classmates"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Overwhelmed by strong smells. Needs quiet time to recharge after social interactions.",
+    "food_sensory_details": "Dislikes mushy textures, especially cooked vegetables like squash or eggplant. Can only eat bananas if they are still slightly green and firm. Safe foods include: crispy, seasoned potato chips (especially barbeque flavor), plain Greek yogurt with a drizzle of honey, and crunchy peanut butter on toasted sourdough bread (crusts removed). Avoids anything with a slimy texture, like okra or certain sauces. Drinks copious amounts of iced coffee with oat milk and stevia. Skips meals when overwhelmed, then binges on processed snacks later. Finds the act of cooking to be overwhelming and avoids it when possible."
+  },
+  "current_life_context": {
+    "where_they_live": "Rents a small apartment in the Central West End, close to her internship site.",
+    "work_school_situation": "Full-time psychology intern at a community mental health clinic. Balancing internship responsibilities with coursework and dissertation research.",
+    "commute_daily_rhythms": "Walks to her internship most days. Commute involves navigating crowded sidewalks and dealing with street noise. Listens to podcasts or audiobooks to try and stay focused. Dreads the commute home after a long day, often feeling drained and irritable.",
+    "local_stressors": [
+      "High cost of living",
+      "Limited access to affordable and healthy food options",
+      "Competition within her Psyd program",
+      "Demands of internship",
+      "Feeling of being constantly observed and evaluated"
+    ],
+    "safe_spaces": [
+      "Her apartment (when it's clean)",
+      "A quiet corner in the library",
+      "Walking in Forest Park"
+    ],
+    "support_system": "Limited support system. Close to a few classmates, but struggles to maintain friendships due to time constraints and social anxiety. Parents are supportive but don't fully understand her struggles. Lacks a consistent mentor or supervisor."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Realizing that her ADHD is impacting her ability to effectively serve her clients and manage her own mental health. Needs help developing coping strategies and managing anxiety.",
+    "what_they_want_to_change": [
+      "Improve time management and organization",
+      "Reduce anxiety and stress",
+      "Develop healthier coping mechanisms",
+      "Increase self-compassion",
+      "Feel more confident in her abilities as a therapist"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of failure",
+      "Lack of time",
+      "Financial constraints",
+      "Difficulty asking for help",
+      "Negative self-talk",
+      "Executive dysfunction"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"I'm really struggling with my own ADHD.\"",
+    "quote_hope": "I'm looking for a therapist that can help me do manage my adhd.",
+    "quotes_additional": [
+      "I am not familiar with the process of finding one and I am not sure what exactly I may need."
+    ],
+    "liz_clinical_narrative": "This highly intelligent and compassionate individual is facing a common challenge: navigating the intense demands of a helping profession while simultaneously managing their own neurodivergence. The key here is not just symptom management, but cultivating self-compassion and building sustainable coping strategies. We'll focus on creating routines that work *with* her brain, not against it, and on reframing perfectionistic tendencies into realistic and achievable goals. We'll also explore the impact of her family dynamics and childhood experiences on her current struggles, fostering a deeper understanding of her patterns and triggers. The goal is to empower her to thrive, both personally and professionally.",
+    "therapy_preferences": "Looking for a therapist specializing in ADHD. Email communication is preferred initially. Needs flexibility in scheduling due to internship demands."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a student or professional struggling to manage ADHD alongside your demanding career?",
+      "Neurodivergent-affirming therapy for overwhelmed adults in St. Louis.",
+      "Find strategies that work with *your* brain, not against it."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "ADHD therapist near me",
+      "adult ADHD treatment",
+      "executive dysfunction therapy",
+      "anxiety therapy St. Louis",
+      "neurodivergent therapist St. Louis",
+      "therapy for psyd students"
+    ],
+    "local_entities": [
+      "Central West End",
+      "Forest Park",
+      "Washington University",
+      "Barnes-Jewish Hospital"
+    ],
+    "content_angles": [
+      "ADHD and Imposter Syndrome in Graduate School",
+      "Tips for Managing Executive Dysfunction as a Therapist",
+      "Self-Care Strategies for Neurodivergent Professionals"
+    ]
+  }
+}

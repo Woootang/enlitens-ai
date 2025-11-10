@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "profile_id": "cluster-021-persona",
+    "persona_name": "Insuranced-Focused Information Seeker",
+    "persona_tagline": "Seeking clarity and access to neurodivergent-affirming care.",
+    "created_at": "2025-11-08 20:41:35.870238",
+    "source_documents": [
+      "cluster_21",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "insurance",
+      "access",
+      "initial consultation",
+      "new clients"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-40",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, possibly married, exploring therapy options.",
+    "occupation": "Office Manager",
+    "education": "Some College",
+    "locality": "South County, St. Louis, MO",
+    "cultural_faith_identities": [
+      "Christian"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a stable but emotionally reserved household in rural Missouri, Emily learned early to suppress her own needs to maintain peace. Her parents, while loving, prioritized practicality and hard work over emotional expression. There was an unspoken expectation to conform and not make waves.",
+    "adolescence": "In high school, Emily struggled with social anxiety and felt like she never quite fit in. She excelled academically but often felt overwhelmed by the demands of school and extracurricular activities. She developed coping mechanisms like perfectionism and people-pleasing to mask her insecurities.",
+    "early_adulthood": "After high school, Emily attended a local community college but dropped out after a year, feeling directionless and unsure of her path. She drifted through various jobs, experiencing periods of depression and anxiety. She met her husband, Mark, and they married relatively young, seeking stability and companionship.",
+    "family_structure": "Emily was raised by both parents in a two-parent household. She has one younger brother, who was always considered the 'easy' child. Her parents are still married but have a strained relationship marked by unspoken resentments.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Social anxiety in adolescence",
+      "Lack of clear direction in early adulthood",
+      "Financial struggles early in marriage"
+    ],
+    "educational_journey": "High school graduate, attended community college for one year but did not complete a degree. Faced struggles with focus and organization throughout her education.",
+    "pivotal_moments": [
+      "Dropping out of college and feeling like a failure",
+      "Getting married and feeling the pressure to conform to societal expectations",
+      "Experiencing burnout at work and realizing she couldn't continue living the way she was",
+      "Discovering the concept of neurodiversity and realizing it resonated with her experiences",
+      "Deciding to seek professional help to understand herself better"
+    ],
+    "intergenerational_patterns": "Emily's mother also struggled with anxiety and depression, possibly undiagnosed ADHD, and coped by being overly critical of herself and others. Emily is determined to break this pattern and create a more emotionally healthy environment for herself and her future family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (suspected/undiagnosed)",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Emily has long suspected she has ADHD, but has hesitated to seek a formal diagnosis due to stigma and fear of being labeled. She stumbled upon online resources describing ADHD in women and felt deeply seen and understood. Now, she is prioritizing finding a therapist who specializes in neurodiversity to receive a proper assessment and support.",
+    "how_it_shows_up": "Difficulty focusing and staying on task, chronic procrastination, feeling overwhelmed by daily responsibilities, anxiety and self-doubt, struggles with emotional regulation, difficulty with organization and time management.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to be in a state of hyperarousal, constantly scanning for potential threats or problems. Difficulty relaxing and shutting off her mind. Frequently experiences racing thoughts and physical tension.",
+    "strengths_superpowers": [
+      "High level of empathy and intuition",
+      "Creative problem-solving skills",
+      "Ability to hyperfocus on tasks that genuinely interest her",
+      "Strong sense of justice and fairness",
+      "Resilience in the face of adversity"
+    ],
+    "current_coping_strategies": [
+      "Overthinking and rumination",
+      "People-pleasing and avoidance of conflict",
+      "Caffeine consumption to stay focused",
+      "Scrolling social media to numb out",
+      "Retail therapy"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Quick learner",
+      "Creative",
+      "Empathetic"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Emotional regulation",
+      "Impulsivity"
+    ],
+    "ef_workarounds": [
+      "Using a planner (inconsistently)",
+      "Setting reminders on her phone (often ignores them)",
+      "Relying on her husband to help with household tasks"
+    ],
+    "sensory_profile": "Sensitive to bright lights and loud noises. Prefers soft, comfortable clothing. Easily overwhelmed by strong smells. Seeks out calming sensory input like weighted blankets and gentle music.",
+    "food_sensory_details": "Very particular about food textures. Dislikes anything mushy or slimy. Avoids foods with visible fat or gristle. Safe foods include: Grilled chicken breast (only if cooked perfectly, not dry but not rubbery), plain rice, steamed broccoli (lightly salted), and specific brand of Triscuits. Will only drink ice water with NO lemon. Binge eats potato chips (Lays Classic) when stressed. Skips meals when overwhelmed, then crashes later with intense hunger."
+  },
+  "current_life_context": {
+    "where_they_live": "Small, tidy home in a quiet subdivision in South County, St. Louis.",
+    "work_school_situation": "Works full-time as an office manager for a small accounting firm. Feels underappreciated and overworked. Dreams of finding a more fulfilling career.",
+    "commute_daily_rhythms": "30-minute commute each way. Listens to podcasts or audiobooks to distract herself from the traffic and stress of the day.",
+    "local_stressors": [
+      "Traffic congestion",
+      "Lack of affordable childcare options",
+      "Pressure to keep up with appearances in her community",
+      "Limited access to neurodivergent-affirming resources"
+    ],
+    "safe_spaces": [
+      "Her backyard garden",
+      "The local library",
+      "Spending time with her close friend, Sarah"
+    ],
+    "support_system": "Her husband, Mark, provides practical support but struggles to understand her emotional needs. Has a close female friend, Sarah, who is a good listener and offers empathy and validation."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "She feels overwhelmed, anxious, and burned out. She wants to understand herself better and develop coping strategies to manage her symptoms.",
+    "what_they_want_to_change": [
+      "Gain a better understanding of her neurodivergence",
+      "Develop effective coping mechanisms for anxiety and overwhelm",
+      "Improve her relationships",
+      "Find a more fulfilling career path",
+      "Reduce her dependence on unhealthy coping strategies"
+    ],
+    "whats_in_the_way": [
+      "Fear of being judged or stigmatized",
+      "Lack of time and energy",
+      "Financial constraints",
+      "Difficulty finding a therapist who truly understands neurodiversity",
+      "Internalized self-doubt and limiting beliefs"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"Are you taking more clients?\"",
+    "quote_hope": "\"I'd love to set up an initial consultation to see if we might be a good fit.\"",
+    "quotes_additional": [
+      "\"Do you accept anthem insurance?\""
+    ],
+    "liz_clinical_narrative": "Emily's story is one of quiet struggle and resilience. She has spent years trying to fit into a world that wasn't designed for her, masking her true self and internalizing the message that she is somehow flawed. Her eagerness to secure an 'initial consultation' and inquire about insurance reflects a desire for clarity and accessibility. Now, she is ready to embark on a journey of self-discovery and empowerment, seeking a therapist who can provide a safe and affirming space for her to explore her neurodivergence and develop strategies for living a more authentic and fulfilling life. It's essential to meet her where she is, validate her experiences, and empower her to embrace her unique strengths and navigate the challenges she faces.",
+    "therapy_preferences": "Seeks a therapist who is neurodivergent-affirming, compassionate, and understanding. Values practical strategies and a collaborative approach. Prefers a therapist who accepts her insurance."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you feeling overwhelmed and anxious? Do you suspect you might have ADHD but haven't been diagnosed? We offer neurodivergent-affirming therapy services in St. Louis.",
+      "Navigating the complexities of insurance coverage for mental health can be stressful. We accept Anthem and are committed to providing accessible and affordable care."
+    ],
+    "primary_keywords": [
+      "neurodivergent therapy St. Louis",
+      "ADHD assessment St. Louis",
+      "anxiety therapy St. Louis",
+      "therapist accepting Anthem",
+      "insurance mental health coverage",
+      "neurodiversity affirming therapist near me"
+    ],
+    "local_entities": [
+      "South County",
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves"
+    ],
+    "content_angles": [
+      "Blog post: Navigating Insurance Coverage for Neurodivergent Therapy",
+      "Video: Signs You Might Be Neurodivergent",
+      "Infographic: Understanding ADHD in Women"
+    ]
+  }
+}

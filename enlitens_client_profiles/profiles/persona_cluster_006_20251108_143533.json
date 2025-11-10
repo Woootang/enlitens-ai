@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "profile_id": "cluster-010-persona",
+    "persona_name": "Navigating Neurodivergence: The Supportive Parent",
+    "persona_tagline": "Advocating for my child's unique needs in a world that doesn't always understand.",
+    "created_at": "2025-11-08 20:35:18.018602",
+    "source_documents": [
+      "cluster_10",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "parent",
+      "autism",
+      "ADHD",
+      "adolescent",
+      "child",
+      "anxiety",
+      "supportive"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-50",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of one or more children",
+    "occupation": "Teacher, Healthcare worker, or similar helping profession (or stay-at-home parent)",
+    "education": "Bachelor's Degree",
+    "locality": "Suburban St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a stable, middle-class household. Parents were supportive but didn't always understand her sensitivities or need for structure. She was often labeled as 'sensitive' or 'shy.' There was some unspoken pressure to conform.",
+    "adolescence": "Started to feel more and more different from her peers. Struggled with social anxiety and feeling like she didn't fit in. Excelled academically but had difficulty with organization and time management. Developed a strong sense of justice and empathy for others who were marginalized.",
+    "early_adulthood": "Went to college, struggled initially with the unstructured environment. Found a passion in her chosen field (education or healthcare), which allowed her to use her empathy and organizational skills. Met her spouse and started a family.",
+    "family_structure": "Married with children. Strong, supportive relationship with her spouse, but they sometimes disagree on parenting styles. Her extended family is generally supportive but can be judgmental at times.",
+    "formative_adversities": [
+      "Witnessing bullying in school and feeling powerless to stop it.",
+      "Feeling misunderstood by her parents during adolescence.",
+      "Struggling with the transition to motherhood and feeling overwhelmed by the responsibilities.",
+      "Navigating the special education system to get her child the support they need."
+    ],
+    "educational_journey": "Good student overall, but struggled with disorganization and procrastination. Found subjects she was passionate about and excelled in those areas. Experienced some frustration with the rigid structure of the education system.",
+    "pivotal_moments": [
+      "Her child's diagnosis of autism or ADHD.",
+      "Realizing that her child was struggling in school and needing extra support.",
+      "Finding a community of other parents who understood her experiences.",
+      "Deciding to seek therapy for her child and advocate for their needs.",
+      "Learning about neurodiversity and understanding that her child's differences are not deficits."
+    ],
+    "intergenerational_patterns": "Potential for undiagnosed neurodivergence in her own family. Her mother may have exhibited similar traits but was never diagnosed. A pattern of suppressing emotions or conforming to societal expectations."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Parent of an Autistic/ADHD child"
+    ],
+    "diagnosis_journey": "Began when she noticed developmental differences in her child. Initially dismissed by some doctors, but she persisted in seeking answers. Felt a mix of relief, validation, and fear when her child was finally diagnosed. The diagnosis led her to research neurodiversity and realize that her child's brain simply works differently.",
+    "how_it_shows_up": "Anxiety about her child's future. Overwhelmed by the demands of parenting a neurodivergent child. Difficulty balancing her own needs with her child's needs. Feeling isolated from other parents who don't understand her experiences. Exhaustion from constantly advocating for her child.",
+    "nervous_system_pattern": "Often in a state of hypervigilance, constantly monitoring her child's well-being. Prone to anxiety and overwhelm. Difficulty relaxing and shutting off her mind. Needs consistent routines and predictability to feel safe and grounded.",
+    "strengths_superpowers": [
+      "Exceptional empathy and understanding for her child's experiences.",
+      "Strong advocacy skills.",
+      "Ability to see the world from a different perspective.",
+      "Creativity in finding solutions to challenges.",
+      "Resilience and determination."
+    ],
+    "current_coping_strategies": [
+      "Researching autism and ADHD.",
+      "Connecting with other parents of neurodivergent children.",
+      "Seeking support from family and friends.",
+      "Trying to implement routines and structure at home.",
+      "Using mindfulness or relaxation techniques to manage anxiety."
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong organizational skills (related to child's needs).",
+      "Ability to plan and prepare for appointments and therapies.",
+      "Excellent at advocating for her child.",
+      "Good at creating structured environments.",
+      "Resourceful in finding information and support."
+    ],
+    "ef_friction_points": [
+      "Difficulty prioritizing her own needs.",
+      "Struggles with time management.",
+      "Overwhelmed by the amount of information and tasks related to her child's care.",
+      "Procrastination on tasks that are not directly related to her child.",
+      "Difficulty with flexible thinking when plans change."
+    ],
+    "ef_workarounds": [
+      "Using a detailed planner to track appointments and tasks.",
+      "Breaking down large tasks into smaller, more manageable steps.",
+      "Setting timers to stay on track.",
+      "Using visual schedules for her child.",
+      "Seeking help from her spouse or other family members."
+    ],
+    "sensory_profile": "Sensitive to noise and crowds, especially when her child is dysregulated. Prefers calm, quiet environments. May experience sensory overload when exposed to too much stimulation. Enjoys tactile activities like gardening or knitting.",
+    "food_sensory_details": "Prefers simple, whole foods. Dislikes strong smells or textures. Safe foods include: Plain yogurt with berries, grilled chicken, steamed vegetables, and gluten-free crackers. Avoids foods with artificial colors, flavors, or preservatives. Only eats bananas if they are slightly green, never ripe. Can only drink beverages if they are ice cold. Will skip meals entirely if overwhelmed and unable to find safe foods."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban home in St. Louis County with a fenced yard. Close to parks and schools.",
+    "work_school_situation": "Works part-time as a teacher or healthcare worker, or stays at home to care for her children. Involved in school activities and IEP meetings.",
+    "commute_daily_rhythms": "Drives her children to school, therapy appointments, and extracurricular activities. Spends time at home managing household tasks and caring for her family. Attends support group meetings or online forums for parents of neurodivergent children.",
+    "local_stressors": [
+      "Navigating the special education system.",
+      "Dealing with judgmental comments from other parents.",
+      "Finding affordable and accessible therapy options.",
+      "Worrying about her child's future.",
+      "Limited access to respite care."
+    ],
+    "safe_spaces": [
+      "Her home.",
+      "Nature (parks, gardens).",
+      "Support group meetings.",
+      "Quiet corners of libraries or coffee shops."
+    ],
+    "support_system": "Spouse, close friends, family members (although they may not fully understand), online support groups, therapists, and educators."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking therapy for her child to help them develop coping mechanisms, manage anxiety, and navigate social situations. Also seeking support for herself to manage the stress and overwhelm of parenting a neurodivergent child.",
+    "what_they_want_to_change": [
+      "Help her child develop healthy social skills.",
+      "Reduce her child's anxiety and meltdowns.",
+      "Improve communication within the family.",
+      "Find strategies to manage her own stress and overwhelm.",
+      "Create a more supportive and understanding environment for her child."
+    ],
+    "whats_in_the_way": [
+      "Lack of affordable and accessible therapy options.",
+      "Limited time and energy due to the demands of parenting.",
+      "Resistance from her child or other family members.",
+      "Fear of judgment from others.",
+      "Difficulty advocating for her child's needs in a system that is not always supportive."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "We have had some struggles with inappropriate behaviors and have not been successful in teaching him right from wrongs in that area. Is this something you could assist with?",
+    "quote_hope": "He asked for therapy to help develop tools to be productive and okay in the world around him without the need to conform to societal norms that he doesn't understand.",
+    "quotes_additional": [
+      "I\u2019m looking for someone who he can talk to besides us about things that bother him.",
+      "We are very supportive of him being him and want him to be successful in what he wants to pursue."
+    ],
+    "liz_clinical_narrative": "As a parent navigating the complexities of raising a neurodivergent child, you carry an immense weight. The journey is often filled with moments of profound love and connection, alongside the challenges of advocating for your child's unique needs in a world that wasn't designed for them. I understand the exhaustion, the worry, and the feeling of being overwhelmed. Here, we can create a safe space to explore your concerns, develop effective coping strategies, and empower you to navigate the system with confidence. Together, we can help your child thrive while honoring their authentic self.",
+    "therapy_preferences": "Family therapy, individual therapy for her child, parent coaching, support groups."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Neurodivergent-affirming therapy for children and adolescents.",
+      "Support for parents navigating the challenges of raising a neurodivergent child.",
+      "Empowering families to thrive."
+    ],
+    "primary_keywords": [
+      "autism therapy St. Louis",
+      "ADHD therapy St. Louis",
+      "neurodiversity St. Louis",
+      "parent support autism",
+      "IEP support St. Louis"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves",
+      "Clayton",
+      "Ladue"
+    ],
+    "content_angles": [
+      "How to advocate for your child's needs in school.",
+      "Understanding sensory sensitivities in children with autism.",
+      "Building a strong support system for parents of neurodivergent children."
+    ]
+  }
+}

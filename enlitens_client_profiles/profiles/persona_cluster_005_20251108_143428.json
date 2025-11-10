@@ -1,0 +1,204 @@
+{
+  "meta": {
+    "profile_id": "cluster-006-persona",
+    "persona_name": "The Overwhelmed and Newly Diagnosed",
+    "persona_tagline": "Navigating late diagnosis and seeking understanding amidst burnout.",
+    "created_at": "2025-11-08 20:34:11.061977",
+    "source_documents": [
+      "cluster_6",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "late diagnosis",
+      "burnout",
+      "anxiety",
+      "social anxiety",
+      "sensory issues",
+      "ADHD",
+      "Autism",
+      "telehealth",
+      "in-person",
+      "female provider",
+      "UHC",
+      "BCBS",
+      "children",
+      "adults"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "10-25",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Inferred, Not Specified",
+    "ethnicity": "Inferred, Not Specified",
+    "current_life_situation": "Student/Early Career, potentially living at home or recently moved out.",
+    "occupation": "Student, Entry-Level Professional, or Unemployed",
+    "education": "High School, Some College, or College Graduate",
+    "locality": "St. Louis, MO or surrounding areas (Columbia, MO)",
+    "cultural_faith_identities": [
+      "Inferred, Not Specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up, there was a sense of being 'different' without understanding why. Always struggled to keep up, felt overwhelmed in group settings, and was often labeled as 'sensitive' or 'difficult'. Routines were either rigidly enforced or completely absent, creating a constant state of anxiety and unpredictability. School was a minefield of social expectations and academic pressures.",
+    "adolescence": "Teenage years were marked by increasing anxiety and social isolation. Struggled to fit in, experienced bullying or exclusion, and developed a strong sense of self-doubt. Academic performance fluctuated wildly, with periods of intense focus followed by complete burnout. Started experimenting with coping mechanisms like compulsive eating or withdrawing from social situations.",
+    "early_adulthood": "Early adulthood brought a mix of freedom and overwhelming responsibility. Moving away from home (or wanting to) highlighted the challenges of independent living. Navigating college or the workforce proved difficult, leading to feelings of burnout and inadequacy. The increasing pressure to 'adult' led to seeking answers and a late diagnosis of Autism and/or ADHD.",
+    "family_structure": "Likely raised in a nuclear family, but dynamics may have been strained by a lack of understanding or acceptance of neurodivergent traits. One or both parents may have struggled with their own mental health or undiagnosed neurodivergence. Sibling relationships may have been complicated by feelings of comparison or competition.",
+    "formative_adversities": [
+      "Being constantly misunderstood and criticized",
+      "Experiencing social rejection and bullying",
+      "Struggling with academic performance despite intelligence",
+      "Developing anxiety and depression due to chronic stress",
+      "Feeling like an outsider in their own family"
+    ],
+    "educational_journey": "Started strong but struggled as expectations increased. Difficulty focusing in class, managing workload, and navigating social dynamics. May have experienced frequent school changes or disruptions. Periods of academic success were often followed by burnout and withdrawal.",
+    "pivotal_moments": [
+      "Realizing they were different from their peers",
+      "Experiencing a major social rejection or bullying incident",
+      "Receiving a late diagnosis of Autism and/or ADHD",
+      "Experiencing a period of intense burnout or mental health crisis",
+      "Finding a supportive community or therapist who understands"
+    ],
+    "intergenerational_patterns": "Likely that neurodivergent traits have been present in the family for generations, but never properly identified or addressed. Family members may have struggled with similar challenges, such as anxiety, depression, or social isolation. There may be a history of substance abuse or other maladaptive coping mechanisms."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Autism Spectrum Disorder",
+      "Anxiety",
+      "Social Anxiety",
+      "Depression",
+      "Sensory Processing Sensitivity"
+    ],
+    "diagnosis_journey": "The diagnosis journey likely started with a growing sense of unease and a feeling of being 'different'. After years of struggling to understand themselves and feeling misunderstood, they began researching neurodivergence and realizing their experiences resonated with others. Seeking a formal diagnosis was a process of finding the right professional, navigating insurance, and facing the emotional impact of finally having an explanation for their struggles.",
+    "how_it_shows_up": "Difficulty concentrating, impulsivity, hyperactivity (or internal restlessness), social anxiety, sensory overload, emotional dysregulation, negative self-talk, irritability, angry outbursts, compulsive eating, burnout, loneliness, interpersonal relationship struggles, depression, self-esteem issues.",
+    "nervous_system_pattern": "Highly sensitive and reactive nervous system, prone to overwhelm and dysregulation. Difficulty filtering sensory input, leading to sensory overload and anxiety. Tendency to be hyper-vigilant and easily startled. May experience chronic stress and difficulty relaxing.",
+    "strengths_superpowers": [
+      "Intense focus and hyper-focus when interested",
+      "Creativity and outside-the-box thinking",
+      "Empathy and compassion for others",
+      "Strong sense of justice and fairness",
+      "Attention to detail"
+    ],
+    "current_coping_strategies": [
+      "Compulsive eating",
+      "Withdrawing from social situations",
+      "Seeking isolation",
+      "Overworking",
+      "Relying on routines and rituals",
+      "Using technology to distract from difficult emotions"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creativity",
+      "Problem-solving",
+      "Hyperfocus on interests",
+      "Strong memory for details",
+      "Ability to think outside the box"
+    ],
+    "ef_friction_points": [
+      "Difficulty with planning and organization",
+      "Procrastination",
+      "Time management",
+      "Impulsivity",
+      "Difficulty with task initiation",
+      "Emotional regulation",
+      "Working memory",
+      "Task switching"
+    ],
+    "ef_workarounds": [
+      "Using visual aids and checklists",
+      "Breaking down tasks into smaller steps",
+      "Setting timers and reminders",
+      "Creating a structured environment",
+      "Seeking support from others",
+      "Using fidget toys to help with focus"
+    ],
+    "sensory_profile": "Highly sensitive to sensory input, both internal and external. May experience sensory overload from loud noises, bright lights, strong smells, or certain textures. Craves sensory input in some areas (e.g., deep pressure, movement) while avoiding it in others.",
+    "food_sensory_details": "Prefers foods that are bland and predictable in texture. Avoids anything slimy, mushy, or with visible fat. Safe foods include plain Cheerios (specifically the yellow box), a specific brand of Townhouse crackers (original only), grilled chicken (only if it's room temperature and not too dry), and overcooked pasta with butter. Only drinks water from a specific reusable bottle. Dislikes mixed textures like casseroles or sauces with chunks. Skips meals when overwhelmed or anxious. Binge eats sugary snacks when stressed as a form of self-soothing. Finds it difficult to try new foods."
+  },
+  "current_life_context": {
+    "where_they_live": "Living in an apartment in St. Louis or a surrounding suburb, or potentially still living at home in Columbia, MO.",
+    "work_school_situation": "Working an entry-level job, attending college, or recently graduated and looking for work. May be experiencing burnout from the demands of work or school. Potentially works remotely at least part of the time.",
+    "commute_daily_rhythms": "If working, commute involves driving or taking public transportation. Daily rhythm is likely inconsistent and unpredictable, leading to feelings of anxiety and overwhelm. Difficulty establishing healthy routines and maintaining a consistent sleep schedule.",
+    "local_stressors": [
+      "Traffic",
+      "Crowds",
+      "Noise pollution",
+      "High cost of living",
+      "Lack of affordable housing",
+      "Limited access to neurodivergent-affirming resources"
+    ],
+    "safe_spaces": [
+      "Their bedroom",
+      "A quiet corner of a coffee shop",
+      "Online support groups",
+      "Nature trails at Grant's Farm",
+      "Their therapist's office"
+    ],
+    "support_system": "Limited support system. May have a few close friends or family members who are understanding and supportive. Seeking professional support from a therapist or counselor. Relies heavily on online communities for connection and support."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking therapy to understand their recent diagnosis and develop coping strategies for managing anxiety, burnout, and sensory overload. Want to improve social skills, build stronger relationships, and find a sense of belonging.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overwhelm",
+      "Improve social skills and build stronger relationships",
+      "Develop healthy coping mechanisms for managing stress",
+      "Increase self-esteem and self-acceptance",
+      "Find a sense of purpose and meaning in life",
+      "Navigate the world as a newly diagnosed neurodivergent person"
+    ],
+    "whats_in_the_way": [
+      "Lack of understanding and support from family and friends",
+      "Difficulty navigating social situations",
+      "Sensory overload",
+      "Anxiety and self-doubt",
+      "Burnout",
+      "Financial constraints",
+      "Difficulty finding a therapist who is neurodivergent-affirming"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I'm just trying to figure out my ADHD and autism.",
+    "quote_hope": "We would love to find someone who can work with her to help with overcoming her fear of social interactions with others, being overwhelmed by loud noises or certain fabrics/feelings, and being able to concentrate on her academics.",
+    "quotes_additional": [
+      "Looking for in-person therapy for a combo of anxiety/burnout (long term), compulsive eating (recent) and probably some undiagnosed Neuro differences.",
+      "Prefer a female provider",
+      "Primary concerns are irritability, negative self-talk, and angry outbursts. No reported concerns at school."
+    ],
+    "liz_clinical_narrative": "It's clear this person is navigating a complex intersection of late diagnosis, sensory sensitivities, and the overwhelming pressure of daily life. They're likely feeling a mix of relief at finally understanding themselves and anxiety about how to move forward. My approach would be to create a safe and affirming space where they can explore their identity, develop coping strategies, and build self-compassion. We'd work together to identify their sensory needs, create a personalized plan for managing anxiety, and explore their strengths and passions. The goal is to empower them to live a fulfilling and authentic life.",
+    "therapy_preferences": "In-person therapy, female provider, someone who understands neurodiversity, telehealth option (potentially)."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you newly diagnosed with ADHD or Autism and feeling overwhelmed?",
+      "Do you struggle with sensory sensitivities and social anxiety?",
+      "Find a neurodivergent-affirming therapist in St. Louis who understands your unique needs."
+    ],
+    "primary_keywords": [
+      "late diagnosis ADHD",
+      "Autism therapy St Louis",
+      "sensory processing sensitivity",
+      "neurodivergent therapist",
+      "social anxiety treatment",
+      "burnout recovery"
+    ],
+    "local_entities": [
+      "Grant's Farm",
+      "St. Louis County",
+      "Columbia, MO",
+      "Central West End",
+      "Clayton"
+    ],
+    "content_angles": [
+      "The benefits of a late diagnosis",
+      "Sensory-friendly strategies for managing anxiety",
+      "Building a neurodivergent-affirming community",
+      "How to navigate the world as a newly diagnosed adult",
+      "Understanding your sensory profile"
+    ]
+  }
+}

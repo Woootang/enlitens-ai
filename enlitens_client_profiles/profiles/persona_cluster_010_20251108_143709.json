@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "profile_id": "cluster-016-persona",
+    "persona_name": "Overwhelmed Queer Autistic Adult",
+    "persona_tagline": "Navigating late diagnosis, chronic conditions, and religious trauma.",
+    "created_at": "2025-11-08 20:36:53.978396",
+    "source_documents": [
+      "cluster_16",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "late diagnosis",
+      "autism",
+      "LGBTQ+",
+      "religious trauma",
+      "chronic illness",
+      "codependency"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "22-30",
+    "gender": "Male",
+    "pronouns": "he/him",
+    "orientation": "Gay",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Living alone, starting first 'adult' job",
+    "occupation": "Entry-level Software Developer",
+    "education": "Bachelor's Degree in Computer Science",
+    "locality": "South City, St. Louis, MO",
+    "cultural_faith_identities": [
+      "Ex-Evangelical"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Highly religious, conservative household with strict rules and expectations. Emotional expression was discouraged, and adherence to religious doctrine was paramount. Family prioritized appearances and external validation over genuine connection. Lived in a constant state of anxiety about 'doing the right thing'.",
+    "adolescence": "Internal conflict intensified as Jared began questioning his sexuality and religious beliefs. He felt increasingly isolated and alienated from his family and peers. Engaged in secretive online communities for support and information. Started experiencing panic attacks and depressive episodes.",
+    "early_adulthood": "Went away to college, initially relieved to escape his restrictive home environment. However, struggled to adapt to the freedom and independence. Overwhelmed by social expectations and academic demands. Started self-medicating with alcohol and food. Experienced a period of intense religious deconstruction and questioning of his identity. Late diagnosis of Autism and ADHD provided some clarity but also increased feelings of being 'different'.",
+    "family_structure": "Two parents, one older sister. Father was emotionally distant and critical. Mother was well-meaning but enmeshed and controlling. Sister was the 'golden child' and generally dismissive of Jared's struggles. No significant losses but a profound lack of emotional attunement and support.",
+    "formative_adversities": [
+      "Religious trauma",
+      "Emotional neglect",
+      "Bullying in school for being 'different'",
+      "Internalized homophobia",
+      "Late diagnosis of neurodivergence"
+    ],
+    "educational_journey": "Attended private Christian school through high school. Excelled academically but struggled socially. College was initially overwhelming but he found a passion for computer science. Graduated with honors but experienced significant burnout towards the end of his studies.",
+    "pivotal_moments": [
+      "Coming out to his parents (met with disapproval and attempts at 'conversion therapy')",
+      "Receiving his Autism and ADHD diagnoses (felt both validating and overwhelming)",
+      "Moving into his own apartment (a step towards independence but also isolating)",
+      "First panic attack (marked a turning point in his mental health)",
+      "Discovering affirming LGBTQ+ communities online (provided a sense of belonging and support)"
+    ],
+    "intergenerational_patterns": "Jared's mother showed signs of undiagnosed neurodivergence (perfectionism, anxiety, sensory sensitivities). His father's side of the family had a history of mental health struggles and substance abuse. The family system perpetuated a pattern of emotional repression and avoidance."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autism",
+      "ADHD",
+      "Bipolar II",
+      "PTSD",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Jared's Autism and ADHD diagnoses came in his early 20s after years of struggling with anxiety, depression, and social difficulties. He initially sought therapy for what he thought was 'just' anxiety. During the course of therapy, the therapist recognized patterns consistent with neurodivergence. He underwent formal testing and received his diagnoses. The Bipolar II diagnosis followed a period of mood instability and hypomanic episodes.",
+    "how_it_shows_up": "Autism manifests as sensory sensitivities, social communication difficulties, and intense special interests (coding). ADHD contributes to impulsivity, difficulty focusing, and emotional dysregulation. Bipolar II causes periods of intense mood swings. PTSD is triggered by reminders of past trauma, leading to anxiety, flashbacks, and avoidance behaviors.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Prone to hyperarousal and difficulty relaxing. Sensory overload is a frequent occurrence. Struggles to regulate emotions and often experiences intense emotional reactions.",
+    "strengths_superpowers": [
+      "Exceptional problem-solving skills",
+      "Hyperfocus on areas of interest",
+      "Strong sense of justice and empathy",
+      "Creative and innovative thinking",
+      "Attention to detail"
+    ],
+    "current_coping_strategies": [
+      "Avoidance of overwhelming situations",
+      "Listening to music to regulate sensory input",
+      "Engaging in special interests to de-stress",
+      "Seeking online support groups",
+      "Self-medicating with food and alcohol"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Logical reasoning",
+      "Systematic thinking",
+      "Pattern recognition"
+    ],
+    "ef_friction_points": [
+      "Difficulty with task initiation",
+      "Procrastination",
+      "Poor time management",
+      "Difficulty prioritizing tasks",
+      "Emotional regulation challenges"
+    ],
+    "ef_workarounds": [
+      "Using visual schedules and checklists",
+      "Breaking down tasks into smaller steps",
+      "Setting timers and reminders",
+      "Seeking external accountability",
+      "Creating a structured environment"
+    ],
+    "sensory_profile": "Highly sensitive to loud noises, bright lights, and strong smells. Prefers soft, comfortable clothing and avoids scratchy fabrics. Enjoys deep pressure and weighted blankets. Finds comfort in repetitive movements and stimming behaviors (hand flapping, rocking).",
+    "food_sensory_details": "Avoids foods with mixed textures or strong flavors. Dislikes anything slimy or chewy. Safe foods include plain pasta with butter, grilled chicken (but only if it's not too dry), and specific brands of crackers (Ritz). Only drinks water or specific types of herbal tea (chamomile). Texture is more important than taste; if the texture is off, he can't eat it. Often skips meals when overwhelmed or stressed. Binge eats on crunchy snacks (Doritos, potato chips) when feeling anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "Small apartment in South City, St. Louis. Close to public transportation but feels isolated from his neighbors.",
+    "work_school_situation": "Works as a junior software developer for a local tech company. Enjoys the technical aspects of his job but struggles with office politics and social expectations.",
+    "commute_daily_rhythms": "Takes the bus to work. The commute is often crowded and overwhelming, especially during rush hour. Listens to music to block out the noise and sensory input.",
+    "local_stressors": [
+      "Lack of affordable housing",
+      "Limited access to neurodivergent-affirming healthcare",
+      "Social isolation",
+      "Pressure to conform to societal expectations"
+    ],
+    "safe_spaces": [
+      "His apartment (when it's clean and organized)",
+      "Online support groups",
+      "Quiet coffee shops with noise-canceling headphones",
+      "Specific parks with less foot traffic"
+    ],
+    "support_system": "Limited support system. Has a few online friends and a therapist. His family is not understanding or supportive of his neurodivergence or sexuality."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Felt overwhelmed by the combination of his neurodivergence, mental health challenges, and religious trauma. Seeking support to manage his anxiety, improve his emotional regulation, and develop healthier coping mechanisms. 'Everything is too taxing.'",
+    "what_they_want_to_change": [
+      "Reduce anxiety and panic attacks",
+      "Improve emotional regulation",
+      "Develop healthier coping mechanisms",
+      "Heal from religious trauma",
+      "Build meaningful relationships",
+      "Explore his queer identity"
+    ],
+    "whats_in_the_way": [
+      "Internalized shame and self-doubt",
+      "Fear of judgment and rejection",
+      "Lack of self-compassion",
+      "Sensory sensitivities and executive function challenges",
+      "Limited access to resources",
+      "Past trauma and negative experiences"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "My entire personality was created around my religious trauma. So that\u2019s going to be a lot to work through.",
+    "quote_hope": "You checked off everything [on Psychology Today].",
+    "quotes_additional": [
+      "goals: autism informed daily skills and sensory regulation",
+      "emotional processing without physical impacts",
+      "trauma work for religious trauma"
+    ],
+    "liz_clinical_narrative": "Jared's story highlights the complex intersection of neurodivergence, trauma, and identity. His late diagnoses have brought some clarity, but also a wave of new challenges as he begins to understand how these factors have shaped his life. Religious trauma, in particular, has left deep scars, impacting his self-worth and sense of belonging. Therapy will focus on creating a safe and affirming space for Jared to process his experiences, develop self-compassion, and build a life that aligns with his authentic self. We will prioritize sensory regulation, emotional processing skills, and trauma-informed care to support his journey towards healing and growth.",
+    "therapy_preferences": "Autism-affirming, trauma-informed, LGBTQ+ affirming, therapist with lived experience or deep understanding of neurodivergence, someone who 'checks off everything'."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Neurodivergent and LGBTQ+ affirming therapy in South City, St. Louis.",
+      "Healing from religious trauma and finding your authentic self.",
+      "Supporting adults with Autism, ADHD, and Bipolar II."
+    ],
+    "primary_keywords": [
+      "autism therapy St Louis",
+      "LGBTQ therapy St Louis",
+      "religious trauma therapy",
+      "neurodiversity affirming therapist",
+      "Bipolar II therapy St Louis",
+      "sensory processing St Louis"
+    ],
+    "local_entities": [
+      "South City St Louis",
+      "Tower Grove",
+      "The Grove St Louis",
+      "Cherokee Street"
+    ],
+    "content_angles": [
+      "The intersection of neurodivergence and religious trauma.",
+      "Creating a sensory-friendly life in St. Louis.",
+      "Navigating the challenges of late diagnosis as an adult."
+    ]
+  }
+}

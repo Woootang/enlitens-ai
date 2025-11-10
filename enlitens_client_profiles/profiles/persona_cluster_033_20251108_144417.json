@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "profile_id": "cluster-043-persona",
+    "persona_name": "Newly Diagnosed Autistic Advocate",
+    "persona_tagline": "Finding my voice, understanding my needs.",
+    "created_at": "2025-11-08 20:44:01.662736",
+    "source_documents": [
+      "cluster_43",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "autistic",
+      "adult",
+      "newly diagnosed",
+      "text preferred"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Female",
+    "pronouns": "She/her",
+    "orientation": "Likely heterosexual or bisexual, not explicitly stated",
+    "ethnicity": "Not specified, likely white based on location and lack of specification.",
+    "current_life_situation": "Working professional, navigating a new autism diagnosis",
+    "occupation": "Office worker, likely in customer service or administrative role based on the mention of work schedule shifts.",
+    "education": "Some college or completed bachelor's degree.",
+    "locality": "St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Skyler grew up in a lower-middle-class household in South County. Her parents were loving but often overwhelmed. Her dad worked long hours in construction, and her mom worked part-time at Schnucks. There wasn't much emotional attunement; she was a 'good kid' who didn't cause trouble, so her needs were often overlooked.",
+    "adolescence": "High school was a confusing time. Skyler struggled to fit in, feeling like she was always slightly 'off.' She excelled academically in subjects she enjoyed (English and history) but struggled with math and science. She had a small group of friends who shared her interests in books and online communities. Social events were exhausting and often led to meltdowns afterward.",
+    "early_adulthood": "Skyler went to community college for a while but dropped out due to feeling overwhelmed and unsure of her path. She bounced between various jobs, never quite finding one that felt like a good fit. She experienced several periods of burnout and depression, chalking it up to 'being lazy' or 'not trying hard enough.' She often masked heavily in social and professional situations, leading to exhaustion and anxiety.",
+    "family_structure": "Two parents, older brother who was favored for his athletic ability. Parents stayed together, but emotionally distant. Brother moved away after high school and they rarely speak now.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "Difficulty fitting in socially",
+      "Unexplained anxiety and depression",
+      "Feeling like an outsider",
+      "Burnout from masking"
+    ],
+    "educational_journey": "Average student in elementary and middle school. High school was challenging socially but excelled in specific subjects. Attended community college but dropped out after two years due to overwhelm and lack of direction.",
+    "pivotal_moments": [
+      "Dropping out of college and feeling like a failure",
+      "A friend mentioning autism after observing Skyler's social struggles",
+      "Reading articles and online forums about autism and realizing the experiences resonated deeply",
+      "Receiving an official autism diagnosis in her late twenties",
+      "Starting therapy to learn coping strategies and self-acceptance"
+    ],
+    "intergenerational_patterns": "Skyler's mother likely had undiagnosed autism traits, exhibiting rigidity and social awkwardness. A pattern of emotional suppression and difficulty expressing needs was present in the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autistic"
+    ],
+    "diagnosis_journey": "Skyler's diagnosis journey began with a suggestion from a friend who noticed her social difficulties and sensory sensitivities. Initially, she dismissed the idea, but after researching autism, she realized the descriptions resonated deeply. She sought out a formal diagnosis from a psychologist specializing in autism in adults. The process was validating but also overwhelming, forcing her to re-evaluate her entire life through a new lens.",
+    "how_it_shows_up": "Difficulty with social cues, sensory sensitivities (especially to loud noises and bright lights), intense special interests (currently focused on historical fashion), struggles with executive function (especially planning and organization), prone to anxiety and burnout, masking in social situations.",
+    "nervous_system_pattern": "High arousal, easily overwhelmed by sensory input, tendency to freeze or fawn in stressful situations, difficulty regulating emotions, chronic anxiety.",
+    "strengths_superpowers": [
+      "Intense focus on special interests",
+      "Strong attention to detail",
+      "Honesty and directness",
+      "Creative problem-solving",
+      "Empathy for others who are marginalized"
+    ],
+    "current_coping_strategies": [
+      "Isolating when overwhelmed",
+      "Engaging in special interests to de-stress",
+      "Using noise-canceling headphones",
+      "Relying on routines to manage anxiety",
+      "Seeking out online support groups for autistic adults"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Hyperfocus on areas of interest",
+      "Excellent memory for details related to special interests",
+      "Ability to think outside the box"
+    ],
+    "ef_friction_points": [
+      "Planning and organization",
+      "Time management",
+      "Task initiation",
+      "Prioritization",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using visual schedules",
+      "Breaking down tasks into smaller steps",
+      "Setting timers",
+      "Using a bullet journal",
+      "Seeking external accountability"
+    ],
+    "sensory_profile": "Highly sensitive to noise, light, and certain textures. Prefers soft, comfortable clothing. Dislikes strong smells. Can become easily overwhelmed in crowded or chaotic environments. Seeks out quiet, predictable spaces.",
+    "food_sensory_details": "Prefers bland, predictable foods. Safe foods include: Annie's mac and cheese (specifically the shells variety), plain rice, chicken nuggets (only from McDonald's, prepared fresh), and specific brand of wheat thins. Avoids anything with a slimy texture, like cooked mushrooms or eggplant. Has a strong aversion to the smell of fish. Only drinks water or Diet Coke; texture of juice is off-putting. Will sometimes skip meals entirely if overwhelmed rather than risk eating something 'wrong.'"
+  },
+  "current_life_context": {
+    "where_they_live": "Small apartment in Maplewood, MO, chosen for its proximity to coffee shops and bookstores.",
+    "work_school_situation": "Works full-time in a customer service role at a local insurance company. Finds the job draining due to the constant social interaction and sensory overload.",
+    "commute_daily_rhythms": "Drives to work, which takes about 20 minutes. Listens to audiobooks or podcasts during the commute to help regulate sensory input. Tries to arrive early to avoid the rush hour chaos.",
+    "local_stressors": [
+      "Traffic noise",
+      "Crowded stores",
+      "Unpredictable social interactions",
+      "Pressure to conform to social norms"
+    ],
+    "safe_spaces": [
+      "Her apartment",
+      "Local library",
+      "Quiet coffee shops",
+      "Online autism support groups"
+    ],
+    "support_system": "Limited support system. Has a few close friends but often feels misunderstood. Relies heavily on online communities for support and validation. Beginning to explore local autism meetups."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "To better understand her autism diagnosis and develop coping strategies for managing her sensory sensitivities and social anxiety.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and burnout",
+      "Improve social skills",
+      "Develop healthier coping mechanisms",
+      "Increase self-acceptance",
+      "Advocate for her needs in the workplace"
+    ],
+    "whats_in_the_way": [
+      "Internalized ableism",
+      "Fear of judgment",
+      "Lack of self-confidence",
+      "Executive function challenges",
+      "Sensory sensitivities",
+      "Limited access to affordable and neurodivergent-affirming resources"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"I am an autistic adult, and ultimately, that's what I need help with.\"",
+    "quote_hope": "Hoping to find strategies to navigate the world without feeling so overwhelmed and misunderstood.",
+    "quotes_additional": [
+      "I do prefer texting.",
+      "My availability shifts with my work schedule, but my phone is almost always on me."
+    ],
+    "liz_clinical_narrative": "Skyler is embarking on a journey of self-discovery, seeking to understand and embrace her autistic identity. She carries the weight of years of masking and feeling like an outsider, leading to chronic anxiety and burnout. My role is to create a safe and affirming space where Skyler can explore her experiences, develop coping strategies, and build self-compassion. We'll focus on identifying her sensory needs, improving communication skills, and advocating for her needs in various settings. Together, we can empower Skyler to live a more authentic and fulfilling life, celebrating her strengths and navigating her challenges with grace and resilience.",
+    "therapy_preferences": "Texting preferred, flexible scheduling, direct and honest communication, practical coping strategies, neurodivergent-affirming approach."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a newly diagnosed autistic adult feeling overwhelmed and lost?",
+      "Discover a neurodivergent-affirming therapy practice in St. Louis that understands your unique needs.",
+      "Learn coping strategies for managing sensory sensitivities, social anxiety, and executive function challenges."
+    ],
+    "primary_keywords": [
+      "Autism therapy St. Louis",
+      "Adult autism diagnosis",
+      "Neurodivergent therapist",
+      "Sensory processing",
+      "Social anxiety autism"
+    ],
+    "local_entities": [
+      "Maplewood, MO",
+      "South County",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "Blog post: 'Navigating the First Year After an Autism Diagnosis'",
+      "Podcast episode: 'Sensory Sensitivities: Tips and Tricks for Autistic Adults'",
+      "Webinar: 'Advocating for Your Needs in the Workplace as an Autistic Employee'"
+    ]
+  }
+}

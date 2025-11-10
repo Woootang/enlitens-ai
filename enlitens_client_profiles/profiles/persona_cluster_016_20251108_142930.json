@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "profile_id": "cluster-016-persona",
+    "persona_name": "Anxious Returning Seeker",
+    "persona_tagline": "Back in therapy, hoping to find the right fit this time.",
+    "created_at": "2025-11-08 20:29:15.642637",
+    "source_documents": [
+      "cluster_16",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "therapy history",
+      "seeking consultation",
+      "ADHD"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Young professional, navigating career and relationships",
+    "occupation": "Marketing Coordinator",
+    "education": "Bachelor's Degree",
+    "locality": "St. Louis, MO",
+    "cultural_faith_identities": [
+      "None Specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban neighborhood outside of St. Louis. Both parents worked full-time, providing a stable but somewhat emotionally distant environment. High expectations were placed on academic achievement.",
+    "adolescence": "Struggled with social anxiety in high school, feeling like she never quite fit in. Excelled academically but felt immense pressure to maintain good grades. Developed perfectionistic tendencies. Started experiencing panic attacks during stressful exam periods.",
+    "early_adulthood": "Attended a local university, initially thriving in the structured academic environment. Began to struggle with time management and organization as coursework became more demanding. Started self-medicating with caffeine and occasional alcohol to cope with stress and anxiety. Landed her first job after graduation, but quickly felt overwhelmed by the demands of the corporate world.",
+    "family_structure": "Two-parent household with one younger brother. Parents were generally supportive but often preoccupied with their own careers and personal lives. Sibling rivalry was present, contributing to feelings of inadequacy and competition.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High academic pressure",
+      "Social anxiety",
+      "First job burnout"
+    ],
+    "educational_journey": "Straight-A student through elementary and high school. Attended University of Missouri-St. Louis, graduating with a degree in Marketing. Experienced increasing academic struggles due to ADHD symptoms and anxiety.",
+    "pivotal_moments": [
+      "First panic attack during a college exam",
+      "Landing dream job only to experience burnout within a year",
+      "Moving to St. Louis for a fresh start",
+      "Recognizing need for professional help to manage anxiety and ADHD"
+    ],
+    "intergenerational_patterns": "Perfectionism and anxiety were common traits in her family. Her mother also struggled with undiagnosed ADHD, which contributed to a chaotic home environment."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Generalized Anxiety Disorder",
+      "Imposter Syndrome"
+    ],
+    "diagnosis_journey": "Suspected ADHD symptoms since childhood but was dismissed by doctors and family members. Self-diagnosed in college after researching online. Received a formal ADHD diagnosis at age 28 after seeking professional help for anxiety. The diagnosis was both validating and overwhelming, leading to a period of grief and self-discovery.",
+    "how_it_shows_up": "Experiences racing thoughts, difficulty focusing, and struggles with organization and time management. Feels overwhelmed by daily tasks and responsibilities. Anxiety manifests as excessive worry, panic attacks, and physical symptoms like stomachaches and headaches. Imposter syndrome leads to self-doubt and fear of failure, even when she is successful.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Sympathetic nervous system is often activated, leading to feelings of constant stress and hypervigilance. Struggles to regulate emotions and can become easily frustrated or irritable.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Problem-solving skills",
+      "Hyperfocus on tasks that interest her",
+      "Empathy and compassion for others"
+    ],
+    "current_coping_strategies": [
+      "Caffeine consumption",
+      "Avoidance of overwhelming tasks",
+      "Scrolling social media",
+      "Trying to implement organizational systems that fail",
+      "Occasional exercise"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Quick thinking in some situations",
+      "Connecting with others"
+    ],
+    "ef_friction_points": [
+      "Time management",
+      "Organization",
+      "Task initiation",
+      "Sustained attention",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Multiple to-do lists that are never completed",
+      "Procrastination",
+      "Relying on external deadlines",
+      "Using phone alarms as reminders"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Enjoys calming scents like lavender and chamomile. Overwhelmed by crowds and strong smells.",
+    "food_sensory_details": "Prefers bland foods with consistent textures. Dislikes anything overly chewy or crunchy. Safe foods include: plain pasta with butter and parmesan cheese, goldfish crackers, and smoothies with frozen berries and spinach (but only if the spinach is completely blended). Avoids foods with visible fat or gristle. Texture of raw tomatoes is extremely off-putting. Skips meals when feeling overwhelmed or anxious, leading to energy crashes and increased irritability. Will occasionally binge eat on sugary snacks when stressed."
+  },
+  "current_life_context": {
+    "where_they_live": "Rents a small apartment in the Central West End neighborhood of St. Louis.",
+    "work_school_situation": "Works full-time as a Marketing Coordinator for a local non-profit organization. Enjoys the mission of the organization but struggles with the fast-paced work environment and demanding workload.",
+    "commute_daily_rhythms": "Drives to work, which takes about 20 minutes each way. Listens to podcasts or audiobooks during her commute to help distract from anxiety. Feels drained and exhausted by the end of the workday.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living in the Central West End",
+      "Pressure to keep up with social events and trends"
+    ],
+    "safe_spaces": [
+      "Her apartment",
+      "Local coffee shop with quiet atmosphere",
+      "Walking in Forest Park"
+    ],
+    "support_system": "Limited support system. Maintains close relationships with a few friends, but often feels hesitant to burden them with her struggles. Parents are supportive but live out of state."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Anxiety has progressed significantly over the past 6 months after detrimental work experiences, leading to major imposter's syndrome and generalized anxiety towards relationships. Feels like ADHD is roadblocking her life.",
+    "what_they_want_to_change": [
+      "Manage anxiety and ADHD symptoms",
+      "Develop healthier coping mechanisms",
+      "Improve relationships",
+      "Increase self-confidence",
+      "Find a sense of purpose and fulfillment"
+    ],
+    "whats_in_the_way": [
+      "Fear of judgment",
+      "Past negative experiences with therapy",
+      "Lack of time and energy",
+      "Financial constraints",
+      "Procrastination and avoidance"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"I've been struggling with some major imposter's syndrome and generalized anxiety towards my relationships, and it's something I'm beginning to realize I need help with. I also have raging ADHD and feel like that's been roadblocking my life, and I've never had the tools to combat it.\"",
+    "quote_hope": "\"I want to get back to a place of enjoy life again, progressing and bettering myself, not just surviving each day.\"",
+    "quotes_additional": [
+      "\"I have tried therapy a few times in the past - but haven\u2019t found the one yet.\"",
+      "\"I\u2019m interested in scheduling a consultation call for therapy with you\""
+    ],
+    "liz_clinical_narrative": "Alison's story is one of seeking and striving, marked by the intense pressure she places on herself. Her anxiety and ADHD symptoms, now more pronounced after recent work experiences, paint a picture of someone who's been pushing herself hard for a long time. My hope for Alison is to create a space where she can explore these pressures, find self-compassion, and develop practical tools to navigate the world in a way that feels more sustainable and joyful. It's about finding the right fit, a therapeutic relationship where she feels truly seen and understood.",
+    "therapy_preferences": "Prefers online therapy options, especially in the evening or weekend, due to work schedule. Seeks a therapist who is challenging and can help her get outside of her comfort zone."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "\"Are you struggling with anxiety and feeling overwhelmed by ADHD symptoms? You're not alone. Enlitens offers neurodivergent-affirming therapy to help you thrive.\"",
+      "\"Have you had negative experiences with therapy in the past? We understand. Our therapists create a safe and supportive environment where you can feel truly seen and understood.\"",
+      "\"Evening and weekend online therapy options available to fit your busy schedule.\""
+    ],
+    "primary_keywords": [
+      "Anxiety therapy St. Louis",
+      "ADHD therapy St. Louis",
+      "Online therapy St. Louis",
+      "Neurodivergent therapist St. Louis",
+      "Imposter syndrome therapy"
+    ],
+    "local_entities": [
+      "Central West End",
+      "Forest Park",
+      "St. Louis City",
+      "University of Missouri-St. Louis"
+    ],
+    "content_angles": [
+      "The connection between anxiety and ADHD",
+      "Finding the right therapist for neurodivergent individuals",
+      "Overcoming imposter syndrome and building self-confidence"
+    ]
+  }
+}

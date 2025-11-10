@@ -1,0 +1,165 @@
+{
+  "meta": {
+    "profile_id": "cluster-048-persona",
+    "persona_name": "Squishmallow-Seeking Stress Relief",
+    "persona_tagline": "Finding comfort and connection in a sensory-overloaded world.",
+    "created_at": "2025-11-08 20:45:02.120044",
+    "source_documents": [
+      "cluster_48",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "sensory seeking",
+      "comfort objects",
+      "therapy tools",
+      "neurodivergent"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "20-30",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Likely heterosexual or bisexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, living with roommates or partner.",
+    "occupation": "Entry-level marketing or administrative role.",
+    "education": "Bachelor's degree",
+    "locality": "South City, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Rose grew up in a lower-middle-class household in South City. Her parents, while loving, were often stressed about finances and struggled to understand Rose's intense emotional reactions and sensory sensitivities. Her room was her sanctuary, filled with stuffed animals and colorful blankets.",
+    "adolescence": "Adolescence was a turbulent time. Rose struggled with social anxiety and felt like she never quite fit in. She found solace in online communities and developed a deep appreciation for anime and manga. High school was marked by fluctuating grades and a constant feeling of being overwhelmed.",
+    "early_adulthood": "Early adulthood brought a mix of excitement and anxiety. College was challenging, but Rose persevered, finding a supportive group of friends who understood her quirks. After graduation, she landed a job in marketing, but the fast-paced environment and constant demands left her feeling drained.",
+    "family_structure": "Rose was raised by her two parents. She has one younger brother who is neurotypical and excelled in sports, often overshadowing Rose's academic or artistic achievements. Her relationship with her brother is strained due to a lack of understanding and differing interests.",
+    "formative_adversities": [
+      "Emotional neglect (parents were busy and not emotionally attuned)",
+      "Social isolation and bullying in middle school",
+      "Pressure to conform to neurotypical expectations",
+      "Difficulty managing sensory overload in public spaces"
+    ],
+    "educational_journey": "Rose attended public schools in St. Louis City. She struggled with organization and time management, often procrastinating on assignments until the last minute. Despite these challenges, she was a creative and insightful student, excelling in subjects like English and art. She graduated with a BA in Communications.",
+    "pivotal_moments": [
+      "Discovering online communities where she felt accepted and understood.",
+      "Receiving a positive affirmation from a teacher about her creative writing.",
+      "Experiencing burnout at her first full-time job.",
+      "Finding comfort in squishmallows and other sensory objects.",
+      "Seeking therapy to address her anxiety and emotional regulation challenges."
+    ],
+    "intergenerational_patterns": "Rose's mother also exhibited signs of anxiety and sensory sensitivities, but these were never formally addressed. Rose suspects her mother may also be neurodivergent, but undiagnosed. There's a family pattern of suppressing emotions and avoiding conflict."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible undiagnosed ADHD/ASD traits"
+    ],
+    "diagnosis_journey": "Rose suspects she is neurodivergent and is exploring whether to seek a formal diagnosis. Her anxiety has been present since childhood, but it has worsened in recent years due to work stress and social pressures. She is drawn to the idea of neurodivergent-affirming therapy and seeks validation and support.",
+    "how_it_shows_up": "Rose experiences frequent anxiety attacks, particularly in crowded or noisy environments. She struggles with emotional regulation, often feeling overwhelmed by her emotions. She also experiences difficulty with focus and attention, making it challenging to complete tasks at work. She often relies on sensory seeking behaviors to self-soothe (squishmallows, soft blankets).",
+    "nervous_system_pattern": "High sympathetic nervous system activation, prone to overwhelm and shutdown. Seeks sensory input for regulation but can easily become overstimulated.",
+    "strengths_superpowers": [
+      "Creativity and artistic ability",
+      "Empathy and compassion",
+      "Strong sense of justice",
+      "Unique perspective and problem-solving skills"
+    ],
+    "current_coping_strategies": [
+      "Sensory seeking (squishmallows, soft textures)",
+      "Avoidance of overwhelming situations",
+      "Online social support groups",
+      "Listening to calming music",
+      "Excessive sleeping"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Hyperfocus on topics of interest",
+      "Strong intuition"
+    ],
+    "ef_friction_points": [
+      "Difficulty with organization and time management",
+      "Procrastination",
+      "Impulsivity",
+      "Difficulty filtering out distractions",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using visual timers",
+      "Breaking down tasks into smaller steps",
+      "Setting reminders on her phone",
+      "Creating a structured daily routine (when she can stick to it)"
+    ],
+    "sensory_profile": "Highly sensitive to noise, bright lights, and strong smells. Seeks out soft textures and comforting sensations. Enjoys weighted blankets and warm baths. Can become easily overwhelmed by sensory input, leading to anxiety and meltdowns.",
+    "food_sensory_details": "Prefers soft, easily digestible foods. Safe foods include Annie's mac and cheese (specifically the white cheddar version), mashed potatoes with gravy (must be smooth, no lumps), and strawberry yogurt (Chobani Flips are preferred). Avoids anything crunchy or with mixed textures. Dislikes foods with strong smells or flavors. Only eats chicken if it's cut into small, bite-sized pieces and baked with minimal seasoning. Skips meals when overwhelmed or anxious. Struggles with meal planning and often relies on takeout or convenience foods."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a small apartment in South City with a roommate. The apartment is cozy and filled with comforting objects, but it can be noisy due to its proximity to a busy street.",
+    "work_school_situation": "Works full-time as a marketing assistant at a local non-profit. The job is demanding and requires her to juggle multiple tasks, which can be overwhelming. She often feels like she's not meeting expectations and worries about making mistakes.",
+    "commute_daily_rhythms": "Commutes to work by bus, which can be stressful due to the crowds and noise. Her daily routine is inconsistent, depending on her work schedule and energy levels. She often stays up late scrolling on social media, making it difficult to wake up early for work.",
+    "local_stressors": [
+      "Traffic noise",
+      "Crowded public spaces",
+      "Lack of affordable housing",
+      "Job insecurity"
+    ],
+    "safe_spaces": [
+      "Her apartment (especially her bedroom)",
+      "Local library",
+      "Quiet coffee shops",
+      "Online support groups"
+    ],
+    "support_system": "Has a few close friends who are supportive and understanding. Relies heavily on online communities for emotional support. Her family is well-meaning but often doesn't understand her struggles."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Rose loves the fact that Enlitens has squishmallows as therapy tools and wants to explore if therapy can help manage anxiety and sensory overload.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and improve emotional regulation",
+      "Develop healthier coping mechanisms",
+      "Improve focus and concentration",
+      "Build stronger relationships",
+      "Gain a better understanding of herself"
+    ],
+    "whats_in_the_way": [
+      "Fear of judgment",
+      "Difficulty asking for help",
+      "Lack of time and energy",
+      "Financial constraints",
+      "Internalized ableism"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "Hello, my name is Rose and I love the fact you have squishmallows as therapy tools, would you be available for a consultation?",
+    "quote_hope": "I'm hoping therapy can help me feel more grounded and less overwhelmed.",
+    "quotes_additional": [],
+    "liz_clinical_narrative": "Rose's message speaks to a deep need for comfort and a desire to find a therapy space that understands her sensory needs. She's drawn to the squishmallows because they represent safety and regulation. My sense is Rose is carrying a significant amount of anxiety and is seeking validation and support. We can create a therapeutic environment where she feels seen, heard, and understood, and help her develop coping strategies to manage her sensory sensitivities and emotional distress. The squishmallows are a starting point for building trust and connection, and we can explore other sensory-based interventions to promote regulation and well-being. It's important to honor Rose's unique needs and preferences and to create a collaborative, empowering therapeutic relationship.",
+    "therapy_preferences": "Neurodivergent-affirming therapy, sensory-based interventions, compassionate and understanding therapist, safe and comfortable environment."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Find comfort and support in a neurodivergent-affirming therapy space.",
+      "We understand your sensory needs and offer tools to help you regulate and thrive.",
+      "Embrace your unique strengths and overcome challenges with our compassionate therapists."
+    ],
+    "primary_keywords": [
+      "squishmallow therapy",
+      "sensory processing sensitivity",
+      "anxiety therapy St. Louis",
+      "neurodivergent-affirming therapy",
+      "comfort objects"
+    ],
+    "local_entities": [
+      "South City",
+      "St. Louis",
+      "Tower Grove Park"
+    ],
+    "content_angles": [
+      "The benefits of sensory tools in therapy",
+      "How to create a sensory-friendly home environment",
+      "Finding community as a neurodivergent adult"
+    ]
+  }
+}

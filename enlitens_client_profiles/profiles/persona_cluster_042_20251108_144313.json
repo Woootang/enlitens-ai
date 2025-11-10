@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "profile_id": "cluster-039-persona",
+    "persona_name": "Accountability-Seeking Mutual Aid Organizer",
+    "persona_tagline": "Taking responsibility and rebuilding trust while navigating AuDHD.",
+    "created_at": "2025-11-08 20:42:57.063269",
+    "source_documents": [
+      "cluster_39",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "AuDHD",
+      "mutual aid",
+      "accountability",
+      "harm reduction",
+      "neurodivergent"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Male",
+    "pronouns": "He/Him",
+    "orientation": "Queer",
+    "ethnicity": "White",
+    "current_life_situation": "Living with roommates in a co-op, deeply involved in mutual aid projects.",
+    "occupation": "Part-time barista, mostly volunteer organizer.",
+    "education": "Some college, dropped out.",
+    "locality": "Tower Grove South, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Chaotic and unstable. Moved frequently due to his mother's unpredictable relationships and financial struggles. Lived in several different states, and attended multiple elementary schools. Frequent food insecurity. Overwhelmed by sensory input in crowded environments.",
+    "adolescence": "Started self-medicating with drugs and alcohol to cope with social anxiety and feelings of inadequacy. Became involved in activist circles and found a sense of belonging, but also struggled with maintaining healthy boundaries and relationships. Experienced frequent rejection sensitivity dysphoria.",
+    "early_adulthood": "Drifted through various jobs and relationships, struggling with impulsivity and difficulty following through on commitments. Became increasingly involved in mutual aid, finding purpose but also replicating unhealthy patterns of overcommitment and emotional dysregulation. Initial diagnosis of ADHD at 24, but felt it didn't fully explain his experiences.",
+    "family_structure": "Raised primarily by his single mother, who struggled with her own undiagnosed ADHD and emotional regulation. Absent father. One younger sister, whom he often felt responsible for protecting. Experienced several step-fathers, some of whom were abusive.",
+    "formative_adversities": [
+      "Childhood neglect",
+      "Emotional abuse",
+      "Instability",
+      "Poverty",
+      "Food insecurity",
+      "Frequent school changes"
+    ],
+    "educational_journey": "Struggled in school due to inattention, impulsivity, and sensory sensitivities. Often felt misunderstood and punished for behaviors he couldn't control. Dropped out of college after a year due to feeling overwhelmed and disconnected.",
+    "pivotal_moments": [
+      "Being kicked out of his mother's house at 17 and forced to become independent.",
+      "Discovering activist communities and finding a sense of belonging, but also replicating unhealthy relationship patterns.",
+      "Receiving feedback about racist harm he caused to a friend and realizing the extent of his impact.",
+      "Starting to suspect he may be autistic in addition to ADHD, leading to a deeper understanding of his neurodivergence.",
+      "Deciding to seek therapy to address his harmful coping mechanisms and take accountability."
+    ],
+    "intergenerational_patterns": "His mother's undiagnosed ADHD manifested as impulsivity, emotional dysregulation, and difficulty maintaining stability, which significantly impacted his childhood. Patterns of unstable relationships and financial insecurity were repeated across generations."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Suspected AuDHD (Autism and ADHD)",
+      "Anxiety",
+      "Rejection Sensitivity Dysphoria"
+    ],
+    "diagnosis_journey": "Initially diagnosed with ADHD at 24 after struggling with inattention and impulsivity. However, he felt that the diagnosis didn't fully capture his experiences. Started researching autism after conversations with friends and realizing the overlap in his symptoms. Currently seeking a formal AuDHD diagnosis.",
+    "how_it_shows_up": "Routine rigidity, impulsivity, memory issues, using others to emotionally regulate without consent, difficulty with social cues, sensory overload, intense special interests, difficulty with transitions, perfectionism.",
+    "nervous_system_pattern": "Highly reactive nervous system, easily overwhelmed by sensory input and emotional stress. Tends to fluctuate between hyperarousal (agitation, anxiety, impulsivity) and hypoarousal (shutdown, dissociation, fatigue). Difficulty regulating emotions and returning to a baseline state.",
+    "strengths_superpowers": [
+      "Hyperfocus on areas of interest",
+      "Creativity and innovative thinking",
+      "Strong sense of justice and empathy",
+      "Passionate advocacy for social causes",
+      "Ability to connect with others who are marginalized or neurodivergent"
+    ],
+    "current_coping_strategies": [
+      "Taking on massive mutual aid projects",
+      "Seeking external validation",
+      "Self-medicating with substances (historically)",
+      "Emotional regulation through others (harmful)",
+      "Avoidance of uncomfortable situations",
+      "Rumination and overthinking"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Connecting with others",
+      "Generating new ideas",
+      "Advocacy"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Planning and organization",
+      "Time management",
+      "Impulse control",
+      "Emotional regulation",
+      "Working memory",
+      "Maintaining focus",
+      "Prioritization"
+    ],
+    "ef_workarounds": [
+      "Using visual reminders",
+      "Breaking down tasks into smaller steps",
+      "Setting timers",
+      "Seeking accountability partners",
+      "Using noise-canceling headphones",
+      "Creating structured routines",
+      "Journaling"
+    ],
+    "sensory_profile": "Highly sensitive to noise, bright lights, and strong smells. Prefers soft, comfortable clothing. Seeks out deep pressure and tactile stimulation to regulate his nervous system. Overwhelmed by crowds and social gatherings. Sensitive to certain food textures.",
+    "food_sensory_details": "Avoids foods with slimy or mushy textures like cooked okra or overly ripe bananas. Only eats chicken if it's grilled, not fried, and prefers it lukewarm. Safe foods include plain Cheerios (specifically the original kind), a particular brand of sourdough pretzels (Snyder's), and unflavored sparkling water. Often skips meals when overwhelmed or hyperfocused, leading to low blood sugar and increased irritability. Binges on sugary snacks and processed foods when stressed."
+  },
+  "current_life_context": {
+    "where_they_live": "Shares a house with several other activists in Tower Grove South. Values the sense of community and shared values.",
+    "work_school_situation": "Works part-time as a barista at a local coffee shop to pay the bills, but primarily dedicates his time to mutual aid projects.",
+    "commute_daily_rhythms": "Walks or bikes to work and meetings. Prefers to avoid public transportation due to sensory overload. His daily rhythm is often unpredictable and dependent on the needs of the community.",
+    "local_stressors": [
+      "Gentrification and displacement in his neighborhood",
+      "Lack of affordable housing",
+      "Systemic racism and inequality",
+      "Political polarization",
+      "Burnout from activism"
+    ],
+    "safe_spaces": [
+      "His co-op house",
+      "Certain parks and green spaces",
+      "Small, intimate gatherings with trusted friends",
+      "Specific coffee shops with a calm atmosphere"
+    ],
+    "support_system": "Relies heavily on his close circle of friends, many of whom are also neurodivergent and involved in activism. Has a therapist he's been seeing sporadically, but struggles to maintain consistency."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "To improve his neurocognition and take accountability for the harm he caused to a friend.",
+    "what_they_want_to_change": [
+      "Learn healthier coping mechanisms",
+      "Develop stronger boundaries",
+      "Improve his relationships",
+      "Take accountability for his actions",
+      "Reduce impulsivity and emotional dysregulation",
+      "Gain a better understanding of his neurodivergence"
+    ],
+    "whats_in_the_way": [
+      "Lack of self-awareness",
+      "Difficulty accepting responsibility",
+      "Fear of vulnerability",
+      "Perfectionism",
+      "Impulsivity",
+      "Sensory overload",
+      "Executive dysfunction",
+      "Financial constraints"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I\u2019ve found myself taking on massive mutual aid / organizing projects as a means of asserting some sort of control over a world that feels increasingly beyond my control.",
+    "quote_hope": "Looking back on my life, I\u2019ve realized this isn\u2019t the first time I\u2019ve done something like this, and through conversations with my closest friends (almost all of whom are AuDHD), I\u2019ve decided I\u2019d like to explore that diagnosis / how my own neurodivergent brain works.",
+    "quotes_additional": [
+      "I was having some pretty extreme neurocognitive issues around routine rigidity, impulsivity, not remembering things, and using him to emotionally regulate without consent.",
+      "I want to do this work both to improve my neurocognition and take accountability for the harm I caused."
+    ],
+    "liz_clinical_narrative": "This person presents as deeply committed to social justice, but also struggles with patterns of behavior that cause harm to others. The journey towards understanding his AuDHD is a crucial step in developing self-awareness and taking responsibility. Therapy will focus on exploring the root causes of his harmful coping mechanisms, building healthier boundaries, and developing strategies for emotional regulation and communication. We will work collaboratively to create a safe and supportive space for him to process his experiences, challenge his beliefs, and develop new ways of relating to himself and others. The path to accountability is not easy, but it is a necessary step in building a more just and equitable world.",
+    "therapy_preferences": "Values a therapist who is knowledgeable about neurodiversity, social justice, and harm reduction. Prefers a collaborative and non-judgmental approach. Wants a therapist who is willing to challenge him and hold him accountable."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Neurodivergent-affirming therapy for activists and organizers.",
+      "Taking accountability and rebuilding trust in your community.",
+      "Understanding AuDHD and developing healthier coping mechanisms."
+    ],
+    "primary_keywords": [
+      "AuDHD therapy St. Louis",
+      "Neurodivergent therapist St. Louis",
+      "Accountability therapy",
+      "Harm reduction therapy",
+      "Mutual aid support",
+      "ADHD and Autism therapy"
+    ],
+    "local_entities": [
+      "Tower Grove South",
+      "The Grove",
+      "South Grand",
+      "St. Louis Mutual Aid"
+    ],
+    "content_angles": [
+      "How AuDHD impacts social justice work.",
+      "Taking accountability for harm as a neurodivergent person.",
+      "Building healthier boundaries in activist communities."
+    ]
+  }
+}

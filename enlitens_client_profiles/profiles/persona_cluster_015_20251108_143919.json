@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "profile_id": "cluster-024-persona",
+    "persona_name": "Anxious & Newly Diagnosed Professional",
+    "persona_tagline": "Navigating new diagnoses and career uncertainty.",
+    "created_at": "2025-11-08 20:39:02.937122",
+    "source_documents": [
+      "cluster_24",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "ASD",
+      "Anxiety",
+      "Job Loss",
+      "Late Diagnosis"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "28-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "White",
+    "current_life_situation": "Unemployed, living with partner",
+    "occupation": "Former Marketing Associate",
+    "education": "Bachelor's Degree in Communications",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a seemingly 'normal' suburban household, Sarah always felt different. Her parents were loving but often dismissed her anxieties as 'being sensitive.' Structure was valued, but emotional expression was often stifled. Her childhood home, while physically comfortable, lacked a sense of true emotional safety and understanding.",
+    "adolescence": "Adolescence was a period of intense social anxiety for Sarah. She struggled to fit in, often feeling like she was 'performing' to meet expectations. Academic pressure intensified her anxiety. She developed rigid routines and became obsessed with achieving perfection to compensate for her feelings of inadequacy.",
+    "early_adulthood": "Early adulthood brought a brief period of relief as Sarah excelled in college. The structured environment and clear expectations allowed her to thrive academically. However, the underlying anxiety persisted, and she began experiencing panic attacks. After graduation, the unstructured nature of the professional world triggered increased anxiety and difficulty adapting to changing expectations in different roles.",
+    "family_structure": "Sarah grew up with both parents and a younger brother. Her parents had a traditional marriage where her father was the primary breadwinner, and her mother managed the household. While outwardly stable, the family avoided difficult conversations, and emotional vulnerability was discouraged. Her brother, naturally more outgoing, was often praised for his easy-going nature, which further intensified Sarah's feelings of being different.",
+    "formative_adversities": [
+      "Emotional neglect (not intentional, but lack of emotional attunement)",
+      "High academic pressure",
+      "Social isolation during adolescence",
+      "Difficulty navigating social cues",
+      "Job loss"
+    ],
+    "educational_journey": "Sarah excelled academically throughout her education. She thrived in structured environments and achieved high grades. She attended a private high school and then a state university. However, transitions between schools were difficult, and she often struggled to adjust to new social dynamics.",
+    "pivotal_moments": [
+      "First panic attack during college finals",
+      "Receiving ADHD, ASD, and GAD diagnoses after job loss",
+      "Experiencing intense burnout after years of masking",
+      "Realizing her childhood experiences contributed to her current struggles",
+      "Starting therapy and beginning to understand her neurodivergence"
+    ],
+    "intergenerational_patterns": "Sarah suspects her mother also experiences anxiety but has never been diagnosed. There's a family history of perfectionism and difficulty expressing emotions openly. Both her parents emphasized the importance of hard work and achieving external validation, which contributed to Sarah's drive for success and subsequent burnout."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "ASD",
+      "Generalized Anxiety Disorder"
+    ],
+    "diagnosis_journey": "After losing her job, Sarah experienced a significant increase in anxiety and began to research potential causes. Recognizing some of her lifelong struggles aligned with symptoms of ADHD and ASD, she sought a formal psychological evaluation. The diagnoses provided validation and a framework for understanding her experiences, but also triggered feelings of grief and uncertainty about her future.",
+    "how_it_shows_up": "Sarah experiences difficulty with focus and attention, particularly in unstructured environments. She struggles with social cues and often misunderstands social interactions. Her anxiety manifests as excessive worry, panic attacks, and difficulty relaxing. She also experiences sensory overload, particularly in crowded or noisy places. She tends to hyperfocus on tasks that interest her, but struggles to initiate tasks she finds boring or overwhelming.",
+    "nervous_system_pattern": "Highly sensitive and reactive. Easily overwhelmed by sensory input and emotional stress. Tendency towards fight-or-flight response in stressful situations. Difficulty regulating emotions and transitioning between tasks. Requires significant downtime to recharge and avoid burnout.",
+    "strengths_superpowers": [
+      "Hyperfocus on areas of interest",
+      "Attention to detail",
+      "Strong sense of justice",
+      "Creative problem-solving",
+      "Empathy for others who feel different"
+    ],
+    "current_coping_strategies": [
+      "Avoidance of overwhelming situations",
+      "Relying on routines and schedules",
+      "Seeking reassurance from her partner",
+      "Self-medicating with caffeine and sugar",
+      "Occasional mindfulness exercises",
+      "Online support groups"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Task completion when deeply interested",
+      "Exceptional memory for details",
+      "Strong planning abilities (when not overwhelmed)"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks",
+      "Procrastination",
+      "Poor time management",
+      "Trouble prioritizing tasks",
+      "Easily distracted",
+      "Difficulty with transitions"
+    ],
+    "ef_workarounds": [
+      "Breaking down tasks into smaller steps",
+      "Using visual timers",
+      "Creating detailed schedules",
+      "Setting reminders",
+      "Seeking external accountability",
+      "Noise-canceling headphones"
+    ],
+    "sensory_profile": "Highly sensitive to noise, light, and textures. Prefers soft, comfortable clothing. Avoids crowded and noisy environments. Seeks out quiet spaces to decompress. Sensitive to strong smells. Can become easily overwhelmed by multi-sensory experiences.",
+    "food_sensory_details": "Prefers bland, predictable foods. Avoids anything with a slimy texture, like okra or overripe bananas. Only eats chicken if it's grilled and slightly cooled to room temperature. Safe foods include plain Cheerios (specifically the yellow box), Ritz crackers, and unsweetened applesauce. Struggles with meal planning and often skips meals when overwhelmed. Binges on sugary snacks when stressed, particularly chewy candies like Starbursts."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment in Webster Groves with her partner.",
+    "work_school_situation": "Unemployed after being laid off from her marketing job. Actively searching for new employment.",
+    "commute_daily_rhythms": "Currently, her daily rhythm is unstructured, which increases her anxiety. She spends most of her days at home, applying for jobs, researching neurodiversity, and trying to manage her anxiety. She occasionally goes for walks in the neighborhood or visits the local library.",
+    "local_stressors": [
+      "Job market competition in St. Louis",
+      "Financial insecurity",
+      "Lack of accessible neurodivergent-affirming resources",
+      "Stigma surrounding mental health diagnoses"
+    ],
+    "safe_spaces": [
+      "Her apartment (when quiet and organized)",
+      "Local library",
+      "Quiet coffee shops with natural light",
+      "Nature trails in Forest Park"
+    ],
+    "support_system": "Supportive partner, but struggles to fully understand her experiences. Limited connection with extended family. Online support groups provide a sense of community."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Lost my job last year, got a psych evaluation, and was diagnosed with ADHD, ASD, and generalized anxiety.",
+    "what_they_want_to_change": [
+      "Gain a better understanding of her diagnoses",
+      "Develop coping strategies for managing anxiety and sensory overload",
+      "Find a fulfilling and sustainable career path",
+      "Improve her social skills and build meaningful relationships",
+      "Reduce her dependence on avoidance and self-medication"
+    ],
+    "whats_in_the_way": [
+      "Internalized stigma surrounding mental health",
+      "Lack of self-confidence",
+      "Fear of failure",
+      "Difficulty advocating for her needs",
+      "Executive function challenges",
+      "Financial constraints"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "Lost my job last year, got a psych evaluation, and was diagnosed with ADHD, ASD, and generalized anxiety.",
+    "quote_hope": "I am diagnosed with Generalized Anxiety Disorder but have had a good grip on things recently\u2026 I hope I can find that 'grip' again.",
+    "quotes_additional": [
+      "I feel so different from everyone else.",
+      "I'm tired of masking all the time.",
+      "I just want to feel normal."
+    ],
+    "liz_clinical_narrative": "Sarah's story is one of resilience and a late-blooming journey of self-discovery. The recent diagnoses of ADHD, ASD, and Generalized Anxiety Disorder, while initially overwhelming, offer a framework for understanding her lifelong struggles. The job loss served as a catalyst, forcing her to confront challenges she had previously masked. Therapy can provide Sarah with a safe space to process her emotions, develop coping strategies, and build self-compassion. By exploring her neurodivergent identity, Sarah can learn to leverage her strengths, advocate for her needs, and create a life that aligns with her values. We will focus on gently untangling the anxiety from her identity, allowing her authentic self to shine. ",
+    "therapy_preferences": "Neurodivergent-affirming therapist, evidence-based approaches (CBT, ACT), focus on practical coping strategies, emphasis on self-compassion and acceptance."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a professional struggling with anxiety and feeling like you don't fit in?",
+      "Newly diagnosed with ADHD or ASD? We can help you navigate your neurodivergent identity.",
+      "Neurodivergent-affirming therapy in St. Louis for adults with anxiety, ADHD, and ASD."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "ASD therapy St. Louis",
+      "Anxiety therapy St. Louis",
+      "Neurodivergent therapy St. Louis",
+      "Late diagnosis ADHD",
+      "Adult ADHD treatment",
+      "Adult ASD treatment",
+      "Job loss anxiety"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "St. Louis County",
+      "Forest Park",
+      "Washington University in St. Louis"
+    ],
+    "content_angles": [
+      "Understanding the connection between ADHD, ASD, and anxiety in adults.",
+      "How to navigate job loss and career uncertainty as a neurodivergent professional.",
+      "Creating a sensory-friendly home environment for adults with sensory sensitivities."
+    ]
+  }
+}

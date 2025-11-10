@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "profile_id": "cluster-046-persona",
+    "persona_name": "Anxious College Student Seeking First-Time Therapy",
+    "persona_tagline": "Navigating college life with anxiety and depression, ready to explore therapy.",
+    "created_at": "2025-11-08 20:44:47.338604",
+    "source_documents": [
+      "cluster_46",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "depression",
+      "college student",
+      "therapy naive",
+      "sliding scale"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "18-22",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Full-time college student living in a dorm",
+    "occupation": "Student, part-time barista",
+    "education": "Currently enrolled in a Bachelor's program",
+    "locality": "St. Louis, MO (near SLU)",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a lower-middle-class household with well-meaning but emotionally unavailable parents. The household was relatively stable but lacked open communication about feelings. Her parents often dismissed her anxieties as 'just being dramatic'.",
+    "adolescence": "High school was marked by increasing social anxiety and academic pressure. She excelled academically but struggled with perfectionism and fear of failure. Started experiencing panic attacks in her junior year. Felt isolated and different from her peers, who seemed to navigate social situations with ease.",
+    "early_adulthood": "Transitioning to college exacerbated her anxiety and depression. The pressure to succeed academically, maintain friendships, and navigate independence became overwhelming. She started isolating herself in her dorm room, skipping classes, and neglecting her self-care. The constant worry about finances and future career prospects added to her stress.",
+    "family_structure": "Two-parent household with one younger brother. Parents are still together but have a strained relationship. Her brother is academically successful and well-adjusted, which makes her feel like she's constantly being compared.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Academic pressure and perfectionism",
+      "Social anxiety and isolation",
+      "Financial insecurity",
+      "Panic attacks"
+    ],
+    "educational_journey": "Excelled in high school academically, driven by a fear of failure. Transitioned to college with high expectations but struggled to maintain her grades due to anxiety and depression. Has considered dropping out multiple times.",
+    "pivotal_moments": [
+      "First panic attack in high school, leading to increased anxiety about social situations.",
+      "Getting accepted into college, which initially felt like a triumph but quickly became a source of stress.",
+      "Failing a major exam in college, triggering a depressive episode.",
+      "Confiding in a close friend about her struggles, leading to a referral for therapy.",
+      "Realizing the need for professional help and deciding to reach out to Enlitens."
+    ],
+    "intergenerational_patterns": "Her mother also struggled with anxiety but never sought professional help, believing it was a sign of weakness. This influenced her initial reluctance to consider therapy."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Currently undiagnosed, but suspects she may have underlying anxiety and depression. Reaching out to Enlitens for an initial consultation to explore diagnosis and treatment options. Has been researching symptoms online and feels they resonate with her experiences.",
+    "how_it_shows_up": "Chronic worry, panic attacks, difficulty concentrating, social anxiety, feelings of hopelessness and worthlessness, fatigue, changes in appetite, and difficulty sleeping. Isolates herself from friends and family, avoids social situations, and procrastinates on assignments.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Prone to hypervigilance and catastrophizing. Struggles to regulate emotions and often experiences intense anxiety and panic.",
+    "strengths_superpowers": [
+      "High intelligence and academic potential",
+      "Strong empathy and compassion for others",
+      "Creativity and artistic talent",
+      "Resilience and determination to overcome challenges"
+    ],
+    "current_coping_strategies": [
+      "Isolating herself",
+      "Procrastinating",
+      "Overthinking",
+      "Scrolling social media",
+      "Drinking excessive amounts of coffee",
+      "Attempting to control every aspect of her life"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong long-term memory",
+      "Ability to analyze complex information",
+      "Creative problem-solving skills"
+    ],
+    "ef_friction_points": [
+      "Difficulty with task initiation",
+      "Poor time management",
+      "Trouble prioritizing tasks",
+      "Easily distracted",
+      "Difficulty regulating emotions",
+      "Procrastination"
+    ],
+    "ef_workarounds": [
+      "Using a planner to track assignments",
+      "Setting reminders on her phone",
+      "Breaking down large tasks into smaller, more manageable steps",
+      "Seeking help from the college's academic support center"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers quiet, calming environments. Avoids crowded places due to sensory overload. Finds comfort in soft textures and calming scents like lavender.",
+    "food_sensory_details": "Very particular about food textures. Dislikes anything mushy or slimy like cooked spinach or overripe bananas. Safe foods include plain pasta with butter (specifically Land O'Lakes), dry Cheerios (original only), and crunchy peanut butter on white bread (Wonder Bread only). Avoids foods with strong smells or flavors, particularly spicy or overly sweet items. When stressed, she tends to skip meals altogether or binge on her safe foods."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a small, shared dorm room on the SLU campus. Finds it difficult to concentrate due to noise and distractions.",
+    "work_school_situation": "Full-time student working part-time as a barista at a local coffee shop to help pay for expenses. Struggles to balance work and school due to her anxiety and depression.",
+    "commute_daily_rhythms": "Walks to classes and work, which can be stressful during peak hours due to crowds and noise. Spends most of her time in her dorm room or the library to avoid sensory overload.",
+    "local_stressors": [
+      "High cost of living in St. Louis",
+      "Academic pressure at SLU",
+      "Lack of affordable mental health resources",
+      "Social isolation on campus",
+      "Noise and distractions in the dorm"
+    ],
+    "safe_spaces": [
+      "Her dorm room (when quiet)",
+      "The library (during off-peak hours)",
+      "A local park near campus",
+      "A quiet corner at the coffee shop where she works"
+    ],
+    "support_system": "Limited support system. Has a few close friends but struggles to confide in them due to fear of judgment. Her parents are supportive but don't fully understand her struggles."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Experiencing chronic anxiety and depression that is impacting her academic performance, social life, and overall well-being. Wants to explore therapy for the first time to learn coping mechanisms and manage her symptoms.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and panic attacks",
+      "Improve mood and energy levels",
+      "Develop healthy coping mechanisms",
+      "Improve social skills and relationships",
+      "Increase self-esteem and confidence",
+      "Improve academic performance"
+    ],
+    "whats_in_the_way": [
+      "Financial constraints (needs sliding scale payment)",
+      "Fear of vulnerability and judgment",
+      "Lack of time due to school and work commitments",
+      "Uncertainty about the therapy process",
+      "Negative stigma surrounding mental health",
+      "Difficulty trusting others"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I am a college student with chronic anxiety and depression and I was wanting to give therapy a try for the first time.",
+    "quote_hope": "I would be interested in bi-weekly(every other week) online appointments.",
+    "quotes_additional": [
+      "I am unsure that my insurance will cover much or any so I wanted to discuss sliding scale payment as well."
+    ],
+    "liz_clinical_narrative": "This young woman is taking a brave first step in seeking help for her anxiety and depression. The transition to college is often a challenging time, and it's understandable that she's feeling overwhelmed. Her willingness to explore therapy, despite financial concerns and potential stigma, speaks to her resilience and determination. It's important to create a safe and supportive space for her to explore her feelings, develop coping skills, and build self-compassion. Addressing her financial concerns and providing affordable therapy options will be crucial in ensuring she receives the care she needs to thrive.",
+    "therapy_preferences": "Bi-weekly online appointments, sliding scale payment, therapist with experience in anxiety and depression, safe and non-judgmental environment"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a college student struggling with anxiety and depression? Enlitens offers neurodivergent-affirming therapy to help you thrive.",
+      "Affordable therapy options for college students in St. Louis. Sliding scale payment available.",
+      "Online therapy appointments to fit your busy schedule."
+    ],
+    "primary_keywords": [
+      "anxiety therapy college student",
+      "depression therapy St. Louis",
+      "sliding scale therapy",
+      "online therapy college",
+      "mental health resources SLU"
+    ],
+    "local_entities": [
+      "St. Louis University",
+      "SLU",
+      "Grand Center",
+      "Midtown St. Louis"
+    ],
+    "content_angles": [
+      "Addressing anxiety and depression in college students",
+      "Navigating the transition to college with mental health challenges",
+      "Finding affordable therapy options in St. Louis"
+    ]
+  }
+}

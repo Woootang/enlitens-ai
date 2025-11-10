@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "profile_id": "cluster-014-persona",
+    "persona_name": "The Unraveling Autistic Adult",
+    "persona_tagline": "Seeking clarity and self-understanding after years of masking.",
+    "created_at": "2025-11-08 20:36:24.022118",
+    "source_documents": [
+      "cluster_14",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "self-diagnosed",
+      "autism",
+      "LGBTQ-friendly",
+      "substance use",
+      "attachment issues",
+      "burnout"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "23-35",
+    "gender": "Varied, likely including non-binary individuals",
+    "pronouns": "he/they, she/her, they/them",
+    "orientation": "Likely LGBTQ+",
+    "ethnicity": "Not specified, assume diverse",
+    "current_life_situation": "Trying to navigate early adulthood, potential relationship challenges, questioning identity",
+    "occupation": "Entry-level to mid-career professional, possibly unemployed",
+    "education": "Some college or college graduate",
+    "locality": "St. Louis, MO or surrounding areas",
+    "cultural_faith_identities": [
+      "None specified, likely open to exploring"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up, there was a sense of not quite fitting in, even if they couldn't articulate why. Rules and expectations felt arbitrary and confusing. Perhaps a chaotic home environment, moving frequently, or subtle emotional neglect.",
+    "adolescence": "Adolescence was a minefield of social expectations and awkwardness. They likely experimented with different identities, trying to find a place where they belonged. There might have been bullying, social isolation, or intense hyperfixations on niche interests to cope. First experiences with substances could have begun here, self-medicating for anxiety or sensory overwhelm.",
+    "early_adulthood": "Early adulthood brought the crushing weight of expectations \u2013 career, relationships, independence. The masking they learned in childhood became exhausting, leading to burnout and a sense of being lost. Self-diagnosis with autism likely occurred during this period, sparked by online research and relatable experiences shared by others.",
+    "family_structure": "Could be a nuclear family, single-parent household, or something in between. Dynamics might have been strained, with parents who didn't understand their sensitivities or need for routine. Siblings may have been allies or sources of further misunderstanding.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "Social isolation/bullying",
+      "Unstable home environment",
+      "Pressure to conform",
+      "Substance use",
+      "Attachment trauma"
+    ],
+    "educational_journey": "School was a mixed bag. They might have excelled in subjects that aligned with their hyperfixations but struggled with organization, deadlines, and social interactions. Possible school changes or dropping out due to overwhelm.",
+    "pivotal_moments": [
+      "Discovering the concept of neurodiversity online and realizing they're not alone.",
+      "Experiencing autistic burnout that forces them to re-evaluate their life.",
+      "A therapist dismissing their self-diagnosis, leading them to seek out neurodivergent-affirming care.",
+      "A significant relationship ending due to communication breakdowns or unmet needs.",
+      "Reaching a point where they can no longer maintain the mask and need to prioritize their well-being."
+    ],
+    "intergenerational_patterns": "It's possible that a parent or other family member also exhibited autistic traits but was never diagnosed. There might be a history of mental health struggles or substance abuse within the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autistic (self-diagnosed or awaiting formal assessment), possible ADHD, LGBTQ+",
+      "Bipolar II, PTSD, Generalized Anxiety"
+    ],
+    "diagnosis_journey": "The journey often starts with a growing sense of 'differentness' throughout their life. Online research and community connection lead to self-diagnosis. Seeking formal diagnosis is fraught with challenges \u2013 long waitlists, expensive assessments, and the potential for invalidation by professionals unfamiliar with adult autism. The experience with Bipolar, PTSD, and Anxiety can predate the autism recognition, leading to ineffective treatment before the full picture is understood.",
+    "how_it_shows_up": "Hyperfixations, social anxiety, sensory overwhelm, dermatillomania, procrastination, autistic burnout, difficulty with basic tasks, substance use, attachment issues, difficulty with eye contact, stimming, literal thinking, difficulty understanding social cues, emotional dysregulation",
+    "nervous_system_pattern": "Highly sensitive and reactive. Easily overwhelmed by sensory input and social demands. Prone to fight/flight/freeze/fawn responses. Difficulty regulating emotions and returning to a calm state.",
+    "strengths_superpowers": [
+      "Intense focus and dedication to interests",
+      "Unique perspective and problem-solving skills",
+      "Strong sense of justice and fairness",
+      "Authenticity and honesty",
+      "Creative thinking"
+    ],
+    "current_coping_strategies": [
+      "Substance use",
+      "Hyperfixation/escaping into interests",
+      "Avoidance of social situations",
+      "Stimming (potentially unconsciously)",
+      "Overthinking/ruminating",
+      "Seeking validation from others"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creativity",
+      "Pattern recognition",
+      "Deep focus on preferred tasks"
+    ],
+    "ef_friction_points": [
+      "Procrastination",
+      "Difficulty initiating and completing tasks",
+      "Organization and time management",
+      "Emotional regulation",
+      "Task-switching",
+      "Prioritizing tasks",
+      "Working memory"
+    ],
+    "ef_workarounds": [
+      "Using visual schedules and timers",
+      "Breaking down tasks into smaller steps",
+      "Creating a dedicated workspace",
+      "Seeking external accountability",
+      "Using noise-canceling headphones",
+      "Setting strict deadlines"
+    ],
+    "sensory_profile": "Highly sensitive to certain stimuli, particularly noise, bright lights, and strong smells. May seek out certain textures or movements for comfort. Proprioceptive input (weighted blankets, tight hugs) can be calming. May struggle with interoception (identifying internal bodily sensations).",
+    "food_sensory_details": "Texture is a major factor. May avoid anything with a slimy or mushy texture, like cooked mushrooms or oatmeal. Temperature is also important \u2013 prefers food that is either very hot or very cold, not lukewarm. 'Safe foods' include plain, unsalted potato chips (Lay's brand specifically), dry Cheerios (not soggy), and string cheese. May binge eat when stressed, craving crunchy and salty foods. Tends to skip meals when overwhelmed or hyperfocused."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment in the city or a small house in a suburb of St. Louis.",
+    "work_school_situation": "Working a job that is not fulfilling or is causing burnout. Potentially unemployed. Might be considering a career change or going back to school.",
+    "commute_daily_rhythms": "Commuting by car or public transportation, which can be overwhelming due to sensory input. May work from home occasionally. Struggles with maintaining a consistent daily routine.",
+    "local_stressors": [
+      "Traffic",
+      "Crowds",
+      "Lack of affordable housing",
+      "Limited access to neurodivergent-affirming resources"
+    ],
+    "safe_spaces": [
+      "Their own apartment/room",
+      "Online communities",
+      "Nature (parks, hiking trails)",
+      "Libraries"
+    ],
+    "support_system": "Limited support system. May rely on online communities for connection and validation. Seeking a therapist to help them navigate challenges and build coping skills. Partner may be supportive but also struggling to understand."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Experiencing autistic burnout and feeling overwhelmed by life. Seeking a formal diagnosis to validate their experiences and access resources. Wanting to improve their mental health and develop coping strategies.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overwhelm",
+      "Improve emotional regulation",
+      "Develop healthier coping mechanisms",
+      "Build stronger relationships",
+      "Gain a better understanding of themselves",
+      "Reduce substance use",
+      "Improve self-esteem"
+    ],
+    "whats_in_the_way": [
+      "Internalized ableism",
+      "Fear of judgment and rejection",
+      "Lack of self-compassion",
+      "Executive dysfunction challenges",
+      "Sensory sensitivities",
+      "Difficulty trusting others",
+      "Financial constraints",
+      "Lack of access to neurodivergent-affirming resources"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I honestly have no idea what I'm doing with my life at this point.",
+    "quote_hope": "You definitely seem like that kind of person!",
+    "quotes_additional": [
+      "I'm looking for a therapist with experience in autism and neurodivergence.",
+      "I am a self diagnosed autistic person that needs help talking through stuff.",
+      "I am dealing with issues with substances & attatchment."
+    ],
+    "liz_clinical_narrative": "It sounds like you're carrying a heavy load right now, and I want to acknowledge the strength it takes to reach out. Many folks come to Enlitens feeling like they're unraveling, realizing that the strategies they've used for years are no longer working. You're not alone in this. We can work together to understand your unique neurodivergent wiring, develop coping strategies that actually fit, and build a life that feels more authentic and sustainable. I want to help you understand *why* things are hard and find ways to make them easier, with compassion and acceptance.",
+    "therapy_preferences": "Neurodivergent-affirming therapist, online appointments preferred, someone who understands autism and LGBTQ+ issues, flexible communication (text, email, phone)"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you feeling lost and overwhelmed, wondering if you might be autistic? We get it. Enlitens offers neurodivergent-affirming therapy to help you understand yourself and build a life that works for you.",
+      "Struggling with burnout, anxiety, or relationship challenges? Our therapists specialize in supporting autistic adults.",
+      "Ready to stop masking and start living authentically? Contact us for a free consultation."
+    ],
+    "primary_keywords": [
+      "autism therapy St. Louis",
+      "neurodivergent therapist",
+      "autistic burnout",
+      "self-diagnosed autism",
+      "LGBTQ+ therapist St. Louis",
+      "attachment issues therapy",
+      "substance abuse therapy St. Louis"
+    ],
+    "local_entities": [
+      "Central West End",
+      "The Grove",
+      "South City"
+    ],
+    "content_angles": [
+      "Understanding autistic burnout and how to prevent it",
+      "The challenges of self-diagnosis and how to find validation",
+      "Building healthy relationships as an autistic adult"
+    ]
+  }
+}

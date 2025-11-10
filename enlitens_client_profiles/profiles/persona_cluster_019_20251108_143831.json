@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "profile_id": "cluster-021-persona",
+    "persona_name": "The Collaborative Co-Parent",
+    "persona_tagline": "Navigating ADHD, Family, and the Middle School Maze.",
+    "created_at": "2025-11-08 20:38:14.840970",
+    "source_documents": [
+      "cluster_21",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "executive function",
+      "co-parenting",
+      "middle school",
+      "collaborative"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "40-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Divorced co-parent with a middle schooler",
+    "occupation": "Project Manager",
+    "education": "Bachelor's Degree",
+    "locality": "Kirkwood, MO",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a stable, middle-class home. Both parents were present, but emotionally distant. Father was a workaholic, mother a perfectionist. Expectations were high, but emotional support was limited. There was an unspoken rule: feelings were a distraction.",
+    "adolescence": "Anxious and struggled to keep up with academics. Socially awkward, felt like she was always one step behind. Developed perfectionistic tendencies to compensate for feeling 'different.' Tried to be the 'good girl' to earn approval.",
+    "early_adulthood": "Excelled in college due to structure and clear goals. Married young, seeking stability and love she hadn't experienced as a child. Started a family, focusing on creating a 'perfect' home. The pressure to maintain this facade became overwhelming.",
+    "family_structure": "Divorced. Co-parenting with ex-husband. One child (middle schooler). Close relationship with her mother, though it's often strained by her mother's critical nature. Siblings live out of state.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Divorce",
+      "Late diagnosis of ADHD",
+      "Pressure to conform to societal expectations",
+      "Lack of understanding from family regarding ADHD"
+    ],
+    "educational_journey": "Successful in high school and college, despite internal struggles. College was a respite from family pressures. Began questioning her life choices after graduation and marriage.",
+    "pivotal_moments": [
+      "Realizing her marriage was unsustainable and choosing to divorce.",
+      "Her child's ADHD diagnosis and the subsequent realization that she also exhibited similar traits.",
+      "Receiving her own ADHD diagnosis as an adult.",
+      "Seeking therapy to understand herself and improve her co-parenting relationship.",
+      "Returning to therapy after a period of stability to address executive function issues related to her child's needs."
+    ],
+    "intergenerational_patterns": "Her mother exhibits signs of undiagnosed ADHD, particularly perfectionism and anxiety. Pattern of suppressing emotions to maintain a 'perfect' image. History of high expectations and limited emotional support."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD"
+    ],
+    "diagnosis_journey": "First suspected ADHD when her child was diagnosed. Started researching and realized many symptoms resonated with her own experiences. Pursued a formal diagnosis in her late 30s. Felt a mix of relief and anger \u2013 relief to finally understand herself, anger for the years of struggling undiagnosed.",
+    "how_it_shows_up": "Executive function difficulties, particularly with organization and time management. Impulsivity in decision-making. Difficulty focusing, especially when overwhelmed. Emotional dysregulation \u2013 experiences intense emotions and struggles to manage them. Hyper-focuses on tasks that interest her, neglecting other responsibilities.",
+    "nervous_system_pattern": "High-strung, easily overwhelmed. Tendency to people-please and avoid conflict, leading to burnout. Seeks external validation to regulate her emotions.",
+    "strengths_superpowers": [
+      "Creativity and problem-solving skills",
+      "Empathy and compassion",
+      "Ability to hyper-focus on tasks she enjoys",
+      "Resilience and determination",
+      "Strong advocacy for her child"
+    ],
+    "current_coping_strategies": [
+      "Lists and planners (often abandoned halfway through)",
+      "Caffeine to stay focused",
+      "Avoidance of overwhelming tasks",
+      "Seeking advice from other parents with ADHD children",
+      "Online support groups",
+      "Perfectionism to mask feelings of inadequacy"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Crisis management (can hyperfocus under pressure)",
+      "Strong verbal communication skills"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization and planning",
+      "Prioritization",
+      "Maintaining focus",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Uses multiple calendars and reminder apps (but often ignores them)",
+      "Breaks down large tasks into smaller steps (sometimes)",
+      "Relies on external accountability (e.g., asking friends to check in)",
+      "Attempts to create routines (often unsuccessful)"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Avoids strong smells. Seeks out calming activities like reading or listening to music. Gets easily overwhelmed in crowded or chaotic environments.",
+    "food_sensory_details": "Dislikes foods with mixed textures (e.g., casseroles). Prefers simple, separate ingredients. 'Safe' foods include: Plain pasta with butter and salt, grilled chicken breast (room temperature), peeled apples, specific brand of granola bars (Nature Valley Oats 'n Honey), and baby carrots. Avoids anything overly sweet or artificially flavored. Texture is extremely important \u2013 anything mushy or slimy is a hard no. Drinks a lot of water and avoids carbonated beverages. Skips meals when stressed or overwhelmed, then binges on carbohydrates later in the day."
+  },
+  "current_life_context": {
+    "where_they_live": "Owns a small house in Kirkwood, MO, close to her child's school. Decor is minimalist to reduce visual clutter.",
+    "work_school_situation": "Works full-time as a Project Manager. Enjoys the problem-solving aspect of her job but struggles with deadlines and organization.",
+    "commute_daily_rhythms": "Drives her child to school in the morning. Works from home 3 days a week, goes to the office the other 2. Evening routine revolves around homework, dinner, and bedtime. Spends weekends catching up on errands and household chores.",
+    "local_stressors": [
+      "School district politics",
+      "Traffic congestion in Kirkwood",
+      "Cost of living",
+      "Lack of affordable ADHD resources for her child"
+    ],
+    "safe_spaces": [
+      "Her home (when it's clean and organized)",
+      "The library",
+      "Walking in a nearby park",
+      "Quiet coffee shop"
+    ],
+    "support_system": "Limited support system. Relies on her therapist, a few close friends, and online parenting groups. Co-parenting relationship with ex-husband is strained but functional."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Needs specific help with executive functioning for her child in middle school. Wants to be a more effective co-parent and provide her child with the support they need.",
+    "what_they_want_to_change": [
+      "Improve executive function skills for herself and her child.",
+      "Develop better co-parenting communication.",
+      "Reduce stress and overwhelm.",
+      "Create a more organized and peaceful home environment.",
+      "Improve emotional regulation.",
+      "Increase collaborative strategies with her child's school and other professionals."
+    ],
+    "whats_in_the_way": [
+      "Her own ADHD symptoms.",
+      "Lack of time and energy.",
+      "Strained co-parenting relationship.",
+      "Perfectionistic tendencies.",
+      "Difficulty asking for help.",
+      "Internalized shame and self-criticism.",
+      "Financial constraints."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "'All the issues we have seem to stem from her ADHD.'",
+    "quote_hope": "'Would prefer a collaborative approach where I can be in a good chunk of the sessions.'",
+    "quotes_additional": [
+      "'We need help with executive function issues.'",
+      "'Her counselor suggested someone like you who specializes in ADHD issues.'"
+    ],
+    "liz_clinical_narrative": "This client is returning to therapy, signaling a level of self-awareness and commitment to growth. The focus on executive functioning, particularly in the context of her child's middle school experience, highlights a desire to not only support her child but also to understand and manage her own ADHD. A collaborative approach is key here, as it speaks to a desire for active involvement and shared responsibility. It's important to acknowledge the inherent challenges of co-parenting and the emotional labor involved in supporting a child with ADHD, while gently exploring her own needs and fostering self-compassion. This person is likely juggling many responsibilities, and our work together will center on building practical strategies, promoting effective communication, and creating a safe space to process the complex emotions that arise.",
+    "therapy_preferences": "Collaborative, solution-focused, practical strategies, family systems approach, psychoeducation."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "'Is ADHD impacting your family dynamics? We specialize in neurodivergent-affirming therapy for parents and children.'",
+      "'Struggling with executive function in middle school? We can help you and your child develop strategies for success.'",
+      "'Co-parenting with ADHD can be challenging. We offer collaborative therapy to support your family.'"
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Executive function coaching middle school",
+      "Co-parenting ADHD",
+      "Neurodivergent family therapy",
+      "ADHD assessment adults"
+    ],
+    "local_entities": [
+      "Kirkwood MO",
+      "St. Louis County",
+      "Webster Groves",
+      "Des Peres"
+    ],
+    "content_angles": [
+      "'Navigating Middle School with ADHD: Tips for Parents'",
+      "'Executive Function Strategies for the Whole Family'",
+      "'Co-Parenting with ADHD: Communication and Collaboration'"
+    ]
+  }
+}

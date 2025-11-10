@@ -109,20 +109,11 @@ class EnhancedPDFExtractor:
         """Run docling extraction with progressive fallbacks."""
 
         fallback_errors: List[str] = []
-        extraction_backend = "docling"
+        extraction_backend = "marker"
+        full_text = ""
 
-        try:
-            result = self.docling_converter.convert(pdf_path)
-            full_text = result.document.export_to_markdown()
-            if not full_text.strip():
-                raise ValueError("Docling returned empty content")
-        except Exception as exc:
-            logger.warning(
-                "Docling conversion failed for %s: %s", pdf_path, exc,
-            )
-            fallback_errors.append(f"docling: {exc}")
-            full_text = ""
-
+        # Skip Docling due to GPU memory constraints with VLLM server
+        # Try Marker first instead
         if not full_text.strip():
             try:
                 full_text = self._fallback_with_marker(pdf_path)

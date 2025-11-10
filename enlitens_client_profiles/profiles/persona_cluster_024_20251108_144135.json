@@ -1,0 +1,174 @@
+{
+  "meta": {
+    "profile_id": "cluster-033-persona",
+    "persona_name": "The Newly-Insured Seeker",
+    "persona_tagline": "Finally accessing the help they need, navigating the system with hope and a little trepidation.",
+    "created_at": "2025-11-08 20:41:22.056431",
+    "source_documents": [
+      "cluster_33",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "insurance",
+      "newly insured",
+      "seeking help",
+      "text preferred",
+      "young adult"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "18-24",
+    "gender": "Male",
+    "pronouns": "He/Him",
+    "orientation": "Inferred heterosexual",
+    "ethnicity": "Inferred Caucasian",
+    "current_life_situation": "Living with family or roommates, entry-level job or unemployed.",
+    "occupation": "Inferred: Unemployed or working a service job",
+    "education": "High school diploma or some college",
+    "locality": "South City, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Ethan grew up in a chaotic household in South City. His parents worked long hours in service jobs, leaving him and his older sister largely unsupervised. There was often yelling and tension related to finances. His mom struggled with her own mental health, and the household was often disorganized and unpredictable.",
+    "adolescence": "Ethan struggled in high school, finding it difficult to focus and keep up with assignments. He was often late or absent. He was diagnosed with ADHD in his senior year, but his parents didn't follow through with medication or therapy, believing he just needed to try harder. He self-medicated with video games and junk food.",
+    "early_adulthood": "Ethan drifted after high school, working odd jobs and struggling to maintain a routine. He felt overwhelmed by the responsibilities of adulthood and often relied on his parents for support. He recently got a new job that provides insurance for the first time, prompting him to finally seek help for his mental health.",
+    "family_structure": "Ethan was raised by both parents, but the emotional and practical care fell short. He has one older sister who moved out as soon as she could. The family dynamic is strained by financial stress and his mother's mental health struggles.",
+    "formative_adversities": [
+      "Financial instability",
+      "Emotional neglect",
+      "Lack of structure and support",
+      "Late ADHD diagnosis",
+      "Difficulty navigating systems"
+    ],
+    "educational_journey": "Struggled in high school, often late or absent. Received a late ADHD diagnosis, but didn't receive adequate support. Graduated with a high school diploma.",
+    "pivotal_moments": [
+      "Late ADHD diagnosis in high school",
+      "Getting his first job with insurance benefits",
+      "Realizing his mental health was impacting his ability to function",
+      "Seeing a friend benefit from therapy",
+      "Feeling overwhelmed and wanting to change his life"
+    ],
+    "intergenerational_patterns": "Ethan's mother also struggled with mental health and difficulty managing responsibilities. There is a pattern of avoiding difficult emotions and problems within the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (inferred)",
+      "Anxiety (inferred)"
+    ],
+    "diagnosis_journey": "Late diagnosis of ADHD in high school, dismissed by parents. Self-identified anxiety related to difficulty managing tasks and feeling overwhelmed. Now seeking professional help to manage both.",
+    "how_it_shows_up": "Difficulty focusing, procrastination, impulsivity, feeling overwhelmed, anxiety, low self-esteem, difficulty maintaining routines, struggles with executive function.",
+    "nervous_system_pattern": "High arousal, easily overwhelmed, seeks stimulation but quickly becomes overstimulated, difficulty regulating emotions, tendency to shut down when stressed.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Hyperfocus on interests",
+      "Resilience",
+      "Empathy"
+    ],
+    "current_coping_strategies": [
+      "Video games",
+      "Junk food",
+      "Avoidance",
+      "Reaching out to friends (occasionally)"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving (when motivated)",
+      "Ability to hyperfocus on areas of interest"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Organization",
+      "Time management",
+      "Planning",
+      "Impulse control",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Uses phone reminders (often ignores them)",
+      "Relies on others to help him with tasks",
+      "Procrastinates until the last minute"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Fidgets frequently, needs to move around. Enjoys tactile stimulation like playing with his hands or fiddling with objects.",
+    "food_sensory_details": "Prefers highly processed foods with strong flavors and textures. Safe foods include: Doritos (Nacho Cheese flavor), frozen chicken nuggets (Tyson brand, microwaved until slightly crispy), Mountain Dew, and instant ramen (chicken flavor). Dislikes foods with mixed textures or anything that feels slimy. Avoids vegetables and most fruits. Sometimes skips meals entirely when overwhelmed or too focused on something else. Binges on junk food when stressed or bored."
+  },
+  "current_life_context": {
+    "where_they_live": "South City, St. Louis, possibly living with parents or roommates in a small apartment or house.",
+    "work_school_situation": "Working an entry-level job at a fast food restaurant or retail store. Struggles with the demands of the job and is often late or calls out sick.",
+    "commute_daily_rhythms": "Takes the bus or walks to work. Daily routine is inconsistent and often disrupted by impulsivity and difficulty managing time.",
+    "local_stressors": [
+      "Lack of affordable housing",
+      "Limited job opportunities",
+      "Public transportation challenges",
+      "Neighborhood noise and crime"
+    ],
+    "safe_spaces": [
+      "His bedroom",
+      "Video game arcades",
+      "Online communities"
+    ],
+    "support_system": "Limited support system. Relies on his parents for some financial and emotional support, but struggles to communicate his needs effectively. Has a few friends, but often feels isolated and misunderstood."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "He\u2019s \u2018been in desperate need/search of help\u2019 now that he has insurance. He is motivated to improve his mental health and overall well-being.",
+    "what_they_want_to_change": [
+      "Manage ADHD symptoms",
+      "Reduce anxiety",
+      "Improve self-esteem",
+      "Develop better coping strategies",
+      "Build healthier relationships",
+      "Establish a more stable routine",
+      "Get a better job"
+    ],
+    "whats_in_the_way": [
+      "Lack of self-confidence",
+      "Difficulty navigating the healthcare system",
+      "Limited financial resources",
+      "Poor executive function skills",
+      "Fear of judgment",
+      "Lack of support",
+      "Overwhelm"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I\u2019ve been in desperate need/search of help.",
+    "quote_hope": "I just got insurance and was wondering if you accept United Healthcare.",
+    "quotes_additional": [
+      "If im honest I don't know much about insurance or it's jargon so i thought I'd ask to be sure :)",
+      "I answer best through text :)"
+    ],
+    "liz_clinical_narrative": "Ethan's story resonates with so many young adults who are finally gaining access to resources and seeking help for long-standing challenges. His brief intake highlights a desire for change, coupled with a vulnerability around navigating complex systems like insurance. He communicates best through text, pointing to a preference for asynchronous communication and a potential sensitivity to in-person interactions. Our work together would focus on building trust, validating his experiences, and providing practical strategies for managing ADHD and anxiety. We'd explore his strengths and interests, empowering him to create a life that feels meaningful and fulfilling.",
+    "therapy_preferences": "Prefers text communication, needs help understanding insurance, likely needs a therapist who is patient, validating, and provides practical support."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "'Just got insurance? We can help you navigate the system and access the mental health support you deserve.'",
+      "'Struggling with ADHD and anxiety? We offer neurodiversity-affirming therapy tailored to your unique needs.'",
+      "'Text us to learn more about our services and insurance options.'"
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety treatment St. Louis",
+      "Therapy for young adults",
+      "Insurance accepted therapy",
+      "Neurodiversity-affirming therapy",
+      "Text therapy",
+      "Affordable therapy St. Louis",
+      "United Healthcare therapy St. Louis"
+    ],
+    "local_entities": [
+      "South City",
+      "St. Louis",
+      "United Healthcare"
+    ],
+    "content_angles": [
+      "Demystifying insurance for mental health care",
+      "The benefits of text therapy for ADHD",
+      "How to find a neurodiversity-affirming therapist in St. Louis"
+    ]
+  }
+}

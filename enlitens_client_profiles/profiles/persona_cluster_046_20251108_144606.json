@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "profile_id": "cluster-050-persona",
+    "persona_name": "Proactive Montessori Mom",
+    "persona_tagline": "Crafting a neurodivergent-affirming life, one playbook at a time.",
+    "created_at": "2024-11-08 20:45:49.779568",
+    "source_documents": [
+      "cluster_50",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "2e",
+      "ADHD",
+      "APD",
+      "Kinefelter Syndrome",
+      "Rejection Sensitive Dysphoria",
+      "Montessori",
+      "neurodivergent family"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of one child",
+    "occupation": "Freelance writer/editor (works from home)",
+    "education": "Bachelor's Degree in English Literature",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban neighborhood. Parents were loving but somewhat traditional and didn't quite understand her own quirky tendencies. She always felt a little 'different' from her peers, often retreating into books and creative pursuits.",
+    "adolescence": "Felt increasing pressure to conform in high school, leading to anxiety and social awkwardness. Excelled academically in English and history but struggled with math and science. Developed a strong sense of justice and empathy for marginalized groups.",
+    "early_adulthood": "Attended a small liberal arts college. Found her tribe among other creative and intellectual students. Explored different career paths before settling on writing and editing. Met her husband in college and they married a few years after graduation.",
+    "family_structure": "Raised by both parents in a stable, two-parent household. One younger sister with whom she has a close but sometimes competitive relationship. Lost her maternal grandmother to cancer during her early twenties, which deeply affected her.",
+    "formative_adversities": [
+      "Feeling like an outsider in her peer group throughout childhood",
+      "Struggling with undiagnosed learning differences in traditional school settings",
+      "Experiencing the loss of her grandmother",
+      "Witnessing instances of bullying and discrimination, fueling her passion for social justice"
+    ],
+    "educational_journey": "Attended public schools with mixed experiences. Excelled in humanities but struggled with STEM subjects. Felt misunderstood by some teachers who didn't appreciate her unconventional learning style. Found solace and inspiration in literature and creative writing classes. Attended a small liberal arts college.",
+    "pivotal_moments": [
+      "Discovering her love for writing and realizing it could be a viable career path",
+      "Meeting her husband and building a strong, supportive partnership",
+      "The birth of her son, Henry, which sparked a deep commitment to understanding and supporting his unique needs",
+      "Henry's 2e diagnosis, prompting her to become an advocate for neurodiversity",
+      "Moving to St. Louis for a fresh start and a better educational environment for Henry"
+    ],
+    "intergenerational_patterns": "Her mother exhibited some traits that might suggest undiagnosed neurodivergence (difficulty with organization, intense focus on specific interests). A history of anxiety and perfectionism runs in the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Advocate for her son's neurodivergence (ADHD, APD, Klinefelter Syndrome)",
+      "Potential undiagnosed ADHD or similar traits"
+    ],
+    "diagnosis_journey": "Focused on Henry's diagnosis journey. She recognized his struggles early on, leading to the 2e diagnosis of ADHD and APD in Naples, FL. Is now eager to create a 'playbook' for him in St. Louis to ensure his success.",
+    "how_it_shows_up": "Feels a strong sense of responsibility for ensuring Henry's well-being and academic success. Can become easily overwhelmed by the demands of parenting a neurodivergent child. Experiences anxiety related to Henry's social challenges and rejection sensitivity. May struggle with her own undiagnosed neurodivergent traits, leading to feelings of inadequacy or overwhelm.",
+    "nervous_system_pattern": "High-strung, prone to anxiety and hypervigilance. Easily overwhelmed by sensory input. Tends to internalize stress and push herself to meet high expectations.",
+    "strengths_superpowers": [
+      "Strong empathy and compassion",
+      "Exceptional advocacy skills",
+      "Creative problem-solving abilities",
+      "Deeply committed to her family",
+      "Highly intelligent and articulate"
+    ],
+    "current_coping_strategies": [
+      "Researches neurodiversity and parenting strategies",
+      "Seeks support from other parents of neurodivergent children",
+      "Engages in creative outlets like writing and journaling",
+      "Prioritizes self-care activities (though often struggles to find the time)",
+      "Uses organizational tools to manage her workload and household responsibilities"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong verbal reasoning",
+      "Creativity",
+      "Hyperfocus on topics of interest",
+      "Advocacy"
+    ],
+    "ef_friction_points": [
+      "Organization and time management",
+      "Prioritization",
+      "Task initiation",
+      "Emotional regulation (especially related to Henry's challenges)",
+      "Overwhelm"
+    ],
+    "ef_workarounds": [
+      "Uses digital calendars and to-do lists",
+      "Breaks down large tasks into smaller, more manageable steps",
+      "Sets timers to stay on track",
+      "Seeks external accountability from friends or family"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Enjoys tactile activities like knitting or gardening. Can become easily overwhelmed by strong smells.",
+    "food_sensory_details": "Prefers foods with consistent textures. Dislikes anything overly chewy or with unexpected lumps. Safe foods include: Annie's Mac & Cheese (shells only), plain Greek yogurt with a drizzle of honey, and grilled chicken breast cut into small pieces. Avoids foods with artificial colors or flavors. Can be prone to skipping meals when stressed or overwhelmed but enjoys baking as a form of stress relief and creative expression. Will only eat fruit if it is peeled and cut into uniform pieces \u2013 bananas must have no brown spots."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a comfortable home in Webster Groves, MO. Chose the area for its good schools and family-friendly atmosphere.",
+    "work_school_situation": "Works from home as a freelance writer/editor, allowing her flexibility to manage Henry's needs. Actively involved in Henry's education at Villa di Maria Montessori School.",
+    "commute_daily_rhythms": "Minimal commute since working from home. Frequent trips to school for meetings and activities. Spends time at local parks and libraries with Henry.",
+    "local_stressors": [
+      "Navigating the St. Louis special education system",
+      "Finding appropriate social and recreational opportunities for Henry",
+      "Dealing with the challenges of raising a neurodivergent child in a neurotypical world",
+      "Maintaining a work-life balance"
+    ],
+    "safe_spaces": [
+      "Her home office",
+      "Local library",
+      "Villa di Maria Montessori School",
+      "Quiet corners of local parks"
+    ],
+    "support_system": "Her husband, a few close friends, other parents at Villa di Maria, online neurodiversity communities."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "To develop a 'playbook' for Henry's success and well-being in St. Louis. To address her own anxiety and overwhelm related to parenting a neurodivergent child. To gain a better understanding of her own potential neurodivergent traits.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overwhelm",
+      "Develop effective coping strategies for managing stress",
+      "Improve communication and collaboration with school staff",
+      "Create a more supportive and inclusive environment for Henry",
+      "Gain a deeper understanding of neurodiversity"
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy",
+      "Financial constraints",
+      "Difficulty prioritizing self-care",
+      "Fear of judgment or criticism from others",
+      "Internalized perfectionism"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"His prior, public school experience in Naples FL was cruel and lame...Villa di Maria says social issues are holding him back.\"",
+    "quote_hope": "\"Eager to create ours and Henry's playbook!\"",
+    "quotes_additional": [
+      "\"Rejection sensitive dysphoria sounds like him.\"",
+      "He is hypersensitive."
+    ],
+    "liz_clinical_narrative": "This mom is clearly driven by a fierce love for her son and a desire to create the best possible life for him. She's taken proactive steps by moving to St. Louis and enrolling him in a Montessori school. She's also navigating the complexities of multiple diagnoses, including ADHD, APD, and Klinefelter syndrome. What she needs now is support in managing her own overwhelm and anxiety, as well as strategies for advocating for Henry in a new environment. Exploring her own potential neurodivergent traits could also be incredibly empowering.",
+    "therapy_preferences": "Neurodivergent-affirming therapist with experience working with children and families. Solution-focused approach with practical strategies for managing stress and improving communication. Emphasis on self-compassion and building resilience."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "'Is your child twice-exceptional (2e)? We understand the unique challenges and strengths of neurodivergent learners.'",
+      "'Creating a 'playbook' for your child's success? We can help you navigate the special education system and advocate for their needs.'",
+      "'Feeling overwhelmed by the demands of parenting a neurodivergent child? We offer compassionate support and practical strategies for managing stress and building resilience.'"
+    ],
+    "primary_keywords": [
+      "neurodivergent family",
+      "2e child",
+      "ADHD APD",
+      "Rejection Sensitive Dysphoria",
+      "Montessori school St. Louis",
+      "parenting neurodivergent children",
+      "neurodiversity affirming therapy",
+      "Kinefelter Syndrome"
+    ],
+    "local_entities": [
+      "Villa di Maria Montessori",
+      "Webster Groves",
+      "St. Louis County special education",
+      "Washington University Occupational Therapy"
+    ],
+    "content_angles": [
+      "How to advocate for your neurodivergent child in school",
+      "Creating a sensory-friendly home environment",
+      "Managing anxiety and overwhelm as a parent of a 2e child"
+    ]
+  }
+}

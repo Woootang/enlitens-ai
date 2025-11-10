@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "profile_id": "cluster-016-persona",
+    "persona_name": "Anxious Emerging Adult Seeking Direction",
+    "persona_tagline": "Navigating anxiety and life transitions with a desire for personal growth.",
+    "created_at": "2025-11-08 20:33:02.393190",
+    "source_documents": [
+      "cluster_16",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxiety",
+      "therapy-seeker",
+      "young-adult",
+      "neurodivergent-questioning"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "22-28",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Recently moved, working from home, seeking stability",
+    "occupation": "Remote Marketing Assistant",
+    "education": "Bachelor's Degree",
+    "locality": "South City, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Middle-class suburban upbringing with loving but somewhat emotionally distant parents. High expectations were placed on academic achievement. Her parents were often preoccupied with their careers, leaving her feeling unseen and unheard. The house was always meticulously clean and organized, which inadvertently created anxiety around imperfection.",
+    "adolescence": "Struggled with social anxiety and feelings of inadequacy in high school. She excelled academically but felt pressure to maintain her perfect grades. Developed perfectionistic tendencies and a fear of failure. Experienced some bullying in middle school related to her perceived 'nerdiness'. Started to experience panic attacks during exams.",
+    "early_adulthood": "College was a mixed bag. While she enjoyed the academic freedom, she struggled with the unstructured environment and social pressures. She hopped between majors, unsure of what she really wanted to do. Landed a 'safe' job after graduation but quickly felt unfulfilled and overwhelmed. The 'detrimental work experiences' mentioned in her intake were due to a micromanager and a toxic work environment that exacerbated her anxiety and imposter syndrome.",
+    "family_structure": "Two-parent household with one younger brother. Her parents are still married but their relationship is strained. Her brother is successful in a STEM field, which she sometimes feels inferior to.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High parental expectations",
+      "Bullying",
+      "Toxic work environment"
+    ],
+    "educational_journey": "Straight-A student in high school. Attended a state university. Switched majors three times before graduating with a degree in Communications. Felt immense pressure to choose the 'right' career path.",
+    "pivotal_moments": [
+      "Receiving a poor performance review at her first job, triggering intense imposter syndrome.",
+      "Moving to St. Louis to 'start over' and escape a toxic work environment.",
+      "Realizing that her anxiety is significantly impacting her quality of life.",
+      "Having a friend suggest she might have ADHD, leading her to research the condition.",
+      "Deciding to actively seek therapy to address her anxiety and explore potential neurodivergence."
+    ],
+    "intergenerational_patterns": "Her mother also struggled with anxiety and perfectionism, though it was never formally addressed. There's a family history of suppressing emotions and prioritizing outward appearances of success."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "ADHD (suspected)",
+      "Imposter Syndrome"
+    ],
+    "diagnosis_journey": "She suspects she has ADHD based on online research and conversations with friends. She experiences significant difficulties with focus, organization, and time management. She has never been formally evaluated but is now seeking therapy to explore this further. She's nervous about the process and fears being dismissed or misdiagnosed.",
+    "how_it_shows_up": "Anxiety manifests as excessive worry, rumination, panic attacks, and difficulty sleeping. ADHD symptoms include procrastination, impulsivity, difficulty concentrating, and a constant feeling of being overwhelmed. Imposter syndrome leads to self-doubt and a fear of being exposed as a fraud.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to be in a state of hyperarousal, constantly scanning for potential threats. Difficulty down-regulating and relaxing. Prone to emotional dysregulation.",
+    "strengths_superpowers": [
+      "Creative problem-solving",
+      "Empathy",
+      "Strong work ethic (when motivated)",
+      "Resourcefulness"
+    ],
+    "current_coping_strategies": [
+      "Avoidance",
+      "Overthinking",
+      "Perfectionism",
+      "Caffeine",
+      "Scrolling social media",
+      "Trying to 'power through'"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative thinking",
+      "Problem-solving under pressure (sometimes)",
+      "Connecting with people"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Sustained attention",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars (often unsuccessfully)",
+      "Setting alarms (which she often ignores)",
+      "Relying on external deadlines",
+      "Seeking help from friends for organization"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Easily overwhelmed by strong smells. Seeks out calming sensory experiences like nature walks and listening to music.",
+    "food_sensory_details": "Dislikes foods with slimy or mushy textures, like cooked mushrooms or overripe bananas. Prefers foods that are crunchy or have a distinct bite. Safe foods include: dry Cheerios (plain), crispy chicken tenders (only if they are very crispy), and cheddar cheese (only sharp cheddar). She will skip meals entirely when feeling overwhelmed. She sometimes stress-eats crunchy snacks like potato chips or pretzels, but feels guilty afterward."
+  },
+  "current_life_context": {
+    "where_they_live": "Renting a small apartment in South City, St. Louis. She chose the area for its walkability and proximity to coffee shops.",
+    "work_school_situation": "Working from home as a remote Marketing Assistant for a small tech company. She enjoys the flexibility but struggles with the isolation and lack of structure.",
+    "commute_daily_rhythms": "No commute, but she tries to get out of the house for a walk or coffee every day to break up the monotony.",
+    "local_stressors": [
+      "Lack of social connection",
+      "Feeling isolated in a new city",
+      "High cost of living",
+      "Job insecurity"
+    ],
+    "safe_spaces": [
+      "Her apartment (when clean and organized)",
+      "Local coffee shops",
+      "Tower Grove Park"
+    ],
+    "support_system": "Limited support system in St. Louis. Relies on phone calls with friends and family back home. Hoping to build new connections through therapy and other social activities."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Her anxiety has become debilitating, and she wants to 'get back to a place of enjoying life again, progressing and bettering myself, not just surviving each day.' She also wants to explore the possibility of having ADHD.",
+    "what_they_want_to_change": [
+      "Reduce anxiety",
+      "Improve focus and concentration",
+      "Develop better coping mechanisms",
+      "Build stronger relationships",
+      "Find a sense of purpose and direction",
+      "Address imposter syndrome"
+    ],
+    "whats_in_the_way": [
+      "Fear of vulnerability",
+      "Perfectionism",
+      "Procrastination",
+      "Lack of self-compassion",
+      "Difficulty asking for help",
+      "Financial constraints"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I find my anxiety getting the best of me, and want to get back to a place of enjoying life again, progressing and bettering myself, not just surviving each day.",
+    "quote_hope": "I'm seeking rather intense therapy that challenges me to get outside of myself and comfort zone.",
+    "quotes_additional": [
+      "I'm interested in therapy and would like a consultation.",
+      "I also have raging ADHD and feel like that's been roadblocking my life, and I've never had the tools to combat it."
+    ],
+    "liz_clinical_narrative": "Alison's story resonates deeply with many young adults navigating the complexities of early adulthood. Her anxiety and suspected ADHD create a perfect storm of overwhelm and self-doubt. She presents as highly capable but struggles to translate that potential into tangible results. Therapy will focus on building self-compassion, developing practical coping strategies for managing anxiety and ADHD symptoms, and exploring her values and passions to create a more fulfilling life. The therapeutic relationship will be crucial in providing a safe and supportive space for her to explore her vulnerabilities and develop a stronger sense of self.",
+    "therapy_preferences": "Online therapy, evening or weekend appointments, a therapist who is challenging and supportive, and who understands neurodiversity."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Feeling overwhelmed by anxiety and suspect you might have ADHD? You're not alone. Our neurodivergent-affirming therapists can help you develop the tools and strategies to thrive.",
+      "Are you a young adult struggling to find your place in the world? We offer a safe and supportive space to explore your identity, values, and goals.",
+      "We understand the unique challenges faced by young professionals with anxiety and ADHD. Let us help you unlock your potential."
+    ],
+    "primary_keywords": [
+      "anxiety therapy St. Louis",
+      "ADHD therapy St. Louis",
+      "young adult therapy St. Louis",
+      "neurodivergent therapy St. Louis",
+      "imposter syndrome therapy"
+    ],
+    "local_entities": [
+      "South City",
+      "Tower Grove Park",
+      "Cherokee Street",
+      "The Hill"
+    ],
+    "content_angles": [
+      "5 Signs You Might Have Undiagnosed ADHD",
+      "How to Manage Anxiety in Your 20s",
+      "Creating a Neurodivergent-Friendly Workplace"
+    ]
+  }
+}

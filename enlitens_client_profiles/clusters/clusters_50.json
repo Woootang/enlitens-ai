@@ -1,0 +1,1191 @@
+{
+  "n_clusters": 50,
+  "silhouette_score": 0.03672998398542404,
+  "total_intakes": 224,
+  "clusters": {
+    "9": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "George 6.5 \nPrevious play therapy- no results \nRSD - when not comfortable would follow directions then when comfortable wanted to plant his flag \nJust finished K \nNegative self talk \nNeeds more coping skills \nMom - Missy \nEmotion regulation",
+          "distance": 0.5116091966629028
+        },
+        {
+          "text": "Big theme - long track record of gaining knowledge and learning (masters in counseling dont use it) difficulties in knowing and doing the work. Complex grief around parenting and how life's been. Trying not to perpetuate cycles. Since ADHD dx seeing patterns of Autism traits. Really really good at masking but its getting exhausting. Hit rock bottoms but no one knows/recognizes because of masking. (Lowest point 2023). Reporting to toxic leader - complex political work environment (drives by fear)",
+          "distance": 0.5116091966629028
+        }
+      ],
+      "all_texts": [
+        "George 6.5 \nPrevious play therapy- no results \nRSD - when not comfortable would follow directions then when comfortable wanted to plant his flag \nJust finished K \nNegative self talk \nNeeds more coping skills \nMom - Missy \nEmotion regulation",
+        "Big theme - long track record of gaining knowledge and learning (masters in counseling dont use it) difficulties in knowing and doing the work. Complex grief around parenting and how life's been. Trying not to perpetuate cycles. Since ADHD dx seeing patterns of Autism traits. Really really good at masking but its getting exhausting. Hit rock bottoms but no one knows/recognizes because of masking. (Lowest point 2023). Reporting to toxic leader - complex political work environment (drives by fear)"
+      ]
+    },
+    "6": {
+      "size": 7,
+      "percentage": 3.125,
+      "representative_samples": [
+        {
+          "text": "Hello I am searching for a therapist that can help my 13 year old autistic son learn and understand healthy sexual behaviors. We have had some struggles with inappropriate behaviors and have not been successful in teaching him right from wrongs in that area. Is this something you could assist with? If not could you recommend a therapist that might?",
+          "distance": 0.44609013199806213
+        },
+        {
+          "text": "My Child (Under 18) Mateo Auberry\nMateo is 15 and has autism, adjd and anxiety. Since entering adolescence he has regressed behaviorlally and academically. We are looking for a therapist that can help him express his feelings and what he needs to lessen his anger and anxiety. He is completely verbal but struggles to tell us what\u2019s wrong.",
+          "distance": 0.46200031042099
+        },
+        {
+          "text": "Good evening, I am looking for a therapist for my almost 9 year old son who is autistic. I\u2019m looking for someone who he can talk to besides us about things that bother him. As well teach him coping mechanisms when he gets upset or overwhelmed. He has very noticeable tics that bother him and he wants to stop. I tried to tell him it\u2019s ok he cannot help it. Please let me know if this is something you specialize in. I do have United Healthcare as insurance. Email is the best way to reach me.",
+          "distance": 0.48324793577194214
+        },
+        {
+          "text": "He is a 14 yo, asexual, autistic, ADHD teen, having mild (?) panic attacks during school when too many noises and/or attention is on him. He asked for therapy to help develop tools to be productive and okay in the world around him without the need to conform to societal norms that he doesn't understand. (some of those are his words) He has been exploring his own diagnosis through educational videos this year and recognizes he can't learn these tools on his own. He's a literal person and does not like play/art therapy. He needs facts and data. He's tried a therapist that does \"feelings\" talk therapy or art therapy. He does not compute that way. We are very supportive of him being him and want him to be successful in what he wants to pursue. He's having some road blocks we can't help him through as his parents. We, his parents, also have used therapy to navigate through life and are excited he's willing to try again.",
+          "distance": 0.5765944123268127
+        },
+        {
+          "text": "Looking for a therapist who can help with an eating disorder, but more importantly is knowledgable on autism",
+          "distance": 0.6122047901153564
+        }
+      ],
+      "all_texts": [
+        "Hello I am searching for a therapist that can help my 13 year old autistic son learn and understand healthy sexual behaviors. We have had some struggles with inappropriate behaviors and have not been successful in teaching him right from wrongs in that area. Is this something you could assist with? If not could you recommend a therapist that might?",
+        "My Child (Under 18) Mateo Auberry\nMateo is 15 and has autism, adjd and anxiety. Since entering adolescence he has regressed behaviorlally and academically. We are looking for a therapist that can help him express his feelings and what he needs to lessen his anger and anxiety. He is completely verbal but struggles to tell us what\u2019s wrong.",
+        "Good evening, I am looking for a therapist for my almost 9 year old son who is autistic. I\u2019m looking for someone who he can talk to besides us about things that bother him. As well teach him coping mechanisms when he gets upset or overwhelmed. He has very noticeable tics that bother him and he wants to stop. I tried to tell him it\u2019s ok he cannot help it. Please let me know if this is something you specialize in. I do have United Healthcare as insurance. Email is the best way to reach me.",
+        "He is a 14 yo, asexual, autistic, ADHD teen, having mild (?) panic attacks during school when too many noises and/or attention is on him. He asked for therapy to help develop tools to be productive and okay in the world around him without the need to conform to societal norms that he doesn't understand. (some of those are his words) He has been exploring his own diagnosis through educational videos this year and recognizes he can't learn these tools on his own. He's a literal person and does not like play/art therapy. He needs facts and data. He's tried a therapist that does \"feelings\" talk therapy or art therapy. He does not compute that way. We are very supportive of him being him and want him to be successful in what he wants to pursue. He's having some road blocks we can't help him through as his parents. We, his parents, also have used therapy to navigate through life and are excited he's willing to try again.",
+        "Looking for a therapist who can help with an eating disorder, but more importantly is knowledgable on autism",
+        "My son would benefit from therapy where he can learn social acceptable behaviors. He has trouble with know what is funny vs. inappropriate.",
+        "My 14 year old is nonbinary, has ADD, probable autism, anxiety and depression, history of self harm, and passive SI they want to do sex affirming hormone therapy and will need a letter of support for this. Can you help? thank you,"
+      ]
+    },
+    "15": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Lost my job last year, got a psych evaluation, and was diagnosed with ADHD, ASD, and generalized anxiety.",
+          "distance": 0.4675979018211365
+        },
+        {
+          "text": "I am diagnosed with Generalized Anxiety Disorder but have had a good grip on things recently.",
+          "distance": 0.4675979018211365
+        }
+      ],
+      "all_texts": [
+        "Lost my job last year, got a psych evaluation, and was diagnosed with ADHD, ASD, and generalized anxiety.",
+        "I am diagnosed with Generalized Anxiety Disorder but have had a good grip on things recently."
+      ]
+    },
+    "22": {
+      "size": 3,
+      "percentage": 1.3392857142857142,
+      "representative_samples": [
+        {
+          "text": "I was recently diagnosed with ADHD, but have known something was off for years. I have issues concentrating, impulsive and emotional eating, etc.  I will tell myself every morning that I will do certain things, no scroll on my phone, not over eat, etc.. and within like 2 hours it's already lost.\nSeptember 10, 2025",
+          "distance": 0.5048722624778748
+        },
+        {
+          "text": "My husband had severe ADHD and hoarding tendencies. Not on ADHD medication. Patient is seeing phych doctor. Needs counseling to help with tools for cleaning, decluttering, finishing tasks, follow through. He had medicare and blue cross secondary insurance,",
+          "distance": 0.52757328748703
+        },
+        {
+          "text": "Just adhd, anxiety, overwhelm, job switch, long distance relationship, a lot",
+          "distance": 0.5568416714668274
+        }
+      ],
+      "all_texts": [
+        "I was recently diagnosed with ADHD, but have known something was off for years. I have issues concentrating, impulsive and emotional eating, etc.  I will tell myself every morning that I will do certain things, no scroll on my phone, not over eat, etc.. and within like 2 hours it's already lost.\nSeptember 10, 2025",
+        "My husband had severe ADHD and hoarding tendencies. Not on ADHD medication. Patient is seeing phych doctor. Needs counseling to help with tools for cleaning, decluttering, finishing tasks, follow through. He had medicare and blue cross secondary insurance,",
+        "Just adhd, anxiety, overwhelm, job switch, long distance relationship, a lot"
+      ]
+    },
+    "13": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "thinking about meds, \"if I need it or not\" graduated in May, started corporate job a little overwhelmed, GF in Amsterdam/Pakistan (being in a relationship brings up things you dont know you need to work on)",
+          "distance": 2.580315161537783e-08
+        }
+      ],
+      "all_texts": [
+        "thinking about meds, \"if I need it or not\" graduated in May, started corporate job a little overwhelmed, GF in Amsterdam/Pakistan (being in a relationship brings up things you dont know you need to work on)"
+      ]
+    },
+    "29": {
+      "size": 3,
+      "percentage": 1.3392857142857142,
+      "representative_samples": [
+        {
+          "text": "My teen needs help with her executive functioning, time blindness, organization, etc.",
+          "distance": 0.33424437046051025
+        },
+        {
+          "text": "My teen needs help with her executive functioning, time blindness, organization, etc.",
+          "distance": 0.33424437046051025
+        },
+        {
+          "text": "Gwen has always been an excellent student, but she shows signs of needing some further support that i would love to assess. She forgets things, has a lot of difficulty socially, and has a lot of trouble falling asleep. (Likely more related issues as well but these are the ones I feel most compelled to find resources to address).",
+          "distance": 0.6684887409210205
+        }
+      ],
+      "all_texts": [
+        "My teen needs help with her executive functioning, time blindness, organization, etc.",
+        "My teen needs help with her executive functioning, time blindness, organization, etc.",
+        "Gwen has always been an excellent student, but she shows signs of needing some further support that i would love to assess. She forgets things, has a lot of difficulty socially, and has a lot of trouble falling asleep. (Likely more related issues as well but these are the ones I feel most compelled to find resources to address)."
+      ]
+    },
+    "34": {
+      "size": 8,
+      "percentage": 3.571428571428571,
+      "representative_samples": [
+        {
+          "text": "I'm 32 years old and was diagnosed with ADHD earlier this year. I am a parent, student, and find myself struggling a lot with motivation, time blindness, impulsivity and emotional regulation. I find myself feeling bad about myself a lot and feel like everything is so challenging. I'm ready to learn skills that can help me feel better.",
+          "distance": 0.45770689845085144
+        },
+        {
+          "text": "I am a 41 year old woman who didn't acknowledge or start treatment for adhd until my late 30s. I am very overwhelmed with life right now and feel like I can never catch up, which is making things feel a bit hopeless. I also struggle with anxiety and depression. I see a psychiatrist and take medication, which has helped, but I need to learn better ways to focus and function, and find a way to better accept myself and the way I am.",
+          "distance": 0.5296045541763306
+        },
+        {
+          "text": "Diagnoised with ADHD as an adult and never recieved help until know.",
+          "distance": 0.5591611862182617
+        },
+        {
+          "text": "I am a 37-year-old woman who is interested in getting evaluated for ADHD.",
+          "distance": 0.5793471932411194
+        },
+        {
+          "text": "I'm 38 years old, was diagnosed with ADHD about 3 years ago, and am fairly convinced that I'm also autistic. I've been meaning to set this up for weeks. I'm ready to take this unmasking journey out of my rabbit hole and finally do the work to finally figure out who I am.",
+          "distance": 0.5921124815940857
+        }
+      ],
+      "all_texts": [
+        "I'm 32 years old and was diagnosed with ADHD earlier this year. I am a parent, student, and find myself struggling a lot with motivation, time blindness, impulsivity and emotional regulation. I find myself feeling bad about myself a lot and feel like everything is so challenging. I'm ready to learn skills that can help me feel better.",
+        "I am a 41 year old woman who didn't acknowledge or start treatment for adhd until my late 30s. I am very overwhelmed with life right now and feel like I can never catch up, which is making things feel a bit hopeless. I also struggle with anxiety and depression. I see a psychiatrist and take medication, which has helped, but I need to learn better ways to focus and function, and find a way to better accept myself and the way I am.",
+        "Diagnoised with ADHD as an adult and never recieved help until know.",
+        "I am a 37-year-old woman who is interested in getting evaluated for ADHD.",
+        "I'm 38 years old, was diagnosed with ADHD about 3 years ago, and am fairly convinced that I'm also autistic. I've been meaning to set this up for weeks. I'm ready to take this unmasking journey out of my rabbit hole and finally do the work to finally figure out who I am.",
+        "Hello Elizabeth Wooten, I recently realized I've experienced a higher number of adhd symptoms than I thought. I've related heavily to those I know who have been medically diagnosed with adhd also. I was looking to see if I might have adhd, especially with the chance my parents could have missed it. I would also love for someone who is LGBTQIA+ allied, to help me with some of the more difficult parts I have recently struggled with in my life. Sincerely, Lillian",
+        "I'm a late-diagnosed autistic woman, and suspect that I also have ADHD, and I am trying to figure out who I am (what I want, what I like, etc.). I also want to talk through my distant relationship with my parents, as well as, learning how to navigate relationships while living in the current, fascist hellscape.",
+        "I was diagnosed with ADHD at 42 after severe burnout that led to two medical leaves. For years, I worked with doctors and tried various treatments to manage stress, anxiety, and depression\u2014seeing small but unsustainable progress. Looking back, I can now see that the burnout was decades in the making. Understanding my ADHD has helped me view my past decisions with more compassion. I'm raising two daughters, navigating a demanding career, and managing an emotionally immature partner\u2014all while trying to break old patterns and avoid losing myself again. I've realized how much of my life has been spent masking and reshaping myself to fit into environments that weren't right for me. Now, I feel isolated, overwhelmed, and unsure how to build a healthier, more authentic life while grieving what could have been. The ADHD insight was pivotal, but I know there are still deeper layers I need help unpacking so I can show up fully for my daughters\u2014and for myself."
+      ]
+    },
+    "8": {
+      "size": 6,
+      "percentage": 2.6785714285714284,
+      "representative_samples": [
+        {
+          "text": "Myself  I've been in and out of therapy since I was 8 (I am 35), I have been diagnosed with ADHD (6th grade) and bipolar (age 19), I just graduated from college, and my wife and I are starting IVF. I want to maintain my mental health through the coming journey and navigate/process the significant life changes that surround me. I struggle to find people and counselors who understand how I communicate.",
+          "distance": 0.3943474292755127
+        },
+        {
+          "text": "I've been in and out of therapy since I was 8 (I am 35), I have been diagnosed with ADHD (6th grade) and bipolar (age 19), I just graduated from college, and my wife and I are starting IVF. I want to maintain my mental health through the coming journey and navigate/process the significant life changes that surround me. I struggle to find people and counselors who understand how I communicate.",
+          "distance": 0.4039701223373413
+        },
+        {
+          "text": "I own a business and have been on a personal growth journey with the help of my mentor/coach. She coaches me in a few different areas of life and recommended for me to seek a therapist due to major mental scars that I am healing from.\n\n\nI come from a refugee family and things can be very toxic at home. I want to not just have someone to talk to, but to have a mental health professional in my corner to guide me as I heal from my trauma.\n\n\nThank you for reading this and I look forward to our call!",
+          "distance": 0.5185034871101379
+        },
+        {
+          "text": "My name is Shyanne Payton. I am 22 years old and seeking a therapist/counselor to help me or to guide me on taking better care of my mental health. I look forward to hearing from you.",
+          "distance": 0.5221333503723145
+        },
+        {
+          "text": "Hello, My name is Hannah Gallagher and I am seeking a counselor to better my self-care skills and better understand my social anxiety. I was wondering what your availability is and what the best way to reach you is.",
+          "distance": 0.6214627027511597
+        }
+      ],
+      "all_texts": [
+        "Myself  I've been in and out of therapy since I was 8 (I am 35), I have been diagnosed with ADHD (6th grade) and bipolar (age 19), I just graduated from college, and my wife and I are starting IVF. I want to maintain my mental health through the coming journey and navigate/process the significant life changes that surround me. I struggle to find people and counselors who understand how I communicate.",
+        "I've been in and out of therapy since I was 8 (I am 35), I have been diagnosed with ADHD (6th grade) and bipolar (age 19), I just graduated from college, and my wife and I are starting IVF. I want to maintain my mental health through the coming journey and navigate/process the significant life changes that surround me. I struggle to find people and counselors who understand how I communicate.",
+        "I own a business and have been on a personal growth journey with the help of my mentor/coach. She coaches me in a few different areas of life and recommended for me to seek a therapist due to major mental scars that I am healing from.\n\n\nI come from a refugee family and things can be very toxic at home. I want to not just have someone to talk to, but to have a mental health professional in my corner to guide me as I heal from my trauma.\n\n\nThank you for reading this and I look forward to our call!",
+        "My name is Shyanne Payton. I am 22 years old and seeking a therapist/counselor to help me or to guide me on taking better care of my mental health. I look forward to hearing from you.",
+        "Hello, My name is Hannah Gallagher and I am seeking a counselor to better my self-care skills and better understand my social anxiety. I was wondering what your availability is and what the best way to reach you is.",
+        "I have PTSD diagnosed and Bipolar symptoms but not the full fledged disorder."
+      ]
+    },
+    "4": {
+      "size": 12,
+      "percentage": 5.357142857142857,
+      "representative_samples": [
+        {
+          "text": "Hi there! I'm looking for a therapist for my 9 year old daughter who struggles with anxiety and has a new diagnosis of ADHD.",
+          "distance": 0.404933899641037
+        },
+        {
+          "text": "We are looking for a therapist for our 11 year old with adhd, family history of divorce, younger sibling, and a diverse family. We are looking for someone for her to talk to, work through emotions, give strategies for adhd, and help give insight and assistance as she starts middle school.",
+          "distance": 0.4978838562965393
+        },
+        {
+          "text": "Liz, Hello! My daughter and I are interested in your therapy services for her. She is 16 and has an ADHD diagnosis and is being evaluated tomorrow by her provider for autism. She has been experiencing some sensory overload. We are looking for a therapist that has experience with neurodivergence so she has someone to talk to about her experiences and help her better understand herself. We thought you might be a wonderful choice for her. We would like to set up an appointment with you if there\u2019s interest and availability. Feel free to text or call too, whatever is best for you!",
+          "distance": 0.515099823474884
+        },
+        {
+          "text": "Hi! My daughter Piper was recently diagnosed with ADHD and anxiety. Looking for a therapist to help navigate this stressful time for her, especially concerning school!",
+          "distance": 0.5304498076438904
+        },
+        {
+          "text": "I am reaching out on behalf of my 9 year old daughter, who has been diagnosed with ADHD and anxiety. She is truggling to utilize coping mechanisms during her daily meltdowns, with anger pointed toward family. These evnts do not occur outside of the home. She is currently working with a play therapist and psychiatrist; however, there is a barrier to progress that has caused me to seek additional resources.",
+          "distance": 0.5454580783843994
+        }
+      ],
+      "all_texts": [
+        "Hi there! I'm looking for a therapist for my 9 year old daughter who struggles with anxiety and has a new diagnosis of ADHD.",
+        "We are looking for a therapist for our 11 year old with adhd, family history of divorce, younger sibling, and a diverse family. We are looking for someone for her to talk to, work through emotions, give strategies for adhd, and help give insight and assistance as she starts middle school.",
+        "Liz, Hello! My daughter and I are interested in your therapy services for her. She is 16 and has an ADHD diagnosis and is being evaluated tomorrow by her provider for autism. She has been experiencing some sensory overload. We are looking for a therapist that has experience with neurodivergence so she has someone to talk to about her experiences and help her better understand herself. We thought you might be a wonderful choice for her. We would like to set up an appointment with you if there\u2019s interest and availability. Feel free to text or call too, whatever is best for you!",
+        "Hi! My daughter Piper was recently diagnosed with ADHD and anxiety. Looking for a therapist to help navigate this stressful time for her, especially concerning school!",
+        "I am reaching out on behalf of my 9 year old daughter, who has been diagnosed with ADHD and anxiety. She is truggling to utilize coping mechanisms during her daily meltdowns, with anger pointed toward family. These evnts do not occur outside of the home. She is currently working with a play therapist and psychiatrist; however, there is a barrier to progress that has caused me to seek additional resources.",
+        "Hello! I\u2019m just looking into some therapy for my ADHD high functioning autistic niece. Could you tell me where you\u2019re located and your pricing please.? Thank you very much!",
+        "I have a 8 year old who has a ADHD diagnosis, looking for supports to develop and strengthen skills to be successful.",
+        "Hello. I\u2019m hoping this might be a good fit. I have a 39 yr old daughter who is on disability for depression/anxiety and deals either adhd as well. Our relationship has been a bit rocky lately and we would like to work on that. Available almost anytime.",
+        "Hi. My daughter has been seeing Hallie Daily as a counselor. She recommended an ADHD coach for my daughter\u2026 and gave me your name. I\u2019m interested in setting up an appointment for her. Kristina Weintz, 17. Please either give me a call or email back. Thanks,",
+        "Jude is 8 years old going into 3rd grade at Hagemann Elementary. Last summer he was diagnosed with ADHD by his pediatrician and also by Child psychologist Dr. Feinberg along with ADHD and a generalized anxiety disorder. Over the last year he saw a psychologist every Saturday for Play Therapy until June when she switched practices. We are looking for a therapist to continue with Jude. We found that Jude thrives with structure and really enjoys the setting of therapy to express his emotions, work on social skills, improving his self esteem and anxiety coping skills.",
+        "Looking for eval of diagnosis and possible help with anxiety/depression of 14 yr old.",
+        "Hello, I wanted to check if you see children. I have a 6 year old daughter who is having a lot of trouble regulating emotions so much so that its causing problems at school. In Kindergarten and now in 1st grade. If you dont see children, would you have a recommendation? Also, she has no formal diagnoses. Best to reach me by email. I'm available anytime. Thank you!"
+      ]
+    },
+    "18": {
+      "size": 7,
+      "percentage": 3.125,
+      "representative_samples": [
+        {
+          "text": "I am looking for a new counselor for my son. He is 12 years old and in 6th grade. He has been in therapy for over 2 years and it has been a great help, and led us to get him a diagnosis of autism. He has a high verbal IQ and low processing speed. He also has a written expression disability that we recently added to his IEP. In the past this lead to a lot of frustration and behavioral problems in school. This has improved with learning to express his feelings. School has started recently and he is struggling a bit with the homework. We visited the children's autism center this week to start trying a medication for focus for his ADHD. It would be great to have a counselor in place too, especially someone with availability outside of school hours.",
+          "distance": 0.424411416053772
+        },
+        {
+          "text": "Hello, My name is Shannon Crabson and I would like some information regarding counseling for my son. He has been diagnosed with ADD (as a child and recently took a test as an adult) and other issues he is having, anxiety, OCD etc. I think he needs to talk with someone to determine what he needs to do.",
+          "distance": 0.49992236495018005
+        },
+        {
+          "text": "My son suffers from anxiety, ADHD and is needing counseling\nNearly 38, neurodivergent, diagnosed anxiety, depression, adhd. Feelihg hopeless lately, last therapist didn\u2019t feel helpful but I know I should try again",
+          "distance": 0.5106504559516907
+        },
+        {
+          "text": "I would like to get my 12 year old son into therapy. He is a gifted, undiagnosed potentially add/adhd?? spectrum? He recently expressed some major struggles he has been having with anxiety and depression, coping. We are a very open family but I also have some major concerns and want to get him some help with coping and talking before it gets worse. He is very hesitant to the idea of a therapist. I have told him that he can talk to me or a therapist and he has chosen me but I do want him to have someone other than myself. We have United Health care. I am curious about price.",
+          "distance": 0.5117412209510803
+        },
+        {
+          "text": "Hi I am looking for a counselor with experience with Asperger's syndrome for my son Kevin. He is 35 years old. He also is dx with bipolar disorder. He is struggling with depression. Looking for ongoing counseling.",
+          "distance": 0.5477184653282166
+        }
+      ],
+      "all_texts": [
+        "I am looking for a new counselor for my son. He is 12 years old and in 6th grade. He has been in therapy for over 2 years and it has been a great help, and led us to get him a diagnosis of autism. He has a high verbal IQ and low processing speed. He also has a written expression disability that we recently added to his IEP. In the past this lead to a lot of frustration and behavioral problems in school. This has improved with learning to express his feelings. School has started recently and he is struggling a bit with the homework. We visited the children's autism center this week to start trying a medication for focus for his ADHD. It would be great to have a counselor in place too, especially someone with availability outside of school hours.",
+        "Hello, My name is Shannon Crabson and I would like some information regarding counseling for my son. He has been diagnosed with ADD (as a child and recently took a test as an adult) and other issues he is having, anxiety, OCD etc. I think he needs to talk with someone to determine what he needs to do.",
+        "My son suffers from anxiety, ADHD and is needing counseling\nNearly 38, neurodivergent, diagnosed anxiety, depression, adhd. Feelihg hopeless lately, last therapist didn\u2019t feel helpful but I know I should try again",
+        "I would like to get my 12 year old son into therapy. He is a gifted, undiagnosed potentially add/adhd?? spectrum? He recently expressed some major struggles he has been having with anxiety and depression, coping. We are a very open family but I also have some major concerns and want to get him some help with coping and talking before it gets worse. He is very hesitant to the idea of a therapist. I have told him that he can talk to me or a therapist and he has chosen me but I do want him to have someone other than myself. We have United Health care. I am curious about price.",
+        "Hi I am looking for a counselor with experience with Asperger's syndrome for my son Kevin. He is 35 years old. He also is dx with bipolar disorder. He is struggling with depression. Looking for ongoing counseling.",
+        "Declan is our 9yo son that has struggled with high anxiety his whole childhood. We are in search of a new counselor for him to speak to. He has not been screened for ADHD or autism yet (testing will take place mid September) but he struggles with classic RSD symptoms.  He's highly rejection sensitive, consistently anxious with a high fear of failure, and constant negative self-talk, including self harm statements in the past. He has seen a counselor before but we have not found one that's a good fit. We are looking for someone who specializes and has experience in RSD children.",
+        "I am looking for someone for my son. He just started high school and his anxiety, ADHD (not sure if he has, he thinks he does) and Autism (diagnosed) is taking over and he is struggling. Looking for him to be evaluated and maybe some counseling. I have been looking for help with little response from others. Available most of the time, leave a message if I am unable to answer due Hi! I\u2019m a mom of a teenage daughter who is very bright but also struggles with a lot of emotional issues: sensory, self harm thoughts, fitting in, being heard and understood to name a few. She has not been diagnosed with Autism but I have a feeling that she has one of the spectrum as I see some traits. Your name was referred to me by her school counselors. She goes to Kirkwood Highschool. Before I make an appointment I wanted to know if you take new clients, outer insurance and how much are your sessions!?! We have Blue Cross Blue Shield. Thank you in advance! Best,to meetings."
+      ]
+    },
+    "43": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Im a mom of 4. Ive had a lot of life and trauma happen in the last 8 months. My youngest is 3 months. Im struggling with regulating myself, keep up with daily task, managing to stay calm when my kids are having big feelings, and also figuring out what i want to do with my life/ learning about who i am.",
+          "distance": 0.4774702489376068
+        },
+        {
+          "text": "Process trauma and figure out what's going on mentally. Homeschooling. Entire life big T trauma combined with little t constantly in fight. Someone who believes what i have going on in my life not just something I think i have from TikTok. (DID) \nNot a great support system - physical health impacted (seizures but told not real and to just stop",
+          "distance": 0.4774702489376068
+        }
+      ],
+      "all_texts": [
+        "Im a mom of 4. Ive had a lot of life and trauma happen in the last 8 months. My youngest is 3 months. Im struggling with regulating myself, keep up with daily task, managing to stay calm when my kids are having big feelings, and also figuring out what i want to do with my life/ learning about who i am.",
+        "Process trauma and figure out what's going on mentally. Homeschooling. Entire life big T trauma combined with little t constantly in fight. Someone who believes what i have going on in my life not just something I think i have from TikTok. (DID) \nNot a great support system - physical health impacted (seizures but told not real and to just stop"
+      ]
+    },
+    "10": {
+      "size": 5,
+      "percentage": 2.232142857142857,
+      "representative_samples": [
+        {
+          "text": "I\u2019m late diagnosed autistic, losing my vidion from retinitis pigmentosa, I have chronic illnesses to numerous to list. I am part of the LGBT+ community, but don\u2019t even have energy to experience that identity because everything else is too taxing. My entire personality was created around my religious trauma. So that\u2019s going to be a lot to work through.",
+          "distance": 0.4179765284061432
+        },
+        {
+          "text": "I\u2019m late diagnosed autistic, losing my vidion from retinitis pigmentosa, I have chronic illnesses to numerous to list. I am part of the LGBT+ community, but don\u2019t even have energy to experience that identity because everything else is too taxing. My entire personality was created around my religious trauma. So that\u2019s going to be a lot to work through.",
+          "distance": 0.4179765284061432
+        },
+        {
+          "text": "Hello! I am 22 and recently started my first adult job and moved in to my own apartment. I have autism, PTSD (mostly managed), anxiety, a history of depression and sexual assault (primary factor in PTSD), and I struggle a lot with codependency, particularly in my family but also in many of my close relationships. I am also queer and working on exploring that more currently. Feel free to contact me via phone or email! I look forward to hearing from you.",
+          "distance": 0.6156590580940247
+        },
+        {
+          "text": "Hey! My name is Jared (he/him) and I am a gay, AuDHD, Bipolar II and have childhood trauma. I came upon your profile on psychology today and you checked off everything. I also live in south city!",
+          "distance": 0.741534948348999
+        },
+        {
+          "text": "goals: autism informed daily skills and sensory regulation \nemotional processing without physical impacts \ntrauma work for religious trauma",
+          "distance": 0.7902225255966187
+        }
+      ],
+      "all_texts": [
+        "I\u2019m late diagnosed autistic, losing my vidion from retinitis pigmentosa, I have chronic illnesses to numerous to list. I am part of the LGBT+ community, but don\u2019t even have energy to experience that identity because everything else is too taxing. My entire personality was created around my religious trauma. So that\u2019s going to be a lot to work through.",
+        "I\u2019m late diagnosed autistic, losing my vidion from retinitis pigmentosa, I have chronic illnesses to numerous to list. I am part of the LGBT+ community, but don\u2019t even have energy to experience that identity because everything else is too taxing. My entire personality was created around my religious trauma. So that\u2019s going to be a lot to work through.",
+        "Hello! I am 22 and recently started my first adult job and moved in to my own apartment. I have autism, PTSD (mostly managed), anxiety, a history of depression and sexual assault (primary factor in PTSD), and I struggle a lot with codependency, particularly in my family but also in many of my close relationships. I am also queer and working on exploring that more currently. Feel free to contact me via phone or email! I look forward to hearing from you.",
+        "Hey! My name is Jared (he/him) and I am a gay, AuDHD, Bipolar II and have childhood trauma. I came upon your profile on psychology today and you checked off everything. I also live in south city!",
+        "goals: autism informed daily skills and sensory regulation \nemotional processing without physical impacts \ntrauma work for religious trauma"
+      ]
+    },
+    "45": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "30 dx in 6th grade military experience (not on disability yet) eval later this month has psych will start Vyvanse \nCurrent tx with talk therapy and cbt not effective with executive functioning. OK at emotional regulation and adhd symptoms. Landscaping by trade - supportive environment. Home life overwhelming (lives alone)",
+          "distance": 0.4771498739719391
+        },
+        {
+          "text": "ADHD 2021 thinking ASD makes more sense. 6 months ago burnout and identity collapse (wife also adhd eval). Wanting to reengage 4 yo son. Attorney. Trying to enforce. Private.",
+          "distance": 0.4771498739719391
+        }
+      ],
+      "all_texts": [
+        "30 dx in 6th grade military experience (not on disability yet) eval later this month has psych will start Vyvanse \nCurrent tx with talk therapy and cbt not effective with executive functioning. OK at emotional regulation and adhd symptoms. Landscaping by trade - supportive environment. Home life overwhelming (lives alone)",
+        "ADHD 2021 thinking ASD makes more sense. 6 months ago burnout and identity collapse (wife also adhd eval). Wanting to reengage 4 yo son. Attorney. Trying to enforce. Private."
+      ]
+    },
+    "23": {
+      "size": 15,
+      "percentage": 6.696428571428571,
+      "representative_samples": [
+        {
+          "text": "Hi Liz. I am looking for a therapist. I am a single mother, to an autistic child. I have been divorced a year and I\u2019m in a new relationship. I would like to work on issues relating to my new life. You may email, text or call for a consultation. Thanks",
+          "distance": 0.4183019995689392
+        },
+        {
+          "text": "Hello! I am in search of therapy as I am a college student transferring to Wash U and am seeking therapy for the next three years. I suffer from Autism Spectrum Disorder, Severe Anxiety and Depression as well as severe ADHD. I am looking for someone to help with stress and coping skills as well as problem solving. I just recently studied abroad and had to let go of my therapist instate from Massachusetts and now that I am heading to Missouri I am in urgent search of finding therapy.",
+          "distance": 0.5306637287139893
+        },
+        {
+          "text": "Hi there, I\u2019m looking for an autism specialist to complement my current therapist. I\u2019m high functioning (working, living on my own, self sufficient), however I was diagnosed late in my teens. Aside from a support group for people with lower support needs than what was helpful for me, I\u2019ve never gotten help specifically for my autism. I think it\u2019s at the root of a lot of other issues I have (depression, anxiety, etc.) and would like to address it now. If you do anything that helps with social skills and executive dysfunction, that is a huge plus. Thank you in advance, and I look forward to hearing from you!",
+          "distance": 0.5326446890830994
+        },
+        {
+          "text": "1. I am a 21-year-old female WashU senior with an Asian-American background. I was recently diagnosed with ADHD in December 2024 and have thought I also have Autism for a while (have not been tested for it yet). I have had therapists in the past couple of years for treating depression, cannabis substance use, and eating disorders (before I was diagnosed with ADHD). I am looking for a new therapist (my recent one moved states) who can help me navigate this recent diagnosis and improve my quality of life. I come from immigrant parents who speak little English and would like to tackle the cultural and language barrier that contributes to the trauma I have endured throughout my life. Emotional regulation is something I would like to work on. 2. I would like a consultation to see if we would be a good fit. 3. I am available by email (preference) and text. Weekday mornings from 9 am to 12 pm work best for me.",
+          "distance": 0.5491454005241394
+        },
+        {
+          "text": "Hi I\u2019m Dani. I\u2019m 35 identify as non binary (AMAB) and believe I\u2019m on the autism spectrum. I have an assessment scheduled for December. I\u2019m looking to try out a new therapist, the one I currently have is nice but they didn\u2019t seem to have a great depth of knowledge on Autism or able to offer a ton of resources. I\u2019m also still working through a lot of confusing feelings around gender and queerness. Let me know if you might be able to help.",
+          "distance": 0.5676324367523193
+        }
+      ],
+      "all_texts": [
+        "Hi Liz. I am looking for a therapist. I am a single mother, to an autistic child. I have been divorced a year and I\u2019m in a new relationship. I would like to work on issues relating to my new life. You may email, text or call for a consultation. Thanks",
+        "Hello! I am in search of therapy as I am a college student transferring to Wash U and am seeking therapy for the next three years. I suffer from Autism Spectrum Disorder, Severe Anxiety and Depression as well as severe ADHD. I am looking for someone to help with stress and coping skills as well as problem solving. I just recently studied abroad and had to let go of my therapist instate from Massachusetts and now that I am heading to Missouri I am in urgent search of finding therapy.",
+        "Hi there, I\u2019m looking for an autism specialist to complement my current therapist. I\u2019m high functioning (working, living on my own, self sufficient), however I was diagnosed late in my teens. Aside from a support group for people with lower support needs than what was helpful for me, I\u2019ve never gotten help specifically for my autism. I think it\u2019s at the root of a lot of other issues I have (depression, anxiety, etc.) and would like to address it now. If you do anything that helps with social skills and executive dysfunction, that is a huge plus. Thank you in advance, and I look forward to hearing from you!",
+        "1. I am a 21-year-old female WashU senior with an Asian-American background. I was recently diagnosed with ADHD in December 2024 and have thought I also have Autism for a while (have not been tested for it yet). I have had therapists in the past couple of years for treating depression, cannabis substance use, and eating disorders (before I was diagnosed with ADHD). I am looking for a new therapist (my recent one moved states) who can help me navigate this recent diagnosis and improve my quality of life. I come from immigrant parents who speak little English and would like to tackle the cultural and language barrier that contributes to the trauma I have endured throughout my life. Emotional regulation is something I would like to work on. 2. I would like a consultation to see if we would be a good fit. 3. I am available by email (preference) and text. Weekday mornings from 9 am to 12 pm work best for me.",
+        "Hi I\u2019m Dani. I\u2019m 35 identify as non binary (AMAB) and believe I\u2019m on the autism spectrum. I have an assessment scheduled for December. I\u2019m looking to try out a new therapist, the one I currently have is nice but they didn\u2019t seem to have a great depth of knowledge on Autism or able to offer a ton of resources. I\u2019m also still working through a lot of confusing feelings around gender and queerness. Let me know if you might be able to help.",
+        "My wife and I are interested in doing couples therapy with a therapist who specializes in helping the neurodiverse. I have OCD and potentially have autism, and she is neurotypical but navigating a chronic illness. We want to work on our communication skills as a couple and already see therapists individually. We are also part of the LGBTQ community and are looking for someone who can be supportive of that. Please let me know if you have any availability to do an initial consult. Phone/text is the best way to reach me, but email is fine too.",
+        "Hi, I am interested in starting therapy back up for the first time in a while and work on myself. I've been struggling with depression and anxiety, and I'm interested in eventually getting tested for autism. Thank you!",
+        "Hi there, I was just referred to therapy (although I\u2019ve been in therapy in the past) by my primary care doctor for depression. We discussed FMLA as an option for me considering my circumstances. I also have diagnosed autism and ADHD and was given your name by Stephanie Bono who assessed me in the spring. My main concern right now though is serious burnout and depression and was hoping to discuss this, FMLA and any ongoing support that would be needed. Looking forward to talking and seeing if you have any availability in November! Thank you so much for any support.",
+        "Hi I am looking for a new therapist. I am hoping to process and cope with being chronically ill and process medical trauma. as well as process past trauma. Are you currently accepting new clients? Thanks for your time and energy Spencer (he/him)",
+        "Hello! I had a therapist when I was away at school and now need one I can meet with in-person. In November I was informally (by my therapist) diagnosed with autism so I have been navigating that with varying levels of difficulty. I\u2019m also about to get married, move, and start my first year of teaching. And ya girl isn\u2019t great at coping with change! I\u2019ve also just got a ton of discovery and understanding to do after being misdiagnosed with an anxiety disorder in high school and having my whole life based around that misdiagnosis.",
+        "Hello, I'm looking to find a therapist to help me work on managing my executive dysfunction symptoms and getting support in general. I am looking for a virtual option, preferably as I\u2019m having a lot of health issues currently. Please contact me by phone to discuss working together. Please leave me a voicemail if I don\u2019t answer immediately. Thank you!",
+        "I've been on a bit of a journey and am trying to understand myself better. I've been researching autism after something clicked while researching and the online tests have indicated it's a possibility I'm on the spectrum. I worry about whether I'll be believed. But what I want is to understand why I struggle with areas of life and if I can improve them. I'd like to find someone I could talk to about my struggles. I've left a voicemail previously for your office but chickened out calling back. Thought I'd try email. Reach me text, call or email.",
+        "Hi, I am looking for a Counselor to help me with challenges of parenting a 4 and 1 year old, helping me deal with binge eating and stress management. I struggle with overstimulation and finding calm coping mechanisms. Are you accepting new patients?",
+        "Hi Elizabeth. I currently am in therapy, but am looking for someone that can help specifically with more things related to EF (making lists, managing day-to-day, accepting support, phone calls, etc). Is this something you offer?",
+        "Middle school teacher in south city, old therapist in Wentzville, family trauma (mom in AZ),"
+      ]
+    },
+    "37": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Organization, timeliness, assignment motivation, 2 dance teams (learning lab @ school) overwhelmed with where to start. Junior this year.",
+          "distance": 3.029788331332384e-08
+        }
+      ],
+      "all_texts": [
+        "Organization, timeliness, assignment motivation, 2 dance teams (learning lab @ school) overwhelmed with where to start. Junior this year."
+      ]
+    },
+    "31": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "I don't want to seem like a nut, but I did also send an inquiry on Psychology Today!",
+          "distance": 2.5281769566731782e-08
+        }
+      ],
+      "all_texts": [
+        "I don't want to seem like a nut, but I did also send an inquiry on Psychology Today!"
+      ]
+    },
+    "36": {
+      "size": 4,
+      "percentage": 1.7857142857142856,
+      "representative_samples": [
+        {
+          "text": "She has gotten a diagnosis of fear of faliure anxiety and it is really jacking up her stomach as well so we are looking for some therapy! She is gifted and just dealing with a lot of attention issues due to 'thinking of what is next'.",
+          "distance": 0.5346128344535828
+        },
+        {
+          "text": "little characteristics that have popped through or are getting worse. a lot of sensory issues - younger just noise, the older she gets the more it becomes feeling things, (pants, shirts, wet hair). Emotion regulation. Ped: anxiety and headaches. Parents in separate households, not as many difficulties noted at dads or school. Overwhelmed needs to punch herself or needs a tight hug",
+          "distance": 0.6899271011352539
+        },
+        {
+          "text": "Hi there! I\u2019m interested in my daughter chatting with you; she\u2019s excellent at masking, but I\u2019m tuned in to know something is up. I spoke with two of her teachers and they\u2019ve encouraged me to seek addt\u2019l, out of the school, counseling, due to what we believe to be an anxiety. Let\u2019s chat soon!",
+          "distance": 0.6908270716667175
+        },
+        {
+          "text": "Mercer is a 17 year old boy who is struggling with anxiety and depression that is manifesting as intense stomach pain and nausea which is preventing him from attending school. His dr is treating him with Lexapro for anxiety and we are wanting him to start therapy.",
+          "distance": 0.7041575312614441
+        }
+      ],
+      "all_texts": [
+        "She has gotten a diagnosis of fear of faliure anxiety and it is really jacking up her stomach as well so we are looking for some therapy! She is gifted and just dealing with a lot of attention issues due to 'thinking of what is next'.",
+        "little characteristics that have popped through or are getting worse. a lot of sensory issues - younger just noise, the older she gets the more it becomes feeling things, (pants, shirts, wet hair). Emotion regulation. Ped: anxiety and headaches. Parents in separate households, not as many difficulties noted at dads or school. Overwhelmed needs to punch herself or needs a tight hug",
+        "Hi there! I\u2019m interested in my daughter chatting with you; she\u2019s excellent at masking, but I\u2019m tuned in to know something is up. I spoke with two of her teachers and they\u2019ve encouraged me to seek addt\u2019l, out of the school, counseling, due to what we believe to be an anxiety. Let\u2019s chat soon!",
+        "Mercer is a 17 year old boy who is struggling with anxiety and depression that is manifesting as intense stomach pain and nausea which is preventing him from attending school. His dr is treating him with Lexapro for anxiety and we are wanting him to start therapy."
+      ]
+    },
+    "20": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Dylan is a very emotional child. He is so intelligent and kind, but he has a hard time dealing with anger and stress. He also has been having night terrors and does have separation anxiety.",
+          "distance": 0.468872994184494
+        },
+        {
+          "text": "We received a rec from Dylan\u2019s PCP. He has been having night terrors and has some separation anxiety. He\u2019s a very emotional kid but so smart. Would love to see if you can help.",
+          "distance": 0.468872994184494
+        }
+      ],
+      "all_texts": [
+        "Dylan is a very emotional child. He is so intelligent and kind, but he has a hard time dealing with anger and stress. He also has been having night terrors and does have separation anxiety.",
+        "We received a rec from Dylan\u2019s PCP. He has been having night terrors and has some separation anxiety. He\u2019s a very emotional kid but so smart. Would love to see if you can help."
+      ]
+    },
+    "47": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Sincerely Sorry, I missed your call.\nMy background:\nRSD: Fear of rejection which impedes me from making new friendships and keeping old friends.,\nPour time Management: Rushed last minute efforts which cause anxiety to procrastination to avoidance then forgotten.,\n-Forgetfulness: disrupts routine, and daily obligations\n-Emotion Regulation: Intense emotional response with guilt, shame, feeling of rejection and inadequacy. Defensive with above emotions and will not stop pleading my case until others agree or I go too far and  the other is irate. \n-Procrastination: Fear of failure; hesitant to start something new because it\u2019s new or not i\u2019m comfortable with it or I dont think I will be perfect at it. \n-Realationship issues (Most important goal to achieve):\nAll issues mentioned are a big driver in my failing marriage. Defensiveness, shutting down, forgefulness, following through with commitments, unmet expectations, unable to regulate emotions and have relationship conversations. procratination with life and future goals, and getting the help I need to be a better Husband.",
+          "distance": 1.9596972933300094e-08
+        }
+      ],
+      "all_texts": [
+        "Sincerely Sorry, I missed your call.\nMy background:\nRSD: Fear of rejection which impedes me from making new friendships and keeping old friends.,\nPour time Management: Rushed last minute efforts which cause anxiety to procrastination to avoidance then forgotten.,\n-Forgetfulness: disrupts routine, and daily obligations\n-Emotion Regulation: Intense emotional response with guilt, shame, feeling of rejection and inadequacy. Defensive with above emotions and will not stop pleading my case until others agree or I go too far and  the other is irate. \n-Procrastination: Fear of failure; hesitant to start something new because it\u2019s new or not i\u2019m comfortable with it or I dont think I will be perfect at it. \n-Realationship issues (Most important goal to achieve):\nAll issues mentioned are a big driver in my failing marriage. Defensiveness, shutting down, forgefulness, following through with commitments, unmet expectations, unable to regulate emotions and have relationship conversations. procratination with life and future goals, and getting the help I need to be a better Husband."
+      ]
+    },
+    "2": {
+      "size": 24,
+      "percentage": 10.714285714285714,
+      "representative_samples": [
+        {
+          "text": "Hi Liz, I've worked with individual therapists but am at a point where I'm looking to meet with someone who specializes in ADHD. I was diagnosed as a teen and now in adult life am noticing it's affecting me more than in the past. Are you currently accepting new clients? If it sounds like I might be a good fit I'd love to just get started. Email initially is best for me.",
+          "distance": 0.4089488685131073
+        },
+        {
+          "text": "Hi, I'm a psyd student at internship and am really struggling with my own adhd. I'm looking for a therapist that can help me do manage my adhd",
+          "distance": 0.4807080328464508
+        },
+        {
+          "text": "I have been diagnosed with ADHD since I was a kid but I think I may fit better with a spectrum diagnosis and need a counselor/therapist/psychologist who accepts my insurance and is available every other Friday when I am off, or Thursday late in the afternoon, like 4:30-5:00. I have a lot of trauma but have unpacked a lot of that with previous providers and am interested in in-person meetings to deal with the ramp-up of my executive functioning issues, interpersonal difficulties, dysphoria attacks, and sensory frustrations.",
+          "distance": 0.490919828414917
+        },
+        {
+          "text": "Hi, Elizabeth! I am looking for a new therapist. It's been a little while since I was in therapy and I really feel like I need to go back. I have ADHD which impacts my day-to-day life and I also struggle with anxiety and depression. I just need to talk a lot of that out. My work schedule varies: Monday 10:30 - 6:30 Tuesday 10:15 - 6:30 Wednesday 8:30 - 4:30 Thursday 8:30 - 6:30 Friday 10:00 - 5:30 (every few weeks I go in earlier) I am best reached via email or text. Thank you!",
+          "distance": 0.5106252431869507
+        },
+        {
+          "text": "ello, my name is Frank and I am looking for a therapist. I am not familiar with the process of finding one and I am not sure what exactly I may need. I don't have any professional diagnosis but I believe I may have depression/anxiety and have been told I seem like I have ADHD.",
+          "distance": 0.5331083536148071
+        }
+      ],
+      "all_texts": [
+        "Hi Liz, I've worked with individual therapists but am at a point where I'm looking to meet with someone who specializes in ADHD. I was diagnosed as a teen and now in adult life am noticing it's affecting me more than in the past. Are you currently accepting new clients? If it sounds like I might be a good fit I'd love to just get started. Email initially is best for me.",
+        "Hi, I'm a psyd student at internship and am really struggling with my own adhd. I'm looking for a therapist that can help me do manage my adhd",
+        "I have been diagnosed with ADHD since I was a kid but I think I may fit better with a spectrum diagnosis and need a counselor/therapist/psychologist who accepts my insurance and is available every other Friday when I am off, or Thursday late in the afternoon, like 4:30-5:00. I have a lot of trauma but have unpacked a lot of that with previous providers and am interested in in-person meetings to deal with the ramp-up of my executive functioning issues, interpersonal difficulties, dysphoria attacks, and sensory frustrations.",
+        "Hi, Elizabeth! I am looking for a new therapist. It's been a little while since I was in therapy and I really feel like I need to go back. I have ADHD which impacts my day-to-day life and I also struggle with anxiety and depression. I just need to talk a lot of that out. My work schedule varies: Monday 10:30 - 6:30 Tuesday 10:15 - 6:30 Wednesday 8:30 - 4:30 Thursday 8:30 - 6:30 Friday 10:00 - 5:30 (every few weeks I go in earlier) I am best reached via email or text. Thank you!",
+        "ello, my name is Frank and I am looking for a therapist. I am not familiar with the process of finding one and I am not sure what exactly I may need. I don't have any professional diagnosis but I believe I may have depression/anxiety and have been told I seem like I have ADHD.",
+        "I have adhd and anxiety , depression and im struggling to find a therapist that would be a good fit. I am a mom of two neurodivergent kids as well",
+        "Hi, my name is Roxanne Clemens. I am a 70 year old female newly diagnosed Aspberger and ADHD. I have Medicare and Camp Leguene Family Member Claims (V.A. 100% coverage). I am in need of a therapist and would appreciate a consultation. Thank you for considering me. Contact me via phone, text or email.",
+        "Hello, My name is Ben Gall. I am looking for help with a variety of things including management of my general anxiety disorder, career problems including an inability to focus and overall apathy towards work. I don't know if I have ADHD, I have never been diagnosed. My wife is currently a client of yours, so if you are unable to see me for professional and ethical reasons, Id greatly appreciate suggestions for other counselors who share your approach and attitude.",
+        "Hello, My name is Jacob and I am a senior college student dealing with what I believe to be ADHD symptoms. I have dealt with anxiety and depression and have sought therapy at various times in my life. I have struggled to find something that sticks while in college and have recently struggled with lack of motivation and constant shifts in thought processes, especially during the job hunt and schoolwork. I am writing this message to hopefully set up a consultation. I am most easily available by email, but I would be open to a call as well (available mostly on weekdays in the early afternoon). Thank you!",
+        "Hi! I am Matt, I was diagnosed with ADHD in 2021. I recently moved back to STL but I don't feel that I have a good support system yet, and my job has been overwhelming. I am looking for ADHD counseling to help me adjust. Probably best to text me at the number above.",
+        "Good evening, I am looking for a therapist who is experienced with late diagnosed neurodivergent adults. I am a 26 year old queer non-binary person who was diagnosed with ADHD but also self-diagnosed with Autism and looking for someone to help me understand, navigate, and help to advocate for my life.",
+        "My name is Gregory. I am looking for a new counselor. Mainly in person. I have just been diagnosed with ADHD last week. This gives me a lot of answers but leaves a lot of questions. Just started counseling less than 3 months ago. Had to change because of insurance this year. Now my counselor is moving. I need someone taking clients in person mainly, that can help me long term. Let me know how to move forward. Thanks Gregory",
+        "I'm looking for support with some challenges and would love to see if you're available for a consultation. I have inattentive ADHD and autism, and daily life feels overwhelming, especially balancing work and home. I\u2019m also distancing myself from a high control group, though my devout parents (whom I live with) don\u2019t know. This has been emotionally complex, and I\u2019d appreciate guidance. Are you accepting new clients? Do you feel you could help? You can reach me best via text or email.",
+        "Hello. I am looking for a new therapist in the STL area for ADHD, Depression, and Anxiety.",
+        "Hi! My name is Kayell and I work for Wellthy, a nationwide care coordination company. I am assisting a 35 year old find a female therapist for anxiety, depression, and ADHD. I would like to provide your information to our client if you can help by answering a few questions. Please feel free to respond to the questions and reply back at your earliest convenience. 1. Are you accepting new patients? 2. Do you accept United Healthcare Choice Plus (it is a PPO plan through an employer)? If not, what are the out of pocket fees? 3. Do you offer in-person appointments? He is located in St. Louis, MO 4. Do you specialize in anxiety, depression, and ADHD? 5. How quickly would a new patient appointment be available? 6. What is the process to get started, is a referral required? Thank you and I look forward to hearing from you soon! Best, Kayell",
+        "Hi, I am wanting to start therapy because I was diagnosed with ADD/ADHD 4 years ago and have not been to therapy for it yet. I saw your profile and felt that we would connect well. I have insurance - BCBS of kansas city. I am a middle school theater teacher, so I would prefer to do online sessions after school or on the weekends if you are avaliable then. Hope to hear from you soon!",
+        "Hi there! My name is Marlena Milshteyn. I\u2019m 22 years old, and I was reaching out to inquire about a new patient consultation. I have ADHD and Autism (late diagnosis club at 19 years old), as well as CPTSD. I was looking through your page and I feel like you are very much the type of practitioner I have been wanting to work with. I\u2019ve been in therapy since I was a child and have had a complicated relationship with therapy over the past few years, but I really appreciate how you described your therapeutic approach. Also, the squishmallows and office vibes were both MASSIVE pluses, haha! Being highly therapized, I feel like I am a little *too* self aware, and need more help with managing daily functioning, working on strengthening my frustration threshold/managing big emotions, and improving on some internal insecurities that are present from past traumas and unmasking my autism and adhd. If you\u2019re available, I would love to set up a consultation to see if we are a good fit! You can reach me by email or",
+        "My name is Anita. I am a college student at Washington university in st Louis. I am looking for help for adhd and depression. I have Tricare insurance. Best way to reach me is text. Do you have any availability?",
+        "Hi Liz, My name is Ray Robson, I'm a 30 year old male. Recently late diagnosed with ASD (most likely Asperger's under old criteria), with some ADHD traits. I've never been to therapy before, so I'm not sure how the start of the process works. I'm happy to do an initial consult if that's the normal procedure, but I wouldn't mind jumping straight in either. I will notice texts fastest but email should also be reliable to reach me. I have had some interpersonal relationship events that I'd like to discuss with a therapist, and I'd also like help strategizing ways to increase my productiveness in completing mundane tasks and sustaining overall motivation levels. I am pretty free most days, but usually wake up very late.",
+        "Hi, I have Autism & ADHD and looking for a therapist. Do you accept Missouri Medicaid?",
+        "Hello Liz, My name is Jessica Shultz, adult. I was diagnosed as an adult by my psychiatrist with autism and adhd. (audadhd). Would it be possible to have a free consult with ya to see if you think if I would be a good fit to be your counseling client. Thanks,",
+        "Hello, I am 20 and recently diagnosed with ASD. I grew up with ADHD. I also suffer from anxiety and depression and I am looking for a therapist, The last few years I have learned alot about myself and realize that I am not living my best life and seems as if I am just watching my life pass me by. I was wondering if you were accepting new patience?",
+        "Hello! I\u2019d love to schedule a 15 minute consult if you are taking on new clients. I have adult diagnosed ADHD as well as CPTSD, anxiety and depression. Thank you, Alli",
+        "Moved to STL about a year ago, want to change therapist, specialty in areas I struggle with and different style \nLearning to work with neurodivergence \nADHD since childhood recent ASD dx \nStopped meds for ADHD first time being unmedicated \nMemory\nFinding connections \nSchool\nExploring identity \nMSW student \n\n\nUHC WashU\nDeciding between DBT and me (edited)"
+      ]
+    },
+    "42": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Im coming to therapy after years of coping with my suspected AuDHD through unhealthy means. Namely, I\u2019ve found myself taking on massive mutual aid / organizing projects as a means of asserting some sort of control over a world that feels increasingly beyond my control. Recently, I got some feedback from a Black man I was friends with and had been organizing with about some racist harm I\u2019d caused him (making promises I couldn\u2019t keep, stealing from him, talking about him negatively behind his back, and playing a victim). As I received this feedback, I realized that I was having some pretty extreme neurocognitive issues around routine rigidity, impulsivity, not remembering things, and using him to emotionally regulate without consent. Looking back on my life, I\u2019ve realized this isn\u2019t the first time I\u2019ve done something like this, and through conversations with my closest friends (almost all of whom are AuDHD), I\u2019ve decided I\u2019d like to explore that diagnosis / how my own neurodivergent brain works. I want to do this work both to improve my neurocognition and take accountability for the harm I caused. \nI have some questions for you I'd like to write down so we're looking at the same thing :)  (1) I'm curious to hear about what if any experience you have working with folks with chronic health conditions and people still taking COVID precautions. (2) Do you have experience working with mutual aid organizers or an understanding of mutual aid? (3) I'd also like to know what if any experience you have with accountability processes. More specifically, how have you worked with clients when their own unhealthy coping strategies cause harm to others to take accountability for the harm they caused?",
+          "distance": 1.7285378461906475e-08
+        }
+      ],
+      "all_texts": [
+        "Im coming to therapy after years of coping with my suspected AuDHD through unhealthy means. Namely, I\u2019ve found myself taking on massive mutual aid / organizing projects as a means of asserting some sort of control over a world that feels increasingly beyond my control. Recently, I got some feedback from a Black man I was friends with and had been organizing with about some racist harm I\u2019d caused him (making promises I couldn\u2019t keep, stealing from him, talking about him negatively behind his back, and playing a victim). As I received this feedback, I realized that I was having some pretty extreme neurocognitive issues around routine rigidity, impulsivity, not remembering things, and using him to emotionally regulate without consent. Looking back on my life, I\u2019ve realized this isn\u2019t the first time I\u2019ve done something like this, and through conversations with my closest friends (almost all of whom are AuDHD), I\u2019ve decided I\u2019d like to explore that diagnosis / how my own neurodivergent brain works. I want to do this work both to improve my neurocognition and take accountability for the harm I caused. \nI have some questions for you I'd like to write down so we're looking at the same thing :)  (1) I'm curious to hear about what if any experience you have working with folks with chronic health conditions and people still taking COVID precautions. (2) Do you have experience working with mutual aid organizers or an understanding of mutual aid? (3) I'd also like to know what if any experience you have with accountability processes. More specifically, how have you worked with clients when their own unhealthy coping strategies cause harm to others to take accountability for the harm they caused?"
+      ]
+    },
+    "35": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Ian is Autistic and has ADHD and is 11 years old.  He's been having issues expressing himself in a positive manner.  He's very harmful in his words to his parents, brother, and self.",
+          "distance": 2.3581575803177657e-08
+        }
+      ],
+      "all_texts": [
+        "Ian is Autistic and has ADHD and is 11 years old.  He's been having issues expressing himself in a positive manner.  He's very harmful in his words to his parents, brother, and self."
+      ]
+    },
+    "19": {
+      "size": 3,
+      "percentage": 1.3392857142857142,
+      "representative_samples": [
+        {
+          "text": "We need help with executive function issues. Her counselor suggested someone like you who specializes in ADHD issues.",
+          "distance": 0.3649658262729645
+        },
+        {
+          "text": "Shes been in counseling for a couple years with Hallie Daily.  She suggested you would be a good fit to work on executive function issues.  All the issues we have seem to stem from her ADHD.",
+          "distance": 0.45517706871032715
+        },
+        {
+          "text": "Returning client with ADHD. Now and middle school needs specific help with executive functioning. Would prefer a collaborative approach where I can be in a good chunk of the sessions.",
+          "distance": 0.5430883169174194
+        }
+      ],
+      "all_texts": [
+        "We need help with executive function issues. Her counselor suggested someone like you who specializes in ADHD issues.",
+        "Shes been in counseling for a couple years with Hallie Daily.  She suggested you would be a good fit to work on executive function issues.  All the issues we have seem to stem from her ADHD.",
+        "Returning client with ADHD. Now and middle school needs specific help with executive functioning. Would prefer a collaborative approach where I can be in a good chunk of the sessions."
+      ]
+    },
+    "38": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Amelia is amazingly creative and incredibly deep thinking. She has big feelings, recently diagnosed with autism\u2026 mostly due to trouble understanding social norms and nuanced conversations. She definitely loves connecting with others but also gets sensory overload easily.",
+          "distance": 0.3461587429046631
+        },
+        {
+          "text": "Hello, I have An 11 yr old daughter. They just started middle school and last spring was diagnosed with autism. It isn\u2019t super obvious when you meet Amelia, it mostly shows up in how literal they are and how they miss some nuance when speaking with others. They also have ADHD and some anxiety and depression. Amelia has been seeing a therapist for a little over two years but doesn\u2019t quite feel connected to them, the therapist is more grandmotherly and I think Amelia wants someone a bit younger to connect with. Are you seeing new patients?",
+          "distance": 0.3461587429046631
+        }
+      ],
+      "all_texts": [
+        "Amelia is amazingly creative and incredibly deep thinking. She has big feelings, recently diagnosed with autism\u2026 mostly due to trouble understanding social norms and nuanced conversations. She definitely loves connecting with others but also gets sensory overload easily.",
+        "Hello, I have An 11 yr old daughter. They just started middle school and last spring was diagnosed with autism. It isn\u2019t super obvious when you meet Amelia, it mostly shows up in how literal they are and how they miss some nuance when speaking with others. They also have ADHD and some anxiety and depression. Amelia has been seeing a therapist for a little over two years but doesn\u2019t quite feel connected to them, the therapist is more grandmotherly and I think Amelia wants someone a bit younger to connect with. Are you seeing new patients?"
+      ]
+    },
+    "28": {
+      "size": 8,
+      "percentage": 3.571428571428571,
+      "representative_samples": [
+        {
+          "text": "Hello! I am a 26 yr old female with UHC insurance. I have a very flexible schedule and would prefer to be contacted via email. I am a counseling masters student, and over the past year or two have been considering the possibility of an Autism/ADHD diagnosis. I don\u2019t fully resonate with the diagnoses individually, but I have resonated with the new discourse around AuDHD and the sort of internal conflict it causes that looks different than the individual diagnoses. I am interested in discussing the pros and cons of pursuing a diagnosis, and also my main concern which is executive dysfunction.",
+          "distance": 0.4110186994075775
+        },
+        {
+          "text": "Hello! I am a 26 yr old female with UHC insurance. I have a very flexible schedule and would prefer to be contacted via email. I am a counseling masters student, and over the past year or two have been considering the possibility of an Autism/ADHD diagnosis. I don\u2019t fully resonate with the diagnoses individually, but I have resonated with the new discourse around AuDHD and the sort of internal conflict it causes that looks different than the individual diagnoses. I am interested in discussing the pros and cons of pursuing a diagnosis, and also my main concern which is executive dysfunction.",
+          "distance": 0.4110186994075775
+        },
+        {
+          "text": "Dear Dr. Wooten, I hope this message finds you well. I am reaching out because I am interested in pursuing an assessment for ADHD and autism. Over time, I have noticed several patterns in my behavior and thinking that align with these conditions, and I believe a formal evaluation could help me better understand and manage these aspects of my life. I would appreciate any advice you can provide regarding next steps or what the diagnostic process entails. If you are available, I would also like to inquire about scheduling an initial consultation to discuss my concerns in more detail. Thank you for your time, and I look forward to hearing from you. Best regards, Lawrence Thomas McDonald III",
+          "distance": 0.4955095052719116
+        },
+        {
+          "text": "Hello My name is Ash and I am a 24 year old F2M Transman who just moved out of what was believed to be an mental and emotional abusive house hold. I have recently noticed the possibility that I might have ADHD an be on the Autism spectrum so I would like professional help in deciding if this is true or not. In addition, I have been experiencing a lot of emotional lows due to my anxiety and depression and wish to develop coping habits to help me though them. I thank you for you time.",
+          "distance": 0.5539592504501343
+        },
+        {
+          "text": "Hi, I\u2019m the mom of a 7 year-old with autism and recently recognizing my own autism and adhd traits. I would like adhd testing for my son and family or individual counseling. We are a loving family but struggling with communication and emotional outbursts. We have insurance through United Healthcare. Email is the best to reach me but phone and text is ok too. Please let me know what the next steps are. Thank you!|",
+          "distance": 0.5589686632156372
+        }
+      ],
+      "all_texts": [
+        "Hello! I am a 26 yr old female with UHC insurance. I have a very flexible schedule and would prefer to be contacted via email. I am a counseling masters student, and over the past year or two have been considering the possibility of an Autism/ADHD diagnosis. I don\u2019t fully resonate with the diagnoses individually, but I have resonated with the new discourse around AuDHD and the sort of internal conflict it causes that looks different than the individual diagnoses. I am interested in discussing the pros and cons of pursuing a diagnosis, and also my main concern which is executive dysfunction.",
+        "Hello! I am a 26 yr old female with UHC insurance. I have a very flexible schedule and would prefer to be contacted via email. I am a counseling masters student, and over the past year or two have been considering the possibility of an Autism/ADHD diagnosis. I don\u2019t fully resonate with the diagnoses individually, but I have resonated with the new discourse around AuDHD and the sort of internal conflict it causes that looks different than the individual diagnoses. I am interested in discussing the pros and cons of pursuing a diagnosis, and also my main concern which is executive dysfunction.",
+        "Dear Dr. Wooten, I hope this message finds you well. I am reaching out because I am interested in pursuing an assessment for ADHD and autism. Over time, I have noticed several patterns in my behavior and thinking that align with these conditions, and I believe a formal evaluation could help me better understand and manage these aspects of my life. I would appreciate any advice you can provide regarding next steps or what the diagnostic process entails. If you are available, I would also like to inquire about scheduling an initial consultation to discuss my concerns in more detail. Thank you for your time, and I look forward to hearing from you. Best regards, Lawrence Thomas McDonald III",
+        "Hello My name is Ash and I am a 24 year old F2M Transman who just moved out of what was believed to be an mental and emotional abusive house hold. I have recently noticed the possibility that I might have ADHD an be on the Autism spectrum so I would like professional help in deciding if this is true or not. In addition, I have been experiencing a lot of emotional lows due to my anxiety and depression and wish to develop coping habits to help me though them. I thank you for you time.",
+        "Hi, I\u2019m the mom of a 7 year-old with autism and recently recognizing my own autism and adhd traits. I would like adhd testing for my son and family or individual counseling. We are a loving family but struggling with communication and emotional outbursts. We have insurance through United Healthcare. Email is the best to reach me but phone and text is ok too. Please let me know what the next steps are. Thank you!|",
+        "48 years old, recently diagnosed with inattentive adhd but suspect that i also have autism. Support needs increasing as I age and am looking for official diagnosis to help me access local disability services.",
+        "i think i have autism. i am currently diagnosed with mdd/ocd and cptsd and im curious ab if i have autism. i relate to all the symptoms and it would explain a lot. was wondering if we can talk.",
+        "Hello, I'm an adult with a recent ASD diagnosis. Looking to improve on lifelong cycles of stress and burnout. My insurance is pretty good through UHC. Thanks."
+      ]
+    },
+    "14": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "I will be with Sparkle at this time during the phone call :)",
+          "distance": 3.349766330984494e-08
+        }
+      ],
+      "all_texts": [
+        "I will be with Sparkle at this time during the phone call :)"
+      ]
+    },
+    "16": {
+      "size": 21,
+      "percentage": 9.375,
+      "representative_samples": [
+        {
+          "text": "Hello, My name is Alison, I have tried therapy a few times in the past - but haven\u2019t found the one yet. I am interested in an initial consultation. I am easiest to reach by text. Thank you!",
+          "distance": 0.4285390377044678
+        },
+        {
+          "text": "Hi Liz, I'm interested in therapy and would like a consultation",
+          "distance": 0.5245159268379211
+        },
+        {
+          "text": "Hello, I\u2019m interested in scheduling a consultation call for therapy with you",
+          "distance": 0.5542885661125183
+        },
+        {
+          "text": "Hi there! I'm seeking to return to therapy as my anxiety has progressed over the past 6 months after some detrimental work experiences. I've been struggling with some major imposter's syndrome and generalized anxiety towards my relationships, and it's something I'm beginning to realize I need help with. I also have raging ADHD and feel like that's been roadblocking my life, and I've never had the tools to combat it. I work a general 9-5 job, so online options would be preferable - especially ones in the evening or weekend. I'd love to chat about an initial consultation, and feel free to email me if we could do that! Thanks so much :)",
+          "distance": 0.5609729290008545
+        },
+        {
+          "text": "Hey there, My name is Freya, I recently moved across the river to St. Louis and am looking to get back into therapy. I\u2019ve had many life changes recently and find my anxiety getting the best of me, and want to get back to a place of enjoy life again, progressing and bettering myself, not just surviving each day. I\u2019m seeking rather intense therapy that challenges me to get outside of myself and comfort zone. I have United Health insurance and believe you\u2019re in my network, but would like to check in on that, and get your rates as well. I\u2019d be available for therapy after 4pm as I work from home until 3:30pm. You can call, text or email whenever works for you. If I do not answer your call I will return one if you leave a voicemail. Thank you in advance!",
+          "distance": 0.5878218412399292
+        }
+      ],
+      "all_texts": [
+        "Hello, My name is Alison, I have tried therapy a few times in the past - but haven\u2019t found the one yet. I am interested in an initial consultation. I am easiest to reach by text. Thank you!",
+        "Hi Liz, I'm interested in therapy and would like a consultation",
+        "Hello, I\u2019m interested in scheduling a consultation call for therapy with you",
+        "Hi there! I'm seeking to return to therapy as my anxiety has progressed over the past 6 months after some detrimental work experiences. I've been struggling with some major imposter's syndrome and generalized anxiety towards my relationships, and it's something I'm beginning to realize I need help with. I also have raging ADHD and feel like that's been roadblocking my life, and I've never had the tools to combat it. I work a general 9-5 job, so online options would be preferable - especially ones in the evening or weekend. I'd love to chat about an initial consultation, and feel free to email me if we could do that! Thanks so much :)",
+        "Hey there, My name is Freya, I recently moved across the river to St. Louis and am looking to get back into therapy. I\u2019ve had many life changes recently and find my anxiety getting the best of me, and want to get back to a place of enjoy life again, progressing and bettering myself, not just surviving each day. I\u2019m seeking rather intense therapy that challenges me to get outside of myself and comfort zone. I have United Health insurance and believe you\u2019re in my network, but would like to check in on that, and get your rates as well. I\u2019d be available for therapy after 4pm as I work from home until 3:30pm. You can call, text or email whenever works for you. If I do not answer your call I will return one if you leave a voicemail. Thank you in advance!",
+        "Hi Elizabeth \u2013 I'm looking for a therapist that is available online and has late in the day/evening appointments (4pm or later is preferred). I'm particularly interested in your evening or weekend appointments, but I'm sure they go fast. I'm wanting to continue therapy as I moved from Iowa in July, but have had a hard time finding a therapist. You can email or text me. I look forward to hearing from you. Sarah",
+        "Hello! I\u2019m looking for a therapist and I really connected with your profile here. Do you have any availability?",
+        "Hello! My husband and I are looking into getting back into couples therapy and your profile here seems like a good fit. Was curious if you had availability and we could do a consult sometime soon? :) Thanks in advance,",
+        "Hello! I'm kind of old hat to the therapy thing, but it has only ever kinda worked. I was diagnosed AuDHD at 38 [ 2 years ago now] and it makes more sense why traditional therapy hasn't completely met the mark for me. I'm going to cut myself off, because i could ramble on and explain everything but that's not appropriate for this box. I just know i need someone to help me talk and brainstorm and finagle some answers or solutions out of all the details in my head. I'm better with email than phone, if you wish to get ahold of me [ phone conversations are just difficult]. Im available Monday mornings, Tuesdays, Thursdays, Fridays. Please let me know if perhaps you might be available to work with me [ your office space photos give me such happy vibes].",
+        "Hi Elizabeth, I recently had a visit at DePauls mental health urgent care, which prompted a visit with a psychiatrist, who advises I would benefit greatly from therapy. How soon are you available to meet? I\u2019m not sure how this all works but was referred to this site as a starting place. Looking forward to hearing from you  \u263a\ufe0f . Amanda",
+        "Hi, I am seeking a therapist with a strong background in working with clients who have chronic suicidal ideation. I am only interested in in-person sessions. If you have availability, please let me know. Thanks!",
+        "Hi! I have United Healthcare and am interested in setting up an initial consultation in regards to therapy for anxiety, depression, eating disorder. I am best reached via text. Thank you so much and I look forward to hearing from you.",
+        "Hi Liz, I am reaching out to see if you would be a good therapist for my fiancee and I. My fiancee just recently called off our wedding and we need some serious counseling. I have ASD1 and she has ADD. We would like to work on our communication skills and boundaries. An initial consult for sure. What days and times are your hours? Email right now is best way to get a hold of me. Thank you!",
+        "I\u2019d like to make an appointment to start therapy. I have Tricare.",
+        "Hello! i\u2019m interested in therapy. i typed out a whole long thing and it told me it was too long, so i\u2019m gonna send this and see if i can hunt down your email",
+        "I was a patient of Kelly Pitman, she is ending her practice and recommended you as a possible continue of my therapy. My problems are rooted in gender disphoria, adhd, and marriage problems. If you could get back to me",
+        "I think I need help determining what I want from therapy and what to focus on first. My TikTok folder called \u201cI need therapy\u201d really covers a lot of ground that resonated with me in some way, from burnout to intellectualizing to executive function\u2026 although I\u2019m wary of using clinical words when I don\u2019t have relevant training. I have a major depression diagnosis, but suspect the root is more complicated.",
+        "recently stopped drinking looking for a therapist, I need help with coping skills and to learn why I do the things I do.",
+        "last therapist was bad start to finish and finally have the energy to start over (2 months) mom found online medicare/Medicaid (in person better - buzzing of phone)",
+        "Hi, We are interested in beginning therapy for my daughter Arrow Wingerter. Arrow just turned 18 on September 6th. I was wondering if you could do a brief initial consult via video. They are available Monday and Tuesday of this week. Thank you!",
+        "Preferred name is Kat I use They/Them pronouns. Basically I have done therapy in the past to help with ptsd, stress induced depression, and anxiety. I was looking to start it again to help with the stress induced depression and to understand my emotions lately more. In summary I am a neurospicy queer engineer constantly confused and overwhelmed by life."
+      ]
+    },
+    "11": {
+      "size": 9,
+      "percentage": 4.017857142857143,
+      "representative_samples": [
+        {
+          "text": "Good evening, My name is Ben Gall, I am looking to start therapy, for General anxiety, stress management, potential ADHD, and life management. I would be looking to use insurance (currently Aetna, Cigna in 2025) I should note my wife Emily Frazier-Gall is currently a client. If that presents any issues I would greatly appreciate recommendations. I am available 8am to 10pm",
+          "distance": 0.5150577425956726
+        },
+        {
+          "text": "Very interested in therapy/counseling, as I had a recent diagnosis for ADHD, and likely on the spectrum as well. I just wanted to double check if you took Cigna insurance? Text or email is highly preferred. Thanks for your time.",
+          "distance": 0.5888841152191162
+        },
+        {
+          "text": "Hi Elizabeth! I've recently received an ADHD diagnosis while in grad school, and am simultaneously going through some relationship issues that are complex and I know I need help navigating. It seems like you would be a great fit for me. I have Aetna through my school's insurance plan, and am not familiar with how much they cover for elective therapy. If you could share any insight on how this typically works (preferably by email since I tend to miss calls), I'll be excited to connect with you and would love to work out a time for a consultation! Thanks, Vivian",
+          "distance": 0.6059553623199463
+        },
+        {
+          "text": "Hi Liz- I am looking for a therapist for my 7 year old. He has been to a few before- but they didn't seem to be a good fit for him. From your profile- your approach seems like something that would better fit the both of us. we have UMR insurance- please let me know what your availability is like",
+          "distance": 0.6094154119491577
+        },
+        {
+          "text": "I am interested in a virtual consult, and then likely therapy, mainly addressing anxiety and neurodivergence. I recently changed insurance providers to MHBP/Aetna, and wanted to confirm whether you were in network. Email is the best way to reach me. Thank you!",
+          "distance": 0.6340120434761047
+        }
+      ],
+      "all_texts": [
+        "Good evening, My name is Ben Gall, I am looking to start therapy, for General anxiety, stress management, potential ADHD, and life management. I would be looking to use insurance (currently Aetna, Cigna in 2025) I should note my wife Emily Frazier-Gall is currently a client. If that presents any issues I would greatly appreciate recommendations. I am available 8am to 10pm",
+        "Very interested in therapy/counseling, as I had a recent diagnosis for ADHD, and likely on the spectrum as well. I just wanted to double check if you took Cigna insurance? Text or email is highly preferred. Thanks for your time.",
+        "Hi Elizabeth! I've recently received an ADHD diagnosis while in grad school, and am simultaneously going through some relationship issues that are complex and I know I need help navigating. It seems like you would be a great fit for me. I have Aetna through my school's insurance plan, and am not familiar with how much they cover for elective therapy. If you could share any insight on how this typically works (preferably by email since I tend to miss calls), I'll be excited to connect with you and would love to work out a time for a consultation! Thanks, Vivian",
+        "Hi Liz- I am looking for a therapist for my 7 year old. He has been to a few before- but they didn't seem to be a good fit for him. From your profile- your approach seems like something that would better fit the both of us. we have UMR insurance- please let me know what your availability is like",
+        "I am interested in a virtual consult, and then likely therapy, mainly addressing anxiety and neurodivergence. I recently changed insurance providers to MHBP/Aetna, and wanted to confirm whether you were in network. Email is the best way to reach me. Thank you!",
+        "I am assisting a professional woan in her 30s with finding a neurodiversity affirming therapist in MO. Are you accepting new clients? She has ABCBS insurance but is willing to go out of network for the right fit. Would this be a good referral for you?",
+        "Hi, my 11 year old son has delt with anxiety on and off most of his life however it is becoming more apparent to the point of interfering with his quality of life. Wondering what your fee and availability is? Your experience with these things in kids this age? We have UHC insurance. Thanks Katie Evola",
+        "Hello. I am looking for a child counselor for my 9 year old daughter. Her school counselor gave me your info. Do you take insurance? Thank you",
+        "Hi Liz! I have 3 teenage step daughters who are interested in talk therapy. They have Healthy Blue which I believe is Medicare. Do you have availability for them? Thanks!"
+      ]
+    },
+    "41": {
+      "size": 12,
+      "percentage": 5.357142857142857,
+      "representative_samples": [
+        {
+          "text": "My 18 yr old daughter is looking for a therapist that has a good understanding of her needs. We believe you may be a good fit. She has had extensive therapy, such as CBT, DBT, Residential ERP at Rogers in Wisconsin for OCD, medication and currently TMS for depression, over the years. Ava has a diagnosis of GAD, Depression, OCD, ADHD and Autism. She was only recently diagnosed with Autism within the last year or so. From my perspective her Autism and ADHD create an internal daily struggle. Almost as if she has two different people driving \"the bus\". I believe she is unable to move forward in her adult life because she has trauma from living highly \"masked\" in early childhood through middle school. She needs to work towards acceptance of who she is as a person so she can grow in her confidence and be proud of her talents. If you think you may be able to help, please let me know. You can contact Ava directly at. If you are unable to reach her my number is. Thanks! Michelle Mayo",
+          "distance": 0.44954150915145874
+        },
+        {
+          "text": "Good Morning, I am Ashley Mack and I am interested in getting my daughter into therapy, I found your profile and I feel you may be a good fit for my daughter. She is 9 years old and is autistic, she is verbal but sometimes really gets flustered with her thoughts and communicating. She has been struggling with wanting to be accepted and being \"different\" and I know that comes with growing up but I also know that having an outlet where she does feel she can let her thoughts and feelings out can be beneficial for her during this growing up stage, which is what drew me to looking into therapy services for her. Any response is appreciated! Thank you!",
+          "distance": 0.5247644186019897
+        },
+        {
+          "text": "Good morning, My daughter is 17, recently she was diagnosed with autism, adhd, and depression. She has been struggling in school the last year, missed about 2-3 days a week, so we had her evaluated as what could be going on. She also is doing virtual homeschool this year, in hopes that this will be better for her. She was the one that spoke up and asked us to have her evaluated, we both agreed that after we understood what was going on, she would find a therapist to help her through this time. After reading your bio you seem perfect for her. (She agreed) if possible we would like to set up a session, if you are currently taking on new clients. Thank you,",
+          "distance": 0.5568249821662903
+        },
+        {
+          "text": "Good afternoon, I am hoping to set up a consult with you for my teen. She is 15, diagnosed with autism with a PDA profile, and deals with a lot of anxiety as well. She, as well most of our family, fall on the LGBTQ+ spectrum. We have a large family and she struggles with her autism conflicting with the other (all autistic) kids and parents in the household. She also navigates trauma and difficulties with her father (my ex-husband) both as a result of the divorce and with him not fully understanding her autism. She prefers in-person therapy appointments. Looking forward to hearing from you! You can reach me via my email or via phone at. Best regards,",
+          "distance": 0.5904898643493652
+        },
+        {
+          "text": "Hi, I am trying to find someone with some availability to see my daughter, Sydney. She just turned 18 yesterday and is a senior in high school. She reached out to me and asked I find her a counselor. She has extreme anxiety in multiple situations but it is especially disruptive when in comes to illness. She stayed home from school because she couldn\u2019t focus due to all the kids around her coughing, etc. she also may be suffering from anorexia. She gets out of class at 3 and we are having an awful time finding someone with an available time for her. Can you help? Thank you! Amanda",
+          "distance": 0.6066393852233887
+        }
+      ],
+      "all_texts": [
+        "My 18 yr old daughter is looking for a therapist that has a good understanding of her needs. We believe you may be a good fit. She has had extensive therapy, such as CBT, DBT, Residential ERP at Rogers in Wisconsin for OCD, medication and currently TMS for depression, over the years. Ava has a diagnosis of GAD, Depression, OCD, ADHD and Autism. She was only recently diagnosed with Autism within the last year or so. From my perspective her Autism and ADHD create an internal daily struggle. Almost as if she has two different people driving \"the bus\". I believe she is unable to move forward in her adult life because she has trauma from living highly \"masked\" in early childhood through middle school. She needs to work towards acceptance of who she is as a person so she can grow in her confidence and be proud of her talents. If you think you may be able to help, please let me know. You can contact Ava directly at. If you are unable to reach her my number is. Thanks! Michelle Mayo",
+        "Good Morning, I am Ashley Mack and I am interested in getting my daughter into therapy, I found your profile and I feel you may be a good fit for my daughter. She is 9 years old and is autistic, she is verbal but sometimes really gets flustered with her thoughts and communicating. She has been struggling with wanting to be accepted and being \"different\" and I know that comes with growing up but I also know that having an outlet where she does feel she can let her thoughts and feelings out can be beneficial for her during this growing up stage, which is what drew me to looking into therapy services for her. Any response is appreciated! Thank you!",
+        "Good morning, My daughter is 17, recently she was diagnosed with autism, adhd, and depression. She has been struggling in school the last year, missed about 2-3 days a week, so we had her evaluated as what could be going on. She also is doing virtual homeschool this year, in hopes that this will be better for her. She was the one that spoke up and asked us to have her evaluated, we both agreed that after we understood what was going on, she would find a therapist to help her through this time. After reading your bio you seem perfect for her. (She agreed) if possible we would like to set up a session, if you are currently taking on new clients. Thank you,",
+        "Good afternoon, I am hoping to set up a consult with you for my teen. She is 15, diagnosed with autism with a PDA profile, and deals with a lot of anxiety as well. She, as well most of our family, fall on the LGBTQ+ spectrum. We have a large family and she struggles with her autism conflicting with the other (all autistic) kids and parents in the household. She also navigates trauma and difficulties with her father (my ex-husband) both as a result of the divorce and with him not fully understanding her autism. She prefers in-person therapy appointments. Looking forward to hearing from you! You can reach me via my email or via phone at. Best regards,",
+        "Hi, I am trying to find someone with some availability to see my daughter, Sydney. She just turned 18 yesterday and is a senior in high school. She reached out to me and asked I find her a counselor. She has extreme anxiety in multiple situations but it is especially disruptive when in comes to illness. She stayed home from school because she couldn\u2019t focus due to all the kids around her coughing, etc. she also may be suffering from anorexia. She gets out of class at 3 and we are having an awful time finding someone with an available time for her. Can you help? Thank you! Amanda",
+        "My name is Karrie, I'm looking for someone for my teen daughter. I ultimately am looking for someone my daughter is comfortable talking to about things that are going on that she needs help with. She's more introverted and doesn't like to \"get help.\" She has not been diagnosed but I have suspicions that she has ADHD. I work from home so I am generally available by phone (text or call) most days until 6pm. After 6 half the week I work a second job and would not be available. Email is always an option but gets checked less often.",
+        "I am needing help with my 8 year old who has is a military child, separated parents, emotionally struggling and as a mom with bipolar and three years sober now. She has gone through a lot. I have worked on myself and see a psychiatrist and therapist. I know the importance of being mentally well and healing. But I\u2019m worried that she has some trauma and that\u2019s why she has behavioral, emotional and mental struggles. If you have availability to fit us in or feel like you could help us. I would be grateful!",
+        "Hi, my daughter Alice is looking for a therapist to help her with coping with emotional outbursts and her transition to middle school, we have to figure out some motivation techniques. She has ADHD and is queer. You are not in my network (Anthem) but she actually found you and picked you out, so I wanted to know about your sliding scale. Thanks",
+        "Hello, I actually called your office and left a message but wanted to send an email and didn\u2019t know for sure what your email was. My daughter, Lindsey, is needing some help. She is struggling with her executive function. She is actually struggling with some life stuff too. She is failing college. She\u2019s also not sure what she wants to do with her life (career). I think she\u2019s lost. She\u2019s only had this diagnosis for a few years. She has so many great qualities. She\u2019s just getting lost with all the things she\u2019s struggling with. She has depression and it seems to be getting a little worse recently. And she also struggles with her weight from binge eating. I did read your information on your website and it look like you possibly might be able to help her get her life in order and help her figure out how her brain works and utilize her strengths. I just hate seeing her like this. I appreciate your time and consideration. Lesley.",
+        "Hello, I am inquiring for my ten-year-old daughter. She has started saying negative things about her body. I try to stress just making healthy choices, but I don't think it's sinking in. She has even mentioned that she is worried she will develop an eating disorder later on in life. I want to try to nip this in the bud as soon as possible and tackle it before it gets worse. What are your fees and what insurance do you take? I wish our healthcare system prioritized mental health; it is so important! The best days/times we are available are Mondays, Tuesdays, and Thursdays any time after 3. The best way to reach out to us is probably either by phone or text. Thank you for your consideration, and I look forward to hearing from you!",
+        "Charlotte is 10 years old in 5th grade. She has been diagnosed autistic with ADHD inattentive and auditory processing disorder. She's had many issues accessing education and coping with sensory input. What I see in her right now is more negative feelings, and I want to help her life experience be better. She is looking for ways to avoid school this year which signals to me that she needs more help.",
+        "Christina Warden highly recommended you for help with my daughters (7 and 5). I have left an emotionally abusive 20-year-long relationship with their father and am now in a healthy, committed queer partnership. It is a very amicable situation, but I also want to give the girls the support they need during this big transition. I have long suspected they are both neurodivergent, as my ex and I are both ND. The oldest has recently has some violent outbursts, and I want to get her the help she needs before it escalates any further. Email is the best way to reach me, although we can also speak via phone. Looking forward to talking with you!"
+      ]
+    },
+    "1": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "I have had a lot of life, much of which I don't remember, and need someone to help navigate how to do the next right things. With hope, you could be her? Email and texts get better responses. I'm 42. Phone calls can lead to more anxiety. It is what it is. Looking for an initial consult, price and whatever else I need to do to keep this ball rolling, before I lose motivation.",
+          "distance": 0.4440036416053772
+        },
+        {
+          "text": "Hi Liz, my name is Allison Hull. I am a 41 year old woman, and I struggle with anxiety and depression, but mostly I struggle with ADHD. Lately, I am constantly overwhelmed and feel like I am falling behind, regardless of whether I am making \"progress\" at all. Also, I have been struggling more and more with intrusive thoughts, often related to the state of the world (surprise!). I feel like I am drowning, and I need help figuring out how to live my life in a more functional, present, and confident way. I prefer to be contacted by text or email. My insurance is out of network, however I am not concerned with the cost. My schedule is flexible and I am okay with virtual or in person visits. I am not sure if you work with adults, but if so please let me know if you are taking new patients. Thank you for your time!",
+          "distance": 0.4440036416053772
+        }
+      ],
+      "all_texts": [
+        "I have had a lot of life, much of which I don't remember, and need someone to help navigate how to do the next right things. With hope, you could be her? Email and texts get better responses. I'm 42. Phone calls can lead to more anxiety. It is what it is. Looking for an initial consult, price and whatever else I need to do to keep this ball rolling, before I lose motivation.",
+        "Hi Liz, my name is Allison Hull. I am a 41 year old woman, and I struggle with anxiety and depression, but mostly I struggle with ADHD. Lately, I am constantly overwhelmed and feel like I am falling behind, regardless of whether I am making \"progress\" at all. Also, I have been struggling more and more with intrusive thoughts, often related to the state of the world (surprise!). I feel like I am drowning, and I need help figuring out how to live my life in a more functional, present, and confident way. I prefer to be contacted by text or email. My insurance is out of network, however I am not concerned with the cost. My schedule is flexible and I am okay with virtual or in person visits. I am not sure if you work with adults, but if so please let me know if you are taking new patients. Thank you for your time!"
+      ]
+    },
+    "5": {
+      "size": 11,
+      "percentage": 4.910714285714286,
+      "representative_samples": [
+        {
+          "text": "Hi Liz, My wife posted on STL Therapists group about looking for a therapist for our daughter. she is 10 years old, has ADHD, social anxiety, and sensory issues. We would love to find someone who can work with her to help with overcoming her fear of social interactions with others, being overwhelmed by loud noises or certain fabrics/feelings, and being able to concentrate on her academics. We have UMR insurance and would plan on using that. We also live near Grant's Farm so your location would be very close to us. We tired scheduling through your website for a phone consultation but each time we received an \"Opps, something went wrong\" error message. We would love to find a time to chat and see if you would be a good fit for Mya and vice versa. We have availability Wednesday evening (8/13) anytime after 6pm for a phone chat. Looking forward to hear form you. Thanks, Dave and Tammy Eberle",
+          "distance": 0.48150455951690674
+        },
+        {
+          "text": "Hello, my name is Emily Lyon I\u2019m 25 years old, I recently got diagnosed with Autism and ADHD and I\u2019m trying to find a therapist in St.Louis, MO or around there I\u2019m from Columbia, MO and haven\u2019t changed any of my doctors yet since I moved to St.Louis. I was wondering if you were accepting new clients. I saw you accepted some insurances I was curious if you accepted blue cross blue shield I have a primary and a secondary. I\u2019m looking for someone to talk to since I\u2019m new to figuring out my adhd and autism. My availability would be open on late afternoons after 1pm most days. The best way to reach me is what you prefer.",
+          "distance": 0.5312485098838806
+        },
+        {
+          "text": "Hello Elizabeth, My name is Spencer Costello. I am a case manager for a non-profit called Rise Above The Disorder (RAD). (https://www.youarerad.org/) I have a client based in Missouri that I\u2019d love to refer over to you. The client is currently struggling with loneliness/interpersonal relationships, depression, self-esteem, anxiety, and possible Autism. The client is looking for a therapist who is offering Tele-health sessions at this time. I think you two could be an amazing match and I wanted to have a brief chat about the case and see if you think the same. If you are accepting new clients at this time, please email me at",
+          "distance": 0.5605043768882751
+        },
+        {
+          "text": "Hi Liz, I am reaching out regarding a potential referral to your practice on behalf of the child of a corporate employee (we are partnering with their human resources team to provide their employees with behavioral health navigation support) in St. Louis, MO with United Healthcare PPO insurance, looking for outpatient counseling. Additional preferences are below: - Client is 10yo - Primary concerns are irritability, negative self-talk, and angry outbursts. No reported concerns at school. - Prefer in-network with UHC PPO - Prefer in-person, but is open to telehealth - Prefer a female provider - Prefer appointments after 3:30pm (I know this is hard to come by, so OK if not available or if there is a waitlist) Can you please let me know whether this is a case you feel is an appropriate fit? Please feel free to call if you would like to discuss further. I appreciate your support in the support of this child! Thank you, and I hope to connect with you soon!",
+          "distance": 0.6314936876296997
+        },
+        {
+          "text": "Hi wondering if you have availability for new clients this month and if your office accepts United (employer coverage). Looking for in-person therapy for a combo of anxiety/burnout (long term), compulsive eating (recent) and probably some undiagnosed Neuro differences. (Not seeking medical diagnoses at this time). I am generally available evenings and weekends but also work remotely on wednesday/friday and can probably make some daytime availability work on those days too depending on the time. Phone calls are okay to contact but a short text so I can program number as \"not spam\" will speed up my response time.",
+          "distance": 0.6377890706062317
+        }
+      ],
+      "all_texts": [
+        "Hi Liz, My wife posted on STL Therapists group about looking for a therapist for our daughter. she is 10 years old, has ADHD, social anxiety, and sensory issues. We would love to find someone who can work with her to help with overcoming her fear of social interactions with others, being overwhelmed by loud noises or certain fabrics/feelings, and being able to concentrate on her academics. We have UMR insurance and would plan on using that. We also live near Grant's Farm so your location would be very close to us. We tired scheduling through your website for a phone consultation but each time we received an \"Opps, something went wrong\" error message. We would love to find a time to chat and see if you would be a good fit for Mya and vice versa. We have availability Wednesday evening (8/13) anytime after 6pm for a phone chat. Looking forward to hear form you. Thanks, Dave and Tammy Eberle",
+        "Hello, my name is Emily Lyon I\u2019m 25 years old, I recently got diagnosed with Autism and ADHD and I\u2019m trying to find a therapist in St.Louis, MO or around there I\u2019m from Columbia, MO and haven\u2019t changed any of my doctors yet since I moved to St.Louis. I was wondering if you were accepting new clients. I saw you accepted some insurances I was curious if you accepted blue cross blue shield I have a primary and a secondary. I\u2019m looking for someone to talk to since I\u2019m new to figuring out my adhd and autism. My availability would be open on late afternoons after 1pm most days. The best way to reach me is what you prefer.",
+        "Hello Elizabeth, My name is Spencer Costello. I am a case manager for a non-profit called Rise Above The Disorder (RAD). (https://www.youarerad.org/) I have a client based in Missouri that I\u2019d love to refer over to you. The client is currently struggling with loneliness/interpersonal relationships, depression, self-esteem, anxiety, and possible Autism. The client is looking for a therapist who is offering Tele-health sessions at this time. I think you two could be an amazing match and I wanted to have a brief chat about the case and see if you think the same. If you are accepting new clients at this time, please email me at",
+        "Hi Liz, I am reaching out regarding a potential referral to your practice on behalf of the child of a corporate employee (we are partnering with their human resources team to provide their employees with behavioral health navigation support) in St. Louis, MO with United Healthcare PPO insurance, looking for outpatient counseling. Additional preferences are below: - Client is 10yo - Primary concerns are irritability, negative self-talk, and angry outbursts. No reported concerns at school. - Prefer in-network with UHC PPO - Prefer in-person, but is open to telehealth - Prefer a female provider - Prefer appointments after 3:30pm (I know this is hard to come by, so OK if not available or if there is a waitlist) Can you please let me know whether this is a case you feel is an appropriate fit? Please feel free to call if you would like to discuss further. I appreciate your support in the support of this child! Thank you, and I hope to connect with you soon!",
+        "Hi wondering if you have availability for new clients this month and if your office accepts United (employer coverage). Looking for in-person therapy for a combo of anxiety/burnout (long term), compulsive eating (recent) and probably some undiagnosed Neuro differences. (Not seeking medical diagnoses at this time). I am generally available evenings and weekends but also work remotely on wednesday/friday and can probably make some daytime availability work on those days too depending on the time. Phone calls are okay to contact but a short text so I can program number as \"not spam\" will speed up my response time.",
+        "Hi Elizabeth, our son Cooper saw you either last year or the year before. We are looking for a new counselor. Copper was admitted to Mercy STL behavioral health back in August and was diagnosed with DMDD. He has been doing really well since he finished IOP. We are just needing to get established with someone. We would need something after 4pm. Please let me know if you would be able to connect again with us. Thanks Katie",
+        "Hello Elizabeth, I am a therapist over at LifeStance and am prepping to leave the company by the end of the year (secret info!) I have a 23 y/o client with Autism who has been through it with providers and I want to make sure she finds a GREAT fit. She is passionate about doing self-esteem work, so your bio caught my eye. What is your caseload looking like these days - how long is your waitlist? Patient has Aetna, United and Healthy Blue but family does not care if we choose option that has co-pay - they just want her to find a good fit! She is currently in an IOP as well and has lots of daytime availability. Happy to talk more with you, would be my pleasure!",
+        "Hi! I am a therapist in STL and I have a couple of referrals that I thought you might be a good fit for. I have seen your responses from the FB STL Therapist group. I wanted to make sure you have openings before I send them your way? I primarily see LGBTQ+ women that use insurance or pay around 100$ a session. The clients are usually neurodivergent and wanting to work on emotions, trauma, self esteem, etc. Does that sound like a good fit for you? Thank you so much!",
+        "Hey there Elizabeth! I saw your about me section on Psychology Today and wanted to reach out to schedule an initial consult / talk to see if it's a good fit. I'm reached pretty easily over phone (text or call).",
+        "Hi Liz! I'm a therapist in NY, have a client who is moving back home to the St. Louis area after attending college here. Are you accepting new clients? I think you would be a great fit for her!",
+        "Good morning! I am looking to schedule a consultation for my two children- 8 yr old girl and 10 yr old boy. I'm free after 12p today (maybe shoot a text if you'd like and let me know what time works for you, I have a few other phone calls I'll be involved in because of a car accident yesterday) and I am also free on Monday after 1p. Thanks so much."
+      ]
+    },
+    "25": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Hello Liz! I was curious if you do evaluations? I was very comforted by your page and have been worried about being evaluated. Thanks!",
+          "distance": 2.6982798218000426e-08
+        }
+      ],
+      "all_texts": [
+        "Hello Liz! I was curious if you do evaluations? I was very comforted by your page and have been worried about being evaluated. Thanks!"
+      ]
+    },
+    "0": {
+      "size": 6,
+      "percentage": 2.6785714285714284,
+      "representative_samples": [
+        {
+          "text": "My name is Kyle (he/they), I'm looking for a therapist with experience in autism and neurodivergence. I am not formally diagnosed due to a lack of available resources, but I have a lot of reason to believe I'm autistic. I'd appreciate scheduling a quick consult to see if I'm the kind of client you work with and confirm insurance. I am fine with any mode of communication but would prefer the phone for an initial consult. Texting or emailing is fine to arrange times. I'm generally available at noon or after 4:30 on weekdays, and any time on weekends. Thank you very much!",
+          "distance": 0.42426133155822754
+        },
+        {
+          "text": "Hey Liz! My partner was diagnosed with autism earlier this year and we are trying to find a therapist that's a good fit and gets it. And you definitely seem like that kind of person! Mark Watkins ( preferred name: Sparkle) struggles with making appointments so I listed my contact info but I completely understand that you will need their consent and permission to set things up. We have UHC Community Plan. Are you in network with them? I look forward to hearing from you! Feel free to call, email, or text.",
+          "distance": 0.4438565671443939
+        },
+        {
+          "text": "I am looking for an initial consult with an autism and LGBTQ-friendly counselor. My official autism assessment isn't until January, but I'm experiencing some issues that appear to be autism-related that I would like help with, such as: hyperfixations, social anxiety, being overwhelmed by stimuli and basic tasks, dermatillomania, procrastination, and possible autistic burnout. I was also previously diagnosed with Bipolar Disorder type II, ADHD, PTSD, and generalized anxiety disorder. I\u2019m currently in counseling and being treated by a psychiatrist, but autism isn\u2019t their specialty. My number is 636-577-4313, and I am available pretty much any time by text, email, and phone. Thank you for your time!",
+          "distance": 0.4671228229999542
+        },
+        {
+          "text": "hello! i am seeking a possible autism diagnosis and I am dealing with issues with substances & attatchment. please let. me know if we could meet!",
+          "distance": 0.5762884020805359
+        },
+        {
+          "text": "I am a self diagnosed autistic person that needs help talking through stuff. I would prefer online appointments because I don't have a driver's license. I honestly have no idea what I'm doing with my life at this point and know that there is probably childhood trauma I have to work through. I also need opinions from someone that isn't in my general circle of work and home. I'm 23 y/o and am on UHC for insurance.",
+          "distance": 0.5844573974609375
+        }
+      ],
+      "all_texts": [
+        "My name is Kyle (he/they), I'm looking for a therapist with experience in autism and neurodivergence. I am not formally diagnosed due to a lack of available resources, but I have a lot of reason to believe I'm autistic. I'd appreciate scheduling a quick consult to see if I'm the kind of client you work with and confirm insurance. I am fine with any mode of communication but would prefer the phone for an initial consult. Texting or emailing is fine to arrange times. I'm generally available at noon or after 4:30 on weekdays, and any time on weekends. Thank you very much!",
+        "Hey Liz! My partner was diagnosed with autism earlier this year and we are trying to find a therapist that's a good fit and gets it. And you definitely seem like that kind of person! Mark Watkins ( preferred name: Sparkle) struggles with making appointments so I listed my contact info but I completely understand that you will need their consent and permission to set things up. We have UHC Community Plan. Are you in network with them? I look forward to hearing from you! Feel free to call, email, or text.",
+        "I am looking for an initial consult with an autism and LGBTQ-friendly counselor. My official autism assessment isn't until January, but I'm experiencing some issues that appear to be autism-related that I would like help with, such as: hyperfixations, social anxiety, being overwhelmed by stimuli and basic tasks, dermatillomania, procrastination, and possible autistic burnout. I was also previously diagnosed with Bipolar Disorder type II, ADHD, PTSD, and generalized anxiety disorder. I\u2019m currently in counseling and being treated by a psychiatrist, but autism isn\u2019t their specialty. My number is 636-577-4313, and I am available pretty much any time by text, email, and phone. Thank you for your time!",
+        "hello! i am seeking a possible autism diagnosis and I am dealing with issues with substances & attatchment. please let. me know if we could meet!",
+        "I am a self diagnosed autistic person that needs help talking through stuff. I would prefer online appointments because I don't have a driver's license. I honestly have no idea what I'm doing with my life at this point and know that there is probably childhood trauma I have to work through. I also need opinions from someone that isn't in my general circle of work and home. I'm 23 y/o and am on UHC for insurance.",
+        "Hello, I am an Autism Care Support Specialist with Aetna and I am assisting an adult member who resides in SAPPINGTON , MO 63128 with locating an in-network provider who conducts autism evaluations. I wanted to reach and inquire if an autism evaluation is within your scope and if so, are you accepting new clients? If there is a waitlist the approximate length of the waitlist? Due to HIPPA I am unable to provider any member information, however any information you provide to me will be forwarded on to the family. Thanks so much!"
+      ]
+    },
+    "44": {
+      "size": 4,
+      "percentage": 1.7857142857142856,
+      "representative_samples": [
+        {
+          "text": "Hello Liz, I have an 11 year old son that is in 6th grade. He has shown some signs of anxiety in the past and last week had a challenging interaction at school that he had a hard time with. We are looking to get him into therapy to help him work through some of his feelings and find some self confidence and coping strategies for when things get difficult. Could we set up a call to chat about whether you think you might be able to help out? Thanks in advance!",
+          "distance": 0.4576493799686432
+        },
+        {
+          "text": "Hi! I am looking for support for my 5 year old son. He is having some challenges with emotional regulation, anxiety, some perseverance concerns, with a touch of sensory issues. It's causing some concerns at school and we would love to build his skills to be able to navigate the world! Thanks!",
+          "distance": 0.6000284552574158
+        },
+        {
+          "text": "I am looking for someone my soon to be 12 year old can speak to. He is having behavior troubles at school and at home.",
+          "distance": 0.629167377948761
+        },
+        {
+          "text": "Hi Liz, I am diagnosed with anxiety, depression and sensory processing disorder. I need help with a lot of things but the shortest way to say it is I need help with getting overwhelmed. Could we have some kind of initial conversation where I can ask some questions? You can reach me by text, phone, or email however I do not answer unfamiliar numbers so please send me a text or email first otherwise I will just call you back.",
+          "distance": 0.6899416446685791
+        }
+      ],
+      "all_texts": [
+        "Hello Liz, I have an 11 year old son that is in 6th grade. He has shown some signs of anxiety in the past and last week had a challenging interaction at school that he had a hard time with. We are looking to get him into therapy to help him work through some of his feelings and find some self confidence and coping strategies for when things get difficult. Could we set up a call to chat about whether you think you might be able to help out? Thanks in advance!",
+        "Hi! I am looking for support for my 5 year old son. He is having some challenges with emotional regulation, anxiety, some perseverance concerns, with a touch of sensory issues. It's causing some concerns at school and we would love to build his skills to be able to navigate the world! Thanks!",
+        "I am looking for someone my soon to be 12 year old can speak to. He is having behavior troubles at school and at home.",
+        "Hi Liz, I am diagnosed with anxiety, depression and sensory processing disorder. I need help with a lot of things but the shortest way to say it is I need help with getting overwhelmed. Could we have some kind of initial conversation where I can ask some questions? You can reach me by text, phone, or email however I do not answer unfamiliar numbers so please send me a text or email first otherwise I will just call you back."
+      ]
+    },
+    "40": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Hi Elizabeth, I just called and left a voicemail. But I am reaching out because I received your information through my work. We have a program with EAP. I was reaching out because I would love to set up an appointment. Thank you!",
+          "distance": 0.5110390186309814
+        },
+        {
+          "text": "Hi! We have our meeting tomorrow at 530 pm but I haven\u2019t received the intake paperwork. Do we need to do anything before the meeting tomorrow? Thank you!",
+          "distance": 0.5110390782356262
+        }
+      ],
+      "all_texts": [
+        "Hi Elizabeth, I just called and left a voicemail. But I am reaching out because I received your information through my work. We have a program with EAP. I was reaching out because I would love to set up an appointment. Thank you!",
+        "Hi! We have our meeting tomorrow at 530 pm but I haven\u2019t received the intake paperwork. Do we need to do anything before the meeting tomorrow? Thank you!"
+      ]
+    },
+    "26": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Hi Liz, this is Marlena Milshteyn\u2019s mom. I know she talked to you at length yesterday, and she talked to her psych for a med consult. But she\u2019s still been talking nonsense and only slept about two hours. I\u2019m planning to take her to Ssm behavioral health urgent care today. We will keep you posted what we find out. I don\u2019t know if she has any appointments scheduled. But she will need to talk to you soon if possible. Thanks so much!",
+          "distance": 0.49870073795318604
+        },
+        {
+          "text": "Good evening, Liz, This is Jane, Kate's mom. I have left several messages asking that you call to set up an appointment for Kate. You have not responded, and I am just wondering if there is a problem. Kate has been asking when she can come and talk to you again. If there is an issue, please let me know what it is or contact me so I can set up a time for you to see Kate. Thank you for your time.",
+          "distance": 0.49870073795318604
+        }
+      ],
+      "all_texts": [
+        "Hi Liz, this is Marlena Milshteyn\u2019s mom. I know she talked to you at length yesterday, and she talked to her psych for a med consult. But she\u2019s still been talking nonsense and only slept about two hours. I\u2019m planning to take her to Ssm behavioral health urgent care today. We will keep you posted what we find out. I don\u2019t know if she has any appointments scheduled. But she will need to talk to you soon if possible. Thanks so much!",
+        "Good evening, Liz, This is Jane, Kate's mom. I have left several messages asking that you call to set up an appointment for Kate. You have not responded, and I am just wondering if there is a problem. Kate has been asking when she can come and talk to you again. If there is an issue, please let me know what it is or contact me so I can set up a time for you to see Kate. Thank you for your time."
+      ]
+    },
+    "7": {
+      "size": 7,
+      "percentage": 3.125,
+      "representative_samples": [
+        {
+          "text": "Hi Liz, I\u2019m a late-diagnosed ADHD woman seeking a better therapeutic fit after working with one therapist and three psychiatrists here in St. Louis. I took a break from therapy once my medication stabilized, but I\u2019m now at a point where I need support again\u2014particularly with family dynamics and emotional regulation. We\u2019ve started the UMSL assessment process for our 6-year-old son and are awaiting results. I also suspect our 3-year-old may be on a similar neurodivergent path. I\u2019m especially interested in family counseling that considers the possibility that my husband may be the only neurotypical in the household. I saw that you offer clarity assessments and support around AuDHD\u2014this really resonated with me. While I only have an ADHD diagnosis, I relate strongly to autistic traits and would appreciate the opportunity to explore that further with someone experienced in neurodivergent adult women. I work full time in a demanding role, but I can make time for a consultation. Text or email is the best way to reach me, as I\u2019ll need to step into a private room to take calls. Thanks so much\u2014I\u2019m looking forward to connecting. Warmly,",
+          "distance": 0.4678189754486084
+        },
+        {
+          "text": "Elizabeth, I'm reaching out on behalf of my husband, Kevin, who is looking for a counselor. I found you because I was searching for someone who takes United Health Care insurance and works with people who are neurodivergent. Long story short, my husband is very smart and talented in his field- he also consistently struggles with relationships at work, workaholic/obsessive tendencies and has been let go for some jobs in the past 5 years. Kevin has never been diagnosed, but both of us believe he has ADHD. Kevin is asking me to initiate this process because I am an LCSW and he feels I can help select someone who might fit his needs. Would you be willing to consult with me/him/us? Thank you for your time. Dannie Hodges",
+          "distance": 0.4868599474430084
+        },
+        {
+          "text": "Hi Liz, My partner and I are looking for a neurodivergent specialist couples therapist. We've been together 5 years and deeply care about one another but we have nonstop communication indifferences and we would like to better our communication and commitment to one another. I was diagnosed with ADHD and my therapist has stated she thinks I have autism and I tend to agree. I did all of the tests and scored pretty high. Id like to formally get diagnosed but not sure how to start the process so in the mean time I'm trying to embrace who I am and love that instead of shame myself. My partner, Jonathan, is neurotypical and wants to better our relationship through our struggles with the ND/NT difference. We'd really like to do in person and Saturdays would be best for us. I have UHC, he has Aetna. We aren't too sure how insurance works but would love to talk more about this all. Thank you!",
+          "distance": 0.524495005607605
+        },
+        {
+          "text": "Hello, I\u2019m interested in helping my husband, Lou. For over a year we worked with a couples therapist after discovering he is AuAdhd. After talking with her she recommended to reach out to you because it seems maybe he needs to work with someone focusing on himself to understand the impacts of neurodivergence and learn tools to deal with his challenges that impact our relationship. He states he\u2019s open to this and also continues to forget to reach out to you. I am trying to support him without taking on the responsibility of \u201ctranslating or parenting\u201d him in the help he needs. I\u2019d like to help him schedule an initial consult to see if this is a good fit.",
+          "distance": 0.54616379737854
+        },
+        {
+          "text": "Hi Elizabeth - my therapist Kara (Shaunessey) Dial recommended you -- I'm looking for options for a possible family session with my adult (22-yr old) son who is neurodiverse and moved back home in May after college. He has a therapist who provides virtual appointments. Wondering if a family session might help us ? Kara though you might be willing to consider this... Email communication is great to start... Thank you, Julie",
+          "distance": 0.5713863968849182
+        }
+      ],
+      "all_texts": [
+        "Hi Liz, I\u2019m a late-diagnosed ADHD woman seeking a better therapeutic fit after working with one therapist and three psychiatrists here in St. Louis. I took a break from therapy once my medication stabilized, but I\u2019m now at a point where I need support again\u2014particularly with family dynamics and emotional regulation. We\u2019ve started the UMSL assessment process for our 6-year-old son and are awaiting results. I also suspect our 3-year-old may be on a similar neurodivergent path. I\u2019m especially interested in family counseling that considers the possibility that my husband may be the only neurotypical in the household. I saw that you offer clarity assessments and support around AuDHD\u2014this really resonated with me. While I only have an ADHD diagnosis, I relate strongly to autistic traits and would appreciate the opportunity to explore that further with someone experienced in neurodivergent adult women. I work full time in a demanding role, but I can make time for a consultation. Text or email is the best way to reach me, as I\u2019ll need to step into a private room to take calls. Thanks so much\u2014I\u2019m looking forward to connecting. Warmly,",
+        "Elizabeth, I'm reaching out on behalf of my husband, Kevin, who is looking for a counselor. I found you because I was searching for someone who takes United Health Care insurance and works with people who are neurodivergent. Long story short, my husband is very smart and talented in his field- he also consistently struggles with relationships at work, workaholic/obsessive tendencies and has been let go for some jobs in the past 5 years. Kevin has never been diagnosed, but both of us believe he has ADHD. Kevin is asking me to initiate this process because I am an LCSW and he feels I can help select someone who might fit his needs. Would you be willing to consult with me/him/us? Thank you for your time. Dannie Hodges",
+        "Hi Liz, My partner and I are looking for a neurodivergent specialist couples therapist. We've been together 5 years and deeply care about one another but we have nonstop communication indifferences and we would like to better our communication and commitment to one another. I was diagnosed with ADHD and my therapist has stated she thinks I have autism and I tend to agree. I did all of the tests and scored pretty high. Id like to formally get diagnosed but not sure how to start the process so in the mean time I'm trying to embrace who I am and love that instead of shame myself. My partner, Jonathan, is neurotypical and wants to better our relationship through our struggles with the ND/NT difference. We'd really like to do in person and Saturdays would be best for us. I have UHC, he has Aetna. We aren't too sure how insurance works but would love to talk more about this all. Thank you!",
+        "Hello, I\u2019m interested in helping my husband, Lou. For over a year we worked with a couples therapist after discovering he is AuAdhd. After talking with her she recommended to reach out to you because it seems maybe he needs to work with someone focusing on himself to understand the impacts of neurodivergence and learn tools to deal with his challenges that impact our relationship. He states he\u2019s open to this and also continues to forget to reach out to you. I am trying to support him without taking on the responsibility of \u201ctranslating or parenting\u201d him in the help he needs. I\u2019d like to help him schedule an initial consult to see if this is a good fit.",
+        "Hi Elizabeth - my therapist Kara (Shaunessey) Dial recommended you -- I'm looking for options for a possible family session with my adult (22-yr old) son who is neurodiverse and moved back home in May after college. He has a therapist who provides virtual appointments. Wondering if a family session might help us ? Kara though you might be willing to consider this... Email communication is great to start... Thank you, Julie",
+        "I tried to book this on your site but it appears to be not going through. I'm AuDHD and have PTSD. I have disabling chronic illnesses that are co-morbid with the the above. I'm a single mom coming out of a DV marriage. I've been looking for someone like you to help me learn about this late diagnosed neurodivergence and to heal from a lot of trauma!",
+        "I go by \"Bobby\" and I'm an Army vet, an engineer-adjacent, a Ravenclaw, a nerd, and married to an AuDHD who jokes (swears?) she doesn't have the \"-DHD\" while also suggesting that I probably have a bit of the 'tism mixed in with my ADHD. You seem like a good fit for me, as I'm looking for someone who can wield direct candor and the \"don't bullshit me\" attitude as well as my inner voice does. A gentle hand and constant affirmation is not comfortable - tell I'm wrong (so I can debate you about it)."
+      ]
+    },
+    "17": {
+      "size": 6,
+      "percentage": 2.6785714285714284,
+      "representative_samples": [
+        {
+          "text": "good afternoon. I'm reaching out to see if your accepting new patients. I wanted to be evaluated for ADHD and or autism. do you take insurance and if so which ones. if not how much do you charge for those types of sessions",
+          "distance": 0.4551904499530792
+        },
+        {
+          "text": "Hi Liz, I was wondering if you are taking new patients and if you accept Optum Behavioral Insurance. I work at HCA if that helps. Thank you.",
+          "distance": 0.5564276576042175
+        },
+        {
+          "text": "Hi Liz, I\u2019ve been looking for a new therapist with experience with adhd and asd, among other things. It looks like you don\u2019t take my insurance (Anthem BCBS). I know sometimes the information on this website can be out of date so I just wanted to check and see if anything has changed there? Thank you.",
+          "distance": 0.6053499579429626
+        },
+        {
+          "text": "Hi Ms. Wooten, I'm a middle aged woman seeking to get autism and ADHD assessments. Do you do these for adults? Also, I have United Healthcare Community Plan insurance, Do you accept that? Thank you, Kara",
+          "distance": 0.6165618300437927
+        },
+        {
+          "text": "Hi, I was wondering if you are accepting new patients and take insurance. If so, please let me know a time to schedule an appointment. Thank you, Hannah",
+          "distance": 0.6248862147331238
+        }
+      ],
+      "all_texts": [
+        "good afternoon. I'm reaching out to see if your accepting new patients. I wanted to be evaluated for ADHD and or autism. do you take insurance and if so which ones. if not how much do you charge for those types of sessions",
+        "Hi Liz, I was wondering if you are taking new patients and if you accept Optum Behavioral Insurance. I work at HCA if that helps. Thank you.",
+        "Hi Liz, I\u2019ve been looking for a new therapist with experience with adhd and asd, among other things. It looks like you don\u2019t take my insurance (Anthem BCBS). I know sometimes the information on this website can be out of date so I just wanted to check and see if anything has changed there? Thank you.",
+        "Hi Ms. Wooten, I'm a middle aged woman seeking to get autism and ADHD assessments. Do you do these for adults? Also, I have United Healthcare Community Plan insurance, Do you accept that? Thank you, Kara",
+        "Hi, I was wondering if you are accepting new patients and take insurance. If so, please let me know a time to schedule an appointment. Thank you, Hannah",
+        "Hello, I was wondering if you were accepting new clients? If you take medicare/ united Healthcare/optum Insurance? If you are lgbtq-friendly? And if you deal with trauma PTSD Behavioral Health? And I can only do Telehealth. Thank you"
+      ]
+    },
+    "30": {
+      "size": 3,
+      "percentage": 1.3392857142857142,
+      "representative_samples": [
+        {
+          "text": "Hello, I was wondering if you were accepting new patients? My son is 9 and diagnosed with adhd. I would like to have him seen by someone with experience helping children cope with anger management. I am available for calls most days Thank you.",
+          "distance": 0.28506001830101013
+        },
+        {
+          "text": "Hello, I was wondering if you were accepting new patients? My son is 9 and diagnosed with adhd. I would like to have him seen by someone with experience helping children cope with anger management. I am available for calls most days Thank you.",
+          "distance": 0.28506001830101013
+        },
+        {
+          "text": "Hi I have a 9 year old who asked me tonight to look for a therapist for him (his dad goes and he has seen it\u2019s effects) so here I am lol are you accepting new patients?|",
+          "distance": 0.570120096206665
+        }
+      ],
+      "all_texts": [
+        "Hello, I was wondering if you were accepting new patients? My son is 9 and diagnosed with adhd. I would like to have him seen by someone with experience helping children cope with anger management. I am available for calls most days Thank you.",
+        "Hello, I was wondering if you were accepting new patients? My son is 9 and diagnosed with adhd. I would like to have him seen by someone with experience helping children cope with anger management. I am available for calls most days Thank you.",
+        "Hi I have a 9 year old who asked me tonight to look for a therapist for him (his dad goes and he has seen it\u2019s effects) so here I am lol are you accepting new patients?|"
+      ]
+    },
+    "33": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Hi! My name is Skyler, my pronouns are she/her. I am an autistic adult, and ultimately, that's what I need help with. I do prefer texting, and my availability shifts with my work schedule, but my phone is almost always on me. Thanks!",
+          "distance": 2.345097449563127e-08
+        }
+      ],
+      "all_texts": [
+        "Hi! My name is Skyler, my pronouns are she/her. I am an autistic adult, and ultimately, that's what I need help with. I do prefer texting, and my availability shifts with my work schedule, but my phone is almost always on me. Thanks!"
+      ]
+    },
+    "27": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Hello, My son Owen has been having a lot of anxiety lately. He starts to get panicky especially when storms are developing. He has expressed to me that he wants to talk to a therapist. Do you have any openings?",
+          "distance": 0.4086720943450928
+        },
+        {
+          "text": "Hi, my son has asked to see a therapist for anxiety. He is having trouble sleeping and said he is having anxiety, but not panic attacks. He saw a therapist for a couple years when he was in elementary school but has been doing really well since then. Anxiety runs in the family. He is great kid. Do you have any availability in the after school hours? He is in school from 7:40-2:40 and about 15 minutes from your office. We have BCBS but can pay private if you don't accept that.",
+          "distance": 0.4086720943450928
+        }
+      ],
+      "all_texts": [
+        "Hello, My son Owen has been having a lot of anxiety lately. He starts to get panicky especially when storms are developing. He has expressed to me that he wants to talk to a therapist. Do you have any openings?",
+        "Hi, my son has asked to see a therapist for anxiety. He is having trouble sleeping and said he is having anxiety, but not panic attacks. He saw a therapist for a couple years when he was in elementary school but has been doing really well since then. Anxiety runs in the family. He is great kid. Do you have any availability in the after school hours? He is in school from 7:40-2:40 and about 15 minutes from your office. We have BCBS but can pay private if you don't accept that."
+      ]
+    },
+    "49": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "My daughter has developed anxiety at bedtime. We have tricare if you take it. Please let me know as soon as you can.",
+          "distance": 2.241363006305619e-08
+        }
+      ],
+      "all_texts": [
+        "My daughter has developed anxiety at bedtime. We have tricare if you take it. Please let me know as soon as you can."
+      ]
+    },
+    "24": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "Howdy! Do you take Medica insurance? If im honest I don't know much about insurance or it's jargon so i thought I'd ask to be sure :) I answer best through text :) thank you!",
+          "distance": 0.4780973196029663
+        },
+        {
+          "text": "Hi ma\u2019am my name is Ethan and I\u2019ve been in desperate need/search of help, I just got insurance and was wondering if you accept United Healthcare; thank you for your time",
+          "distance": 0.4780973494052887
+        }
+      ],
+      "all_texts": [
+        "Howdy! Do you take Medica insurance? If im honest I don't know much about insurance or it's jargon so i thought I'd ask to be sure :) I answer best through text :) thank you!",
+        "Hi ma\u2019am my name is Ethan and I\u2019ve been in desperate need/search of help, I just got insurance and was wondering if you accept United Healthcare; thank you for your time"
+      ]
+    },
+    "32": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "I have a 39 year old son who was diagnosed with language impairment, auditory processing and learning difficulties. Medically diagnosed as dyslexia. He has the MTHFR GENE A12098/T677 and COMT gene. We are working to get his body methylating. He is dealing with some issues that he cannot seem to grasp that could lead down the wrong path.",
+          "distance": 2.2362426577160477e-08
+        }
+      ],
+      "all_texts": [
+        "I have a 39 year old son who was diagnosed with language impairment, auditory processing and learning difficulties. Medically diagnosed as dyslexia. He has the MTHFR GENE A12098/T677 and COMT gene. We are working to get his body methylating. He is dealing with some issues that he cannot seem to grasp that could lead down the wrong path."
+      ]
+    },
+    "3": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Hello, I am a college student with chronic anxiety and depression and I was wanting to give therapy a try for the first time. I am unsure that my insurance will cover much or any so I wanted to discuss sliding scale payment as well. Please email me back as soon as you are able to set up a consultation. I would be interested in bi-weekly(every other week) online appointments.",
+          "distance": 1.7575750632659037e-08
+        }
+      ],
+      "all_texts": [
+        "Hello, I am a college student with chronic anxiety and depression and I was wanting to give therapy a try for the first time. I am unsure that my insurance will cover much or any so I wanted to discuss sliding scale payment as well. Please email me back as soon as you are able to set up a consultation. I would be interested in bi-weekly(every other week) online appointments."
+      ]
+    },
+    "48": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Hello, my name is Rose and I love the fact you have squishmallows as therapy tools, would you be available for a consultation?",
+          "distance": 2.4426741518368544e-08
+        }
+      ],
+      "all_texts": [
+        "Hello, my name is Rose and I love the fact you have squishmallows as therapy tools, would you be available for a consultation?"
+      ]
+    },
+    "21": {
+      "size": 2,
+      "percentage": 0.8928571428571428,
+      "representative_samples": [
+        {
+          "text": "hi! are you currently accepting new clients? I'd love to set up an initial consultation to see if we might be a good fit.",
+          "distance": 0.485668420791626
+        },
+        {
+          "text": "Good morning, Are you taking more clients? Do you accept anthem insurance?",
+          "distance": 0.485668420791626
+        }
+      ],
+      "all_texts": [
+        "hi! are you currently accepting new clients? I'd love to set up an initial consultation to see if we might be a good fit.",
+        "Good morning, Are you taking more clients? Do you accept anthem insurance?"
+      ]
+    },
+    "12": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Hi, my daughter Ava, is a great kid but she is in a unhealthy relationship with her ex boyfriend. She is starting to experiment with alcohol and drugs. We have a great relationship but she doesn't really want to hear what I have to say or doesn't want to tell me most things.",
+          "distance": 2.6590122104153124e-08
+        }
+      ],
+      "all_texts": [
+        "Hi, my daughter Ava, is a great kid but she is in a unhealthy relationship with her ex boyfriend. She is starting to experiment with alcohol and drugs. We have a great relationship but she doesn't really want to hear what I have to say or doesn't want to tell me most things."
+      ]
+    },
+    "39": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "There are little characteristics that my daughter has always had that raise a flag that she may be on the spectrum. She is very functioning. Some of these characteristics, I know I had as well, maybe still have but push them down. Booking the next session for myself.",
+          "distance": 2.3786531855307658e-08
+        }
+      ],
+      "all_texts": [
+        "There are little characteristics that my daughter has always had that raise a flag that she may be on the spectrum. She is very functioning. Some of these characteristics, I know I had as well, maybe still have but push them down. Booking the next session for myself."
+      ]
+    },
+    "46": {
+      "size": 1,
+      "percentage": 0.4464285714285714,
+      "representative_samples": [
+        {
+          "text": "Henry, his mom and I just moved to STL. H is in 3rd grade at Villa di Maria Montessori. His prior, public school experience in Naples FL was cruel and lame, not a good cultural fit for us either. Last December diagnosed 2e with ADHD & APD. Villa di Maria says social issues are holding him back. He is hypersensitive; rejection sensitive dysphoria sounds like him. Henry has Kinefelter syndrome. Appears typically abled. Eager to create ours and Henry's playbook!",
+          "distance": 2.3896788547972392e-08
+        }
+      ],
+      "all_texts": [
+        "Henry, his mom and I just moved to STL. H is in 3rd grade at Villa di Maria Montessori. His prior, public school experience in Naples FL was cruel and lame, not a good cultural fit for us either. Last December diagnosed 2e with ADHD & APD. Villa di Maria says social issues are holding him back. He is hypersensitive; rejection sensitive dysphoria sounds like him. Henry has Kinefelter syndrome. Appears typically abled. Eager to create ours and Henry's playbook!"
+      ]
+    }
+  }
+}

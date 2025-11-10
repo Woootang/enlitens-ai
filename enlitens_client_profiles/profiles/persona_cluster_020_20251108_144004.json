@@ -1,0 +1,161 @@
+{
+  "meta": {
+    "profile_id": "cluster-027-persona",
+    "persona_name": "Anxious and Emotional Young Child",
+    "persona_tagline": "Smart, sensitive, and struggling with big emotions and separation anxiety.",
+    "created_at": "2025-11-08 20:39:51.636148",
+    "source_documents": [
+      "cluster_27",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "emotional",
+      "anxiety",
+      "night terrors",
+      "separation anxiety",
+      "intelligent"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "6-8",
+    "gender": "Male",
+    "pronouns": "He/Him",
+    "orientation": null,
+    "ethnicity": null,
+    "current_life_situation": "Elementary school student living with parents.",
+    "occupation": "Student",
+    "education": "2nd Grade",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": []
+  },
+  "developmental_story": {
+    "childhood_environment": "Dylan was raised in a loving but somewhat anxious household. Both parents work full-time and strive to provide a stable environment, but their own anxieties often seep into their parenting. The home is filled with books and educational toys, reflecting the parents' emphasis on intelligence and learning. There's a pressure to excel, subtly communicated, that adds to Dylan's stress. Bedtime routines are inconsistent, contributing to sleep disturbances.",
+    "adolescence": "N/A",
+    "early_adulthood": "N/A",
+    "family_structure": "Dylan lives with his mom and dad. He is an only child.",
+    "formative_adversities": [
+      "Inconsistent bedtime routines",
+      "Subtle pressure to excel academically",
+      "Exposure to parental anxiety"
+    ],
+    "educational_journey": "Dylan started kindergarten feeling excited but quickly became overwhelmed by the structure and social demands. He thrives when given individual attention and struggles in large group settings. He is bright and grasps concepts quickly, but his anxiety sometimes interferes with his ability to focus and complete tasks. He has had a few minor incidents at school where he became overwhelmed and had meltdowns.",
+    "pivotal_moments": [
+      "Starting kindergarten and experiencing sensory overload.",
+      "A family vacation where he was separated from his parents for a short time and experienced intense panic.",
+      "A classroom incident where he couldn't answer a question and felt deeply embarrassed.",
+      "Witnessing his parents argue, which triggered intense anxiety and fear of abandonment."
+    ],
+    "intergenerational_patterns": "Dylan's mother has a history of anxiety and perfectionism, which she unknowingly passes on to Dylan through her parenting style. His father tends to avoid conflict, leaving Dylan feeling unsupported when he expresses big emotions."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible sensory processing sensitivity"
+    ],
+    "diagnosis_journey": "Dylan has not yet been formally diagnosed with any neurodivergent conditions. The parents are seeking therapy to address his anxiety, separation anxiety, and night terrors. There is a suspicion that he might be highly sensitive, but more assessment is needed.",
+    "how_it_shows_up": "Dylan is very emotional and has a hard time dealing with anger and stress. He experiences night terrors and separation anxiety. He is also very intelligent and kind.",
+    "nervous_system_pattern": "Highly reactive and easily overwhelmed. Tends to be in a state of high alert, scanning for potential threats. Difficulty regulating emotions and calming down once escalated.",
+    "strengths_superpowers": [
+      "High intelligence",
+      "Exceptional empathy",
+      "Strong sense of justice",
+      "Creative problem-solving"
+    ],
+    "current_coping_strategies": [
+      "Seeking reassurance from parents",
+      "Avoiding situations that trigger anxiety",
+      "Withdrawing when overwhelmed",
+      "Having emotional outbursts"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong working memory for things he's interested in",
+      "Good at understanding complex concepts"
+    ],
+    "ef_friction_points": [
+      "Difficulty with transitions",
+      "Trouble regulating emotions",
+      "Poor impulse control when anxious",
+      "Difficulty focusing in noisy environments"
+    ],
+    "ef_workarounds": [
+      "Using visual timers to prepare for transitions",
+      "Having a designated quiet space to retreat to",
+      "Practicing deep breathing exercises with parents"
+    ],
+    "sensory_profile": "Highly sensitive to loud noises, bright lights, and scratchy clothing. Prefers soft, comfortable textures. Easily overwhelmed by crowded places and strong smells. Seeks out sensory input like swinging or cuddling to self-soothe.",
+    "food_sensory_details": "Avoids foods with mixed textures, like casseroles or stews. Dislikes anything slimy or mushy, like cooked spinach or overripe bananas. Safe foods include: plain, dry Cheerios (specifically the original kind), lightly salted potato chips (Lay's brand), grilled cheese sandwiches made with white bread and American cheese (crusts cut off), and apple slices (peeled). He will only eat chicken if it's grilled, cut into small pieces, and served at room temperature. He skips meals when overwhelmed by anxiety."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a two-story house in a quiet, tree-lined street in Webster Groves, MO.",
+    "work_school_situation": "Attends second grade at a local elementary school. Struggles with the noise and social demands of the classroom.",
+    "commute_daily_rhythms": "Wakes up early, often after a night terror. Gets dressed with some prompting from his parents. Eats a small breakfast of Cheerios. Rides the bus to school, which he finds stressful due to the noise and crowds. Spends the day trying to manage his anxiety and focus on his schoolwork. Comes home, does homework (often with resistance), eats dinner, and tries to wind down before bedtime. Bedtime is often a struggle due to his anxiety.",
+    "local_stressors": [
+      "School environment",
+      "Bus rides",
+      "Social situations",
+      "Family disagreements"
+    ],
+    "safe_spaces": [
+      "His bedroom",
+      "His grandmother's house",
+      "The library"
+    ],
+    "support_system": "Parents, grandparents, family pediatrician."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Parents are concerned about Dylan's emotional struggles, night terrors, and separation anxiety. They want to find strategies to help him manage his emotions and improve his overall well-being. The pediatrician recommended seeking professional help.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and night terrors",
+      "Improve emotional regulation",
+      "Increase independence and reduce separation anxiety",
+      "Develop coping strategies for managing stress"
+    ],
+    "whats_in_the_way": [
+      "Dylan's sensitivity and reactivity",
+      "Parental anxiety and inconsistent parenting strategies",
+      "School environment",
+      "Lack of coping skills"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "He has a hard time dealing with anger and stress.",
+    "quote_hope": "He is so intelligent and kind.",
+    "quotes_additional": [
+      "He has been having night terrors and does have separation anxiety.",
+      "He\u2019s a very emotional kid but so smart."
+    ],
+    "liz_clinical_narrative": "Dylan is a bright and sensitive young boy who is struggling with significant anxiety. His night terrors and separation anxiety are impacting his daily life and causing distress for both him and his parents. It's clear that Dylan needs support in developing emotional regulation skills and learning coping strategies to manage his anxiety. A neurodivergent-affirming approach will be essential to validating his experiences and helping him understand his unique sensitivities. Working with the parents to create a more consistent and supportive home environment will also be crucial for Dylan's success. By focusing on his strengths and providing him with a safe and understanding space, we can help Dylan build resilience and thrive.",
+    "therapy_preferences": "Play therapy, parent-child therapy, cognitive behavioral therapy (CBT) techniques adapted for children, sensory integration activities."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your child struggling with big emotions and anxiety?",
+      "We provide neurodivergent-affirming therapy for children and families in St. Louis.",
+      "Help your child develop emotional regulation skills and build resilience."
+    ],
+    "primary_keywords": [
+      "child anxiety therapy",
+      "night terrors",
+      "separation anxiety",
+      "emotional regulation",
+      "neurodivergent therapy St. Louis",
+      "child therapist Webster Groves"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "St. Louis County",
+      "Kirkwood",
+      "Rock Hill"
+    ],
+    "content_angles": [
+      "How to help your child manage anxiety",
+      "Understanding night terrors in children",
+      "The benefits of neurodivergent-affirming therapy",
+      "Creating a calming environment for sensitive children"
+    ]
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "profile_id": "cluster-029-persona",
+    "persona_name": "Overwhelmed & Overcommitted: The 'Next Right Thing' Seeker",
+    "persona_tagline": "Drowning in the present, seeking clarity and a path forward.",
+    "created_at": "2025-11-08 20:40:20.032771",
+    "source_documents": [
+      "cluster_29",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "Anxiety",
+      "Overwhelmed",
+      "Intrusive Thoughts",
+      "Late Diagnosis",
+      "Seeking Direction"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "41-42",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Feels overwhelmed by life; seeking better functionality and presence.",
+    "occupation": "Likely a professional or skilled worker based on concerns about falling behind and wanting to live more functionally.",
+    "education": "Likely at least a Bachelor's degree, possibly higher, given the language and profession implied.",
+    "locality": "St. Louis, MO",
+    "cultural_faith_identities": []
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class suburban environment. Parents were present but emotionally distant, prioritizing achievement and outward appearances over emotional needs. A younger sibling required significant parental attention due to chronic illness, leaving her feeling overlooked and responsible.",
+    "adolescence": "Developed anxiety in high school, initially attributed to academic pressure. Excelled in school but struggled with social anxiety and a feeling of never quite fitting in. Started developing perfectionistic tendencies to compensate for perceived shortcomings. Early experimentation with ways to self-soothe \u2013 food, over-achieving, controlling environments.",
+    "early_adulthood": "Attended a prestigious university, experiencing intense pressure to succeed. Developed a pattern of overcommitting to extracurricular activities and academic pursuits, leading to periods of burnout. Started experiencing depressive episodes, which were dismissed as stress-related. Met her future husband and began building a life based on perceived stability and societal expectations.",
+    "family_structure": "Two parents, younger sibling with health challenges. Married with no children (inferred, as not mentioned in intakes, but likely given the feeling of being overwhelmed).",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Sibling's chronic illness and associated family stress",
+      "High-pressure academic environment",
+      "Late diagnosis of ADHD",
+      "Feeling of never being 'good enough'"
+    ],
+    "educational_journey": "Successful academic career, excelling in high school and attending a prestigious university. Pattern of overachievement masked underlying struggles with ADHD and anxiety.",
+    "pivotal_moments": [
+      "Sibling's diagnosis: shifted family dynamic and her role within it.",
+      "University burnout: realization that her coping mechanisms were unsustainable.",
+      "Marriage: initially provided stability but later became a source of pressure and unmet needs.",
+      "Job change: triggered a significant increase in stress and feelings of inadequacy.",
+      "ADHD diagnosis: provided a framework for understanding her lifelong struggles but also created a sense of grief and loss for lost potential."
+    ],
+    "intergenerational_patterns": "Mother likely displayed similar tendencies towards perfectionism and anxiety, modeling a pattern of suppressing emotions and prioritizing achievement. Possible undiagnosed neurodivergence in the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety",
+      "Depression",
+      "Intrusive Thoughts"
+    ],
+    "diagnosis_journey": "Suspected ADHD for years but dismissed it due to academic success. Recent increase in overwhelm and intrusive thoughts prompted her to seek professional evaluation. Diagnosis provided validation but also triggered feelings of grief and regret for missed opportunities and years of struggle. Now grappling with understanding how ADHD has shaped her life and relationships.",
+    "how_it_shows_up": "Constant overwhelm, difficulty focusing, procrastination, impulsivity, racing thoughts, intrusive thoughts (particularly about world events), anxiety, depression, feeling like she's falling behind, difficulty managing time and priorities.",
+    "nervous_system_pattern": "High-strung, easily overwhelmed, tendency towards fight-or-flight response. Difficulty regulating emotions, particularly anxiety and frustration. Prone to sensory overload and shutdown.",
+    "strengths_superpowers": [
+      "High intelligence",
+      "Strong work ethic (when able to focus)",
+      "Creativity",
+      "Empathy",
+      "Resilience",
+      "Ability to hyperfocus on tasks that interest her"
+    ],
+    "current_coping_strategies": [
+      "Overcommitting to tasks to feel productive",
+      "Perfectionism",
+      "Avoidance",
+      "Seeking external validation",
+      "Using social media for distraction",
+      "Ruminating on negative thoughts",
+      "Difficulty asking for help"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Quick thinking",
+      "Problem-solving in urgent situations",
+      "Creativity",
+      "Hyperfocus on preferred tasks"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Prioritization",
+      "Organization",
+      "Working memory",
+      "Emotional regulation",
+      "Impulse control",
+      "Filtering distractions",
+      "Planning and execution"
+    ],
+    "ef_workarounds": [
+      "Lists (often abandoned)",
+      "Calendar reminders (often ignored)",
+      "Trying different productivity apps (rarely sticking with one)",
+      "Seeking external accountability (sporadically effective)"
+    ],
+    "sensory_profile": "Sensitive to loud noises, bright lights, and strong smells. Prefers soft fabrics and comfortable clothing. Finds repetitive sounds soothing (e.g., rain, white noise). Tactile defensiveness related to certain textures.",
+    "food_sensory_details": "Avoids foods with slimy or mushy textures like cooked mushrooms or overripe bananas. Dislikes mixed textures, such as casseroles or stews. Prefers foods that are easily identifiable and separate. Safe foods include: plain pasta with butter and parmesan cheese (specific brand of parmesan), air-popped popcorn with a light sprinkle of salt, grilled chicken breast (only if cooked thoroughly and not dry), and certain brand of yogurt tubes (kept very cold). Skips meals when overwhelmed or anxious, leading to blood sugar crashes and increased irritability. Binge eats on crunchy snacks (specifically potato chips and pretzels) when stressed."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban St. Louis, likely in a two-story home with a small yard. Feels disconnected from nature and yearns for a more peaceful environment.",
+    "work_school_situation": "Employed in a professional role (e.g., marketing, finance, education) requiring significant attention to detail and project management. Feels overwhelmed by workload and expectations. Considering a career change but fears the uncertainty.",
+    "commute_daily_rhythms": "Commutes 30-45 minutes each way, often feeling stressed and anxious about traffic. Spends most of the day in front of a computer, attending meetings and responding to emails. Struggles to find time for self-care or relaxation.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living",
+      "Competitive job market",
+      "Political polarization",
+      "Social isolation"
+    ],
+    "safe_spaces": [
+      "Her bedroom (when clean and organized)",
+      "Local library",
+      "Certain coffee shop with quiet atmosphere",
+      "Spending time with close friends (when able to schedule it)"
+    ],
+    "support_system": "Limited support system. Husband is supportive but struggles to understand her ADHD and anxiety. Has a few close friends but finds it difficult to maintain regular contact due to time constraints and social anxiety."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling overwhelmed, struggling with intrusive thoughts, and wanting to live a more functional, present, and confident life.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overwhelm",
+      "Develop better coping mechanisms for ADHD",
+      "Improve time management and organization skills",
+      "Increase self-confidence",
+      "Live more presently",
+      "Find more joy and fulfillment in life",
+      "Navigate next right things"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of failure",
+      "Difficulty asking for help",
+      "Lack of self-compassion",
+      "Executive dysfunction",
+      "Anxiety",
+      "Intrusive thoughts",
+      "Limited support system",
+      "Overcommitment",
+      "Burnout"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I feel like I am drowning, and I need help figuring out how to live my life in a more functional, present, and confident way.",
+    "quote_hope": "Looking for an initial consult, price and whatever else I need to do to keep this ball rolling, before I lose motivation.",
+    "quotes_additional": [
+      "Lately, I am constantly overwhelmed and feel like I am falling behind, regardless of whether I am making 'progress' at all.",
+      "I have had a lot of life, much of which I don't remember, and need someone to help navigate how to do the next right things."
+    ],
+    "liz_clinical_narrative": "It sounds like you're carrying a heavy load, and it's completely understandable that you're feeling overwhelmed. Your journey through life, particularly with a late ADHD diagnosis, has likely been marked by both strengths and significant challenges. We can work together to unpack those experiences, understand how ADHD is impacting your current life, and develop strategies to manage your anxiety, intrusive thoughts, and executive functioning challenges. My goal is to create a safe and supportive space where you can explore your emotions, build self-compassion, and discover your own path towards a more fulfilling and present life. We can focus on practical tools and strategies, as well as addressing the deeper emotional roots of your struggles. Let's find your 'next right things' together.",
+    "therapy_preferences": "Prefers text or email communication. Open to virtual or in-person visits. Not concerned with cost."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you feeling overwhelmed and struggling to keep up? Our neurodivergent-affirming therapy can help you develop strategies to manage ADHD, anxiety, and intrusive thoughts.",
+      "Do you feel like you're constantly falling behind, despite your best efforts? We understand the unique challenges faced by adults with ADHD and offer compassionate support to help you live a more functional and present life.",
+      "Looking for a therapist who understands the complexities of late-diagnosed ADHD? We provide a safe and supportive space for you to explore your experiences and develop coping mechanisms that work for you."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety therapy St. Louis",
+      "Neurodivergent therapy St. Louis",
+      "Adult ADHD treatment",
+      "Intrusive thoughts therapy",
+      "Overwhelm management",
+      "Executive dysfunction therapy",
+      "Late diagnosis ADHD"
+    ],
+    "local_entities": [
+      "Clayton",
+      "Kirkwood",
+      "Webster Groves",
+      "Ladue",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "Understanding and managing intrusive thoughts with ADHD",
+      "Practical strategies for improving time management and organization with ADHD",
+      "The emotional impact of a late ADHD diagnosis and how to cope",
+      "How to build self-compassion and overcome perfectionism with ADHD"
+    ]
+  }
+}

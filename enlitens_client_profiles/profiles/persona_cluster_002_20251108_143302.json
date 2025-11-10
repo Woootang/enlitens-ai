@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "profile_id": "cluster-002-persona",
+    "persona_name": "The Overwhelmed ADHD Grad Student",
+    "persona_tagline": "Navigating academic pressures and the complexities of ADHD.",
+    "created_at": "2025-11-08 20:32:45.278100",
+    "source_documents": [
+      "cluster_2",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "Grad Student",
+      "Anxiety",
+      "Executive Dysfunction",
+      "Trauma"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "24-28",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Interning PsyD student",
+    "occupation": "PsyD Student, Therapy Intern",
+    "education": "Doctoral Student",
+    "locality": "St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class, suburban home. Parents were loving but often busy and stressed. High expectations were placed on academic performance. Her ADHD went undiagnosed, leading to feelings of inadequacy and being 'lazy' despite working hard.",
+    "adolescence": "Developed strong perfectionistic tendencies to compensate for ADHD symptoms. Faced increased academic pressure in high school, leading to anxiety and social isolation. Experienced bullying due to being perceived as 'different' or 'weird.' Started self-medicating with caffeine and sugar to focus.",
+    "early_adulthood": "Excelled academically in undergrad through sheer force of will and all-nighters. Chose psychology as a major to understand herself and others. Experienced burnout during senior year. Applied to PsyD programs, driven by a desire to help others but also feeling immense pressure to succeed.",
+    "family_structure": "Two-parent household. One younger brother who was considered the 'easy' child. Parents are still married but have a strained relationship.",
+    "formative_adversities": [
+      "Undiagnosed ADHD leading to feelings of inadequacy",
+      "Bullying in high school",
+      "Academic Burnout in undergrad",
+      "Perfectionism",
+      "Financial stress of graduate school"
+    ],
+    "educational_journey": "Attended high-achieving public schools. Excelled in undergrad despite ADHD challenges, graduating with honors. Currently in a rigorous PsyD program with high demands.",
+    "pivotal_moments": [
+      "Receiving an ADHD diagnosis during her PsyD program",
+      "Experiencing burnout during her senior year of undergrad",
+      "A particularly hurtful bullying incident in high school that solidified her feelings of being 'different'",
+      "The realization that she was drawn to psychology to understand her own struggles",
+      "The moment she decided to pursue a PsyD, feeling both excitement and overwhelming pressure"
+    ],
+    "intergenerational_patterns": "Her mother is suspected to have undiagnosed ADHD, exhibiting similar tendencies towards disorganization and impulsivity. There is a family history of anxiety and depression."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety",
+      "Possible Depression"
+    ],
+    "diagnosis_journey": "Suspected ADHD for years, but dismissed it due to academic success. Symptoms became unmanageable during her PsyD program, leading to a formal diagnosis. Felt a mix of relief and anger, realizing how much she had struggled unnecessarily.",
+    "how_it_shows_up": "Executive dysfunction impacts her ability to manage deadlines, organize her time, and stay focused during classes and therapy sessions. Anxiety manifests as excessive worry, rumination, and panic attacks. Struggles with emotional regulation and impulsivity in interpersonal relationships. Feels like an imposter in her program.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Prone to hyperarousal and difficulty relaxing. Seeks stimulation to focus but quickly becomes overstimulated. Has a tendency to people-please and avoid conflict, leading to emotional exhaustion.",
+    "strengths_superpowers": [
+      "High intelligence and analytical skills",
+      "Empathy and compassion for others",
+      "Creative problem-solving abilities",
+      "Strong work ethic (when properly motivated)",
+      "Deep understanding of psychological concepts"
+    ],
+    "current_coping_strategies": [
+      "Caffeine consumption",
+      "Procrastination followed by frantic last-minute work",
+      "Avoidance of challenging tasks",
+      "Seeking validation from others",
+      "Isolating herself when overwhelmed"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "High intelligence",
+      "Creative thinking",
+      "Problem-solving",
+      "Hyperfocus on topics of interest"
+    ],
+    "ef_friction_points": [
+      "Time management",
+      "Organization",
+      "Planning and prioritizing",
+      "Task initiation",
+      "Sustaining focus",
+      "Emotional regulation",
+      "Impulsivity"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars and to-do lists (that she often forgets to check)",
+      "Setting alarms and reminders (that she often ignores)",
+      "Trying to body double with friends (inconsistently effective)",
+      "Relying on external pressure to meet deadlines"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights, leading to sensory overload in crowded environments. Seeks tactile stimulation through fidget toys and stimming behaviors (e.g., leg shaking, hair twirling). Can become easily irritated by certain textures and smells.",
+    "food_sensory_details": "Avoids foods with mixed textures, such as casseroles or stews. Dislikes anything overly mushy or slimy. Safe foods include plain pasta with butter, lightly salted potato chips (Lay's Classic), and room-temperature, grilled chicken breast (especially from Chick-Fil-A). Struggles with meal planning and often skips meals when stressed or overwhelmed. Binge eats on sugary snacks (specifically sour gummy worms and chocolate chip cookies) when feeling anxious or burnt out. Can only drink iced coffee if it's from Starbucks and has a specific ratio of milk to espresso."
+  },
+  "current_life_context": {
+    "where_they_live": "Rents a small apartment near campus in the Central West End, St. Louis.",
+    "work_school_situation": "Full-time PsyD student and therapy intern at a local community mental health center. Working long hours and feeling overwhelmed by the demands of the program and internship.",
+    "commute_daily_rhythms": "Commutes by car to campus and her internship, battling traffic and parking challenges. Daily routine involves attending classes, seeing clients, completing coursework, and trying to find time for self-care (often unsuccessfully).",
+    "local_stressors": [
+      "High cost of living in St. Louis",
+      "Competitive academic environment",
+      "Traffic congestion",
+      "Lack of affordable and accessible mental health resources",
+      "Pressure to succeed and maintain a perfect image"
+    ],
+    "safe_spaces": [
+      "Her apartment (when clean and organized)",
+      "A quiet corner in the university library",
+      "Spending time with her cat",
+      "Going for walks in Forest Park"
+    ],
+    "support_system": "Limited support system. Has a few close friends from her program, but they are all equally stressed and overwhelmed. Her family is supportive but lives out of state and doesn't fully understand her struggles. Feels isolated and alone."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Recognizes that her ADHD is significantly impacting her academic performance, internship, and overall well-being. Seeking therapy to develop coping strategies, manage anxiety, and improve her executive functioning skills. 'I'm really struggling with my own adhd. I'm looking for a therapist that can help me do manage my adhd'",
+    "what_they_want_to_change": [
+      "Improve time management and organization skills",
+      "Reduce anxiety and stress levels",
+      "Develop healthier coping mechanisms",
+      "Improve emotional regulation",
+      "Increase self-compassion and reduce self-criticism",
+      "Feel more confident and competent as a therapist"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of failure",
+      "Lack of self-compassion",
+      "Executive dysfunction challenges",
+      "Anxiety",
+      "Limited time and energy",
+      "Financial constraints",
+      "Stigma surrounding mental health",
+      "Difficulty asking for help"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I'm really struggling with my own adhd.",
+    "quote_hope": "I'm looking for a therapist that can help me do manage my adhd",
+    "quotes_additional": [
+      "It's been a little while since I was in therapy and I really feel like I need to go back.",
+      "I just need to talk a lot of that out."
+    ],
+    "liz_clinical_narrative": "It sounds like you're carrying a heavy load, juggling the demands of a rigorous PsyD program with the everyday challenges of ADHD. It's completely understandable that you're feeling overwhelmed. It takes incredible strength to recognize when you need support, and I commend you for reaching out. Together, we can explore practical strategies to manage your executive functioning challenges, develop healthier coping mechanisms for anxiety, and cultivate greater self-compassion. My goal is to provide a safe and affirming space where you can explore your experiences, build resilience, and thrive both personally and professionally. Remember, you are not alone in this journey, and your struggles do not define your potential as a future therapist.",
+    "therapy_preferences": "Seeking a therapist who specializes in ADHD and understands the unique challenges faced by graduate students. Prefers a compassionate and collaborative approach with practical strategies and tools. Values a therapist who is neurodivergent-affirming and non-judgmental."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a graduate student struggling with ADHD? You're not alone. Enlitens offers neurodivergent-affirming therapy to help you thrive.",
+      "Feeling overwhelmed by academic demands and ADHD challenges? Our therapists understand the unique struggles you face.",
+      "Develop practical coping strategies, manage anxiety, and improve executive functioning skills with our specialized ADHD therapy for graduate students."
+    ],
+    "primary_keywords": [
+      "ADHD therapy",
+      "graduate student",
+      "anxiety",
+      "executive dysfunction",
+      "St. Louis",
+      "neurodivergent-affirming",
+      "therapy intern"
+    ],
+    "local_entities": [
+      "Central West End",
+      "Washington University in St. Louis",
+      "St. Louis University",
+      "Forest Park",
+      "Barnes-Jewish Hospital"
+    ],
+    "content_angles": [
+      "How to manage ADHD while in graduate school",
+      "The unique challenges of ADHD for therapy interns",
+      "Neurodivergent-affirming therapy for overwhelmed students"
+    ]
+  }
+}

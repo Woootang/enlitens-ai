@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "profile_id": "cluster-030-persona",
+    "persona_name": "The Hopeful and Exhausted Parent",
+    "persona_tagline": "Seeking support and strategies to help my child thrive.",
+    "created_at": "2025-11-08 20:38:31.643362",
+    "source_documents": [
+      "cluster_30",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "child",
+      "parenting",
+      "anger management",
+      "seeking therapy"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of one or more children",
+    "occupation": "Part-time employee or stay-at-home parent",
+    "education": "Some college or Bachelor's degree",
+    "locality": "Suburban St. Louis County",
+    "cultural_faith_identities": [
+      "Christian (cultural)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Sarah grew up in a middle-class household. Her father worked long hours, and her mother was the primary caregiver. While the family was financially stable, emotional expression was limited. Sarah often felt unseen and unheard, internalizing her emotions.",
+    "adolescence": "Sarah struggled with social anxiety in high school. She excelled academically but felt like an outsider. She found solace in books and developed a strong sense of empathy for others. She had a few close friends, but often felt overwhelmed by social situations.",
+    "early_adulthood": "Sarah attended a local university, where she initially thrived. However, the pressure to choose a career path led to anxiety and self-doubt. She changed her major several times before graduating with a degree in education. She worked as a teacher for a few years before deciding to stay home with her children.",
+    "family_structure": "Sarah was raised by both parents in a relatively stable home. She has one younger brother, with whom she has a strained relationship due to past conflicts and unresolved issues. Her parents are still married but have a somewhat distant relationship.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Social anxiety in adolescence",
+      "Postpartum depression after the birth of her first child"
+    ],
+    "educational_journey": "Attended public schools, struggled with social anxiety, excelled academically, changed majors several times in college before graduating with a degree in education.",
+    "pivotal_moments": [
+      "Birth of her son and realizing how challenging parenting can be",
+      "Her son's ADHD diagnosis and the realization that she needed to seek help for him",
+      "Witnessing her husband attend therapy and seeing the positive impact it had on him"
+    ],
+    "intergenerational_patterns": "Sarah's mother also struggled with anxiety and depression, although it was never formally diagnosed. Sarah is determined to break this cycle and provide her son with the emotional support she lacked as a child."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Parent of a child with ADHD",
+      "Anxiety",
+      "Potential for undiagnosed ADHD herself"
+    ],
+    "diagnosis_journey": "Her son was diagnosed with ADHD at age 7 after struggling in school and exhibiting hyperactive and impulsive behaviors at home. The diagnosis process involved consultations with a pediatrician, psychologist, and educational specialist. Sarah is now wondering if she may also have ADHD.",
+    "how_it_shows_up": "Worries constantly about her son's well-being and future. Feels overwhelmed by the demands of parenting and household management. Struggles with emotional regulation, especially anger and frustration. Tends to overthink situations and catastrophize.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tendency to be hypervigilant and reactive to perceived threats. Difficulty relaxing and unwinding.",
+    "strengths_superpowers": [
+      "Highly empathetic and compassionate",
+      "Dedicated and loving parent",
+      "Strong sense of responsibility",
+      "Creative problem-solver"
+    ],
+    "current_coping_strategies": [
+      "Scrolling social media to de-stress",
+      "Relying on caffeine to get through the day",
+      "Avoiding difficult conversations",
+      "Seeking support from other parents in online forums"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strong long-term memory",
+      "Ability to hyperfocus on tasks of interest",
+      "Creative problem-solving skills"
+    ],
+    "ef_friction_points": [
+      "Difficulty with task initiation",
+      "Poor time management",
+      "Procrastination",
+      "Emotional dysregulation"
+    ],
+    "ef_workarounds": [
+      "Using a planner to schedule tasks",
+      "Setting timers to stay on track",
+      "Breaking down large tasks into smaller, more manageable steps"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Enjoys nature and spending time outdoors. Finds repetitive movements calming.",
+    "food_sensory_details": "Dislikes mushy textures, like cooked spinach or overripe bananas. Safe foods include: crunchy peanut butter on whole wheat toast, air-popped popcorn with a little salt, and grilled chicken breast, cut into small pieces. Avoids foods with artificial colors and flavors, as they seem to exacerbate her son's hyperactivity. Skips meals when stressed but craves sugary snacks when feeling down."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban home in St. Louis County with a small yard. Close to parks and schools.",
+    "work_school_situation": "Works part-time from home as a freelance writer/editor, balancing work with childcare responsibilities.",
+    "commute_daily_rhythms": "Primarily stays at home, with occasional trips to the grocery store, school, or extracurricular activities. Feels isolated and longs for more social interaction.",
+    "local_stressors": [
+      "High cost of living",
+      "Competitive school environment",
+      "Traffic congestion"
+    ],
+    "safe_spaces": [
+      "Her bedroom, a quiet corner in the library, a local park"
+    ],
+    "support_system": "Limited support system. Relies primarily on her husband for emotional support, but he is often busy with work. Connects with other parents online but lacks close, in-person friendships."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Her son asked her to find him a therapist because his dad goes, and he has seen the positive effects. She also wants to help her son cope with his anger management issues.",
+    "what_they_want_to_change": [
+      "Help her son manage his anger and improve his behavior",
+      "Gain tools and strategies to support her son's ADHD",
+      "Improve her own emotional regulation and reduce stress",
+      "Feel more confident and capable as a parent"
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy",
+      "Financial constraints",
+      "Fear of judgment from others",
+      "Difficulty asking for help"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I have a 9 year old who asked me tonight to look for a therapist for him... so here I am lol",
+    "quote_hope": "His dad goes and he has seen it\u2019s effects.",
+    "quotes_additional": [
+      "I would like to have him seen by someone with experience helping children cope with anger management."
+    ],
+    "liz_clinical_narrative": "Sarah's journey is one of hope and exhaustion. She's navigating the complexities of parenting a child with ADHD while also grappling with her own unmet needs. She is demonstrating tremendous courage by seeking therapy for her son. It's likely she will also benefit from having a space to process her own experiences and learn coping strategies to manage her stress and anxiety. Validating her experiences, offering practical tools, and fostering a sense of community can empower Sarah to thrive as a parent and individual.",
+    "therapy_preferences": "Family-focused therapy, play therapy for her son, individual therapy for herself, strategies for managing anger and improving communication."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your child struggling with anger and ADHD? We can help.",
+      "Supporting families navigating neurodiversity in St. Louis.",
+      "Therapy for children and parents who are feeling overwhelmed."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "child anger management",
+      "parenting support",
+      "neurodiversity affirming therapy",
+      "therapy for kids"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Kirkwood",
+      "Webster Groves",
+      "Clayton"
+    ],
+    "content_angles": [
+      "How to manage anger outbursts in children with ADHD",
+      "The benefits of family therapy for neurodiverse families",
+      "Self-care tips for parents of children with ADHD"
+    ]
+  }
+}

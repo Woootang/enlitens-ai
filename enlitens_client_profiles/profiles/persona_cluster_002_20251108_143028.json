@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "profile_id": "cluster-002-persona",
+    "persona_name": "The Adult-Diagnosed Executive Function Struggler",
+    "persona_tagline": "Navigating adult life with newly realized ADHD.",
+    "created_at": "2025-11-08 20:30:10.064211",
+    "source_documents": [
+      "cluster_2",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "Adult Diagnosis",
+      "Executive Function",
+      "Anxiety",
+      "Depression"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, possibly in grad school or recently graduated.",
+    "occupation": "Psychology Intern/Student or young professional in a field requiring focus and organization.",
+    "education": "Master's or Doctoral Student, or Bachelor's degree",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a stable, middle-class household with involved parents. Was generally a 'good kid' who followed the rules and excelled academically, leading to ADHD symptoms being overlooked. Always felt like she had to work harder than others to achieve the same results. Family valued achievement and followed the rules.",
+    "adolescence": "High school was a mix of academic success and internal struggle. Started experiencing anxiety and self-doubt, especially when comparing herself to peers. Maintained good grades but often procrastinated and relied on last-minute cramming. Socially awkward and struggled with feeling like she fit in. Started to develop some perfectionist tendencies.",
+    "early_adulthood": "College was a turning point. The unstructured environment and increased demands led to feeling overwhelmed and burnt out. Started experiencing symptoms of depression and anxiety more frequently. Discovered unhealthy coping mechanisms like binge-eating and excessive screen time. Grad school, if applicable, exacerbated these issues.",
+    "family_structure": "Two parents, possibly one or two siblings. Parents are supportive but may not fully understand her struggles. Sibling dynamic may involve comparison and feeling inadequate. Possible that one parent also has undiagnosed ADHD.",
+    "formative_adversities": [
+      "Late ADHD Diagnosis",
+      "Academic Pressure",
+      "Social Isolation",
+      "Perfectionism",
+      "Executive Function Challenges"
+    ],
+    "educational_journey": "Successful throughout primary and secondary education. College and graduate school presented significant challenges due to executive function difficulties. Possibly experienced academic probation or near-failure at some point.",
+    "pivotal_moments": [
+      "Receiving the ADHD diagnosis in adulthood.",
+      "Realizing that her struggles are not due to laziness or lack of intelligence.",
+      "Experiencing a major burnout or breakdown.",
+      "Seeking therapy for the first time.",
+      "Finding online communities of other adults with ADHD."
+    ],
+    "intergenerational_patterns": "Potential for undiagnosed ADHD or other neurodivergence in family members. Generational tendency towards perfectionism, high achievement, and suppressing emotions."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Anxiety",
+      "Depression",
+      "Possible Sensory Processing Sensitivity"
+    ],
+    "diagnosis_journey": "Suspected ADHD for a while but dismissed it due to past academic success. Self-diagnosed based on online research and relatable experiences. Finally sought a formal evaluation after experiencing a significant decline in functioning and feeling overwhelmed. Diagnosis was validating but also brought up feelings of grief and anger about the missed opportunities and struggles of the past.",
+    "how_it_shows_up": "Difficulty focusing, especially on tasks that are not inherently interesting. Procrastination and avoidance. Time blindness. Difficulty with planning and organization. Impulsivity (spending, eating, talking). Emotional dysregulation. Rejection sensitive dysphoria. Anxiety and depression related to feeling like a failure. Sensory overload and sensitivity to noise and light.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tendency to overthink and ruminate. Difficulty relaxing and unwinding. May experience frequent headaches, stomachaches, or other stress-related physical symptoms. Can become easily irritable and reactive when overstimulated.",
+    "strengths_superpowers": [
+      "High intelligence and creativity.",
+      "Hyperfocus on areas of interest.",
+      "Strong empathy and compassion.",
+      "Ability to think outside the box.",
+      "Resilience and determination."
+    ],
+    "current_coping_strategies": [
+      "Procrastination.",
+      "Avoidance.",
+      "Binge-eating.",
+      "Excessive screen time.",
+      "Caffeine dependence.",
+      "Trying to 'power through' despite feeling overwhelmed.",
+      "Seeking external validation and approval."
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creativity, problem-solving when hyperfocused, empathy"
+    ],
+    "ef_friction_points": [
+      "Task initiation, time management, organization, planning, prioritization, working memory, emotional regulation, impulse control"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars and to-do lists (often unsuccessfully).",
+      "Setting alarms and reminders.",
+      "Body doubling with friends or online groups.",
+      "Breaking down tasks into smaller, more manageable steps.",
+      "Reward system for completing tasks (often inconsistent)."
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Dislikes scratchy fabrics and tags in clothing. Prefers soft, comfortable clothing. May have specific sensory seeking behaviors (e.g., fidgeting, stimming).",
+    "food_sensory_details": "Texture-sensitive: avoids anything with a slimy or mushy texture like cooked mushrooms or overripe bananas. Prefers foods with a satisfying crunch (chips, pretzels, raw carrots). Overly aware of strong smells, especially artificial flavors or preservatives. Safe foods: Plain Cheerios (specifically the yellow box), Pirate's Booty aged white cheddar puffs, chicken nuggets (only if McDonald's brand and freshly made), and room-temperature pasta with butter and salt. Often skips meals due to being engrossed in a task or overwhelmed by food choices, then binges on easily accessible snacks later."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment in a walkable neighborhood of St. Louis City or County, close to coffee shops and parks.",
+    "work_school_situation": "Working full-time in a demanding job or completing a rigorous graduate program. Feeling constantly stressed and overwhelmed by the demands of work/school and personal life. Struggling to maintain a healthy work-life balance.",
+    "commute_daily_rhythms": "Commute involves driving or public transportation. Listens to podcasts or audiobooks to distract from anxiety. Starts the day feeling behind and struggles to catch up throughout the day. Evenings are spent trying to unwind and prepare for the next day, but often ends up feeling exhausted and depleted.",
+    "local_stressors": [
+      "Traffic congestion.",
+      "Lack of affordable housing.",
+      "Pressure to succeed in a competitive environment.",
+      "Limited access to mental health resources."
+    ],
+    "safe_spaces": [
+      "Her apartment.",
+      "Local coffee shop.",
+      "Quiet park.",
+      "Online support groups."
+    ],
+    "support_system": "Limited support system. Has a few close friends but struggles to maintain relationships due to executive function difficulties. Family is supportive but may not fully understand her struggles. Could be longing for a supportive partner."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling overwhelmed and burnt out. Experiencing a significant decline in functioning. Seeking help to manage ADHD symptoms and improve overall quality of life. 'I really feel like I need to go back' to therapy.",
+    "what_they_want_to_change": [
+      "Improve executive function skills.",
+      "Manage anxiety and depression.",
+      "Develop healthier coping mechanisms.",
+      "Build stronger relationships.",
+      "Achieve a better work-life balance.",
+      "Reduce feelings of shame and self-doubt."
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy.",
+      "Financial constraints.",
+      "Fear of judgment.",
+      "Difficulty asking for help.",
+      "Internalized ableism.",
+      "Executive function challenges."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I'm really struggling with my own adhd...I just need to talk a lot of that out.",
+    "quote_hope": "If it sounds like I might be a good fit I'd love to just get started.",
+    "quotes_additional": [
+      "I am not familiar with the process of finding one and I am not sure what exactly I may need.",
+      "I have been diagnosed with ADHD since I was a kid but I think I may fit better with a spectrum diagnosis."
+    ],
+    "liz_clinical_narrative": "It sounds like you're carrying a heavy load right now, and I want to honor the strength it takes to reach out for support. You've navigated life with ADHD, perhaps without knowing the full picture, and now you're at a point where the strategies that once worked are no longer enough. We can work together to unpack the challenges you're facing, develop new coping mechanisms, and celebrate your unique strengths. My goal is to create a safe and affirming space where you can explore your neurodivergence, build self-compassion, and create a life that feels more manageable and fulfilling.",
+    "therapy_preferences": "Looking for a therapist specializing in ADHD, particularly in adults. Prefers email or text communication. Seeks in-person or telehealth options, depending on availability and needs. Values a therapist who is understanding, non-judgmental, and affirming of neurodiversity."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you an adult struggling with newly diagnosed or previously overlooked ADHD? We understand the unique challenges you face.",
+      "Feeling overwhelmed, anxious, or burnt out? Our neurodivergent-affirming therapists can help you develop strategies for managing your ADHD and living a more fulfilling life.",
+      "Ready to take the next step? Contact us today to schedule a consultation."
+    ],
+    "primary_keywords": [
+      "Adult ADHD therapy St. Louis",
+      "Executive function coaching St. Louis",
+      "Neurodiversity affirming therapist St. Louis",
+      "Anxiety and ADHD therapy",
+      "Late diagnosis ADHD support"
+    ],
+    "local_entities": [
+      "Clayton",
+      "Webster Groves",
+      "Kirkwood",
+      "Brentwood",
+      "Maplewood"
+    ],
+    "content_angles": [
+      "The unique challenges of adult ADHD diagnosis.",
+      "Strategies for managing executive function difficulties.",
+      "How to create a neurodivergent-affirming lifestyle.",
+      "The importance of self-compassion for adults with ADHD."
+    ]
+  }
+}

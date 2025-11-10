@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "profile_id": "cluster-037-persona",
+    "persona_name": "The Reassurance-Seeking Juggler",
+    "persona_tagline": "Just trying to keep all the balls in the air...and not drop the ball on seeking help.",
+    "created_at": "2025-11-08 20:42:24.743973",
+    "source_documents": [
+      "cluster_37",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "anxious",
+      "overthinking",
+      "perfectionistic",
+      "seeking reassurance"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "30-40",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, working professional",
+    "occupation": "Marketing Manager",
+    "education": "Master's Degree",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class, suburban home. Her parents were loving but had high expectations. Her mother was a stay-at-home mom who volunteered extensively, and her father was a driven executive. The home was generally stable, but achievement was highly valued, and mistakes were not often discussed.",
+    "adolescence": "High school was a constant pressure cooker. She excelled academically but felt immense pressure to maintain her GPA and participate in extracurriculars. She was a cheerleader and involved in student government. Developed early anxiety around college applications and 'measuring up'. Social life was based around performance and achievement rather than genuine connection.",
+    "early_adulthood": "College was a blur of late nights studying and trying to maintain a perfect image. She joined a sorority, further exacerbating her need to 'fit in' and perform. She felt immense pressure to secure a prestigious internship and then a high-paying job after graduation. Started experiencing panic attacks during her senior year, which she hid from everyone.",
+    "family_structure": "Two-parent household. One younger brother, who was often compared to her. Her parents are still married. A close-knit extended family with frequent gatherings.",
+    "formative_adversities": [
+      "Constant pressure to achieve",
+      "Emotional neglect due to parents' focus on achievement",
+      "Internalized pressure to be perfect",
+      "Panic attacks in college"
+    ],
+    "educational_journey": "Attended a highly competitive high school. Graduated with honors. Attended a prestigious university out of state. Received a Master's degree in Marketing.",
+    "pivotal_moments": [
+      "Realizing she was having panic attacks in college",
+      "Getting her first 'real' job and feeling completely overwhelmed",
+      "Getting married and realizing that her perfectionism was impacting her relationship",
+      "The birth of her first child and feeling completely inadequate as a mother",
+      "The constant need to compare herself to other moms on social media"
+    ],
+    "intergenerational_patterns": "Her mother also struggled with anxiety and perfectionism, which was never addressed. A family history of high-achievers with a strong emphasis on external validation."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (late-diagnosed)",
+      "Anxiety",
+      "Perfectionism"
+    ],
+    "diagnosis_journey": "Suspected something was 'off' for years, but dismissed it as 'stress' or 'being a perfectionist'. After struggling with post-partum anxiety, she finally sought help. Her therapist suggested she be evaluated for ADHD. The diagnosis was initially shocking but ultimately validating. She felt relief knowing there was a reason for her struggles.",
+    "how_it_shows_up": "Overthinking, constant worry, difficulty focusing, feeling overwhelmed easily, struggles with time management, difficulty relaxing, needs constant reassurance, fear of failure, comparing herself to others, difficulty initiating tasks, struggles with emotional regulation, hyperfocus on tasks that interest her.",
+    "nervous_system_pattern": "High-strung, easily overwhelmed, tendency towards freeze response when stressed, difficulty down-regulating, chronic tension in shoulders and neck.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Strong work ethic",
+      "Empathy",
+      "Hyperfocus on areas of interest",
+      "Problem-solving"
+    ],
+    "current_coping_strategies": [
+      "Overplanning",
+      "Seeking reassurance from others",
+      "Using social media to compare herself to others (which often backfires)",
+      "Caffeine",
+      "Trying to 'power through' difficulties",
+      "Retail therapy"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strategic thinking",
+      "Creative problem-solving",
+      "Ability to connect with people on an emotional level",
+      "Strong attention to detail (when focused)"
+    ],
+    "ef_friction_points": [
+      "Difficulty initiating tasks",
+      "Poor time management",
+      "Procrastination",
+      "Difficulty prioritizing tasks",
+      "Easily distracted",
+      "Trouble with transitions",
+      "Overwhelmed by large projects",
+      "Difficulty focusing on tasks she finds boring"
+    ],
+    "ef_workarounds": [
+      "Using multiple planners (digital and paper)",
+      "Setting alarms and reminders",
+      "Breaking down large tasks into smaller steps",
+      "Seeking accountability partners",
+      "Trying to delegate tasks when possible"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Enjoys textures like velvet and silk. Dislikes scratchy fabrics. Needs a calm, quiet environment to focus. Easily overstimulated in crowded places.",
+    "food_sensory_details": "Very particular about food textures. Avoids anything slimy or with visible fat. Only eats chicken if it's grilled, skinless, and cut into small pieces. Safe foods: plain Cheerios (must be in the yellow box), specific brand of Triscuits (the thin crisps only), room-temperature smoothies with very specific ingredients (banana, spinach, almond milk, protein powder - exact measurements are crucial). Will only eat fruit if it's perfectly ripe and not bruised. Cannot tolerate chunky soups or stews. Often skips meals when overwhelmed or stressed. Has a tendency to binge eat sugary snacks when feeling anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a renovated bungalow in Webster Groves, MO. Appreciates the walkable neighborhood and the proximity to local shops and restaurants.",
+    "work_school_situation": "Works full-time as a Marketing Manager for a local non-profit. Enjoys the work but feels constantly overwhelmed by the workload and the pressure to perform. Struggles to balance work and family life.",
+    "commute_daily_rhythms": "Drives to work, approximately a 20-minute commute each way. Listens to podcasts or audiobooks to try to relax during the drive. Feels stressed by the traffic and the pressure to be on time.",
+    "local_stressors": [
+      "Traffic on I-44",
+      "The pressure to keep up with other families in the neighborhood",
+      "The cost of living in Webster Groves",
+      "The constant construction in the area"
+    ],
+    "safe_spaces": [
+      "Her home (when it's clean and organized)",
+      "A quiet coffee shop in Kirkwood",
+      "Her backyard garden"
+    ],
+    "support_system": "Has a supportive husband, but often feels like she's carrying most of the mental load. Has a few close friends, but struggles to find time to connect with them. Her parents live nearby and are helpful with childcare, but can also be critical."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling increasingly overwhelmed and anxious. Wants to learn coping strategies for managing her ADHD and anxiety. Wants to improve her relationships and feel more present in her life. Realized she needed help when she started having panic attacks again and felt like she was 'losing it'.",
+    "what_they_want_to_change": [
+      "Reduce anxiety and overthinking",
+      "Improve focus and concentration",
+      "Develop better time management skills",
+      "Improve emotional regulation",
+      "Be more present with her children",
+      "Reduce feelings of guilt and inadequacy",
+      "Stop comparing herself to others",
+      "Set healthier boundaries"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of failure",
+      "Difficulty asking for help",
+      "Lack of time",
+      "Difficulty prioritizing self-care",
+      "Internalized beliefs about needing to be 'strong' and 'in control'",
+      "The belief that therapy is a sign of weakness"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I don't want to seem like a nut, but I did also send an inquiry on Psychology Today!",
+    "quote_hope": "I just want to feel like I can breathe again and enjoy my life.",
+    "quotes_additional": [],
+    "liz_clinical_narrative": "This client is likely experiencing a significant amount of anxiety and self-doubt. The act of sending multiple inquiries suggests a high level of anxiety and a need for reassurance that they are making the right decision. It's important to validate their feelings and create a safe space for them to explore their concerns. Addressing their perfectionistic tendencies and helping them develop self-compassion will be crucial. Therapy should focus on building coping skills for managing anxiety, improving self-esteem, and fostering a sense of self-acceptance. Exploring the root causes of their anxiety and addressing any underlying trauma will also be important.",
+    "therapy_preferences": "Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), mindfulness-based techniques, a therapist who is warm, empathetic, and non-judgmental."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you feeling overwhelmed and anxious, trying to juggle work, family, and everything in between?",
+      "Do you struggle with perfectionism and feel like you're never good enough?",
+      "Find relief from anxiety and learn to manage your ADHD symptoms with our neurodivergent-affirming therapy services."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety treatment Webster Groves",
+      "Perfectionism therapy",
+      "Late-diagnosed ADHD",
+      "Overwhelmed mom",
+      "Therapy for anxiety"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Clayton",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "The unique challenges of late-diagnosed ADHD in women",
+      "How perfectionism can fuel anxiety and burnout",
+      "Practical strategies for managing ADHD symptoms in daily life"
+    ]
+  }
+}

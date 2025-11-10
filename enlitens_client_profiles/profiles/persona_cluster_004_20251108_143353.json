@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "profile_id": "cluster-004-persona",
+    "persona_name": "Anxious Parent Advocate",
+    "persona_tagline": "Navigating neurodivergence in my child and family.",
+    "created_at": "2025-11-08 20:33:35.571850",
+    "source_documents": [
+      "cluster_4",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "Anxiety",
+      "Children",
+      "Parents",
+      "School Struggles"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, working mother of one or two children",
+    "occupation": "Teacher or other helping professional (e.g., nurse, social worker)",
+    "education": "Master's Degree",
+    "locality": "Suburban St. Louis County",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class, stable household with involved parents. High expectations were placed on academic achievement. Suppression of emotions was common; 'big feelings' were often dismissed or discouraged. Rules and structure were valued, but flexibility and understanding of individual needs were lacking.",
+    "adolescence": "Excelled academically but struggled socially. Felt pressure to conform to expectations and fit in, leading to anxiety and feelings of inadequacy. Developed perfectionistic tendencies and a strong need for control. Started experiencing physical symptoms of anxiety, such as stomach aches and headaches.",
+    "early_adulthood": "Attended a four-year university, pursuing a career in education. Continued to experience anxiety and self-doubt, particularly in social situations. Focused on achieving external validation through academic and professional success. Began to question the expectations placed upon her and felt a growing disconnect from her 'true self'.",
+    "family_structure": "Raised by both parents in a traditional family structure. One or two siblings, often with a competitive dynamic. Close-knit family, but communication was often superficial, avoiding deeper emotional issues. Grandparents were involved in her upbringing, reinforcing traditional values.",
+    "formative_adversities": [
+      "High academic expectations",
+      "Suppression of emotions",
+      "Difficulty expressing needs",
+      "Witnessing parental conflict (unresolved)",
+      "Feeling unseen or unheard within the family"
+    ],
+    "educational_journey": "Attended high-performing public schools. Excelled academically but felt immense pressure to maintain her grades. College was a natural progression, driven by the desire to achieve a successful career. Always a 'good student', masking any learning differences or struggles.",
+    "pivotal_moments": [
+      "Birth of her first child, leading to increased anxiety and overwhelm.",
+      "Child's diagnosis of ADHD/Anxiety, triggering a re-evaluation of her own childhood experiences.",
+      "Realizing that her parenting style was mirroring patterns from her own upbringing.",
+      "Seeking therapy for her child and starting to recognize her own needs.",
+      "Experiencing burnout from balancing work, family, and caregiving responsibilities."
+    ],
+    "intergenerational_patterns": "Her mother also struggled with anxiety and perfectionism, passing down these tendencies to her daughter. A history of suppressing emotions and avoiding conflict within the family. Possible undiagnosed neurodivergence in previous generations, leading to a lack of understanding and support for individual needs."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Parent of a child with ADHD and Anxiety",
+      "Potential undiagnosed ADHD/Anxiety herself"
+    ],
+    "diagnosis_journey": "The focus is initially on her child's diagnosis. She recognizes her child's struggles and seeks help. As she learns more about ADHD and Anxiety, she begins to see similar patterns in herself. She may contemplate seeking her own diagnosis but feels overwhelmed by the process. She worries about the stigma associated with mental health and how it might impact her career or family.",
+    "how_it_shows_up": "Increased anxiety, particularly around school and parenting. Difficulty managing emotions and responding calmly to her child's meltdowns. Overwhelmed by daily tasks and responsibilities. Struggles with perfectionism and self-criticism. Difficulty setting boundaries and saying no. Experiences physical symptoms of stress, such as fatigue, headaches, and digestive issues. May struggle with emotional regulation and exhibit irritability or short temper.",
+    "nervous_system_pattern": "High-strung, hyper-vigilant, and prone to overstimulation. Easily overwhelmed by sensory input and emotional demands. Difficulty relaxing and unwinding. Chronic state of stress and anxiety. Tendency to people-please and prioritize the needs of others over her own.",
+    "strengths_superpowers": [
+      "Empathy and compassion",
+      "Strong advocacy skills",
+      "Dedicated and loving parent",
+      "Highly organized and detail-oriented",
+      "Resilient and resourceful"
+    ],
+    "current_coping_strategies": [
+      "Researching ADHD and anxiety online",
+      "Seeking advice from other parents",
+      "Trying to implement strategies recommended by therapists and educators",
+      "Using exercise or mindfulness to manage stress",
+      "Relying on caffeine or alcohol to cope with daily demands",
+      "Seeking a therapist for her child"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Organization (externally, but internally chaotic)",
+      "Task initiation (when motivated by external pressure)",
+      "Planning (though often unrealistic)",
+      "Hyperfocus (on tasks related to her child's needs)"
+    ],
+    "ef_friction_points": [
+      "Emotional regulation during child's meltdowns",
+      "Task completion (loses steam mid-task)",
+      "Time management (always running late)",
+      "Prioritization (struggles to differentiate urgent vs. important)",
+      "Working memory (forgetting appointments and tasks)"
+    ],
+    "ef_workarounds": [
+      "Using digital calendars and reminders",
+      "Creating to-do lists (that she rarely completes)",
+      "Relying on her spouse or family for support",
+      "Avoiding situations that trigger anxiety",
+      "Seeking external validation and reassurance"
+    ],
+    "sensory_profile": "Sensitive to noise and bright lights. Prefers soft, comfortable clothing. Dislikes strong smells and perfumes. Avoids crowded or chaotic environments. Seeks out quiet and calming spaces.",
+    "food_sensory_details": "Prefers bland, predictable foods. Avoids anything with a mushy or slimy texture, like cooked mushrooms or overly ripe bananas. Safe foods include: Annie's Mac & Cheese (specifically the shells variety), lightly salted potato chips (Lay's brand only), plain yogurt (Greek, Fage brand), and grilled chicken breast (prepared without strong seasoning). Often skips meals when stressed or overwhelmed, leading to energy crashes. Struggles with intuitive eating and has a tendency to restrict food intake to maintain control. Will eat her child\u2019s leftover crusts, but not the whole sandwich."
+  },
+  "current_life_context": {
+    "where_they_live": "Comfortable suburban home in Kirkwood or Webster Groves, St. Louis County. Values safety and good schools.",
+    "work_school_situation": "Works full-time as a teacher at a local elementary school. Enjoys working with children but feels increasingly overwhelmed by the demands of the job.",
+    "commute_daily_rhythms": "Drives 20-30 minutes to work, often battling traffic. Morning routine is chaotic, trying to get herself and her children ready on time. Evenings are spent helping with homework, preparing dinner, and managing household tasks.",
+    "local_stressors": [
+      "Competitive school environment",
+      "High cost of living in St. Louis County",
+      "Lack of affordable childcare options",
+      "Traffic congestion",
+      "Pressure to keep up with social expectations"
+    ],
+    "safe_spaces": [
+      "Her home (when it's quiet)",
+      "Her child's classroom (when she volunteers)",
+      "The library",
+      "Spending time outdoors in nature"
+    ],
+    "support_system": "Her spouse, though they may struggle to understand her challenges. A close friend or family member who provides emotional support. Online parenting groups or forums. Seeking professional help through therapy."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Her daughter's recent ADHD diagnosis has brought her to therapy. She wants to provide the best support possible for her child and learn strategies to navigate the challenges of raising a neurodivergent child.",
+    "what_they_want_to_change": [
+      "Help her daughter succeed in school and life.",
+      "Improve her own emotional regulation skills.",
+      "Reduce stress and anxiety.",
+      "Create a more harmonious family environment.",
+      "Better understand her daughter's neurodivergence"
+    ],
+    "whats_in_the_way": [
+      "Her own anxiety and perfectionism.",
+      "Lack of time and energy.",
+      "Financial constraints.",
+      "Stigma associated with mental health.",
+      "Difficulty asking for help.",
+      "Unrealistic expectations of herself and her children."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "She is struggling to utilize coping mechanisms during her daughter's daily meltdowns, with anger pointed toward family.",
+    "quote_hope": "We are looking for someone for her to talk to, work through emotions, give strategies for adhd, and help give insight and assistance as she starts middle school.",
+    "quotes_additional": [
+      "Looking for a therapist to help navigate this stressful time for her, especially concerning school!",
+      "We are looking for a therapist that has experience with neurodivergence so she has someone to talk to about her experiences and help her better understand herself."
+    ],
+    "liz_clinical_narrative": "As a parent navigating the complexities of neurodivergence, you're likely carrying a heavy load. Witnessing your child's struggles can bring up your own unresolved anxieties and past experiences. It's completely understandable to feel overwhelmed and uncertain about how to best support your child while also taking care of yourself. My goal is to provide a safe and supportive space for you to process your emotions, develop effective coping strategies, and gain a deeper understanding of your family's dynamics. Together, we can create a path forward that empowers both you and your child to thrive.",
+    "therapy_preferences": "Neurodivergent-affirming, family therapy, child therapy, strategies for adhd, talk therapy, parental support"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your child struggling with ADHD and anxiety? We understand the challenges of raising a neurodivergent child and can provide the support your family needs.",
+      "Are you feeling overwhelmed and anxious about your child's school performance? Our therapists specialize in helping children with ADHD thrive in the classroom.",
+      "Discover strategies to manage your child's meltdowns and create a more peaceful home environment."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety therapy for children",
+      "Neurodivergent parenting support",
+      "Child therapist St. Louis County",
+      "School anxiety treatment"
+    ],
+    "local_entities": [
+      "Kirkwood",
+      "Webster Groves",
+      "Des Peres",
+      "Clayton",
+      "Ladue",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "Supporting your child's executive function skills at home",
+      "Creating a sensory-friendly environment for your neurodivergent child",
+      "Understanding and managing anxiety in children with ADHD"
+    ]
+  }
+}

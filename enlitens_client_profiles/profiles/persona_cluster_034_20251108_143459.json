@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "profile_id": "cluster-034-persona",
+    "persona_name": "Late-Diagnosed Mom Navigating Overwhelm",
+    "persona_tagline": "Finally understanding myself, and trying to build a life that works.",
+    "created_at": "2025-11-08 20:34:44.425997",
+    "source_documents": [
+      "cluster_34",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "late diagnosis",
+      "parenting",
+      "overwhelm",
+      "self-acceptance"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married mom of two, juggling work and family.",
+    "occupation": "Marketing Coordinator",
+    "education": "Bachelor's Degree",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a seemingly stable suburban home, but with a mother who was emotionally distant and critical. High expectations were placed on academic achievement, with little room for emotional expression or struggles. Father was often working and emotionally unavailable.",
+    "adolescence": "Adolescence was marked by a feeling of being 'different' but not knowing why. Struggled with organization and time management, leading to academic stress and feeling like a failure despite her efforts. Developed anxiety as a coping mechanism to try and meet expectations. Socially awkward, often felt like an outsider.",
+    "early_adulthood": "College was a mixed bag. Managed to graduate, but it required immense effort and constant all-nighters. Relationship struggles due to impulsivity and emotional dysregulation. Landed a decent job but quickly felt overwhelmed by the demands of corporate life. Started self-medicating with caffeine and sugar to cope with the constant pressure.",
+    "family_structure": "Two parents, one younger brother. Mother was a perfectionist, father was a workaholic. Brother was naturally gifted and excelled in school, further fueling her feelings of inadequacy.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High-pressure academic environment",
+      "Feeling like an outsider",
+      "Difficulty forming and maintaining relationships",
+      "Constant self-criticism"
+    ],
+    "educational_journey": "Attended public schools in the Webster Groves School District. Struggled with organization and time management throughout her academic career. College was challenging, but she managed to graduate with a Bachelor's degree in Marketing.",
+    "pivotal_moments": [
+      "Getting fired from her first job due to disorganization and missed deadlines",
+      "The birth of her first child, which exacerbated her feelings of overwhelm and inadequacy",
+      "Her ADHD diagnosis at age 38",
+      "Starting medication and realizing how much it helped quiet the 'noise' in her head",
+      "Deciding to seek therapy to learn coping skills and self-acceptance"
+    ],
+    "intergenerational_patterns": "Her mother exhibited many traits of undiagnosed ADHD, including disorganization, impulsivity, and emotional dysregulation. A pattern of high expectations and criticism was passed down through generations."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (late-diagnosed)",
+      "Possible Autism Spectrum Disorder (self-suspected)",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Suspected something was different for years, but dismissed it as personal failings. After struggling immensely with parenting and work, she finally sought an evaluation at age 38. The diagnosis was a relief and a validation of her struggles. Currently taking medication, which helps with focus and impulsivity.",
+    "how_it_shows_up": "Struggles with motivation, time blindness, impulsivity, and emotional regulation. Feels overwhelmed easily and has difficulty prioritizing tasks. Experiences anxiety and depression, often feeling hopeless and unable to 'catch up.' Difficulty accepting herself and her neurodivergent traits.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to be hypervigilant and constantly scanning for potential threats or problems. Difficulty relaxing and shutting off her mind. Prone to burnout and chronic stress.",
+    "strengths_superpowers": [
+      "High empathy",
+      "Creative problem-solving",
+      "Ability to hyperfocus on topics of interest",
+      "Strong sense of justice",
+      "Resilience"
+    ],
+    "current_coping_strategies": [
+      "Medication",
+      "Caffeine",
+      "Sugar",
+      "Avoidance",
+      "Perfectionism",
+      "doomscrolling",
+      "retail therapy"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative thinking",
+      "Connecting with others",
+      "Problem-solving in the moment"
+    ],
+    "ef_friction_points": [
+      "Time management",
+      "Organization",
+      "Planning",
+      "Prioritization",
+      "Task initiation",
+      "Emotional regulation",
+      "Working memory"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars and reminders (but often ignoring them)",
+      "Trying different organizational systems (but rarely sticking with them)",
+      "Relying on her spouse to help with household tasks",
+      "Using noise-canceling headphones to reduce distractions"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Overwhelmed by strong smells. Seeks out calming and predictable environments. Enjoys tactile stimulation, such as fidget toys.",
+    "food_sensory_details": "Avoids foods with mixed textures, like casseroles or stews. Dislikes anything slimy or mushy. Safe foods include plain pasta with butter, grilled chicken (must be thoroughly cooked), and crunchy snacks like potato chips or pretzels. Only eats certain brands of yogurt. Drinks copious amounts of Diet Coke. Skips meals when overwhelmed or stressed, then binges on sugary snacks later in the day. Craves salty and crunchy foods when anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a two-story house in Webster Groves with her husband and two children.",
+    "work_school_situation": "Works full-time as a Marketing Coordinator for a local non-profit. Finds the work rewarding but struggles with the organizational demands and constant deadlines.",
+    "commute_daily_rhythms": "Drives 20 minutes each way to work. Listens to podcasts or audiobooks to try and make the commute less stressful. Feels rushed in the mornings trying to get herself and her kids ready.",
+    "local_stressors": [
+      "High cost of living in Webster Groves",
+      "Pressure to keep up with other families in the neighborhood",
+      "Limited access to affordable childcare",
+      "Traffic congestion"
+    ],
+    "safe_spaces": [
+      "Her bedroom",
+      "The local library",
+      "Walking in a nearby park",
+      "Spending time with her close friend"
+    ],
+    "support_system": "Her husband is supportive but often doesn't understand her struggles. Has one close friend who is also neurodivergent. Her parents live nearby but are not always emotionally supportive."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling overwhelmed and burnt out. Wants to learn coping skills and self-acceptance to manage her ADHD and improve her overall well-being. 'I'm ready to learn skills that can help me feel better.'",
+    "what_they_want_to_change": [
+      "Improve time management and organization",
+      "Reduce anxiety and depression",
+      "Learn to regulate her emotions",
+      "Develop healthier coping mechanisms",
+      "Accept herself and her neurodivergent traits",
+      "Feel less overwhelmed by life"
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy",
+      "Perfectionism",
+      "Fear of failure",
+      "Negative self-talk",
+      "Difficulty asking for help",
+      "Financial constraints"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I am very overwhelmed with life right now and feel like I can never catch up, which is making things feel a bit hopeless.",
+    "quote_hope": "I'm ready to take this unmasking journey out of my rabbit hole and finally do the work to finally figure out who I am.",
+    "quotes_additional": [
+      "I find myself feeling bad about myself a lot and feel like everything is so challenging.",
+      "I need to learn better ways to focus and function, and find a way to better accept myself and the way I am."
+    ],
+    "liz_clinical_narrative": "This client is a bright and capable woman who is struggling with the cumulative effects of late-diagnosed ADHD. She's spent years masking and trying to conform to neurotypical expectations, leading to burnout and a deep sense of inadequacy. My goal would be to help her understand her unique strengths and challenges, develop effective coping strategies, and cultivate self-compassion. We'll explore her sensory sensitivities, executive function challenges, and emotional regulation difficulties, and work together to create a life that is more aligned with her neurodivergent needs. The focus will be on building self-acceptance and empowering her to live authentically.",
+    "therapy_preferences": "Prefers a therapist who is knowledgeable about ADHD and neurodiversity. Values empathy, understanding, and practical strategies. Would benefit from a structured and goal-oriented approach, but also needs space to process her emotions and experiences."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a late-diagnosed woman struggling with overwhelm and feeling like you can never catch up?",
+      "Discover your strengths and learn coping skills to thrive with ADHD.",
+      "Neurodivergent-affirming therapy in St. Louis, MO, helping you build a life that works for you."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "late-diagnosed ADHD",
+      "neurodiversity affirming therapist",
+      "overwhelm",
+      "parenting with ADHD",
+      "self-acceptance"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Rock Hill",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "Tips for managing overwhelm as a neurodivergent parent.",
+      "The benefits of late-diagnosis ADHD.",
+      "How to build a neurodiversity-affirming life."
+    ]
+  }
+}

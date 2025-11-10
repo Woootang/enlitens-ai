@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "profile_id": "cluster-037-persona",
+    "persona_name": "Overwhelmed High School Achiever",
+    "persona_tagline": "Striving for excellence, drowning in the details.",
+    "created_at": "2025-11-08 20:42:06.895470",
+    "source_documents": [
+      "cluster_37",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "high-achiever",
+      "high school",
+      "dance",
+      "organization",
+      "timeliness",
+      "motivation"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "16-17",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "High school junior, living with parents",
+    "occupation": "Student",
+    "education": "High School Junior",
+    "locality": "Kirkwood, MO",
+    "cultural_faith_identities": [
+      "Christian"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a stable, upper-middle-class home in Kirkwood, Sarah was always encouraged to excel. Her parents, both professionals, placed a high value on academics and extracurricular activities. While the home was loving, there was an unspoken pressure to maintain a high level of achievement. Playdates were often structured learning experiences, and free time was frequently filled with enrichment activities.",
+    "adolescence": "As Sarah entered high school, the pressure intensified. She thrived academically, earning top grades in her honors classes. She joined the debate team and two dance teams, pouring all her energy into rehearsals and competitions. The workload became overwhelming, leading to chronic stress and difficulty sleeping. She started experiencing anxiety and found it increasingly hard to manage her time and commitments. Socially, she felt like she was constantly performing, trying to maintain a perfect image. Started experiencing feelings of anxiety and self-doubt.",
+    "early_adulthood": "N/A - Still in high school",
+    "family_structure": "Sarah lives with her parents and younger brother. Her parents are supportive but can sometimes be overbearing, pushing her to take on more than she can handle. Her brother is a source of occasional conflict, as she often feels responsible for setting a good example for him. Her maternal grandmother lives nearby and provides a loving, comforting presence.",
+    "formative_adversities": [
+      "Unspoken pressure to achieve",
+      "Difficulty balancing academic and extracurricular commitments",
+      "Anxiety and self-doubt",
+      "Perfectionism",
+      "Sleep deprivation"
+    ],
+    "educational_journey": "Sarah has always been a high-achieving student. She attended a top-rated elementary and middle school in Kirkwood and is now enrolled in honors courses at Kirkwood High School. While she excels academically, she struggles with organization and time management. She often feels overwhelmed by the sheer volume of assignments and activities.",
+    "pivotal_moments": [
+      "Being chosen for the varsity dance team as a freshman, creating immense pressure to maintain her position.",
+      "Receiving a B+ on a calculus test, leading to self-doubt about her academic abilities.",
+      "Having a panic attack before a dance competition, realizing the level of stress she was under.",
+      "Breaking down in tears while trying to complete a late-night assignment, feeling completely overwhelmed.",
+      "Confiding in her grandmother about her struggles and feeling validated and supported."
+    ],
+    "intergenerational_patterns": "Sarah's mother also struggled with perfectionism and anxiety as a teenager. She pushed herself relentlessly to succeed in academics and extracurricular activities, often at the expense of her mental and physical health. Sarah sees these patterns in herself and fears repeating her mother's mistakes."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (suspected, undiagnosed)",
+      "Anxiety"
+    ],
+    "diagnosis_journey": "Sarah hasn't been formally diagnosed with ADHD, but she suspects she may have it. She's noticed increasing difficulty with focus, organization, and time management. Her learning lab teacher suggested that she might benefit from an evaluation. The thought of going through the diagnostic process is overwhelming, so she has been avoiding it. Her anxiety exacerbates these challenges, making it even harder to focus and stay organized.",
+    "how_it_shows_up": "Sarah struggles with organization, timeliness, and motivation, particularly when faced with large or complex assignments. She often procrastinates, feeling overwhelmed by where to start. She's easily distracted and has difficulty focusing on tasks that she finds boring or uninteresting. She frequently loses things and forgets important deadlines. She often feels restless and fidgety, particularly when sitting still for long periods of time.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Sympathetic nervous system is frequently activated. Prone to anxiety and panic attacks. Difficulty regulating emotions.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Determination",
+      "Strong work ethic",
+      "Perseverance",
+      "Empathy",
+      "Dance Talent"
+    ],
+    "current_coping_strategies": [
+      "Cramming for tests",
+      "Pulling all-nighters",
+      "Relying on caffeine and sugar for energy",
+      "Avoiding tasks that feel overwhelming",
+      "Seeking reassurance from parents and teachers",
+      "Perfectionism (as a way to control anxiety)",
+      "Excessive planning (that often leads to overwhelm)"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Hyperfocus on topics of interest (dance)",
+      "Creativity in problem-solving (dance routines)",
+      "Verbal Reasoning",
+      "Attention to detail (when motivated)"
+    ],
+    "ef_friction_points": [
+      "Organization",
+      "Timeliness",
+      "Task initiation",
+      "Sustained attention",
+      "Prioritization",
+      "Time management",
+      "Impulse control",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Color-coding notes (but not consistently)",
+      "Using a planner (but forgetting to check it)",
+      "Setting alarms (but snoozing them)",
+      "Asking for extensions (but feeling guilty)",
+      "Trying different productivity apps (but giving up quickly)"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Enjoys tactile stimulation (e.g., playing with slime or fidget toys). Has a strong sense of smell and is easily bothered by strong perfumes or cleaning products. Needs predictability and routine but craves novelty and excitement.",
+    "food_sensory_details": "Avoids foods with slimy textures, like cooked mushrooms or overripe bananas. Can only eat chicken if it is baked, skinless, and cut into small, bite-sized pieces. Safe foods include: plain Cheerios (eaten dry), goldfish crackers, and string cheese. Dislikes anything overly spicy or with strong, artificial flavors. Often skips meals when feeling overwhelmed or stressed, then binges on sugary snacks later in the day. Prefers crunchy textures over soft ones. Can only drink milk cold, directly from the carton, never from a glass. Gets stomach aches from dairy if it's not a specific brand of lactose-free milk."
+  },
+  "current_life_context": {
+    "where_they_live": "Lives in a comfortable two-story house in a quiet, tree-lined neighborhood in Kirkwood, MO.",
+    "work_school_situation": "Full-time student at Kirkwood High School. Involved in multiple extracurricular activities, including two dance teams and the debate team. Also works part-time at a local frozen yogurt shop to earn spending money.",
+    "commute_daily_rhythms": "Drives to school with her mom most days. Carpools with teammates to dance practice. Works at the frozen yogurt shop two evenings a week and on weekends.",
+    "local_stressors": [
+      "Competitive academic environment at Kirkwood High School",
+      "Pressure to excel in extracurricular activities",
+      "High expectations from parents and teachers",
+      "Traffic congestion during rush hour",
+      "Limited access to affordable mental health resources"
+    ],
+    "safe_spaces": [
+      "Her bedroom",
+      "The dance studio",
+      "Her grandmother's house",
+      "The library at school"
+    ],
+    "support_system": "Parents, grandmother, close friends from dance team, learning lab teacher at school."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Feeling overwhelmed with school and extracurricular activities. Difficulty with organization, timeliness, and motivation. Wants to manage stress and improve her overall well-being.",
+    "what_they_want_to_change": [
+      "Improve organizational skills",
+      "Manage time more effectively",
+      "Reduce stress and anxiety",
+      "Increase motivation",
+      "Achieve a better balance between school, extracurriculars, and personal life",
+      "Learn how to ask for help"
+    ],
+    "whats_in_the_way": [
+      "Perfectionism",
+      "Fear of failure",
+      "Difficulty asking for help",
+      "Lack of awareness of available resources",
+      "Overwhelming workload",
+      "Procrastination",
+      "Lack of self-compassion"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\"I'm just overwhelmed with where to start.\"",
+    "quote_hope": "I want to feel like I can actually handle everything without completely burning out.",
+    "quotes_additional": [
+      "Organization, timeliness, assignment motivation...it's all just too much right now."
+    ],
+    "liz_clinical_narrative": "Sarah is a bright, capable young woman who is struggling under the weight of her own high expectations. She's driven to succeed, but her perfectionism and anxiety are making it difficult for her to manage her time and commitments. It's crucial to validate her experience and help her develop healthier coping mechanisms. We can work together to improve her organizational skills, manage her stress, and cultivate self-compassion. It's about helping her find a sustainable path to success that doesn't come at the expense of her mental health.",
+    "therapy_preferences": "Individual therapy, cognitive-behavioral therapy (CBT), mindfulness-based stress reduction (MBSR), support groups for high-achieving students"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a high-achieving student feeling overwhelmed by school, extracurriculars, and life in general? You're not alone. At Enlitens, we provide neurodivergent-affirming therapy to help you manage stress, improve your organizational skills, and find a sustainable path to success.",
+      "Struggling with organization, timeliness, and motivation? Our therapists specialize in working with high school students who are navigating the challenges of academic and social pressures. We can help you develop effective coping strategies and build a more balanced, fulfilling life.",
+      "Is anxiety and perfectionism holding you back from reaching your full potential? Enlitens offers a safe and supportive space where you can explore your challenges, develop self-compassion, and learn how to thrive."
+    ],
+    "primary_keywords": [
+      "high school student stress",
+      "anxiety Kirkwood",
+      "organization help teens",
+      "time management for students",
+      "perfectionism therapy",
+      "ADHD assessment teens St. Louis",
+      "neurodivergent affirming therapy"
+    ],
+    "local_entities": [
+      "Kirkwood High School",
+      "Kirkwood Public Library",
+      "Des Peres",
+      "Webster Groves",
+      "Ladue"
+    ],
+    "content_angles": [
+      "Tips for managing stress and anxiety during the school year",
+      "How to balance academics, extracurriculars, and social life",
+      "The importance of self-care for high-achieving students",
+      "Understanding and managing perfectionism",
+      "Recognizing the signs of burnout in teenagers",
+      "Strategies for improving organization and time management skills"
+    ]
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "profile_id": "cluster-011-persona",
+    "persona_name": "The Newly Diagnosed, Overwhelmed Professional",
+    "persona_tagline": "Navigating life with a new diagnosis while juggling career and relationships.",
+    "created_at": "2025-11-08 20:34:28.671969",
+    "source_documents": [
+      "cluster_11",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "ADHD",
+      "Anxiety",
+      "Late Diagnosis",
+      "Relationship Issues",
+      "Insurance",
+      "Professional"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, navigating relationships, possibly grad school",
+    "occupation": "Marketing Specialist",
+    "education": "Master's Degree",
+    "locality": "Webster Groves, St. Louis, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a seemingly perfect suburban household, Sarah always felt like she was working harder than everyone else to keep up. Her parents were high-achievers, and expected the same from her and her siblings. Emotions were often dismissed as 'drama'.",
+    "adolescence": "High school was a constant hustle of AP classes, extracurriculars, and trying to maintain a social life. Sarah developed severe anxiety, which she masked by overachieving. She felt intense pressure to get into a 'good college'. There were also some instances of bullying when she wasn't able to keep up.",
+    "early_adulthood": "College brought a temporary sense of freedom, but also intense pressure to choose the 'right' career path. Sarah bounced between majors, feeling lost and overwhelmed. Relationships were fleeting and often ended because she couldn't balance everything. Post-graduation, she threw herself into her career, seeking validation through accomplishments.",
+    "family_structure": "Intact, nuclear family with two younger siblings. Her mother was a homemaker turned real estate agent, and her father was a corporate lawyer. While appearing stable, the family lacked emotional intimacy and open communication.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "High parental expectations",
+      "Academic pressure",
+      "Bullying in high school"
+    ],
+    "educational_journey": "Gifted program in elementary school, AP classes in high school, attended a prestigious university. Academic success was always prioritized, but Sarah struggled with organization and time management.",
+    "pivotal_moments": [
+      "Failing a major exam in college despite studying tirelessly, leading to a breakdown.",
+      "A romantic relationship ending due to her inability to manage her time and emotions.",
+      "Receiving an ADHD diagnosis in her late 20s, prompting a re-evaluation of her life.",
+      "A manager at her job criticizing her performance for being disorganized and inconsistent."
+    ],
+    "intergenerational_patterns": "Sarah's mother displayed similar tendencies towards anxiety and perfectionism, potentially masking her own neurodivergence. There's a pattern of suppressing emotions and prioritizing achievement over well-being within the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (newly diagnosed)",
+      "Anxiety",
+      "Potential Autism Spectrum (self-suspecting)"
+    ],
+    "diagnosis_journey": "Sarah always knew she was 'different,' but attributed it to being 'quirky' or 'highly sensitive.' In grad school, she started struggling immensely with focus and organization, despite her best efforts. After talking to a friend who was diagnosed with ADHD, she started researching and realized the symptoms aligned with her experiences. She sought an official diagnosis, which confirmed her suspicions. The diagnosis was both validating and overwhelming.",
+    "how_it_shows_up": "Difficulty focusing, procrastination, impulsivity, anxiety, perfectionism, relationship issues, feeling overwhelmed, difficulty managing time, hyperfocusing on specific interests, sensory sensitivities.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Alternates between hyperarousal and shutdown. Struggles with emotional regulation and can be easily triggered by sensory input or social situations.",
+    "strengths_superpowers": [
+      "Creativity",
+      "Problem-solving",
+      "Empathy",
+      "Hyperfocus when engaged",
+      "Strong work ethic (when motivated)"
+    ],
+    "current_coping_strategies": [
+      "Overworking",
+      "Avoiding overwhelming situations",
+      "Relying on caffeine",
+      "Scrolling social media",
+      "Retail therapy (impulsive purchases)",
+      "Seeking validation through achievements"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creativity",
+      "Problem-solving under pressure",
+      "Connecting with others on a deep level"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Planning",
+      "Prioritization",
+      "Emotional regulation",
+      "Working memory"
+    ],
+    "ef_workarounds": [
+      "Using multiple planners (both digital and physical)",
+      "Setting alarms for everything",
+      "Trying different productivity methods (Pomodoro, etc.)",
+      "Seeking external accountability",
+      "Body doubling"
+    ],
+    "sensory_profile": "Sensitive to loud noises, bright lights, and strong smells. Prefers soft fabrics and comfortable clothing. Easily overwhelmed by crowded spaces and multi-sensory environments.",
+    "food_sensory_details": "Strong aversion to mushy textures, like cooked mushrooms or overripe bananas. Prefers foods with distinct textures and flavors. Safe foods include: crispy chicken tenders (specifically from Raising Cane's), plain pasta with butter, and crunchy vegetables like carrots and celery. Avoids anything with visible fat or gristle. Often forgets to eat when hyperfocused, then binges on processed snacks later. Needs to have a specific routine for preparing and eating meals to not get overwhelmed. Overly aware of the textures of food."
+  },
+  "current_life_context": {
+    "where_they_live": "Rents an apartment in Webster Groves, seeking a walkable neighborhood with access to coffee shops and parks.",
+    "work_school_situation": "Works full-time as a Marketing Specialist for a local non-profit. Considering going back to school for a more fulfilling career.",
+    "commute_daily_rhythms": "Drives to work, battling traffic. Listens to podcasts to distract from anxiety. Struggles with the unstructured time after work, often leading to procrastination and overwhelm.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living",
+      "Pressure to succeed in a competitive job market",
+      "Lack of affordable mental health resources"
+    ],
+    "safe_spaces": [
+      "Her apartment (when clean and organized)",
+      "Local coffee shop",
+      "Quiet parks",
+      "Online support groups"
+    ],
+    "support_system": "Limited support system. Close friends, but struggles to be vulnerable. Family is supportive, but not understanding of her struggles. Considering joining a support group for adults with ADHD."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Recently diagnosed with ADHD and struggling to manage anxiety and relationship issues. Feeling overwhelmed and burnt out.",
+    "what_they_want_to_change": [
+      "Improve time management and organization skills.",
+      "Reduce anxiety and improve emotional regulation.",
+      "Develop healthier coping mechanisms.",
+      "Improve relationship skills and communication.",
+      "Find a more fulfilling career path."
+    ],
+    "whats_in_the_way": [
+      "Lack of self-awareness.",
+      "Perfectionism.",
+      "Fear of failure.",
+      "Negative self-talk.",
+      "Difficulty asking for help.",
+      "Limited financial resources.",
+      "Procrastination."
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I've recently received an ADHD diagnosis while in grad school, and am simultaneously going through some relationship issues that are complex and I know I need help navigating.",
+    "quote_hope": "It seems like you would be a great fit for me.",
+    "quotes_additional": [
+      "Very interested in therapy/counseling, as I had a recent diagnosis for ADHD, and likely on the spectrum as well.",
+      "I am interested in a virtual consult, and then likely therapy, mainly addressing anxiety and neurodivergence."
+    ],
+    "liz_clinical_narrative": "Sarah's journey is marked by a relentless pursuit of achievement, often masking underlying anxiety and a feeling of being 'different.' Her recent ADHD diagnosis provides a new lens through which to understand her struggles. We'll work together to explore the impact of her diagnosis on her life, develop coping strategies for managing anxiety and executive function challenges, and cultivate a stronger sense of self-compassion. Our work will focus on building skills to navigate relationships more effectively, identify and challenge negative thought patterns, and create a life that aligns with her values and aspirations.",
+    "therapy_preferences": "Virtual therapy, prefers email communication, looking for a therapist with experience in ADHD and anxiety."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a professional struggling with anxiety and overwhelm after a late-in-life ADHD diagnosis? We understand.",
+      "Navigating relationship challenges and ADHD? Enlitens provides neurodivergent-affirming therapy to help you thrive.",
+      "Is your quest for perfectionism causing burnout? Our therapists can help you develop healthier coping strategies."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Anxiety therapy St. Louis",
+      "Neurodivergent therapy St. Louis",
+      "Adult ADHD diagnosis",
+      "Relationship issues ADHD",
+      "Executive function coaching",
+      "Late diagnosis ADHD"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Clayton",
+      "Richmond Heights",
+      "Washington University",
+      "Saint Louis University"
+    ],
+    "content_angles": [
+      "A blog post on 'The unique challenges of late-diagnosed ADHD in women'.",
+      "A webinar on 'Building executive function skills for adults with ADHD'.",
+      "A series of Instagram posts on 'Debunking common myths about ADHD'."
+    ]
+  }
+}

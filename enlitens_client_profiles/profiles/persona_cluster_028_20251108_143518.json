@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "profile_id": "cluster-028-persona",
+    "persona_name": "The Self-Reflecting Student & Parent",
+    "persona_tagline": "Seeking clarity and strategies for themselves and their family's neurodivergent traits.",
+    "created_at": "2025-11-08 20:34:59.576518",
+    "source_documents": [
+      "cluster_28",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "AuDHD",
+      "ADHD",
+      "Autism",
+      "Parenting",
+      "Self-Discovery",
+      "Executive Dysfunction",
+      "Anxiety",
+      "Depression"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "24-35",
+    "gender": "Female (including F2M Transman)",
+    "pronouns": "She/Her (or He/Him for the trans individual)",
+    "orientation": "Varied",
+    "ethnicity": "Not specified, assuming diverse backgrounds",
+    "current_life_situation": "Student, Parent, or both; potentially navigating relationship challenges or recent move",
+    "occupation": "Student (Counseling Masters), Unspecified/Varied",
+    "education": "Some college, Bachelor's degree, Master's student",
+    "locality": "St. Louis, MO",
+    "cultural_faith_identities": []
+  },
+  "developmental_story": {
+    "childhood_environment": "Often felt misunderstood and 'different'. High expectations from family, leading to masking and internalizing struggles. Some experienced emotional neglect or invalidation of feelings. Possibly moved frequently or experienced instability.",
+    "adolescence": "Increased anxiety and social awkwardness. Difficulty fitting in with peers. Academic struggles despite intelligence. Experimentation with identity and self-discovery. Heightened sensitivity to criticism and rejection. Possible onset of depressive symptoms.",
+    "early_adulthood": "Exploration of career paths and relationships, often feeling overwhelmed and unsure. Periods of intense focus and productivity followed by burnout. Self-medication with substances or activities. Increased awareness of neurodivergent traits but uncertainty about diagnosis. Feelings of inadequacy and imposter syndrome.",
+    "family_structure": "Varied family structures, possibly including single-parent households or blended families. Some experienced emotional distance from parents or siblings. Others may have been caregivers for younger siblings or family members. Potentially a family history of mental health issues or undiagnosed neurodivergence.",
+    "formative_adversities": [
+      "Emotional neglect or invalidation",
+      "Difficulty with social interactions and bullying",
+      "Academic pressure and perfectionism",
+      "Family instability or frequent moves",
+      "Experiences of abuse (for some)"
+    ],
+    "educational_journey": "Started strong, but motivation waned over time. Difficulty with organization and time management. Periods of intense focus followed by procrastination. May have changed schools frequently or experienced academic setbacks. Some found solace in creative pursuits or specialized subjects.",
+    "pivotal_moments": [
+      "Realizing their child's neurodivergence triggered self-reflection.",
+      "Encountering information about AuDHD or other neurodivergent identities.",
+      "Experiencing a significant burnout or breakdown.",
+      "Leaving an emotionally abusive environment.",
+      "Starting counseling masters program."
+    ],
+    "intergenerational_patterns": "Likely a history of undiagnosed neurodivergence in the family. Family members may have struggled with similar challenges, such as anxiety, depression, or executive dysfunction. Communication patterns may be indirect or emotionally avoidant."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (suspected or diagnosed)",
+      "Autism Spectrum Disorder (suspected or diagnosed)",
+      "AuDHD (suspected)",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Begins with self-discovery and online research. Recognizes patterns in their own behavior and thinking. Experiences internal conflict and uncertainty about pursuing a formal diagnosis. Seeks professional help to confirm or rule out diagnoses. May experience relief, validation, or further confusion after diagnosis. For the parent, the child's diagnosis sparked their own journey.",
+    "how_it_shows_up": "Executive dysfunction (difficulty with planning, organization, and time management). Emotional dysregulation (intense emotions and difficulty managing them). Sensory sensitivities (over- or under-responsiveness to sensory input). Social awkwardness and difficulty with social cues. Intense interests and hyperfocus. Anxiety and depression. Internal conflict and masking.",
+    "nervous_system_pattern": "Highly sensitive and reactive nervous system. Easily overwhelmed by sensory input and emotional stress. Tendency towards fight-or-flight response. Difficulty regulating emotions and calming down after stressful events. Possible history of trauma or adverse childhood experiences.",
+    "strengths_superpowers": [
+      "Strong empathy and compassion",
+      "Creative problem-solving skills",
+      "Intense focus and dedication",
+      "High intelligence and curiosity",
+      "Ability to see patterns and connections"
+    ],
+    "current_coping_strategies": [
+      "Researching neurodivergence and mental health",
+      "Seeking therapy or counseling",
+      "Journaling and self-reflection",
+      "Engaging in creative activities",
+      "Connecting with others online or in person",
+      "Trying to establish routines and structure (often unsuccessfully)"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem solving",
+      "Hyperfocus on areas of interest",
+      "Strong intuition",
+      "Resilience and adaptability"
+    ],
+    "ef_friction_points": [
+      "Task initiation and completion",
+      "Organization and planning",
+      "Time management",
+      "Prioritization",
+      "Working memory",
+      "Emotional regulation"
+    ],
+    "ef_workarounds": [
+      "Using visual schedules and checklists",
+      "Breaking down tasks into smaller steps",
+      "Setting timers and reminders",
+      "Seeking external accountability",
+      "Creating a structured environment",
+      "Using fidget toys or other sensory aids"
+    ],
+    "sensory_profile": "Highly sensitive to sensory input. May experience overstimulation or understimulation. Sensitivity to noise, light, smells, textures, and tastes. Seeks out or avoids certain sensory experiences. May have difficulty filtering out background noise or distractions. May experience sensory meltdowns or shutdowns.",
+    "food_sensory_details": "Dislikes foods with mixed textures, such as casseroles or stews. Prefers foods that are predictable and consistent in texture and flavor. Safe foods include plain pasta with butter, grilled chicken breast (only if not dry), specific brands of yogurt (e.g., Chobani plain Greek yogurt), and certain crunchy snacks like Cheez-Its (original only). Avoids anything slimy or with visible fat. May skip meals when overwhelmed or stressed. Relies on caffeine to get through the day. Sometimes engages in emotional eating, favoring crunchy or salty snacks like potato chips (Lay's Classic) or pretzels."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment or small house in a diverse neighborhood in St. Louis City or County. May be close to a park or other green space. Proximity to university or counseling program is desirable.",
+    "work_school_situation": "Balancing schoolwork, internships, and/or part-time jobs. Juggling multiple responsibilities and feeling overwhelmed. Struggling to meet deadlines and maintain a consistent schedule. For the parent, balancing work, childcare, and personal needs.",
+    "commute_daily_rhythms": "May rely on public transportation or driving. Commute can be stressful and overwhelming due to traffic, noise, and sensory overload. Daily rhythms are often chaotic and unpredictable. Difficulty establishing consistent routines and schedules.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living",
+      "Lack of affordable childcare",
+      "Social isolation",
+      "Pressure to conform to societal expectations"
+    ],
+    "safe_spaces": [
+      "Their bedroom or home office",
+      "Nature (parks, gardens)",
+      "Libraries or quiet cafes",
+      "Online support groups",
+      "Therapy sessions"
+    ],
+    "support_system": "Limited support system. May rely on friends, family, or online communities. Seeking professional support to address their mental health and neurodivergent traits. May feel isolated and misunderstood."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking clarity and validation regarding potential ADHD/Autism diagnosis. Experiencing anxiety, depression, and executive dysfunction. Struggling with parenting challenges and communication issues. Wanting to develop coping strategies and improve their overall well-being. Recent move or leaving an abusive situation necessitates support.",
+    "what_they_want_to_change": [
+      "Improve executive function skills",
+      "Reduce anxiety and depression",
+      "Develop healthier coping mechanisms",
+      "Improve communication and relationships",
+      "Gain a better understanding of themselves and their neurodivergent traits",
+      "Create a more structured and fulfilling life"
+    ],
+    "whats_in_the_way": [
+      "Internalized ableism and self-doubt",
+      "Fear of judgment and stigma",
+      "Lack of resources and support",
+      "Financial constraints",
+      "Executive dysfunction and difficulty with planning and organization",
+      "Overwhelm and burnout",
+      "Trauma history"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I don\u2019t fully resonate with the diagnoses individually, but I have resonated with the new discourse around AuDHD and the sort of internal conflict it causes that looks different than the individual diagnoses.",
+    "quote_hope": "I would like professional help in deciding if this is true or not. In addition, I have been experiencing a lot of emotional lows due to my anxiety and depression and wish to develop coping habits to help me though them.",
+    "quotes_additional": [
+      "I am interested in discussing the pros and cons of pursuing a diagnosis, and also my main concern which is executive dysfunction.",
+      "Over time, I have noticed several patterns in my behavior and thinking that align with these conditions...",
+      "I am reaching out because I am interested in pursuing an assessment for ADHD and autism."
+    ],
+    "liz_clinical_narrative": "This individual is on a journey of self-discovery, recognizing patterns that suggest neurodivergence in themselves and possibly their family. They are seeking validation, understanding, and practical strategies to navigate the challenges of executive dysfunction, anxiety, and depression. As a therapist, I would create a safe and supportive space for them to explore their identity, process their emotions, and develop coping mechanisms that are tailored to their unique needs and strengths. We would explore the pros and cons of seeking a formal diagnosis, while also focusing on building self-compassion, resilience, and a sense of belonging. For those who are parents, we would address the specific challenges of raising a neurodivergent child and fostering a healthy family dynamic. This is a journey of empowerment, and I am honored to be a part of it.",
+    "therapy_preferences": "Email communication preferred. Flexible schedule. Interested in discussing pros and cons of diagnosis. Seeking practical strategies for executive dysfunction and emotional regulation. Looking for a therapist who is knowledgeable about neurodiversity and affirming of their experiences."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a student or parent suspecting you may have AuDHD or ADHD? We offer neurodivergent-affirming therapy and assessment.",
+      "Struggling with executive dysfunction and emotional regulation? Our therapists understand the unique challenges of neurodivergent individuals.",
+      "Is your child recently diagnosed with autism and you suspect you might be too? We can help you navigate this journey of self-discovery."
+    ],
+    "primary_keywords": [
+      "AuDHD assessment St. Louis",
+      "ADHD therapy St. Louis",
+      "Autism assessment St. Louis",
+      "Executive dysfunction treatment",
+      "Neurodivergent therapist St. Louis",
+      "Parenting neurodivergent children"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Clayton",
+      "St. Louis City",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "The pros and cons of seeking a formal ADHD/Autism diagnosis as an adult.",
+      "Practical strategies for managing executive dysfunction in daily life.",
+      "How to create a neurodivergent-affirming home environment for your family."
+    ]
+  }
+}

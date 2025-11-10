@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "profile_id": "cluster-023-persona",
+    "persona_name": "The Late-Diagnosed Juggler",
+    "persona_tagline": "Navigating life with newly discovered neurodivergence while balancing multiple roles.",
+    "created_at": "2025-11-08 20:29:30.818662",
+    "source_documents": [
+      "cluster_23",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "neurodivergent",
+      "late diagnosis",
+      "anxiety",
+      "depression",
+      "executive dysfunction",
+      "single parent",
+      "college student"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "21-35",
+    "gender": "Female/Non-Binary",
+    "pronouns": "She/Her, They/Them",
+    "orientation": "Queer (inferred)",
+    "ethnicity": "Asian-American/White",
+    "current_life_situation": "Single mother, college student, young professional",
+    "occupation": "Student, entry-level professional",
+    "education": "College student, recent graduate",
+    "locality": "St. Louis, MO (Wash U area)",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Often felt like she was 'performing' to fit in. Parents, while loving, didn't quite understand her intense emotions and sensitivities, often dismissing them as 'being dramatic.' Stability was present, but emotional attunement was lacking. Overachieving was rewarded, leading to a constant pressure to excel.",
+    "adolescence": "The pressure to succeed intensified during adolescence. Social situations became increasingly fraught with anxiety, leading to isolation and masking behaviors. Started experiencing depressive episodes, which were often attributed to 'teen angst.' Developed hyper-focus on specific interests as a coping mechanism. Experimented with substances to self-medicate anxiety.",
+    "early_adulthood": "Early adulthood brought increased responsibilities and expectations, leading to burnout. College was a mix of academic success and social isolation. Relationships were difficult to navigate, marked by intense emotions and communication challenges. Started to seriously question her identity and whether she truly knew herself under the layers of masking.",
+    "family_structure": "Grew up in a nuclear family, with both parents present. One or two siblings, often high-achieving and seemingly 'well-adjusted,' which further fueled feelings of inadequacy. Some clients are now single moms, some are navigating complex relationship dynamics after divorce.",
+    "formative_adversities": [
+      "Emotional neglect",
+      "Pressure to conform",
+      "Social isolation",
+      "Late diagnosis of ADHD/Autism",
+      "Internalized ableism"
+    ],
+    "educational_journey": "Generally high-achieving academically, but with periods of burnout and overwhelm. Struggles with executive function impacted consistency. May have switched majors or taken breaks due to mental health challenges. Intense pressure to succeed and meet parental expectations, especially as Asian-American children of immigrants.",
+    "pivotal_moments": [
+      "The moment of realizing she might be autistic/ADHD.",
+      "Receiving the official diagnosis, bringing both relief and confusion.",
+      "The ending of a significant relationship, forcing her to confront her own needs and patterns.",
+      "Starting therapy and beginning the process of self-discovery.",
+      "The birth of her child, shifting priorities and revealing capacity for deep love."
+    ],
+    "intergenerational_patterns": "Possible undiagnosed neurodivergence in parents, leading to a lack of understanding and support. Generational trauma related to immigration and cultural assimilation. Pattern of prioritizing achievement over emotional well-being."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Autism Spectrum Disorder",
+      "ADHD",
+      "Anxiety",
+      "Depression",
+      "Non-Binary (AMAB)",
+      "Queer"
+    ],
+    "diagnosis_journey": "Suspected she was different for a long time, but dismissed it or didn't have the language to explain it. Researched Autism/ADHD independently and experienced a profound sense of recognition. Faced skepticism from some medical professionals before finally receiving a formal diagnosis in adulthood. The diagnosis process was validating but also brought up grief for the years spent struggling without understanding.",
+    "how_it_shows_up": "Executive dysfunction impacts daily tasks, leading to feelings of guilt and shame. Sensory sensitivities cause overwhelm and anxiety in certain environments. Difficulty with social cues and communication leads to misunderstandings and isolation. Intense emotions and difficulty regulating them. Masking behaviors contribute to burnout and a sense of disconnect from her true self. Gender dysphoria and confusion around gender identity add another layer of complexity.",
+    "nervous_system_pattern": "Highly sensitive nervous system that is easily overwhelmed. Tends to fluctuate between hyper-arousal and hypo-arousal. Seeks sensory input to regulate, but can easily become overstimulated. Difficulty with interoception, making it hard to identify and respond to her own needs.",
+    "strengths_superpowers": [
+      "Hyper-focus on areas of interest",
+      "Strong sense of justice and empathy",
+      "Creative problem-solving skills",
+      "Ability to see patterns and connections that others miss",
+      "Intense loyalty and dedication to loved ones"
+    ],
+    "current_coping_strategies": [
+      "Reaching out to therapists for support",
+      "Seeking out online communities and support groups",
+      "Engaging in special interests",
+      "Self-medicating with substances (cannabis)",
+      "Masking in social situations",
+      "Using planners and checklists (sometimes)",
+      "Seeking formal diagnoses to understand themselves better."
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving",
+      "Task initiation when highly motivated",
+      "Pattern recognition",
+      "Deep knowledge in areas of interest"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Planning",
+      "Prioritization",
+      "Emotional regulation",
+      "Working memory"
+    ],
+    "ef_workarounds": [
+      "Breaking down tasks into smaller steps",
+      "Using visual timers",
+      "Setting reminders on her phone",
+      "Creating designated spaces for specific activities",
+      "Seeking external accountability",
+      "Trying to create routines (but often failing)"
+    ],
+    "sensory_profile": "Highly sensitive to noise, bright lights, and strong smells. Prefers soft, comfortable clothing. Can become easily overwhelmed by crowded or chaotic environments. Seeks out sensory input like weighted blankets or fidget toys to regulate. Proprioceptive input (e.g., hugs, firm pressure) is often calming.",
+    "food_sensory_details": "Dislikes foods with mixed textures, like casseroles or stews. Avoids anything slimy or with visible fat. Safe foods include plain Cheerios (must be crunchy), specific brand of white cheddar cheese crackers (Kraft only), grilled chicken (must be room temperature, no sauce), and rice (basmati only). Notices herself binge eating on crunchy textures when stressed. Often skips meals when overwhelmed or hyper-focused."
+  },
+  "current_life_context": {
+    "where_they_live": "Small apartment near Wash U campus or in a walkable neighborhood in St. Louis city.",
+    "work_school_situation": "Attending Wash U, recently transferred, or working an entry-level job while parenting or trying to finish a degree.",
+    "commute_daily_rhythms": "Walking, biking, or taking public transportation to school or work. Daily rhythms are often disrupted by executive dysfunction and sensory overwhelm.",
+    "local_stressors": [
+      "High cost of living",
+      "Lack of affordable childcare",
+      "Limited access to neurodivergent-affirming resources",
+      "Social isolation",
+      "Difficulty navigating complex bureaucratic systems"
+    ],
+    "safe_spaces": [
+      "Her apartment (when clean and organized)",
+      "Quiet coffee shops with noise-canceling headphones",
+      "Online support groups",
+      "Nature (when not too crowded)"
+    ],
+    "support_system": "Limited support system. May have a few close friends, but struggles to maintain relationships due to executive dysfunction and social anxiety. Parents may be supportive but lack understanding of her neurodivergence. Seeking therapy to build a stronger support network."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking therapy to navigate recent diagnosis, improve quality of life, manage stress, and develop coping skills. Feeling overwhelmed by the demands of daily life and struggling to balance multiple roles.",
+    "what_they_want_to_change": [
+      "Improve emotional regulation",
+      "Reduce anxiety and depression",
+      "Develop better executive function skills",
+      "Build stronger relationships",
+      "Increase self-acceptance",
+      "Process trauma",
+      "Learn to unmask and be authentic"
+    ],
+    "whats_in_the_way": [
+      "Internalized ableism",
+      "Fear of judgment",
+      "Lack of self-compassion",
+      "Executive dysfunction",
+      "Sensory overwhelm",
+      "Financial constraints",
+      "Limited access to resources",
+      "Feeling like a failure",
+      "Past negative experiences with therapy"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I think it\u2019s at the root of a lot of other issues I have (depression, anxiety, etc.) and would like to address it now.",
+    "quote_hope": "I am looking for a new therapist who can help me navigate this recent diagnosis and improve my quality of life.",
+    "quotes_additional": [
+      "I\u2019m also still working through a lot of confusing feelings around gender and queerness.",
+      "I\u2019m looking for an autism specialist to complement my current therapist."
+    ],
+    "liz_clinical_narrative": "It sounds like you're carrying a lot right now \u2013 navigating a new diagnosis, balancing multiple responsibilities, and trying to figure out who you are under all the layers. It takes incredible strength to reach out for support, and I want you to know that you're not alone. My approach is rooted in neurodiversity-affirmation, meaning we'll work together to understand and celebrate your unique strengths, while also developing strategies to navigate the challenges you face. We'll explore your sensory needs, executive function challenges, and emotional landscape with compassion and curiosity. I want to create a safe space where you can unmask, be your authentic self, and build a life that feels truly aligned with your values and needs. I also will make sure to collaborate with your current medical and therapeutic providers.",
+    "therapy_preferences": "Neurodivergent-affirming therapist with experience working with adults with Autism and ADHD. Someone who understands the nuances of masking and can help her unmask safely. Looking for practical strategies and tools to manage executive dysfunction and sensory overwhelm. A therapist who is also knowledgeable about gender identity and queer issues."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a late-diagnosed neurodivergent adult struggling to balance work, school, and personal life? We understand the unique challenges you face and offer compassionate, neurodiversity-affirming therapy to help you thrive.",
+      "Feeling overwhelmed by sensory sensitivities, executive dysfunction, and social anxiety? Our therapists can help you develop practical coping strategies and build a more fulfilling life.",
+      "We specialize in working with adults with Autism and ADHD, including those who are questioning their gender identity or exploring their queerness."
+    ],
+    "primary_keywords": [
+      "late diagnosed autism",
+      "adult adhd",
+      "neurodiversity affirming therapy",
+      "st louis therapist",
+      "executive dysfunction",
+      "sensory overload",
+      "gender identity",
+      "queer therapy",
+      "single mom therapy"
+    ],
+    "local_entities": [
+      "Wash U",
+      "Clayton",
+      "Central West End",
+      "St. Louis City"
+    ],
+    "content_angles": [
+      "The unique challenges of late-diagnosed neurodivergence",
+      "How to create a sensory-friendly environment at home and work",
+      "Practical strategies for managing executive dysfunction"
+    ]
+  }
+}

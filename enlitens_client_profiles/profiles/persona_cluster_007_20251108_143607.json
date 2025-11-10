@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "profile_id": "cluster-012-persona",
+    "persona_name": "The Juggling Neurodivergent Parent",
+    "persona_tagline": "Seeking clarity and connection amidst the chaos of raising a neurodivergent family.",
+    "created_at": "2025-11-08 20:35:48.904855",
+    "source_documents": [
+      "cluster_12",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "neurodivergent",
+      "parent",
+      "family",
+      "couples therapy",
+      "AuDHD",
+      "late diagnosis"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, working full-time, raising young children.",
+    "occupation": "Project Manager",
+    "education": "Bachelor's Degree",
+    "locality": "Webster Groves, MO",
+    "cultural_faith_identities": [
+      "None specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Growing up in a seemingly 'normal' suburban household, Sarah always felt like she was running to catch up. Her parents were loving but traditional, valuing achievement and conformity. The pressure to excel academically and socially masked her underlying ADHD and nascent autistic traits. Her hyperactive tendencies were dismissed as being 'spirited' and her intense focus on specific interests was seen as quirky. The home environment, while stable, lacked emotional attunement, leaving Sarah feeling unseen and misunderstood.",
+    "adolescence": "Adolescence was a turbulent time. Sarah struggled with social cues and felt like an outsider. Her academic performance fluctuated wildly, excelling in subjects that captivated her interest and floundering in those that didn't. She developed anxiety and relied on perfectionism as a coping mechanism. The undiagnosed ADHD made it difficult to manage her time and stay organized, leading to frequent feelings of overwhelm and self-doubt. She had a few close friends, but felt like she was always masking and never truly herself.",
+    "early_adulthood": "Sarah entered college with high hopes but quickly became overwhelmed by the demands of independent living. She changed majors several times, searching for a career path that felt aligned with her passions. She struggled with imposter syndrome and questioned her abilities. Relationships were challenging, as she found it difficult to navigate social expectations and communicate her needs effectively. After graduating, she drifted through several jobs before landing in project management, drawn to the structured environment and problem-solving aspects.",
+    "family_structure": "Sarah was raised by her parents, who are still together. She has one younger brother who is neurotypical. Her relationship with her brother was always strained, as she felt like she never quite measured up to his achievements. Her mother was a homemaker and her father worked in finance. While her parents provided a comfortable life, they struggled to understand Sarah's unique challenges. Her grandmother, on her mother's side, was likely also neurodivergent, exhibiting similar traits of intense focus and social awkwardness.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Difficulty fitting in socially",
+      "Academic struggles due to undiagnosed ADHD",
+      "Imposter syndrome in early adulthood",
+      "Burnout from masking and overworking"
+    ],
+    "educational_journey": "Attended public schools in suburban St. Louis. Switched majors three times in college before graduating with a degree in Communications. Always struggled with standardized tests and time management. Excelled in creative writing and public speaking.",
+    "pivotal_moments": [
+      "Realizing her son was struggling in similar ways she had as a child",
+      "Discovering the concept of neurodiversity and realizing it explained her own experiences",
+      "Receiving her ADHD diagnosis in her late 30s",
+      "Experiencing burnout and realizing she needed to prioritize her mental health",
+      "Deciding to seek couples therapy to improve communication with her husband"
+    ],
+    "intergenerational_patterns": "Sarah's grandmother exhibited similar traits, suggesting a family history of undiagnosed neurodivergence. Her parents' traditional views on success and conformity created pressure for her to conform, leading to masking and burnout. Sarah is determined to break these patterns and create a more accepting and supportive environment for her children."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (diagnosed)",
+      "Suspects Autism (AuDHD)",
+      "Anxiety"
+    ],
+    "diagnosis_journey": "Sarah suspected something was different about her for years, but her struggles were dismissed as personality quirks. It wasn't until her son began exhibiting similar challenges that she started researching neurodiversity. She took several online quizzes and found that she resonated strongly with both ADHD and autism. After years of self-doubt, she sought a formal ADHD diagnosis in her late 30s, which was a validating but also overwhelming experience. She is now exploring the possibility of an autism diagnosis.",
+    "how_it_shows_up": "Difficulty focusing, impulsivity, emotional dysregulation, hyperfixations, sensory sensitivities, social anxiety, communication challenges, perfectionism, burnout, difficulty with transitions, struggles with household tasks.",
+    "nervous_system_pattern": "High-strung and easily overwhelmed. Tends to be in a state of hyperarousal, constantly scanning for potential threats. Prone to emotional meltdowns when stressed. Finds it difficult to relax and unwind. Needs significant downtime to recharge.",
+    "strengths_superpowers": [
+      "Creative problem-solving",
+      "Intense focus on areas of interest",
+      "Empathy and compassion",
+      "Strong sense of justice",
+      "Ability to connect with others who are neurodivergent"
+    ],
+    "current_coping_strategies": [
+      "Medication for ADHD",
+      "Therapy (individual and couples)",
+      "Mindfulness and meditation",
+      "Creating routines and systems",
+      "Seeking support from online communities",
+      "Sensory tools (e.g., fidget toys, noise-canceling headphones)"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative problem-solving, hyperfocus on tasks of interest, strong long-term memory for details in areas of interest."
+    ],
+    "ef_friction_points": [
+      "Task initiation, time management, organization, planning, working memory, emotional regulation, transitioning between tasks, prioritizing tasks, filtering distractions."
+    ],
+    "ef_workarounds": [
+      "Using a digital planner, setting reminders, breaking down tasks into smaller steps, using visual timers, creating a designated workspace, outsourcing tasks when possible (e.g., cleaning, meal prep)."
+    ],
+    "sensory_profile": "Highly sensitive to certain sounds, smells, and textures. Overwhelmed by bright lights and crowded spaces. Seeks out deep pressure and weighted blankets for comfort. Finds repetitive movements calming. Sensitive to certain fabrics and clothing tags.",
+    "food_sensory_details": "Avoids foods with slimy textures, such as okra or cooked mushrooms. Only eats chicken if it's grilled and slightly cooled to room temperature. Prefers bland, predictable foods. Safe foods include: plain Cheerios, specific brand of gluten-free crackers (Simple Mills), air-popped popcorn with minimal salt, and apple slices. Binge eating occurs when stressed. Often skips meals when overwhelmed with work or family responsibilities. Dislikes the smell of strong spices and artificial flavors. Struggles to eat in noisy or crowded environments."
+  },
+  "current_life_context": {
+    "where_they_live": "Owns a house in Webster Groves, a suburb of St. Louis, with her husband and two children.",
+    "work_school_situation": "Works full-time as a project manager for a marketing agency. The demanding role requires her to be highly organized and detail-oriented, which is a constant challenge. Considering a career change to something more aligned with her passions.",
+    "commute_daily_rhythms": "Commutes 30 minutes each way to work. Listens to podcasts or audiobooks during her commute to help manage her anxiety and overstimulation. After work, she rushes home to help with dinner, homework, and bedtime routines. Weekends are spent catching up on household chores and attending her children's activities.",
+    "local_stressors": [
+      "High cost of living in St. Louis suburbs",
+      "Competitive school environment",
+      "Traffic congestion",
+      "Limited access to neurodivergent-affirming resources"
+    ],
+    "safe_spaces": [
+      "Her home office, when quiet",
+      "The local library",
+      "Nature trails in Forest Park",
+      "Online neurodivergent communities"
+    ],
+    "support_system": "Her husband, although their communication is strained. Her therapist. A few close friends who are also neurodivergent. Online support groups for ADHD and AuDHD."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking a better therapeutic fit after feeling misunderstood by previous therapists. Wants support with family dynamics, emotional regulation, and exploring potential AuDHD diagnosis. Concerned about the impact of her neurodivergence on her marriage and parenting.",
+    "what_they_want_to_change": [
+      "Improve communication with her husband",
+      "Develop better emotional regulation skills",
+      "Reduce feelings of overwhelm and burnout",
+      "Create a more supportive and accepting environment for her children",
+      "Gain clarity on her identity and neurodivergent traits",
+      "Reduce masking and be more authentic"
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy",
+      "Financial constraints",
+      "Fear of judgment and stigma",
+      "Difficulty prioritizing her own needs",
+      "Communication barriers with her husband",
+      "Executive function challenges (e.g., task initiation, organization)"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "We've started the UMSL assessment process for our 6-year-old son and are awaiting results. I also suspect our 3-year-old may be on a similar neurodivergent path.",
+    "quote_hope": "I saw that you offer clarity assessments and support around AuDHD\u2014this really resonated with me.",
+    "quotes_additional": [
+      "I\u2019m a late-diagnosed ADHD woman seeking a better therapeutic fit.",
+      "I relate strongly to autistic traits and would appreciate the opportunity to explore that further with someone experienced in neurodivergent adult women."
+    ],
+    "liz_clinical_narrative": "Sarah's story is one of resilience and a deep desire to understand herself and her family better. She carries the weight of years of undiagnosed neurodivergence, which has manifested in anxiety, burnout, and relationship challenges. Her commitment to creating a neurodivergent-affirming home for her children is admirable, and she is now turning inward to prioritize her own well-being. I believe Sarah would benefit from a therapeutic approach that integrates psychoeducation, emotional regulation skills, and couples counseling. It is important to provide her with a safe and validating space to explore her AuDHD traits and develop strategies for managing her executive function challenges. I want to help her unpack the intergenerational patterns that have shaped her experiences and empower her to create a more authentic and fulfilling life.",
+    "therapy_preferences": "Neurodivergent-affirming therapist, individual and couples therapy, clarity assessment for AuDHD, flexible scheduling, in-person or telehealth options."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Are you a parent struggling with the challenges of raising a neurodivergent child while also navigating your own neurodivergent traits?",
+      "Do you feel like you're constantly juggling multiple roles and responsibilities, leaving you feeling overwhelmed and burned out?",
+      "We provide neurodivergent-affirming therapy for individuals and couples, helping you create a more connected and fulfilling life."
+    ],
+    "primary_keywords": [
+      "neurodivergent family therapy St. Louis",
+      "AuDHD assessment St. Louis",
+      "ADHD couples counseling St. Louis",
+      "late diagnosis ADHD support",
+      "neurodiversity-affirming therapist",
+      "parenting neurodivergent children"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Clayton",
+      "Des Peres",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "The challenges and rewards of raising a neurodivergent family",
+      "Understanding AuDHD: A guide for late-diagnosed adults",
+      "How to improve communication in neurodivergent relationships",
+      "Self-care strategies for burned-out neurodivergent parents"
+    ]
+  }
+}

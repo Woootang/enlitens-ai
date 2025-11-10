@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "profile_id": "cluster-038-persona",
+    "persona_name": "The Anxious Husband Seeking Redemption",
+    "persona_tagline": "Fighting RSD and Time Blindness to Save His Marriage",
+    "created_at": "2025-11-08 20:42:41.192031",
+    "source_documents": [
+      "cluster_38",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "RSD",
+      "Time Management",
+      "Procrastination",
+      "Relationship Issues",
+      "Marriage"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "35-45",
+    "gender": "Male",
+    "pronouns": "He/Him",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, struggling to maintain the relationship",
+    "occupation": "Project Manager",
+    "education": "Bachelor's Degree",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Christian (inferred from general demographics of area)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Middle-class suburban upbringing in St. Louis. Both parents worked, creating a sense of neglect. Dad was a disciplinarian, emphasizing achievement and perfection. Mom was passive, often overwhelmed, and relied on him to be the 'good kid'.",
+    "adolescence": "High school was a mixed bag. He excelled academically but struggled socially due to intense fear of rejection. Started developing perfectionistic tendencies to compensate for feelings of inadequacy. Experienced bullying due to his perceived 'goody-two-shoes' image.",
+    "early_adulthood": "College was a period of experimentation and anxiety. He excelled in his studies, but his social anxiety worsened. Started using procrastination as a coping mechanism to avoid the fear of failure. Met his wife, Sarah, during his senior year.",
+    "family_structure": "Two-parent household with one younger sister. Father was emotionally distant and critical. Mother was loving but enabling. Sister was the 'rebellious' one, often causing family conflict.",
+    "formative_adversities": [
+      "Emotional neglect from parents",
+      "Bullying in high school",
+      "Pressure to achieve academically",
+      "Witnessing marital conflict between parents"
+    ],
+    "educational_journey": "Attended a private high school and then a state university, excelling in his studies but struggling with social anxiety. Graduated with a degree in Business Administration.",
+    "pivotal_moments": [
+      "His father's constant criticism instilled a deep-seated fear of failure.",
+      "Meeting his wife, Sarah, provided a sense of belonging and acceptance.",
+      "A particularly embarrassing social rejection in college solidified his RSD.",
+      "A performance review at work where he was criticized for missed deadlines triggered a major depressive episode.",
+      "Sarah confronting him about his defensiveness and emotional unavailability, leading him to seek therapy."
+    ],
+    "intergenerational_patterns": "Father displayed similar tendencies towards perfectionism and emotional distance. Mother exhibited passive-aggressive behavior and difficulty setting boundaries."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD (late-diagnosed)",
+      "RSD (Rejection Sensitive Dysphoria)",
+      "Anxiety",
+      "Depression"
+    ],
+    "diagnosis_journey": "Suspected ADHD in college, but dismissed it due to academic success. Symptoms became more pronounced in his career and marriage. Initially attributed his struggles to 'laziness' and 'lack of discipline.' Wife, Sarah, researched ADHD and encouraged him to seek assessment. Received official diagnosis at age 38. Relief mixed with regret for lost time and strained relationships.",
+    "how_it_shows_up": "RSD leads to intense fear of rejection, impeding friendships and causing him to overthink social interactions. Poor time management results in last-minute rushes, anxiety, and procrastination. Forgetfulness disrupts routines and daily obligations. Experiences intense emotional responses with guilt, shame, and feelings of inadequacy. Becomes defensive and pleads his case until others agree, often going too far. Procrastinates due to fear of failure, hesitant to start new things. All these issues significantly impact his marriage, leading to defensiveness, shutting down, forgetfulness, unmet expectations, and difficulty regulating emotions during conversations.",
+    "nervous_system_pattern": "Primarily sympathetic activation. Easily triggered into fight-or-flight response by perceived criticism or rejection. Struggles to regulate emotions and return to a calm state. Experiences frequent anxiety and hypervigilance.",
+    "strengths_superpowers": [
+      "Strong analytical skills",
+      "Problem-solving abilities",
+      "High intelligence",
+      "Creative thinking (when not paralyzed by perfectionism)",
+      "Loyalty and dedication to his wife"
+    ],
+    "current_coping_strategies": [
+      "Avoiding difficult conversations",
+      "Procrastinating on tasks",
+      "Overworking to compensate for perceived failures",
+      "Seeking reassurance from Sarah",
+      "Isolating himself when overwhelmed"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Strategic thinking",
+      "Problem-solving under pressure (last-minute)",
+      "Hyperfocus on tasks of interest"
+    ],
+    "ef_friction_points": [
+      "Time blindness",
+      "Task initiation",
+      "Prioritization",
+      "Emotional regulation",
+      "Working Memory",
+      "Organization",
+      "Following through with commitments"
+    ],
+    "ef_workarounds": [
+      "Uses multiple calendars and reminders (often ignores them)",
+      "Creates detailed to-do lists (rarely completes them)",
+      "Relies on Sarah to manage household tasks and appointments",
+      "Attempts to break down large tasks into smaller steps (becomes overwhelmed by the number of steps)"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers calm and predictable environments. Avoids crowded places due to sensory overload. Finds comfort in routine and predictability. Fidgets constantly when anxious or bored.",
+    "food_sensory_details": "Dislikes overly processed foods with artificial flavors or colors. Textures are crucial: anything too mushy or slimy is a no-go. Prefers simple, familiar foods. Safe foods include: Rotisserie chicken (ONLY if skin is removed and it's lukewarm), plain spaghetti with butter and a sprinkle of parmesan, and specific brand of white cheddar Cheez-Its. Avoids foods with strong smells or overwhelming spices. Skips meals when stressed or overwhelmed, then binges on comfort foods (Cheez-Its, peanut butter straight from the jar) late at night."
+  },
+  "current_life_context": {
+    "where_they_live": "Two-story home in a quiet suburban neighborhood in St. Louis County.",
+    "work_school_situation": "Works full-time as a Project Manager in a fast-paced corporate environment. Feels constantly overwhelmed by deadlines and expectations. Struggles to manage his workload and prioritize tasks.",
+    "commute_daily_rhythms": "30-minute commute each way. Listens to podcasts to distract himself from anxiety. Arrives late to work frequently due to time blindness.",
+    "local_stressors": [
+      "Heavy traffic on I-64",
+      "Constant construction in the area",
+      "High property taxes",
+      "Pressure to keep up with the Joneses"
+    ],
+    "safe_spaces": [
+      "His home office (when Sarah isn't home)",
+      "The local library",
+      "Walking in a nearby park"
+    ],
+    "support_system": "Limited support system. Relies heavily on his wife, Sarah, but feels guilty about burdening her. Has a few acquaintances at work but struggles to form deep friendships. Recently started seeing a therapist."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "His marriage is on the brink of collapse. Sarah has threatened to leave if he doesn't address his issues. He desperately wants to save his marriage and be a better husband.",
+    "what_they_want_to_change": [
+      "Improve his communication skills",
+      "Regulate his emotions",
+      "Manage his time effectively",
+      "Reduce his defensiveness",
+      "Follow through with commitments",
+      "Stop procrastinating",
+      "Be more present and engaged in his marriage"
+    ],
+    "whats_in_the_way": [
+      "Deep-seated fear of rejection",
+      "Perfectionistic tendencies",
+      "Poor executive function skills",
+      "Lack of self-awareness",
+      "Resistance to change",
+      "Difficulty asking for help",
+      "Sarah's growing resentment and frustration"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "All issues mentioned are a big driver in my failing marriage. Defensiveness, shutting down, forgetfulness, following through with commitments, unmet expectations, unable to regulate emotions and have relationship conversations.",
+    "quote_hope": "\u2026getting the help I need to be a better Husband.",
+    "quotes_additional": [
+      "Fear of rejection which impedes me from making new friendships and keeping old friends.",
+      "Rushed last minute efforts which cause anxiety to procrastination to avoidance then forgotten.",
+      "Intense emotional response with guilt, shame, feeling of rejection and inadequacy."
+    ],
+    "liz_clinical_narrative": "This client presents with a constellation of challenges stemming from late-diagnosed ADHD and deeply ingrained Rejection Sensitive Dysphoria. The impact on his marriage is profound, creating a cycle of defensiveness, avoidance, and unmet expectations. His anxiety and fear of failure fuel procrastination and perfectionism, further exacerbating his difficulties. Therapy will focus on developing coping mechanisms for RSD, improving executive function skills, and fostering healthier communication patterns within his marriage. We will work collaboratively to unpack the origins of his perfectionism and cultivate self-compassion. By addressing these core issues, he can begin to rebuild trust and connection with his wife and create a more fulfilling life for himself.",
+    "therapy_preferences": "Solution-focused therapy, Cognitive Behavioral Therapy (CBT), couples counseling, practical strategies for managing ADHD symptoms, a therapist who is understanding and patient."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is RSD and Procrastination Impacting Your Marriage? We Can Help.",
+      "Reclaim Your Relationship: Neurodivergent-Affirming Therapy for Couples in St. Louis.",
+      "From Overwhelmed to Organized: ADHD Support and Coaching for Professionals."
+    ],
+    "primary_keywords": [
+      "RSD marriage problems",
+      "ADHD relationship issues",
+      "procrastination and defensiveness",
+      "neurodivergent couples therapy St. Louis",
+      "time management for ADHD adults"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Clayton",
+      "Brentwood",
+      "Webster Groves",
+      "Kirkwood"
+    ],
+    "content_angles": [
+      "The link between ADHD and marital conflict",
+      "How to cope with Rejection Sensitive Dysphoria in relationships",
+      "Practical strategies for improving communication with a neurodivergent partner"
+    ]
+  }
+}

@@ -194,33 +194,48 @@ class QdrantVectorStore(BaseVectorStore):
         self.client: Optional[QdrantClient] = None
         self.local_store: Dict[str, Dict[str, Any]] = {}
 
-        if url is None and host is None:
-            url = os.getenv("QDRANT_URL")
+        # Check environment variables
+        env_url = os.getenv("QDRANT_URL")
+        env_host = os.getenv("QDRANT_HOST")
+        env_port = os.getenv("QDRANT_PORT")
+        
+        if url is None and host is None and env_url:
+            url = env_url
         if api_key is None:
             api_key = os.getenv("QDRANT_API_KEY")
-        if host is None:
-            host = os.getenv("QDRANT_HOST", "localhost")
-        if port is None:
-            try:
-                port = int(os.getenv("QDRANT_PORT", "6333"))
-            except ValueError:
-                port = 6333
 
         try:
+            # Priority 1: Explicit URL
             if url:
                 self.client = QdrantClient(url=url, api_key=api_key, prefer_grpc=prefer_grpc)
-            else:
+                logger.info("✅ Connected to Qdrant URL: %s", url)
+            # Priority 2: Explicit host/port OR environment variables set
+            elif host or env_host:
+                final_host = host or env_host or "localhost"
+                final_port = port
+                if final_port is None:
+                    try:
+                        final_port = int(env_port) if env_port else 6333
+                    except ValueError:
+                        final_port = 6333
                 self.client = QdrantClient(
-                    host=host,
-                    port=port,
+                    host=final_host,
+                    port=final_port,
                     api_key=api_key,
                     prefer_grpc=prefer_grpc,
                 )
+                logger.info("✅ Connected to Qdrant server: %s:%s", final_host, final_port)
+            # Priority 3: Default to local file storage (no server needed!)
+            else:
+                local_path = os.path.join(os.getcwd(), "qdrant_storage")
+                self.client = QdrantClient(path=local_path)
+                logger.info("✅ Using local Qdrant storage: %s", local_path)
+            
             self._ensure_collection()
-            logger.info("Connected to Qdrant collection %s", self.collection_name)
+            logger.info("✅ Qdrant collection '%s' ready", self.collection_name)
         except Exception as exc:
             self.client = None
-            logger.warning("Falling back to in-memory vector store: %s", exc)
+            logger.warning("⚠️ Falling back to in-memory vector store: %s", exc)
 
     def _ensure_collection(self) -> None:
         if self.client is None:

@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "profile_id": "cluster-031-persona",
+    "persona_name": "Worried Mom Seeking Immediate Support",
+    "persona_tagline": "Navigating crisis and advocating for her child's mental health.",
+    "created_at": "2025-11-08 20:40:54.135347",
+    "source_documents": [
+      "cluster_31",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "parent",
+      "crisis",
+      "urgent",
+      "child_mental_health"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "45-55",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of teenage/young adult children",
+    "occupation": "Likely works full-time, possibly in healthcare or education",
+    "education": "Bachelor's Degree",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Christian (inferred from SSM Behavioral Health mention)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a stable, middle-class household. Parents were involved but possibly emotionally distant, prioritizing achievement and appearing 'normal'. Rules and expectations were clear, but flexibility and emotional expression were limited. Learned early on to suppress her own needs to keep the peace.",
+    "adolescence": "Became the 'responsible' one, often mediating between siblings and managing household tasks. High-achieving in school but struggled with anxiety and perfectionism. Started experiencing physical symptoms of stress like headaches and stomach issues. Developed a pattern of caretaking and anticipating the needs of others.",
+    "early_adulthood": "Attended college, possibly for teaching or nursing. Met her husband and married relatively young. Focused on building a 'perfect' family, replicating the structure she knew. Experienced some postpartum depression after the birth of her children but pushed through it.",
+    "family_structure": "Married with two children, a teenage daughter and a young adult daughter. Husband is supportive but may not fully understand the complexities of neurodivergence or mental health challenges. She feels primarily responsible for the emotional well-being of her family.",
+    "formative_adversities": [
+      "Emotional neglect in childhood",
+      "Pressure to conform and achieve",
+      "Postpartum depression",
+      "Witnessing her child's struggles with mental health"
+    ],
+    "educational_journey": "Attended local public schools, excelled academically. Completed a Bachelor's degree, possibly in education or healthcare. May have considered further education but prioritized family responsibilities.",
+    "pivotal_moments": [
+      "The birth of her first child, triggering postpartum depression",
+      "Her child's initial mental health crisis, forcing her to confront the limitations of her current coping strategies",
+      "Realizing her child may need more specialized support than she can provide",
+      "Feeling dismissed or unheard by healthcare professionals"
+    ],
+    "intergenerational_patterns": "Likely repeats patterns of emotional suppression and caretaking from her own upbringing. Possible family history of anxiety, depression, or undiagnosed neurodivergence."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Possible undiagnosed ADHD traits",
+      "Vicarious trauma from child's struggles"
+    ],
+    "diagnosis_journey": "She hasn't been formally diagnosed, but the stress of her daughter's mental health challenges is bringing her close to needing support herself. She's researched mental health resources and is proactive in seeking help for her daughter.",
+    "how_it_shows_up": "Constant worry and rumination. Difficulty sleeping. Irritability. Physical symptoms of stress (headaches, stomach issues). Over-functioning and difficulty delegating. Burnout from caretaking responsibilities.",
+    "nervous_system_pattern": "Hypervigilant and easily overwhelmed. Sympathetic nervous system is frequently activated. Difficulty relaxing and 'switching off'. Responds to stress by trying to control the situation.",
+    "strengths_superpowers": [
+      "Strong advocacy skills",
+      "Empathetic and compassionate",
+      "Highly organized and resourceful",
+      "Tenacious in seeking solutions"
+    ],
+    "current_coping_strategies": [
+      "Researching mental health resources",
+      "Seeking medical and therapeutic support for her daughter",
+      "Talking to friends and family (though potentially feeling misunderstood)",
+      "Over-functioning and trying to control the situation"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Planning and organization",
+      "Task initiation (when driven by urgency)",
+      "Hyperfocus on solving problems for her child"
+    ],
+    "ef_friction_points": [
+      "Difficulty prioritizing her own needs",
+      "Trouble relaxing and switching off",
+      "Procrastination on tasks that don't feel urgent",
+      "Emotional regulation under stress"
+    ],
+    "ef_workarounds": [
+      "Using lists and calendars to manage tasks",
+      "Relying on external accountability (e.g., appointments for her daughter)",
+      "Seeking support from friends and family"
+    ],
+    "sensory_profile": "Sensitive to noise and chaos. Prefers calm and predictable environments. May experience sensory overload when stressed. Finds comfort in routines and familiar surroundings.",
+    "food_sensory_details": "Dislikes overly processed foods with artificial colors or flavors. Prefers simple, home-cooked meals. Sensitive to textures, especially anything slimy or mushy. 'Safe foods': Grilled chicken breast (plain), steamed green beans, mashed potatoes (smooth, no lumps), chamomile tea. Skips meals when overwhelmed with worry."
+  },
+  "current_life_context": {
+    "where_they_live": "Suburban home in St. Louis County, MO. Values a safe and family-friendly neighborhood.",
+    "work_school_situation": "Works full-time, possibly in a role that requires organization and attention to detail (e.g., office manager, teacher). Juggling work responsibilities with caretaking and advocating for her daughter.",
+    "commute_daily_rhythms": "Drives to work, spends evenings managing household tasks and supporting her family. Weekends are often consumed by appointments and activities related to her children.",
+    "local_stressors": [
+      "Navigating the mental healthcare system in St. Louis",
+      "Concerns about school safety and bullying",
+      "Pressure to maintain a 'perfect' family image"
+    ],
+    "safe_spaces": [
+      "Her home (when it's calm and quiet)",
+      "Church (for some)",
+      "Spending time in nature"
+    ],
+    "support_system": "Husband, close friends (though they may not fully understand her struggles), potentially a support group for parents of children with mental health challenges."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Her daughter is in crisis, and she's feeling overwhelmed and unable to cope. She needs immediate support and guidance.",
+    "what_they_want_to_change": [
+      "Help her daughter get the care she needs",
+      "Learn coping strategies to manage her own anxiety and stress",
+      "Improve communication with her husband and daughter",
+      "Find a sense of calm and balance in her life"
+    ],
+    "whats_in_the_way": [
+      "Lack of access to timely and affordable mental healthcare",
+      "Stigma surrounding mental illness",
+      "Her own perfectionism and need to control the situation",
+      "Difficulty prioritizing her own needs"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I don\u2019t know if she has any appointments scheduled. But she will need to talk to you soon if possible.",
+    "quote_hope": "Kate has been asking when she can come and talk to you again.",
+    "quotes_additional": [
+      "She's still been talking nonsense and only slept about two hours.",
+      "I am just wondering if there is a problem."
+    ],
+    "liz_clinical_narrative": "This mom is reaching out in a moment of deep distress, desperately seeking help for her child. I can hear the exhaustion and worry in her words. My priority will be to validate her feelings, offer immediate support, and help her navigate the complex mental healthcare system. I'll create a safe space for her to share her fears and frustrations, and work collaboratively to develop a plan that addresses both her daughter's needs and her own well-being. It's crucial to empower her with knowledge and resources, and remind her that she doesn't have to go through this alone. We need to get Kate in as soon as humanly possible. I will also encourage her to seek individual support to process the trauma she's experiencing and develop healthy coping mechanisms.",
+    "therapy_preferences": "Wants immediate appointments, values practical advice and solutions, appreciates clear communication and responsiveness from the therapist, needs a therapist who is experienced in working with adolescents and families."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your child struggling with a mental health crisis? We offer immediate support and compassionate care for families in St. Louis.",
+      "Navigating the mental healthcare system can be overwhelming. Let us help you find the resources you need.",
+      "You don't have to go through this alone. Enlitens provides a safe and supportive space for parents and children."
+    ],
+    "primary_keywords": [
+      "child mental health crisis",
+      "teen therapy St. Louis",
+      "urgent mental health support",
+      "parent anxiety",
+      "family therapy St. Louis"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "SSM Behavioral Health",
+      "Clayton",
+      "Ladue"
+    ],
+    "content_angles": [
+      "How to recognize the signs of a mental health crisis in your child",
+      "Navigating the mental healthcare system in St. Louis: A guide for parents",
+      "Self-care strategies for parents of children with mental health challenges"
+    ]
+  }
+}

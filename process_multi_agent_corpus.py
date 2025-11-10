@@ -31,12 +31,14 @@ import argparse
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from src.agents.supervisor_agent import SupervisorAgent
+from src.agents.context_curator_agent import ContextCuratorAgent
 from src.models.enlitens_schemas import EnlitensKnowledgeBase, EnlitensKnowledgeEntry
 from src.extraction.enhanced_pdf_extractor import EnhancedPDFExtractor
 from src.extraction.enhanced_extraction_tools import EnhancedExtractionTools
 from src.agents.extraction_team import ExtractionTeam
 from src.utils.enhanced_logging import setup_enhanced_logging, log_startup_banner
 from src.retrieval.embedding_ingestion import EmbeddingIngestionPipeline
+from src.utils.terminology import sanitize_structure, contains_banned_terms
 
 # Configure comprehensive logging - single log file for all processing
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -71,6 +73,56 @@ if monitor_endpoint:
 else:
     logger.info("📝 Remote monitoring disabled; using local log file only")
 
+# ---------------------------------------------------------------------------
+# Monitoring helpers
+# ---------------------------------------------------------------------------
+
+
+def post_monitor_stats(payload: Dict[str, Any]) -> None:
+    """Send structured progress updates to the monitoring dashboard."""
+
+    if not monitor_endpoint:
+        return
+
+    try:
+        import httpx
+        from urllib.parse import urlparse
+
+        # Parse the URL to get the scheme, netloc, and path
+        parsed_url = urlparse(monitor_endpoint)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        path = parsed_url.path
+
+        # Construct the full URL for the request
+        full_url = f"{base_url}{path}"
+
+        # Ensure the path ends with a slash if it's a directory
+        if full_url.endswith('/'):
+            full_url = full_url[:-1]
+
+        # Add query parameters if any
+        if parsed_url.query:
+            full_url += f"?{parsed_url.query}"
+
+        # Add fragment if any
+        if parsed_url.fragment:
+            full_url += f"#{parsed_url.fragment}"
+
+        # Use httpx to send the request
+        with httpx.Client() as client:
+            response = client.post(
+                full_url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10.0, # Increased timeout for monitoring
+            )
+            response.raise_for_status() # Raise an exception for bad status codes
+
+    except (httpx.RequestError, httpx.HTTPStatusError, TimeoutError, ConnectionError) as e:
+        logger.warning(f"Could not send stats to monitoring server: {e}")
+    except Exception as e:
+        logger.warning(f"An unexpected error occurred during monitoring stats: {e}")
+
 # Clean up old logs after logger is configured
 try:
     import glob
@@ -98,6 +150,7 @@ class MultiAgentProcessor:
 
         # Initialize components
         self.supervisor = SupervisorAgent()
+        self.context_curator = ContextCuratorAgent()  # NEW: Intelligent context curation
         self.pdf_extractor = EnhancedPDFExtractor()
         self.extraction_tools = EnhancedExtractionTools()
         self.extraction_team = ExtractionTeam()
@@ -397,6 +450,26 @@ class MultiAgentProcessor:
             context["extracted_entities"] = entities
             logger.info(f"✅ Processing context created")
 
+            # NEW: Curate intelligent context using pre-processing agents
+            logger.info(f"🎯 Running intelligent context curation for {document_id}")
+            try:
+                from src.synthesis.ollama_client import VLLMClient
+                llm_client = VLLMClient()  # For agent operations
+                
+                curated_context = await self.context_curator.curate_context(
+                    paper_text=text,
+                    entities=entities,
+                    health_report_text=context.get("st_louis_context", {}).get("report_text", ""),
+                    llm_client=llm_client
+                )
+                
+                # Add curated context to processing context
+                context["curated_context"] = curated_context
+                logger.info(f"✅ Context curation complete: ~{curated_context['token_estimate']['total_curated']:,} tokens")
+            except Exception as e:
+                logger.warning(f"⚠️ Context curation failed, proceeding without: {e}")
+                context["curated_context"] = None
+
             # Process through supervisor (multi-agent system)
             logger.info(f"🚀 Starting supervisor processing for {document_id}")
             start_time = time.time()
@@ -415,8 +488,8 @@ class MultiAgentProcessor:
                             "filename": pdf_path.name,
                             "doc_type": context.get("doc_type"),
                             "processing_timestamp": datetime.utcnow().isoformat(),
-                            "quality_score": result.get("quality_score"),
-                            "confidence_score": result.get("confidence_score"),
+                            "quality_score": float(result.get("quality_score")) if result.get("quality_score") is not None else None,
+                            "confidence_score": float(result.get("confidence_score")) if result.get("confidence_score") is not None else None,
                         }
                         self.embedding_ingestion.ingest_document(
                             document_id=document_id,
@@ -576,7 +649,7 @@ class MultiAgentProcessor:
                         if hasattr(blog_content, field) and isinstance(value, list):
                             setattr(blog_content, field, value)
 
-            return EnlitensKnowledgeEntry(
+            entry = EnlitensKnowledgeEntry(
                 metadata=metadata,
                 extracted_entities=entities,
                 rebellion_framework=rebellion_framework,
@@ -591,6 +664,25 @@ class MultiAgentProcessor:
                 content_creation_ideas=content_creation_ideas,
                 full_document_text=full_document_text  # CRITICAL: Store for citation verification
             )
+
+            # Enforce terminology policy across all text fields
+            try:
+                sanitized = sanitize_structure(entry.model_dump())
+                if sanitized != entry.model_dump():
+                    entry = EnlitensKnowledgeEntry.model_validate(sanitized)
+                    logger.info("🔧 Applied terminology sanitizer to knowledge entry: %s", document_id)
+            except Exception as _san_exc:
+                logger.warning("Terminology sanitizer failed for %s: %s", document_id, _san_exc)
+
+            # Log if any banned terms remain
+            try:
+                dump_text = json.dumps(entry.model_dump(), ensure_ascii=False)
+                if contains_banned_terms(dump_text):
+                    logger.warning("⚠️ Banned terminology detected post-sanitize for %s", document_id)
+            except Exception:
+                pass
+
+            return entry
 
         except Exception as e:
             logger.error(f"Error converting to knowledge entry: {e}")
@@ -619,6 +711,7 @@ class MultiAgentProcessor:
     async def process_corpus(self):
         """Process the entire corpus using the multi-agent system."""
         start_time = time.time()  # Track processing start time
+        failed_count = 0
         try:
             logger.info("🚀 Starting MULTI-AGENT Enlitens Corpus Processing")
             logger.info(f"📁 Input directory: {self.input_dir}")
@@ -646,9 +739,15 @@ class MultiAgentProcessor:
                     logger.error("❌ Supervisor initialization failed; aborting corpus processing")
                     return
 
-            # Load existing progress
             self.knowledge_base = await self._load_progress()
             processed_docs = {doc.metadata.document_id for doc in self.knowledge_base.documents}
+
+            post_monitor_stats({
+                "status": "running",
+                "total_documents": total_files,
+                "documents_processed": len(self.knowledge_base.documents),
+                "documents_failed": failed_count,
+            })
 
             # Process documents with multi-agent system
             for i, pdf_path in enumerate(pdf_files):
@@ -658,13 +757,40 @@ class MultiAgentProcessor:
 
                 logger.info(f"📖 Processing file {i+1}/{total_files}: {pdf_path.name}")
 
+                post_monitor_stats({
+                    "status": "processing",
+                    "current_document": pdf_path.name,
+                    "current_index": i + 1,
+                    "total_documents": total_files,
+                    "documents_processed": len(self.knowledge_base.documents),
+                    "documents_failed": failed_count,
+                })
+
+                doc_start_time = time.time()
+
                 # Process document with multi-agent system
                 knowledge_entry = await self.process_document(pdf_path)
+                doc_duration = time.time() - doc_start_time
                 if knowledge_entry:
                     self.knowledge_base.documents.append(knowledge_entry)
                     logger.info(f"✅ Successfully processed: {pdf_path.name}")
+                    post_monitor_stats({
+                        "status": "processing",
+                        "documents_processed": len(self.knowledge_base.documents),
+                        "documents_failed": failed_count,
+                        "last_document": pdf_path.name,
+                        "last_duration": round(doc_duration, 2),
+                    })
                 else:
                     logger.error(f"❌ Failed to process: {pdf_path.name}")
+                    failed_count += 1
+                    post_monitor_stats({
+                        "status": "processing",
+                        "documents_processed": len(self.knowledge_base.documents),
+                        "documents_failed": failed_count,
+                        "last_document": pdf_path.name,
+                        "last_error": "processing_failed",
+                    })
 
                 # Save progress after each document
                 await self._save_progress(self.knowledge_base, i+1, total_files)
@@ -673,18 +799,80 @@ class MultiAgentProcessor:
                 if (i + 1) % 3 == 0:  # Every 3 documents
                     await self._cleanup_memory()
 
+            # === NEW: Integrate Personas, Confidence Scoring, and External Search ===
+            logger.info("="*80)
+            logger.info("🎯 POST-PROCESSING: Personas, Confidence, & External Search")
+            logger.info("="*80)
+            
+            # 1. Integrate Personas
+            try:
+                from src.agents.persona_integration_agent import load_and_integrate_personas
+                logger.info("📊 Integrating 57 client personas...")
+                self.knowledge_base = load_and_integrate_personas(self.knowledge_base.model_dump())
+                logger.info("✅ Personas integrated")
+            except Exception as e:
+                logger.warning(f"⚠️  Persona integration failed: {e}")
+            
+            # 2. Calculate Confidence Scores
+            try:
+                from src.utils.confidence_scorer import ConfidenceScorer
+                logger.info("📊 Calculating confidence scores...")
+                scorer = ConfidenceScorer(low_threshold=0.5, high_threshold=0.8)
+                
+                # Add all documents to scorer
+                for doc in self.knowledge_base.get("documents", []):
+                    doc_id = doc.get("document_id", "unknown")
+                    scorer.add_document(doc_id, doc)
+                
+                # Calculate scores
+                scorer.calculate_scores()
+                
+                # Add to knowledge base
+                kb_dict = self.knowledge_base if isinstance(self.knowledge_base, dict) else self.knowledge_base.model_dump()
+                kb_dict = scorer.add_to_knowledge_base(kb_dict)
+                self.knowledge_base = kb_dict
+                
+                logger.info("✅ Confidence scores calculated")
+                
+                # 3. External Search for Low-Confidence Entities
+                low_conf_entities = scorer.get_low_confidence_entities()
+                
+                if low_conf_entities:
+                    from src.retrieval.external_search import ExternalSearchClient
+                    logger.info(f"🔍 Searching external APIs for {len(low_conf_entities)} low-confidence entities...")
+                    
+                    search_client = ExternalSearchClient()
+                    self.knowledge_base = search_client.enrich_knowledge_base(
+                        self.knowledge_base, 
+                        low_conf_entities
+                    )
+                    search_client.close()
+                    
+                    logger.info("✅ External search completed")
+                else:
+                    logger.info("✅ No low-confidence entities need external search")
+                    
+            except Exception as e:
+                logger.warning(f"⚠️  Confidence scoring/external search failed: {e}")
+            
+            logger.info("="*80)
+            logger.info("✅ POST-PROCESSING COMPLETE")
+            logger.info("="*80)
+            
             # Save final results
-            self.knowledge_base.total_documents = len(self.knowledge_base.documents)
+            self.knowledge_base.total_documents = len(self.knowledge_base.get("documents", [])) if isinstance(self.knowledge_base, dict) else len(self.knowledge_base.documents)
             # Atomic write: write to temp then replace to reduce risk during transient I/O issues
             try:
                 tmp_final = Path(str(self.output_file) + ".tmp")
                 with open(tmp_final, 'w', encoding='utf-8') as f:
-                    json.dump(self.knowledge_base.model_dump(), f, indent=2, default=str)
+                    kb_to_save = self.knowledge_base if isinstance(self.knowledge_base, dict) else self.knowledge_base.model_dump()
+                    json.dump(kb_to_save, f, indent=2, default=str)
                 os.replace(tmp_final, self.output_file)
             except Exception as e:
                 logger.error(f"❌ Atomic write failed, falling back to direct write: {e}")
                 with open(self.output_file, 'w', encoding='utf-8') as f:
-                    json.dump(self.knowledge_base.model_dump(), f, indent=2, default=str)
+                    kb_to_save = self.knowledge_base if isinstance(self.knowledge_base, dict) else self.knowledge_base.model_dump()
+                    json.dump(kb_to_save, f, indent=2, default=str)
 
             # Clean up temporary file
             if self.temp_file.exists():
@@ -711,12 +899,22 @@ class MultiAgentProcessor:
             for category, stats in quality_breakdown.items():
                 logger.info(f"   - {category}: {stats['avg']:.2f} (min: {stats['min']:.2f}, max: {stats['max']:.2f})")
 
+            post_monitor_stats({
+                "status": "completed",
+                "documents_processed": len(self.knowledge_base.documents),
+                "documents_failed": failed_count,
+                "total_documents": total_files,
+                "runtime_seconds": round(processing_duration, 2),
+            })
+
         except Exception as e:
             logger.error(f"❌ Error processing corpus: {e}")
+            post_monitor_stats({"status": "error", "error": str(e)})
             raise
         finally:
             # Clean up resources
             await self._cleanup()
+            post_monitor_stats({"status": "idle"})
 
     async def _check_system_resources(self):
         """Check system resources and provide recommendations."""

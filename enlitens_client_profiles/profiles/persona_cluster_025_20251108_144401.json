@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "profile_id": "cluster-042-persona",
+    "persona_name": "Anxious Evaluation Seeker",
+    "persona_tagline": "Seeking clarity and comfort in the evaluation process.",
+    "created_at": "2025-11-08 20:43:45.737186",
+    "source_documents": [
+      "cluster_42",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "evaluation",
+      "anxiety",
+      "neurodivergent-affirming",
+      "self-doubt"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "25-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Working professional, living with partner",
+    "occupation": "Marketing Coordinator",
+    "education": "Bachelor's Degree",
+    "locality": "Webster Groves, St. Louis",
+    "cultural_faith_identities": [
+      "None"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a middle-class home in suburban St. Louis. Her parents were loving but often preoccupied with their careers, leaving her feeling unseen and unheard. Academic achievement was highly valued, leading to intense pressure to succeed.",
+    "adolescence": "High school was a mix of academic success and social anxiety. She excelled in her classes but struggled with feeling like she didn't quite fit in. Developed a habit of over-preparing and seeking validation from teachers and peers.",
+    "early_adulthood": "College was a period of exploration and increased anxiety. She changed her major several times, unsure of what she wanted to do. Started experiencing panic attacks during exams and presentations. After graduation, she took a marketing job but felt increasingly overwhelmed and unsure of her abilities.",
+    "family_structure": "Two-parent household with one younger brother. Her mother is a high-achieving lawyer, and her father is an engineer. Her brother was naturally gifted academically, which added to her sense of inadequacy.",
+    "formative_adversities": [
+      "Pressure to excel academically",
+      "Feeling unseen and unheard by parents",
+      "Social anxiety and difficulty fitting in",
+      "Panic attacks and generalized anxiety"
+    ],
+    "educational_journey": "Attended highly-rated public schools in Webster Groves. Excelled academically but struggled with test anxiety. Attended a private university in Missouri, changing majors several times before graduating with a degree in Marketing.",
+    "pivotal_moments": [
+      "Failing a major exam in college, triggering a panic attack and feelings of self-doubt.",
+      "Being overlooked for a promotion at work, reinforcing her sense of inadequacy.",
+      "Discovering neurodiversity through online research and realizing her experiences resonated with ADHD symptoms.",
+      "Finding Liz Wooten's website and feeling a sense of comfort and understanding.",
+      "Deciding to seek an evaluation to gain clarity and support."
+    ],
+    "intergenerational_patterns": "Her mother also struggled with anxiety and perfectionism, likely undiagnosed ADHD. A pattern of high expectations and internalizing stress runs in the family."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Suspects ADHD, possibly combined type",
+      "Anxiety",
+      "Perfectionism"
+    ],
+    "diagnosis_journey": "Self-researched ADHD after struggling with organization, focus, and emotional regulation. Has been putting off seeking an official diagnosis due to anxiety about the process and potential stigma. Finds comfort in online communities and neurodiversity-affirming content. This journey brought her to Liz's website and feeling 'comforted by your page'.",
+    "how_it_shows_up": "Difficulty focusing on tasks, procrastination, disorganization, forgetfulness, emotional dysregulation, anxiety, perfectionism, self-doubt, fear of judgment, feeling overwhelmed by daily tasks.",
+    "nervous_system_pattern": "High-strung, easily overwhelmed, prone to anxiety and panic attacks, difficulty relaxing and unwinding, constantly seeking external validation.",
+    "strengths_superpowers": [
+      "Creative problem-solving",
+      "Strong empathy",
+      "Attention to detail (when interested)",
+      "Resilience",
+      "Hyperfocus on passion projects"
+    ],
+    "current_coping_strategies": [
+      "Over-preparing for tasks",
+      "Seeking reassurance from others",
+      "Avoiding challenging situations",
+      "Scrolling social media to distract from anxiety",
+      "Caffeine to manage focus",
+      "Trying to maintain a strict routine (often unsuccessfully)"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creative thinking",
+      "Problem-solving in areas of interest",
+      "Connecting with others empathetically"
+    ],
+    "ef_friction_points": [
+      "Task initiation",
+      "Time management",
+      "Organization",
+      "Prioritization",
+      "Emotional regulation",
+      "Working memory"
+    ],
+    "ef_workarounds": [
+      "Using multiple calendars and to-do lists (often abandoned)",
+      "Setting alarms and reminders",
+      "Body doubling with friends",
+      "Trying to break down tasks into smaller steps (sometimes helpful)"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft, comfortable clothing. Easily overwhelmed by strong smells. Finds repetitive movements calming (e.g., fidgeting, pacing).",
+    "food_sensory_details": "Avoids foods with mushy textures like overcooked oatmeal or canned peaches. Dislikes anything overly processed or artificial-tasting. Safe foods include: air-popped popcorn with minimal butter, specific brand of veggie straws (Senasations), grilled chicken breast (room temperature, no skin), and dry Cheerios. Often skips meals when stressed or overwhelmed, then binges on sugary snacks later in the day. Sensitive to the smell of fish cooking."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment in Webster Groves, St. Louis with her partner.",
+    "work_school_situation": "Works full-time as a Marketing Coordinator for a small non-profit. Feels underappreciated and overwhelmed by the workload.",
+    "commute_daily_rhythms": "Drives 20 minutes to work each day. Listens to podcasts or audiobooks to distract from anxiety during the commute. Struggles to maintain a consistent morning routine due to difficulty waking up and getting started.",
+    "local_stressors": [
+      "Traffic congestion on I-64",
+      "High cost of living in Webster Groves",
+      "Pressure to keep up with social expectations in the community"
+    ],
+    "safe_spaces": [
+      "Her apartment",
+      "Quiet coffee shops",
+      "Spending time in nature (e.g., Forest Park)"
+    ],
+    "support_system": "Supportive partner, a few close friends, but struggles to ask for help due to fear of judgment."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking an evaluation to understand if she has ADHD and to gain clarity about her struggles. 'I was very comforted by your page and have been worried about being evaluated.'",
+    "what_they_want_to_change": [
+      "Improve focus and concentration",
+      "Manage anxiety and emotional regulation",
+      "Increase self-confidence",
+      "Develop healthier coping mechanisms",
+      "Reduce procrastination and improve time management"
+    ],
+    "whats_in_the_way": [
+      "Anxiety about the evaluation process",
+      "Fear of being judged or stigmatized",
+      "Self-doubt and imposter syndrome",
+      "Difficulty prioritizing her needs",
+      "Lack of time and energy"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "'I was very comforted by your page and have been worried about being evaluated.'",
+    "quote_hope": "I'm hoping an evaluation will give me some clarity and help me understand myself better.",
+    "quotes_additional": [],
+    "liz_clinical_narrative": "It's clear that this individual is experiencing a great deal of anxiety surrounding the evaluation process, which is entirely understandable. Many of my clients come to me with similar fears \u2013 the fear of being misjudged, the fear of confirming their deepest insecurities. My goal is to create a safe and supportive environment where we can explore these concerns together, not just to arrive at a diagnosis, but to foster self-compassion and empower them to embrace their unique neurodivergent profile. I will prioritize her comfort and ensure she feels heard and validated throughout the entire process. We will work together to create a strengths-based plan that honors her individuality and helps her thrive.",
+    "therapy_preferences": "Neurodivergent-affirming, compassionate, collaborative, strengths-based, trauma-informed"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Feeling anxious about getting an ADHD evaluation? You're not alone. Our neurodiversity-affirming practice provides a safe and supportive environment.",
+      "Worried about being judged? We understand. Our evaluations focus on your strengths and empower you to embrace your unique neurodivergent profile.",
+      "Finally understand the root causes of your struggles. Our comprehensive evaluations can provide clarity and direction."
+    ],
+    "primary_keywords": [
+      "ADHD evaluation St. Louis",
+      "Anxiety about ADHD diagnosis",
+      "Neurodiversity affirming therapist",
+      "Adult ADHD assessment",
+      "Self-doubt and ADHD"
+    ],
+    "local_entities": [
+      "Webster Groves",
+      "Kirkwood",
+      "Des Peres",
+      "St. Louis County"
+    ],
+    "content_angles": [
+      "Addressing anxiety about ADHD evaluations",
+      "Debunking myths about ADHD in adults",
+      "Highlighting the strengths of neurodivergent individuals",
+      "Sharing personal stories of successful ADHD diagnosis journeys"
+    ]
+  }
+}

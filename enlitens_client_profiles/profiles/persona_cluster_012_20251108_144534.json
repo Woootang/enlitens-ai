@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "profile_id": "cluster-048-persona",
+    "persona_name": "Concerned Mother Navigating Teen Turmoil",
+    "persona_tagline": "Helping mothers reconnect with their teens facing challenging choices.",
+    "created_at": "2025-11-08 20:45:18.588002",
+    "source_documents": [
+      "cluster_48",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "mother",
+      "teenager",
+      "relationship issues",
+      "substance use",
+      "communication breakdown"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "40-55",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Caucasian",
+    "current_life_situation": "Married, mother of teenage daughter",
+    "occupation": "Registered Nurse",
+    "education": "Bachelor's Degree in Nursing",
+    "locality": "Suburban St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Christian (non-denominational)"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Grew up in a stable, middle-class home with two loving parents. Her father was a teacher, and her mother was a stay-at-home mom until she started school. Values were placed on education, hard work, and family unity. Some emotional repression was present; 'big feelings' were often discouraged.",
+    "adolescence": "A people-pleaser, she excelled academically and participated in extracurricular activities. She always strived for perfection and internalized a lot of stress. Developed some mild social anxiety and relied on close friendships for support. Started to notice subtle signs of her own tendency to over-analyze and worry.",
+    "early_adulthood": "Went to college for nursing, focusing on a career that felt 'safe' and helpful. Met her husband during this time. They married shortly after graduation. Early career was demanding, but she found fulfillment in caring for others. Started to suppress her own needs and feelings to maintain peace at home and work.",
+    "family_structure": "Raised by both parents, one younger brother. Parents are still married. Close relationship with her brother, but they don't see each other as often as they'd like due to distance. Her parents are supportive but sometimes struggle to understand her daughter's struggles.",
+    "formative_adversities": [
+      "Witnessing her grandmother's slow decline due to Alzheimer's disease",
+      "Experiencing bullying in middle school for being 'too smart'",
+      "Her own miscarriage before having Ava"
+    ],
+    "educational_journey": "Attended public schools and excelled academically. Was often praised for her intelligence and work ethic. College was challenging but rewarding. Initially considered medical school but chose nursing for the perceived stability and shorter training period.",
+    "pivotal_moments": [
+      "Her daughter Ava's birth, solidifying her desire to be a 'good mother'",
+      "The death of her grandmother, forcing her to confront mortality and the importance of connection",
+      "Ava getting her first bad grade in school, triggering her own anxieties about perfectionism",
+      "Finding out about Ava's unhealthy relationship, leading to feelings of helplessness and fear",
+      "Realizing that she can't control Ava's choices, but she can control how she supports her."
+    ],
+    "intergenerational_patterns": "A pattern of emotional suppression and prioritizing others' needs over her own. Her mother also struggled with anxiety and perfectionism. A history of 'doing what's expected' rather than pursuing genuine passions."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "Anxiety",
+      "Perfectionistic tendencies"
+    ],
+    "diagnosis_journey": "Never formally diagnosed, but has recognized her own struggles with anxiety for years. Assumed it was 'just part of her personality'. Considered seeking therapy in the past but always prioritized her family's needs. Is now realizing that her own mental health is impacting her ability to support Ava.",
+    "how_it_shows_up": "Constant worry and overthinking, especially about Ava. Difficulty sleeping. Muscle tension and headaches. Tendency to ruminate on past mistakes. Difficulty setting boundaries. Feels guilty when prioritizing her own needs.",
+    "nervous_system_pattern": "Hypervigilant. Easily overwhelmed by sensory input and emotional stress. Tends to be in a state of chronic fight-or-flight. Difficulty relaxing and 'turning off' her mind.",
+    "strengths_superpowers": [
+      "Empathy and compassion",
+      "Strong work ethic",
+      "Organization and attention to detail",
+      "Ability to connect with others"
+    ],
+    "current_coping_strategies": [
+      "Trying to talk to Ava (but feels like she's not being heard)",
+      "Wine in the evenings to relax",
+      "Overworking to avoid dealing with her feelings",
+      "Scrolling social media to distract herself"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Planning and organization",
+      "Task completion (at work)",
+      "Following routines"
+    ],
+    "ef_friction_points": [
+      "Difficulty prioritizing tasks at home",
+      "Procrastination on self-care activities",
+      "Trouble initiating conversations with Ava about difficult topics",
+      "Inability to adapt when plans change unexpectedly"
+    ],
+    "ef_workarounds": [
+      "Using a planner to schedule everything",
+      "Setting reminders on her phone",
+      "Relying on her husband to handle household tasks she avoids"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers calm and quiet environments. Finds comfort in repetitive tasks and familiar routines. Overwhelmed by crowded places and strong smells.",
+    "food_sensory_details": "Prefers foods with consistent textures and mild flavors. Dislikes anything overly spicy or with unexpected textures. Safe foods: Grilled chicken breast (only if it's fully cooked and not rubbery), steamed broccoli (with no sauce), plain yogurt (specifically Chobani), sliced apples (Granny Smith), and Wheat Thins. Avoids foods with visible fat or gristle. Will binge on sweets (especially chocolate chip cookies from Schnucks bakery) when stressed or overwhelmed. Often skips meals when feeling anxious."
+  },
+  "current_life_context": {
+    "where_they_live": "A comfortable, well-maintained home in a quiet suburban neighborhood in St. Louis County. Pride in her home and neighborhood. Values safety and security.",
+    "work_school_situation": "Works full-time as a registered nurse at a local hospital. Enjoys her work but feels increasingly burned out due to the demands of the job. Lately she has been having panic attacks before her shifts.",
+    "commute_daily_rhythms": "30-minute commute to the hospital. Listens to NPR or podcasts during her drive. Tries to get to work early to avoid traffic. After work, she rushes home to help with dinner and homework.",
+    "local_stressors": [
+      "Rising crime rates in the St. Louis area",
+      "Concerns about the quality of education in her daughter's school",
+      "The increasing cost of living"
+    ],
+    "safe_spaces": [
+      "Her garden",
+      "Her church",
+      "Her best friend's house"
+    ],
+    "support_system": "Her husband is supportive but doesn't always understand her anxieties. Has a close relationship with her best friend, who is also a mother of teenagers. Limited contact with extended family."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "\u201cMy daughter Ava, is a great kid but she is in a unhealthy relationship with her ex boyfriend. She is starting to experiment with alcohol and drugs. We have a great relationship but she doesn't really want to hear what I have to say or doesn't want to tell me most things.\u201d She wants to find a way to help Ava and reconnect with her.",
+    "what_they_want_to_change": [
+      "Improve communication with Ava",
+      "Help Ava make healthy choices",
+      "Reduce her own anxiety and stress",
+      "Set better boundaries",
+      "Regain a sense of control"
+    ],
+    "whats_in_the_way": [
+      "Ava's resistance to opening up",
+      "Her own perfectionistic tendencies",
+      "Fear of judgment from others",
+      "Difficulty prioritizing her own needs",
+      "Lack of self-compassion"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "\u201cShe doesn't really want to hear what I have to say or doesn't want to tell me most things.\u201d",
+    "quote_hope": "I just want my daughter to be happy and healthy.",
+    "quotes_additional": [
+      "I feel like I'm losing her.",
+      "I don't know what to do anymore.",
+      "I just want to help."
+    ],
+    "liz_clinical_narrative": "This mother is experiencing a profound sense of helplessness and fear as she watches her daughter struggle. She is caught in a cycle of worry and overthinking, which is impacting her own well-being and her ability to connect with Ava. Her desire to protect her daughter is overwhelming her ability to set healthy boundaries. We can work together to help her develop coping strategies for managing her anxiety, improve communication with Ava, and rediscover her own sense of self-worth. It's time to shift from trying to control Ava's choices to empowering her to make her own.",
+    "therapy_preferences": "Individual therapy, family therapy (if Ava is willing), solution-focused approach, emphasis on coping skills and communication strategies"
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Is your teen pulling away? We can help you reconnect and navigate challenging choices.",
+      "Feeling overwhelmed by your teen's struggles? Find support and guidance here.",
+      "Learn effective communication strategies to rebuild trust and understanding with your teenager."
+    ],
+    "primary_keywords": [
+      "teen relationship issues",
+      "teen substance abuse",
+      "parent-teen communication",
+      "anxiety in mothers",
+      "St. Louis therapy for mothers"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Clayton",
+      "Kirkwood",
+      "Webster Groves",
+      "Ladue"
+    ],
+    "content_angles": [
+      "How to talk to your teen about difficult topics",
+      "Recognizing the signs of substance abuse in teenagers",
+      "Coping strategies for anxious mothers",
+      "Setting healthy boundaries with your teenager"
+    ]
+  }
+}

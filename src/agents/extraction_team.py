@@ -16,6 +16,8 @@ import asyncio
 import torch
 from transformers import pipeline
 
+from src.utils.gpu_memory_manager import get_gpu_manager
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,12 +60,16 @@ class LazyPipelineLoader:
             "CPU" if device == -1 else f"device {device}",
         )
 
-        self._cache[cache_key] = self._pipeline_factory(
-            task,
-            model=model_name,
-            device=device,
-            **pipeline_kwargs,
-        )
+        try:
+            self._cache[cache_key] = self._pipeline_factory(
+                task,
+                model=model_name,
+                device=device,
+                **pipeline_kwargs,
+            )
+        except Exception as e:
+            logger.error(f"Failed to load {model_name}: {str(e)[:200]}")
+            raise
         return self._cache[cache_key]
 
 
@@ -83,21 +89,25 @@ class ExtractionTeam:
         pipeline_factory: Callable[..., Any] = pipeline,
         force_cpu: Optional[bool] = None,
     ):
+        # FORCE CPU for NER models since vLLM uses all GPU memory
         self.pipeline_loader = LazyPipelineLoader(
             pipeline_factory=pipeline_factory,
-            force_cpu=force_cpu,
+            force_cpu=True,  # Always use CPU for NER
         )
         self.models = {}
+        self.gpu_manager = get_gpu_manager()
         self.entity_types = {
             'biomedical': ['DISEASE', 'CHEMICAL', 'GENE', 'PROTEIN', 'CELL_LINE'],
             'neuroscience': ['BRAIN_REGION', 'NEURAL_PATHWAY', 'NEUROTRANSMITTER', 'COGNITIVE_FUNCTION'],
             'psychology': ['PSYCHOLOGICAL_CONCEPT', 'BEHAVIOR', 'EMOTION', 'MENTAL_STATE'],
             'clinical': ['SYMPTOM', 'TREATMENT', 'DIAGNOSIS', 'INTERVENTION', 'OUTCOME']
         }
+        logger.info("⚠️  NER models will run on CPU (vLLM occupies GPU)")
         
     async def extract_entities(self, extraction_result: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extract entities from the document using specialized models.
+        OPTIMIZED: Load/unload models sequentially to avoid GPU OOM.
         
         Args:
             extraction_result: Raw extraction result from PDF
@@ -106,7 +116,10 @@ class ExtractionTeam:
             Dictionary of extracted entities by type
         """
         try:
-            logger.info("Extraction Team: Starting entity extraction")
+            logger.info("Extraction Team: Starting entity extraction (sequential loading)")
+            
+            # Log initial GPU state
+            self.gpu_manager.log_memory_stats("🔥 GPU before extraction")
             
             # Get text content
             text_content = self._get_text_content(extraction_result)
@@ -114,35 +127,64 @@ class ExtractionTeam:
                 logger.warning("Extraction Team: No text content found")
                 return {}
             
-            # Extract entities using different models
+            # Extract entities using different models - ONE AT A TIME
             entities = {}
             
-            # Biomedical entities
+            # 1. Disease/Condition entities (OpenMed DiseaseDetect)
+            logger.info("🔄 Model 1/5: DiseaseDetect...")
             biomedical_entities = await self._extract_biomedical_entities(text_content)
-            entities['biomedical'] = biomedical_entities
+            entities['diseases'] = biomedical_entities
+            await self._unload_model('disease_detect')
             
-            # Neuroscience entities
+            # 2. Chemical/Drug entities (OpenMed PharmaDetect)
+            logger.info("🔄 Model 2/5: PharmaDetect...")
             neuro_entities = await self._extract_neuroscience_entities(text_content)
-            entities['neuroscience'] = neuro_entities
+            entities['chemicals'] = neuro_entities
+            await self._unload_model('pharma_detect')
             
-            # Psychology entities
+            # 3. Anatomical entities (OpenMed AnatomyDetect)
+            logger.info("🔄 Model 3/5: AnatomyDetect...")
             psych_entities = await self._extract_psychology_entities(text_content)
-            entities['psychology'] = psych_entities
+            entities['anatomy'] = psych_entities
+            await self._unload_model('anatomy_detect')
             
-            # Clinical entities
+            # 4. Gene/Protein entities (OpenMed GenomeDetect)
+            logger.info("🔄 Model 4/5: GenomeDetect...")
             clinical_entities = await self._extract_clinical_entities(text_content)
-            entities['clinical'] = clinical_entities
+            entities['genes'] = clinical_entities
+            await self._unload_model('genome_detect')
             
-            # Statistical entities
+            # 5. Clinical symptoms/treatments (ClinicalDistilBERT)
+            logger.info("🔄 Model 5/5: ClinicalDistilBERT...")
+            clinical_symptoms = await self._extract_clinical_symptoms(text_content)
+            entities['clinical'] = clinical_symptoms
+            await self._unload_model('clinical_distilbert')
+            
+            # Statistical entities (lightweight, no GPU needed)
             statistical_entities = await self._extract_statistical_entities(text_content)
             entities['statistical'] = statistical_entities
             
-            logger.info(f"Extraction Team: Extracted {sum(len(v) for v in entities.values())} entities")
+            logger.info(f"✅ Extraction Team: Extracted {sum(len(v) for v in entities.values())} entities")
             return entities
             
         except Exception as e:
-            logger.error(f"Extraction Team: Entity extraction failed: {e}")
+            logger.error(f"❌ Extraction Team: Entity extraction failed: {e}")
             return {}
+    
+    async def _unload_model(self, model_key: str):
+        """Unload a model from memory and clear GPU cache."""
+        try:
+            if model_key in self.models:
+                logger.info(f"🧹 Unloading {model_key}...")
+                del self.models[model_key]
+                
+                # Use GPU manager for cleanup
+                self.gpu_manager.clear_cache()
+                self.gpu_manager.log_memory_stats(f"After unloading {model_key}")
+                
+                logger.info(f"✅ {model_key} unloaded")
+        except Exception as e:
+            logger.warning(f"Failed to unload {model_key}: {e}")
     
     def _get_text_content(self, extraction_result: Dict[str, Any]) -> str:
         """Extract text content from extraction result"""
@@ -151,135 +193,204 @@ class ExtractionTeam:
         return ''
     
     async def _extract_biomedical_entities(self, text: str) -> List[Dict[str, Any]]:
-        """Extract biomedical entities using BiomedBERT"""
+        """Extract disease/condition entities using OpenMed DiseaseDetect"""
         try:
-            # Load BiomedBERT model
-            if 'biomedbert' not in self.models:
-                self.models['biomedbert'] = self.pipeline_loader.get(
-                    'biomedbert',
-                    "ner",
-                    "dmis-lab/biobert-base-cased-v1.1",
+            # Check GPU memory before loading
+            if not self.gpu_manager.check_available_memory(1.0):
+                logger.warning("Insufficient GPU memory for disease model, forcing cleanup")
+                self.gpu_manager.force_cleanup()
+            
+            # Load OpenMed DiseaseDetect model
+            if 'disease_detect' not in self.models:
+                logger.info("Loading OpenMed DiseaseDetect (434M, ~0.85GB)...")
+                self.models['disease_detect'] = self.pipeline_loader.get(
+                    'disease_detect',
+                    "token-classification",
+                    "OpenMed/OpenMed-NER-DiseaseDetect-SuperClinical-434M",
                     aggregation_strategy="simple",
+                    torch_dtype="float16"
                 )
+                self.gpu_manager.log_memory_stats("After loading DiseaseDetect")
             
             # Extract entities
-            entities = self.models['biomedbert'](text)
+            entities = self.models['disease_detect'](text[:2000])  # Limit to first 2000 chars for speed
             
-            # Filter for biomedical entity types
+            # Format entities
             biomedical_entities = []
             for entity in entities:
-                if entity['entity_group'] in self.entity_types['biomedical']:
-                    biomedical_entities.append({
-                        'text': entity['word'],
-                        'label': entity['entity_group'],
-                        'confidence': entity['score'],
-                        'start': entity['start'],
-                        'end': entity['end']
-                    })
+                biomedical_entities.append({
+                    'text': entity['word'],
+                    'label': 'Disease',
+                    'confidence': entity['score'],
+                    'start': entity['start'],
+                    'end': entity['end']
+                })
             
+            logger.info(f"✅ DiseaseDetect found {len(biomedical_entities)} disease entities")
             return biomedical_entities
             
         except Exception as e:
-            logger.error(f"Biomedical entity extraction failed: {e}")
+            logger.warning(f"⚠️ Disease NER model unavailable (optional), skipping: {str(e)[:100]}")
             return []
     
     async def _extract_neuroscience_entities(self, text: str) -> List[Dict[str, Any]]:
-        """Extract neuroscience entities using NeuroBERT"""
+        """Extract chemical/neurotransmitter entities using OpenMed PharmaDetect"""
         try:
-            # Load NeuroBERT model
-            if 'neurobert' not in self.models:
-                self.models['neurobert'] = self.pipeline_loader.get(
-                    'neurobert',
-                    "ner",
-                    "allenai/scibert_scivocab_uncased",
+            # Check GPU memory
+            if not self.gpu_manager.check_available_memory(1.0):
+                self.gpu_manager.force_cleanup()
+            
+            # Load OpenMed PharmaDetect model
+            if 'pharma_detect' not in self.models:
+                logger.info("Loading OpenMed PharmaDetect (434M, ~0.85GB)...")
+                self.models['pharma_detect'] = self.pipeline_loader.get(
+                    'pharma_detect',
+                    "token-classification",
+                    "OpenMed/OpenMed-NER-PharmaDetect-SuperClinical-434M",
                     aggregation_strategy="simple",
+                    torch_dtype="float16"
                 )
+                self.gpu_manager.log_memory_stats("After loading PharmaDetect")
             
             # Extract entities
-            entities = self.models['neurobert'](text)
+            entities = self.models['pharma_detect'](text[:2000])
             
-            # Filter for neuroscience entity types
+            # Format entities
             neuro_entities = []
             for entity in entities:
-                if entity['entity_group'] in self.entity_types['neuroscience']:
-                    neuro_entities.append({
-                        'text': entity['word'],
-                        'label': entity['entity_group'],
-                        'confidence': entity['score'],
-                        'start': entity['start'],
-                        'end': entity['end']
-                    })
+                neuro_entities.append({
+                    'text': entity['word'],
+                    'label': 'Chemical',
+                    'confidence': entity['score'],
+                    'start': entity['start'],
+                    'end': entity['end']
+                })
             
+            logger.info(f"✅ PharmaDetect found {len(neuro_entities)} chemical/drug entities")
             return neuro_entities
             
         except Exception as e:
-            logger.error(f"Neuroscience entity extraction failed: {e}")
+            logger.error(f"Chemical entity extraction failed: {e}")
             return []
     
     async def _extract_psychology_entities(self, text: str) -> List[Dict[str, Any]]:
-        """Extract psychology entities using PsychBERT"""
+        """Extract anatomical entities using OpenMed AnatomyDetect"""
         try:
-            # Load PsychBERT model
-            if 'psychbert' not in self.models:
-                self.models['psychbert'] = self.pipeline_loader.get(
-                    'psychbert',
-                    "ner",
-                    "mental/mental-bert-base-uncased",
+            # Check GPU memory
+            if not self.gpu_manager.check_available_memory(1.5):
+                self.gpu_manager.force_cleanup()
+            
+            # Load OpenMed AnatomyDetect model (larger: 560M)
+            if 'anatomy_detect' not in self.models:
+                logger.info("Loading OpenMed AnatomyDetect (560M, ~1.1GB)...")
+                self.models['anatomy_detect'] = self.pipeline_loader.get(
+                    'anatomy_detect',
+                    "token-classification",
+                    "OpenMed/OpenMed-NER-AnatomyDetect-ElectraMed-560M",
                     aggregation_strategy="simple",
+                    torch_dtype="float16"
                 )
+                self.gpu_manager.log_memory_stats("After loading AnatomyDetect")
             
             # Extract entities
-            entities = self.models['psychbert'](text)
+            entities = self.models['anatomy_detect'](text[:2000])
             
-            # Filter for psychology entity types
+            # Format entities
             psych_entities = []
             for entity in entities:
-                if entity['entity_group'] in self.entity_types['psychology']:
-                    psych_entities.append({
-                        'text': entity['word'],
-                        'label': entity['entity_group'],
-                        'confidence': entity['score'],
-                        'start': entity['start'],
-                        'end': entity['end']
-                    })
+                psych_entities.append({
+                    'text': entity['word'],
+                    'label': 'Anatomy',
+                    'confidence': entity['score'],
+                    'start': entity['start'],
+                    'end': entity['end']
+                })
             
+            logger.info(f"✅ AnatomyDetect found {len(psych_entities)} anatomical entities")
             return psych_entities
             
         except Exception as e:
-            logger.error(f"Psychology entity extraction failed: {e}")
+            logger.error(f"Anatomy entity extraction failed: {e}")
             return []
     
     async def _extract_clinical_entities(self, text: str) -> List[Dict[str, Any]]:
-        """Extract clinical entities using GatorTron"""
+        """Extract gene/protein entities using OpenMed GenomeDetect"""
         try:
-            # Load GatorTron model
-            if 'gator' not in self.models:
-                self.models['gator'] = self.pipeline_loader.get(
-                    'gator',
-                    "ner",
-                    "emilyalsentzer/Bio_ClinicalBERT",
+            # Check GPU memory
+            if not self.gpu_manager.check_available_memory(1.0):
+                self.gpu_manager.force_cleanup()
+            
+            # Load OpenMed GenomeDetect model
+            if 'genome_detect' not in self.models:
+                logger.info("Loading OpenMed GenomeDetect (434M, ~0.85GB)...")
+                self.models['genome_detect'] = self.pipeline_loader.get(
+                    'genome_detect',
+                    "token-classification",
+                    "OpenMed/OpenMed-NER-GenomeDetect-SuperClinical-434M",
                     aggregation_strategy="simple",
+                    torch_dtype="float16"
                 )
+                self.gpu_manager.log_memory_stats("After loading GenomeDetect")
             
             # Extract entities
-            entities = self.models['gator'](text)
+            entities = self.models['genome_detect'](text[:2000])
             
-            # Filter for clinical entity types
+            # Format entities
             clinical_entities = []
             for entity in entities:
-                if entity['entity_group'] in self.entity_types['clinical']:
-                    clinical_entities.append({
-                        'text': entity['word'],
-                        'label': entity['entity_group'],
-                        'confidence': entity['score'],
-                        'start': entity['start'],
-                        'end': entity['end']
-                    })
+                clinical_entities.append({
+                    'text': entity['word'],
+                    'label': 'Gene',
+                    'confidence': entity['score'],
+                    'start': entity['start'],
+                    'end': entity['end']
+                })
             
+            logger.info(f"✅ GenomeDetect found {len(clinical_entities)} gene/protein entities")
             return clinical_entities
             
         except Exception as e:
-            logger.error(f"Clinical entity extraction failed: {e}")
+            logger.warning(f"⚠️ Gene NER model unavailable (optional), skipping: {str(e)[:100]}")
+            return []
+    
+    async def _extract_clinical_symptoms(self, text: str) -> List[Dict[str, Any]]:
+        """Extract clinical symptoms/treatments using ClinicalDistilBERT"""
+        try:
+            # Check GPU memory
+            if not self.gpu_manager.check_available_memory(0.5):
+                self.gpu_manager.force_cleanup()
+            
+            # Load ClinicalDistilBERT i2b2-2010 model
+            if 'clinical_distilbert' not in self.models:
+                logger.info("Loading ClinicalDistilBERT i2b2-2010 (65M, ~0.13GB)...")
+                self.models['clinical_distilbert'] = self.pipeline_loader.get(
+                    'clinical_distilbert',
+                    "token-classification",
+                    "nlpie/clinical-distilbert-i2b2-2010",
+                    aggregation_strategy="simple",
+                    torch_dtype="float16"
+                )
+                self.gpu_manager.log_memory_stats("After loading ClinicalDistilBERT")
+            
+            # Extract entities
+            entities = self.models['clinical_distilbert'](text[:2000])
+            
+            # Format entities (PROBLEM, TREATMENT, TEST)
+            clinical_entities = []
+            for entity in entities:
+                clinical_entities.append({
+                    'text': entity['word'],
+                    'label': entity.get('entity_group', 'Clinical'),
+                    'confidence': entity['score'],
+                    'start': entity['start'],
+                    'end': entity['end']
+                })
+            
+            logger.info(f"✅ ClinicalDistilBERT found {len(clinical_entities)} clinical entities")
+            return clinical_entities
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Clinical NER model unavailable (optional), skipping: {str(e)[:100]}")
             return []
     
     async def _extract_statistical_entities(self, text: str) -> List[Dict[str, Any]]:

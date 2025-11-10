@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "profile_id": "cluster-013-persona",
+    "persona_name": "Navigating Life Transitions & Trauma Healing",
+    "persona_tagline": "Seeking guidance and support through life's significant changes while healing from past trauma.",
+    "created_at": "2025-11-08 20:36:07.619046",
+    "source_documents": [
+      "cluster_13",
+      "intake_segment"
+    ],
+    "llm_model": "gemini-cluster-based",
+    "version": "2.0",
+    "attribute_tags": [
+      "therapy",
+      "trauma",
+      "ADHD",
+      "anxiety",
+      "life transitions",
+      "self-care"
+    ]
+  },
+  "identity_demographics": {
+    "age_range": "22-35",
+    "gender": "Female",
+    "pronouns": "She/Her",
+    "orientation": "Heterosexual",
+    "ethnicity": "Not specified, likely Caucasian",
+    "current_life_situation": "Young professional navigating career and/or family planning, some are business owners",
+    "occupation": "Varies: Business owner, recent college graduate, young professional",
+    "education": "College graduate or pursuing higher education",
+    "locality": "St. Louis County, MO",
+    "cultural_faith_identities": [
+      "Not specified"
+    ]
+  },
+  "developmental_story": {
+    "childhood_environment": "Often characterized by instability or high expectations. Some experienced refugee family dynamics with potential toxicity at home. Others experienced early trauma or loss that wasn't fully processed. There may have been a pressure to excel academically or to take on adult responsibilities prematurely.",
+    "adolescence": "Adolescence was marked by navigating social anxieties and pressures, possibly leading to internalized stress and difficulty forming close relationships. For some, the ADHD diagnosis in childhood led to feelings of being different or struggling to fit in. The bipolar diagnosis introduced further complexity and the need for ongoing mental health management.",
+    "early_adulthood": "Early adulthood is a period of significant transitions, including completing education, starting careers, and potentially beginning families. The pressure to succeed and manage multiple responsibilities can exacerbate existing mental health challenges. Past trauma may resurface as they navigate new relationships and life stages. Starting IVF introduces additional emotional and financial stressors.",
+    "family_structure": "Varies: Some come from close-knit families, while others experience toxic or strained relationships with family members. Refugee families may have experienced displacement and cultural adjustment challenges. Siblings may be a source of support or competition. Lack of emotional availability from parents may have led to feeling unseen or unheard.",
+    "formative_adversities": [
+      "Childhood ADHD diagnosis and feeling different",
+      "Bipolar diagnosis and managing mood swings",
+      "Family toxicity or refugee experience",
+      "Unprocessed trauma from childhood or adolescence",
+      "Social anxiety and difficulty forming relationships"
+    ],
+    "educational_journey": "Varied: Some thrived academically despite ADHD, while others struggled with focus and organization. College graduation is a significant achievement, but also brings new pressures and uncertainties. Changes in schools might have led to difficulties adjusting to new environments and social circles.",
+    "pivotal_moments": [
+      "Receiving ADHD diagnosis",
+      "Receiving bipolar diagnosis",
+      "Graduating from college",
+      "Starting IVF treatment",
+      "Identifying a need for trauma healing"
+    ],
+    "intergenerational_patterns": "Potential for intergenerational trauma or mental health challenges. Family patterns may include difficulty expressing emotions, high expectations, or a lack of support for mental health needs."
+  },
+  "neurodivergence_mental_health": {
+    "identities": [
+      "ADHD",
+      "Social Anxiety",
+      "Bipolar (for some)",
+      "Trauma Survivor"
+    ],
+    "diagnosis_journey": "ADHD diagnosis in childhood (6th grade) led to medication and behavioral interventions. Bipolar diagnosis in early adulthood (age 19) required further adjustments to treatment and coping strategies. Social anxiety was likely present from adolescence, leading to avoidance of social situations and difficulty forming connections. The realization of needing trauma healing came later, recognizing the impact of past experiences on current functioning.",
+    "how_it_shows_up": "Difficulty focusing and staying organized, leading to missed deadlines or feeling overwhelmed. Social anxiety manifests as nervousness in social situations, difficulty initiating conversations, and fear of judgment. Mood swings associated with bipolar disorder impact energy levels, sleep patterns, and decision-making. Trauma impacts emotional regulation, relationships, and self-perception.",
+    "nervous_system_pattern": "Highly sensitive and reactive nervous system. Easily overwhelmed by sensory input and emotional triggers. Tendency towards hypervigilance and difficulty relaxing. May experience physical symptoms of anxiety, such as racing heart or stomach upset.",
+    "strengths_superpowers": [
+      "Resilience",
+      "Creativity",
+      "Empathy",
+      "Strong work ethic",
+      "Ability to connect with others who have similar experiences"
+    ],
+    "current_coping_strategies": [
+      "Medication management",
+      "Therapy (inconsistent)",
+      "Journaling",
+      "Exercise (sporadic)",
+      "Avoidance of stressful situations",
+      "Seeking support from friends or family"
+    ]
+  },
+  "executive_function_sensory": {
+    "ef_strengths": [
+      "Creativity and innovative thinking",
+      "Hyperfocus on tasks of interest",
+      "Resilience and adaptability",
+      "Strong sense of justice and fairness"
+    ],
+    "ef_friction_points": [
+      "Difficulty with planning and organization",
+      "Procrastination",
+      "Impulsivity",
+      "Emotional regulation",
+      "Time management",
+      "Difficulty prioritizing tasks",
+      "Trouble initiating tasks"
+    ],
+    "ef_workarounds": [
+      "Using planners and calendars",
+      "Setting reminders and alarms",
+      "Breaking down large tasks into smaller steps",
+      "Seeking support from friends or family",
+      "Creating routines and schedules"
+    ],
+    "sensory_profile": "Sensitive to loud noises and bright lights. Prefers soft and comfortable clothing. May be easily overwhelmed by strong smells or tastes. Seeks out calming sensory experiences, such as nature or soothing music.",
+    "food_sensory_details": "Dislikes foods with slimy textures, such as okra or cooked mushrooms. Prefers foods that are easily digestible, such as plain pasta or rice. Safe foods include: Annie's Mac & Cheese (prepared exactly as directed), specific brand of blueberry yogurt, and room-temperature grilled chicken. Binges on crunchy snacks (e.g., potato chips, pretzels) when stressed. Often skips meals when feeling overwhelmed or anxious, leading to energy crashes and increased irritability."
+  },
+  "current_life_context": {
+    "where_they_live": "Apartment in a walkable neighborhood in St. Louis County (e.g., Clayton, Maplewood). Prioritizes access to amenities and public transportation.",
+    "work_school_situation": "Working full-time in a demanding job or running a small business. Potentially juggling work with graduate studies or family responsibilities. Feeling overwhelmed by the demands of work and life.",
+    "commute_daily_rhythms": "Commute involves driving or taking public transportation. Daily routine includes waking up early, working long hours, and trying to fit in self-care activities. Difficulty maintaining a consistent routine due to work demands and mental health challenges.",
+    "local_stressors": [
+      "Traffic congestion",
+      "High cost of living",
+      "Lack of affordable housing",
+      "Limited access to mental health resources",
+      "Social isolation"
+    ],
+    "safe_spaces": [
+      "Home",
+      "Local coffee shop",
+      "Park or nature trail",
+      "Friend's house",
+      "Therapy office"
+    ],
+    "support_system": "Relies on friends and family for support. May have a partner or spouse who provides emotional support. Seeking professional help from a therapist or counselor."
+  },
+  "goals_barriers": {
+    "why_therapy_now": "Seeking support to navigate significant life changes (e.g., starting IVF, career transitions) and to heal from past trauma.",
+    "what_they_want_to_change": [
+      "Improve self-care skills",
+      "Better understand and manage social anxiety",
+      "Heal from past trauma",
+      "Develop healthier coping mechanisms",
+      "Improve emotional regulation",
+      "Build stronger relationships",
+      "Maintain mental health through life transitions"
+    ],
+    "whats_in_the_way": [
+      "Lack of time and energy",
+      "Financial constraints",
+      "Fear of vulnerability",
+      "Difficulty trusting others",
+      "Negative self-talk",
+      "Perfectionism",
+      "Past negative experiences with therapy"
+    ]
+  },
+  "narrative_voice": {
+    "quote_struggle": "I struggle to find people and counselors who understand how I communicate.",
+    "quote_hope": "I want to maintain my mental health through the coming journey and navigate/process the significant life changes that surround me.",
+    "quotes_additional": [
+      "I want to not just have someone to talk to, but to have a mental health professional in my corner to guide me as I heal from my trauma.",
+      "I am seeking a therapist/counselor to help me or to guide me on taking better care of my mental health."
+    ],
+    "liz_clinical_narrative": "This individual is navigating significant life transitions while also grappling with the impact of past trauma and neurodivergent experiences. They are seeking a therapist who can provide guidance and support as they navigate these challenges. It's important to create a safe and validating space where they can explore their feelings, develop coping strategies, and build resilience. Recognizing their unique communication style and tailoring the therapeutic approach accordingly will be crucial in fostering a strong therapeutic relationship. Emphasizing self-compassion and celebrating their strengths can help them build confidence and move towards healing and growth. Collaboration is key \u2013 empowering them to actively participate in shaping their therapy goals and approach.",
+    "therapy_preferences": "Neurodivergent-affirming, trauma-informed, collaborative, empathetic, validating, strengths-based, solution-focused."
+  },
+  "marketing_seo": {
+    "website_copy_snippets": [
+      "Navigating life transitions with ADHD? We understand the unique challenges you face.",
+      "Trauma healing for neurodivergent individuals: Find a safe and validating space to heal.",
+      "Seeking a therapist who gets you? Enlitens offers neurodivergent-affirming therapy in St. Louis."
+    ],
+    "primary_keywords": [
+      "ADHD therapy St. Louis",
+      "Trauma therapy St. Louis",
+      "Neurodivergent therapist St. Louis",
+      "Anxiety therapy St. Louis",
+      "Life transitions therapy",
+      "Self-care therapy"
+    ],
+    "local_entities": [
+      "St. Louis County",
+      "Clayton",
+      "Maplewood",
+      "Webster Groves",
+      "Brentwood"
+    ],
+    "content_angles": [
+      "The Intersection of ADHD and Trauma: Understanding the Connection",
+      "Self-Care Strategies for Neurodivergent Individuals",
+      "Finding a Therapist Who Understands Your Unique Communication Style"
+    ]
+  }
+}
