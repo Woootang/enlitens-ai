@@ -119,32 +119,50 @@ class ProfileMatcherAgent:
         
         # Use LLM to intelligently select personas
         try:
+            logger.info(f"🎯 Starting persona matching with LLM...")
             response = await llm_client.generate_text(
                 prompt=prompt,
                 temperature=0.3,  # Lower temp for more consistent selection
                 num_predict=2000
             )
+            logger.info(f"✅ LLM generated response of length: {len(response)}")
             
             # Debug: Log the raw LLM response
-            logger.debug(f"LLM response for persona matching:\n{response[:500]}")
+            logger.info(f"🔍 LLM response for persona matching:\n{response[:1000]}")
             
             # Parse LLM response to get selected persona IDs
             selected_ids = self._parse_selection_response(response)
-            logger.debug(f"Parsed persona IDs: {selected_ids}")
+            logger.info(f"🔍 Parsed persona IDs: {selected_ids}")
+            logger.info(f"🔍 Number of IDs parsed: {len(selected_ids)}")
             
             # Return full persona objects for selected IDs
             selected_personas = []
             for persona in personas:
-                if persona.get('_file') in selected_ids:
+                persona_file = persona.get('_file', '')
+                # Extract just the filename for matching
+                persona_filename = persona_file.split('/')[-1]
+                logger.info(f"🔍 Checking persona file: {persona_filename} (from {persona_file})")
+                if persona_filename in selected_ids:
                     selected_personas.append(persona)
+                    logger.info(f"✅ Matched persona: {persona_filename}")
                     
             logger.info(f"✅ Selected {len(selected_personas)} relevant personas")
+            
+            if len(selected_personas) == 0:
+                logger.error(f"❌ CRITICAL: NO PERSONAS SELECTED! This should not happen!")
+                logger.error(f"Available persona files: {[p.get('_file') for p in personas[:5]]}")
+                logger.error(f"Selected IDs from LLM: {selected_ids}")
+                # Return first 10 as fallback
+                logger.warning("🔥 FALLING BACK to first 10 personas")
+                return personas[:top_k]
+                
             return selected_personas[:top_k]
             
         except Exception as e:
-            logger.error(f"Profile matching failed: {e}")
+            logger.error(f"❌ CRITICAL: Profile matching failed with exception: {e}")
+            logger.exception(e)
             # Fallback: return first 10 personas
-            logger.warning("Falling back to first 10 personas")
+            logger.warning("🔥 FALLING BACK to first 10 personas due to exception")
             return personas[:top_k]
     
     def _create_matching_prompt(

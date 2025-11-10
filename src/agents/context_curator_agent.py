@@ -24,7 +24,7 @@ class ContextCuratorAgent:
     def __init__(
         self,
         personas_dir: str = "enlitens_client_profiles/profiles",
-        transcripts_path: str = "enlitens_knowledge_base/liz_transcripts.txt",
+        transcripts_path: str = "enlitens_knowledge_base/transcripts.txt",
         framework_path: str = "enlitens_knowledge_base/enlitens_interview_framework.txt"
     ):
         self.profile_matcher = ProfileMatcherAgent(personas_dir=personas_dir)

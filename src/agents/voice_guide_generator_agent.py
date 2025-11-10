@@ -15,7 +15,7 @@ class VoiceGuideGeneratorAgent:
     
     def __init__(
         self,
-        transcripts_path: str = "enlitens_knowledge_base/liz_transcripts.txt",
+        transcripts_path: str = "enlitens_knowledge_base/transcripts.txt",
         framework_path: str = "enlitens_knowledge_base/enlitens_interview_framework.txt"
     ):
         self.transcripts_path = Path(transcripts_path)

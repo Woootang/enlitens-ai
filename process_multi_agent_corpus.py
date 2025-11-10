@@ -235,7 +235,7 @@ class MultiAgentProcessor:
     def _analyze_client_insights(self) -> Dict[str, Any]:
         """Analyze client intake data for enhanced context."""
         try:
-            intakes_path = Path(__file__).parent / "intakes.txt"
+            intakes_path = Path(__file__).parent / "enlitens_knowledge_base" / "intakes.txt"
             if intakes_path.exists():
                 with open(intakes_path, 'r', encoding='utf-8') as f:
                     content = f.read()
@@ -256,7 +256,7 @@ class MultiAgentProcessor:
     def _analyze_founder_insights(self) -> Dict[str, Any]:
         """Analyze founder transcripts for voice patterns."""
         try:
-            transcripts_path = Path(__file__).parent / "transcripts.txt"
+            transcripts_path = Path(__file__).parent / "enlitens_knowledge_base" / "transcripts.txt"
             if transcripts_path.exists():
                 with open(transcripts_path, 'r', encoding='utf-8') as f:
                     content = f.read()
