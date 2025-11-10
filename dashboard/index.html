@@ -5,674 +5,1395 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🧠 Enlitens AI Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         :root {
+            font-size: 16px;
             --primary: #C105F5;
             --secondary: #05F2C7;
             --success: #7CFC00;
             --warning: #FFA500;
-            --error: #FF4502;
-            --bg-dark: #0f0c29;
-            --bg-mid: #302b63;
-            --text-light: #e1e1e1;
-            --text-muted: #9CA3AF;
+            --danger: #FF4F6A;
+            --bg-dark: #060019;
+            --bg-mid: #1d0b3a;
+            --bg-panel: rgba(255, 255, 255, 0.06);
+            --text-main: #f3f3ff;
+            --text-muted: #a8a6c8;
+            --text-soft: #cac7e6;
+            --border-soft: rgba(255, 255, 255, 0.12);
         }
-        
-        html, body {
-            height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark), var(--bg-mid), #24243e);
-            color: var(--text-light);
-            font-size: 16px;
+
+        * {
+            box-sizing: border-box;
         }
-        
-        /* Full-screen responsive container */
-        .main-container {
-            height: 100vh;
-            padding: 3rem;
-            display: flex;
-            flex-direction: column;
+
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: radial-gradient(circle at top left, rgba(193, 5, 245, 0.25), transparent),
+                        radial-gradient(circle at bottom right, rgba(5, 242, 199, 0.15), transparent),
+                        linear-gradient(135deg, #060019 0%, #13092c 45%, #08051a 100%);
+            color: var(--text-main);
+            min-height: 100vh;
             overflow: hidden;
         }
-        
-        /* Header */
-        .header {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem 2rem;
-            border-radius: 1rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(193, 5, 245, 0.3);
+
+        .app-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            padding: 3rem;
+        }
+
+        @media (max-width: 1200px) {
+            .app-shell {
+                padding: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            .app-shell {
+                padding: 2rem 1.5rem 4rem;
+            }
+        }
+
+        .app-header {
+            flex-shrink: 0;
             display: flex;
             justify-content: space-between;
+            gap: 2rem;
             align-items: center;
-            flex-shrink: 0;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 1.5rem;
+            padding: 2rem 2.5rem;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
         }
-        
-        .header h1 {
-            font-size: 2rem;
+
+        .title-block h1 {
+            margin: 0 0 0.5rem;
+            font-size: 2.25rem;
+            letter-spacing: 0.02em;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 700;
         }
-        
-        .status-badge {
-            padding: 0.5em 1em;
-            background: rgba(124, 252, 0, 0.1);
-            border: 1px solid var(--success);
-            border-radius: 2em;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-        }
-        
-        .status-badge::before {
-            content: '●';
-            color: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-shrink: 0;
-        }
-        
-        .tab {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
+
+        .title-block p {
+            margin: 0;
             color: var(--text-muted);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
         }
-        
-        .tab.active {
-            background: rgba(193, 5, 245, 0.2);
-            border-color: var(--primary);
-            color: var(--text-light);
-            box-shadow: 0 4px 12px rgba(193, 5, 245, 0.3);
-        }
-        
-        .tab:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 1rem;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Chain of Thought Tab - Full Screen */
-        .chain-container {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 1rem;
-            padding: 2rem;
-            height: 100%;
+
+        .status-group {
             display: flex;
             flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-end;
         }
-        
-        .chain-header {
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 1.5rem;
+            border-radius: 2rem;
+            background: rgba(124, 252, 0, 0.12);
+            border: 1px solid rgba(124, 252, 0, 0.4);
+            color: var(--success);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .status-badge::before {
+            content: '';
+            display: inline-block;
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 10px currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.danger {
+            background: rgba(255, 79, 106, 0.12);
+            border-color: rgba(255, 79, 106, 0.4);
+            color: var(--danger);
+        }
+
+        .status-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            gap: 0.3rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        .tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .tab-button {
+            position: relative;
+            border: none;
+            padding: 0.85rem 1.8rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-soft);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tab-button:hover {
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .tab-button.active {
+            color: var(--text-main);
+            background: rgba(193, 5, 245, 0.25);
+            border-color: rgba(193, 5, 245, 0.45);
+            box-shadow: 0 12px 28px rgba(193, 5, 245, 0.25);
+        }
+
+        .tab-panels {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .tab-panel {
+            display: none;
+            height: 100%;
+        }
+
+        .tab-panel.active {
+            display: block;
+            height: 100%;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            backdrop-filter: blur(16px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 1rem;
         }
-        
-        .chain-header h2 {
-            font-size: 1.5rem;
-            color: var(--primary);
+
+        .panel-title {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
         }
-        
-        .auto-scroll-toggle {
-            padding: 0.5rem 1rem;
-            background: rgba(193, 5, 245, 0.2);
-            border: 1px solid var(--primary);
-            border-radius: 0.5rem;
-            color: var(--text-light);
+
+        .panel-title h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            letter-spacing: 0.03em;
+        }
+
+        .panel-title span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .control-button {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            padding: 0.6rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
             cursor: pointer;
-            font-size: 0.875rem;
+            transition: all 0.2s;
         }
-        
-        .auto-scroll-toggle.paused {
+
+        .control-button:hover {
+            border-color: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .control-button.paused {
             background: rgba(255, 165, 0, 0.2);
-            border-color: var(--warning);
+            border-color: rgba(255, 165, 0, 0.5);
+            color: #ffdd9b;
         }
-        
-        .chain-steps {
+
+        .chain-grid {
+            height: 100%;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .chain-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .timeline-scroll,
+        .agent-scroll,
+        .cli-output,
+        .json-scroll,
+        .alerts-scroll {
             flex: 1;
             overflow-y: auto;
-            padding-right: 1rem;
+            padding-right: 0.75rem;
         }
-        
-        /* Reasoning Step - MORE SPACE */
-        .reasoning-step {
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 3px solid var(--primary);
-            padding: 1.5rem;
+
+        .timeline-scroll::-webkit-scrollbar,
+        .agent-scroll::-webkit-scrollbar,
+        .cli-output::-webkit-scrollbar,
+        .json-scroll::-webkit-scrollbar,
+        .alerts-scroll::-webkit-scrollbar {
+            width: 0.55rem;
+        }
+
+        .timeline-scroll::-webkit-scrollbar-thumb,
+        .agent-scroll::-webkit-scrollbar-thumb,
+        .cli-output::-webkit-scrollbar-thumb,
+        .json-scroll::-webkit-scrollbar-thumb,
+        .alerts-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), rgba(193, 5, 245, 0.35));
+            border-radius: 999px;
+        }
+
+        .timeline-step {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 4px solid rgba(255, 255, 255, 0.15);
+            border-radius: 1.1rem;
+            padding: 1.4rem 1.6rem;
             margin-bottom: 1.5rem;
-            border-radius: 0.75rem;
-            animation: fadeIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.2s ease;
         }
-        
-        .reasoning-step.thinking {
-            background: rgba(193, 5, 245, 0.15);
-            border-left-width: 5px;
-            padding: 2rem;
-            box-shadow: 0 4px 16px rgba(193, 5, 245, 0.3);
+
+        .timeline-step:hover {
+            transform: translateX(0.25rem);
         }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+
+        .timeline-step.thought {
+            border-left-color: var(--primary);
+            background: rgba(193, 5, 245, 0.18);
+            box-shadow: 0 16px 32px rgba(193, 5, 245, 0.22);
         }
-        
-        .reasoning-header {
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+        }
+
+        .step-icon {
+            font-size: 1.75rem;
+        }
+
+        .step-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .step-meta strong {
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+        }
+
+        .step-meta span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .step-time {
+            margin-left: auto;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+        }
+
+        .step-message {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+        }
+
+        .step-raw {
+            margin: 0;
+            border-radius: 0.9rem;
+            background: rgba(10, 5, 25, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.85rem;
+            color: #d7d4f7;
+            line-height: 1.55;
+            white-space: pre-wrap;
+        }
+
+        .agent-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .agent-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .agent-card-header {
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 1rem;
         }
-        
-        .reasoning-icon {
-            font-size: 1.75rem;
+
+        .agent-card-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
         }
-        
-        .reasoning-type {
-            color: var(--primary);
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-        
-        .reasoning-timestamp {
+
+        .agent-card-header span {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            font-size: 0.875rem;
-            margin-left: auto;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
-        
-        .reasoning-message {
-            color: var(--text-light);
-            font-size: 1rem;
-            line-height: 1.6;
+
+        .agent-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+
+        .agent-step {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+            padding: 1rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .agent-step.thought {
+            border-color: rgba(193, 5, 245, 0.35);
+            background: rgba(193, 5, 245, 0.12);
+        }
+
+        .agent-step time {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+
+        .agent-step pre {
+            margin: 0;
             white-space: pre-wrap;
-            word-wrap: break-word;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: #f6f3ff;
         }
-        
-        /* Stats Grid */
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
             gap: 2rem;
-            margin-bottom: 2rem;
         }
-        
-        .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-        
-        .stat-card-title {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-            font-weight: 600;
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.2rem;
+            padding: 1.8rem;
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            flex-direction: column;
+            gap: 1.4rem;
         }
-        
+
+        .metric-card h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+        }
+
         .metric-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 1rem;
+            font-size: 0.95rem;
+            color: var(--text-soft);
         }
-        
-        .metric-row:last-child {
-            border-bottom: none;
+
+        .metric-row strong {
+            font-size: 1.25rem;
+            color: var(--text-main);
         }
-        
-        .metric-label {
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
-        
-        .metric-value {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-        
-        .metric-value.highlight {
-            color: var(--secondary);
-            font-size: 1.5rem;
-        }
-        
-        /* Progress Bar */
-        .progress-container {
-            margin: 1rem 0;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 2rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 1rem;
-            overflow: hidden;
+
+        .bar-shell {
             position: relative;
+            height: 0.75rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            overflow: hidden;
         }
-        
-        .progress-fill {
+
+        .bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.35s ease;
+        }
+
+        .metric-footnote {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.07em;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            height: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .progress-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .progress-bar-shell {
+            width: 100%;
+            height: 2.5rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.5s;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
+            font-weight: 700;
+            padding-right: 1.2rem;
+            font-size: 1.05rem;
+            transition: width 0.45s ease;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .stat-pill span {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .stat-pill strong {
+            font-size: 1.2rem;
+        }
+
+        .agent-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+            gap: 1.2rem;
+        }
+
+        .agent-status-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .agent-status-card .agent-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .agent-status-card .agent-role {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+        }
+
+        .agent-status-card .agent-state {
+            margin-top: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+        }
+
+        .agent-status-card.running {
+            border-color: rgba(5, 242, 199, 0.35);
+        }
+
+        .agent-status-card.completed {
+            border-color: rgba(124, 252, 0, 0.35);
+        }
+
+        .agent-status-card.error {
+            border-color: rgba(255, 79, 106, 0.45);
+        }
+
+        .cli-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .cli-output {
+            background: rgba(6, 3, 24, 0.92);
+            border: 1px solid rgba(5, 242, 199, 0.2);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: #9ff6ff;
+            box-shadow: inset 0 0 60px rgba(5, 242, 199, 0.05);
+        }
+
+        .cli-output .timestamp {
+            color: #7de0ff;
+        }
+
+        .cli-output .error {
+            color: #ff99a8;
+        }
+
+        .cli-output .warning {
+            color: #ffd494;
+        }
+
+        .cli-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .json-scroll details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1.2rem;
+            overflow: hidden;
+        }
+
+        .json-scroll summary {
+            cursor: pointer;
+            padding: 1rem 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .json-scroll pre {
+            margin: 0;
+            background: rgba(6, 3, 24, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.2rem;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.85rem;
+            color: #e7e4ff;
+            white-space: pre-wrap;
+        }
+
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .alert-item {
+            background: rgba(255, 79, 106, 0.12);
+            border: 1px solid rgba(255, 79, 106, 0.35);
+            border-radius: 1rem;
+            padding: 1.2rem 1.4rem;
+        }
+
+        .alert-item.warning {
+            background: rgba(255, 165, 0, 0.15);
+            border-color: rgba(255, 165, 0, 0.45);
+        }
+
+        .alert-item header {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .alert-item pre {
+            margin: 0.9rem 0 0;
+            font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.82rem;
+            white-space: pre-wrap;
+            color: #ffe7f0;
+        }
+
+        .meta-highlight {
+            color: var(--secondary);
+        }
+
+        .link-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             font-weight: 600;
         }
-        
-        /* Alert Box */
-        .alert-card {
-            background: rgba(255, 69, 2, 0.1);
-            border: 1px solid rgba(255, 69, 2, 0.3);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .alert-item {
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background: rgba(255, 69, 2, 0.05);
-            border-radius: 0.5rem;
-        }
-        
-        .alert-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 1.5rem;
-            }
-            
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            
-            .tabs {
-                flex-wrap: wrap;
-            }
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 0.5rem;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 0.25rem;
+
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="header">
-            <h1>🧠 Enlitens AI Processing Dashboard</h1>
-            <div class="status-badge">Active</div>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('chain')">🧠 Agent Reasoning</div>
-            <div class="tab" onclick="switchTab('stats')">📊 System Stats</div>
-            <div class="tab" onclick="switchTab('progress')">📈 Progress</div>
-            <div class="tab" onclick="switchTab('alerts')">⚠️ Alerts (<span id="alert-count">0</span>)</div>
-        </div>
-        
-        <!-- Chain of Thought Tab -->
-        <div id="chain-tab" class="tab-content active">
-            <div class="chain-container">
-                <div class="chain-header">
-                    <h2>Agent Chain of Thought</h2>
-                    <button class="auto-scroll-toggle" onclick="toggleAutoScroll()">
-                        <span id="scroll-status">🔄 Auto-scroll ON</span>
-                    </button>
-                </div>
-                <div class="chain-steps" id="chain-steps">
-                    <p style="text-align: center; color: var(--text-muted); padding: 3rem;">
-                        ⏳ Waiting for agent reasoning...
-                    </p>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="title-block">
+                <h1>🧠 Enlitens AI Operations</h1>
+                <p>Multi-Agent Corpus Processing Control Room</p>
+            </div>
+            <div class="status-group">
+                <div class="status-badge" id="pipeline-status">ACTIVE</div>
+                <div class="status-meta">
+                    <span id="start-time-label">Start: --</span>
+                    <span id="uptime-label">Uptime: --</span>
                 </div>
             </div>
-        </div>
-        
-        <!-- Stats Tab -->
-        <div id="stats-tab" class="tab-content">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-title">⚡ Power</div>
-                    <div class="metric-row">
-                        <span class="metric-label">Total Draw</span>
-                        <span class="metric-value highlight" id="power-total">-- W</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">GPU</span>
-                        <span class="metric-value" id="power-gpu">-- W</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">CPU</span>
-                        <span class="metric-value" id="power-cpu">-- W</span>
-                    </div>
+        </header>
+
+        <nav class="tab-bar">
+            <button class="tab-button active" onclick="switchTab(event, 'chain')">🧠 Agent Reasoning</button>
+            <button class="tab-button" onclick="switchTab(event, 'stats')">📊 System Stats</button>
+            <button class="tab-button" onclick="switchTab(event, 'progress')">📈 Progress</button>
+            <button class="tab-button" onclick="switchTab(event, 'logs')">💻 CLI Logs</button>
+            <button class="tab-button" onclick="switchTab(event, 'json')">🧾 JSON Output</button>
+            <button class="tab-button" onclick="switchTab(event, 'alerts')">⚠️ Alerts</button>
+        </nav>
+
+        <main class="tab-panels">
+            <section id="chain-tab" class="tab-panel active">
+                <div class="chain-grid">
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <h2>Agent Chain of Thought</h2>
+                                <span>Live reasoning timeline by agent</span>
+                            </div>
+                            <div class="panel-controls">
+                                <button class="control-button" id="auto-scroll-toggle" onclick="toggleAutoScroll()">🔄 Auto-scroll ON</button>
+                            </div>
+                        </div>
+                        <div class="meta-highlight" id="current-document-banner">Current Document: --</div>
+                        <div class="timeline-scroll" id="timeline-container">
+                            <div class="empty-state">Waiting for agent reasoning...</div>
+                        </div>
+                    </section>
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <h2>Agent Journals</h2>
+                                <span>Per-agent thought stream</span>
+                            </div>
+                        </div>
+                        <div class="agent-scroll" id="agent-thoughts">
+                            <div class="empty-state">No agent thoughts yet.</div>
+                        </div>
+                    </section>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-card-title">🎮 GPU</div>
-                    <div class="metric-row">
-                        <span class="metric-label">Utilization</span>
-                        <span class="metric-value" id="gpu-util">--%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Memory</span>
-                        <span class="metric-value" id="gpu-mem">-- GB</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Temperature</span>
-                        <span class="metric-value" id="gpu-temp">--°C</span>
-                    </div>
+            </section>
+
+            <section id="stats-tab" class="tab-panel">
+                <div class="stats-grid">
+                    <article class="metric-card" id="power-card">
+                        <h3>⚡ Power Distribution</h3>
+                        <div class="metric-row">
+                            <span>Total Draw</span>
+                            <strong id="power-total">-- W</strong>
+                        </div>
+                        <div class="bar-shell">
+                            <div class="bar-fill" id="psu-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="metric-footnote" id="psu-meta">PSU usage --%</div>
+                        <div class="metric-row">
+                            <span>GPU</span>
+                            <strong id="power-gpu">-- W</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>CPU</span>
+                            <strong id="power-cpu">-- W</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>System Overhead</span>
+                            <strong id="power-other">-- W</strong>
+                        </div>
+                    </article>
+
+                    <article class="metric-card" id="gpu-card">
+                        <h3>🎮 GPU</h3>
+                        <div class="metric-row">
+                            <span>Utilization</span>
+                            <strong id="gpu-util">--%</strong>
+                        </div>
+                        <div class="bar-shell"><div class="bar-fill" id="gpu-util-bar" style="width: 0%"></div></div>
+                        <div class="metric-row">
+                            <span>Memory</span>
+                            <strong id="gpu-mem">-- / -- GB</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Temperature</span>
+                            <strong id="gpu-temp">--°C</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Power</span>
+                            <strong id="gpu-power">-- W</strong>
+                        </div>
+                    </article>
+
+                    <article class="metric-card" id="cpu-card">
+                        <h3>🖥️ CPU</h3>
+                        <div class="metric-row">
+                            <span>Utilization</span>
+                            <strong id="cpu-util">--%</strong>
+                        </div>
+                        <div class="bar-shell"><div class="bar-fill" id="cpu-util-bar" style="width: 0%"></div></div>
+                        <div class="metric-row">
+                            <span>Memory</span>
+                            <strong id="cpu-mem">-- / -- GB</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Load Avg</span>
+                            <strong id="cpu-load">--</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Temperature</span>
+                            <strong id="cpu-temp">--°C</strong>
+                        </div>
+                        <div class="metric-footnote" id="cpu-meta">Frequency -- MHz • -- cores</div>
+                    </article>
+
+                    <article class="metric-card" id="context-card">
+                        <h3>🧬 Context Curator</h3>
+                        <div class="metric-row">
+                            <span>Personas</span>
+                            <strong id="context-personas">-- tokens</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Health Brief</span>
+                            <strong id="context-health">-- tokens</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Voice Guide</span>
+                            <strong id="context-voice">-- tokens</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Total Context</span>
+                            <strong id="context-total">-- tokens</strong>
+                        </div>
+                    </article>
+
+                    <article class="metric-card" id="alert-card-summary">
+                        <h3>⚠️ Alert Summary</h3>
+                        <div class="metric-row">
+                            <span>Active Alerts</span>
+                            <strong id="alert-count">0</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Last Event</span>
+                            <strong id="alert-last">--</strong>
+                        </div>
+                        <div class="metric-footnote" id="alert-meta">Monitoring logs in real time.</div>
+                    </article>
+
+                    <article class="metric-card" id="json-card-summary">
+                        <h3>🧾 Knowledge Base</h3>
+                        <div class="metric-row">
+                            <span>Documents</span>
+                            <strong id="json-doc-count">--</strong>
+                        </div>
+                        <div class="metric-row">
+                            <span>Last Updated</span>
+                            <strong id="json-updated">--</strong>
+                        </div>
+                        <a class="link-button" href="/api/download">⬇️ Download JSON</a>
+                    </article>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-card-title">🖥️ CPU</div>
-                    <div class="metric-row">
-                        <span class="metric-label">Utilization</span>
-                        <span class="metric-value" id="cpu-util">--%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Memory</span>
-                        <span class="metric-value" id="cpu-mem">-- GB</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Temperature</span>
-                        <span class="metric-value" id="cpu-temp">--°C</span>
-                    </div>
+            </section>
+
+            <section id="progress-tab" class="tab-panel">
+                <div class="progress-grid">
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <h2>Processing Overview</h2>
+                                <span>Live document throughput</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-shell">
+                            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%">0%</div>
+                        </div>
+                        <div class="progress-stats">
+                            <div class="stat-pill">
+                                <span>Completed</span>
+                                <strong id="progress-completed">0</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span>Total</span>
+                                <strong id="progress-total">--</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span>Current File</span>
+                                <strong id="progress-current">--</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span>Stage</span>
+                                <strong id="progress-stage">--</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span>Run Duration</span>
+                                <strong id="progress-duration">--</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span>Last Quality</span>
+                                <strong id="progress-quality">--</strong>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <h2>Agent Status</h2>
+                                <span>Pipeline team health</span>
+                            </div>
+                        </div>
+                        <div class="agent-status-grid" id="agent-status-grid">
+                            <div class="empty-state">Agent telemetry loading...</div>
+                        </div>
+                    </section>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-card-title">🎯 Context Curator</div>
-                    <div class="metric-row">
-                        <span class="metric-label">Personas</span>
-                        <span class="metric-value" id="curator-personas">-- tokens</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Health Brief</span>
-                        <span class="metric-value" id="curator-health">-- tokens</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Voice Guide</span>
-                        <span class="metric-value" id="curator-voice">-- tokens</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Total Context</span>
-                        <span class="metric-value highlight" id="curator-total">-- tokens</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Progress Tab -->
-        <div id="progress-tab" class="tab-content">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-title">📊 Processing Progress</div>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+            </section>
+
+            <section id="logs-tab" class="tab-panel">
+                <section class="panel cli-container">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <h2>CLI Log Stream</h2>
+                            <span>Tail of enlitens_complete_processing.log</span>
+                        </div>
+                        <div class="panel-controls" style="display:flex; gap:0.75rem;">
+                            <button class="control-button" id="log-follow-toggle" onclick="toggleLogFollow()">👁️ Follow Tail</button>
+                            <button class="control-button" onclick="copyLogs()">📋 Copy</button>
                         </div>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Completed</span>
-                        <span class="metric-value" id="docs-done">0</span>
+                    <pre class="cli-output" id="cli-output">Loading logs...</pre>
+                    <div class="cli-footer">
+                        <span id="log-meta">Last update --</span>
+                        <span>Streaming last 400 lines</span>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Total</span>
-                        <span class="metric-value" id="docs-total">344</span>
+                </section>
+            </section>
+
+            <section id="json-tab" class="tab-panel">
+                <section class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <h2>Knowledge Base JSON Preview</h2>
+                            <span>Most recent documents (auto-refresh)</span>
+                        </div>
+                        <div class="panel-controls">
+                            <button class="control-button" onclick="refreshJsonPreview()">🔃 Refresh Now</button>
+                        </div>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Current File</span>
-                        <span class="metric-value" id="current-file" style="font-size: 0.875rem;">None</span>
+                    <div class="metric-footnote" id="json-meta">Updated --</div>
+                    <div class="json-scroll" id="json-preview">
+                        <div class="empty-state">Waiting for knowledge base output...</div>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Stage</span>
-                        <span class="metric-value" id="current-stage">Idle</span>
+                </section>
+            </section>
+
+            <section id="alerts-tab" class="tab-panel">
+                <section class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <h2>Alert Timeline</h2>
+                            <span>Errors & warnings from latest run</span>
+                        </div>
+                        <div class="panel-controls">
+                            <button class="control-button" onclick="showLogsTab()">Open in Logs</button>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-card-title">📄 Latest Document</div>
-                    <div class="metric-row">
-                        <span class="metric-label">ID</span>
-                        <span class="metric-value" id="latest-doc" style="font-size: 0.875rem;">--</span>
+                    <div class="alerts-scroll" id="alerts-list">
+                        <div class="empty-state">No alerts detected. System nominal.</div>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Quality</span>
-                        <span class="metric-value" id="latest-quality">--</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Confidence</span>
-                        <span class="metric-value" id="latest-confidence">--</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Alerts Tab -->
-        <div id="alerts-tab" class="tab-content">
-            <div class="alert-card">
-                <div class="stat-card-title">⚠️ System Alerts</div>
-                <div id="alert-list">
-                    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                        ✅ No alerts
-                    </p>
-                </div>
-            </div>
-        </div>
+                </section>
+            </section>
+        </main>
     </div>
-    
+
     <script>
-        let autoScroll = true;
-        
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            // Show selected tab
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.target.classList.add('active');
+        const state = {
+            autoScroll: true,
+            followLogs: true,
+            lastMetrics: null,
+            lastTimelineLength: 0,
+            activeTab: 'chain',
+            latestLogs: ''
+        };
+
+        const REFRESH_FAST = 3000;
+        const REFRESH_MED = 4000;
+        const REFRESH_SLOW = 6000;
+
+        function switchTab(event, tabName) {
+            state.activeTab = tabName;
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === `${tabName}-tab`);
+            });
         }
-        
-        function toggleAutoScroll() {
-            autoScroll = !autoScroll;
-            const btn = document.querySelector('.auto-scroll-toggle');
-            const status = document.getElementById('scroll-status');
-            
-            if (autoScroll) {
-                btn.classList.remove('paused');
-                status.textContent = '🔄 Auto-scroll ON';
-            } else {
-                btn.classList.add('paused');
-                status.textContent = '⏸️ Auto-scroll PAUSED';
+
+        function showLogsTab() {
+            const logsButton = [...document.querySelectorAll('.tab-button')].find(btn => btn.textContent.includes('CLI Logs'));
+            if (logsButton) {
+                switchTab({ currentTarget: logsButton }, 'logs');
             }
         }
-        
-        async function updateChainOfThought() {
-            try {
-                const response = await fetch('/api/chain_of_thought');
-                const data = await response.json();
-                const container = document.getElementById('chain-steps');
-                
-                if (!data.reasoning_steps || data.reasoning_steps.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">⏳ Waiting for agent reasoning...</p>';
-                    return;
-                }
 
-                let html = '';
-                if (data.current_document) {
-                    html += `<div style="padding: 1.5rem; background: rgba(193, 5, 245, 0.1); border-radius: 1rem; margin-bottom: 2rem; border: 1px solid rgba(193, 5, 245, 0.3);">
-                        <strong style="color: var(--primary); font-size: 1.125rem;">📖 Current Document:</strong> 
-                        <span style="color: var(--secondary); font-size: 1rem;">${data.current_document}</span>
-                    </div>`;
-                }
+        function toggleAutoScroll() {
+            state.autoScroll = !state.autoScroll;
+            const btn = document.getElementById('auto-scroll-toggle');
+            if (state.autoScroll) {
+                btn.textContent = '🔄 Auto-scroll ON';
+                btn.classList.remove('paused');
+            } else {
+                btn.textContent = '⏸️ Auto-scroll OFF';
+                btn.classList.add('paused');
+            }
+        }
 
-                data.reasoning_steps.forEach(step => {
-                    const typeClass = step.is_thought ? 'thinking' : '';
-                    const agentLabel = step.is_thought ? `<strong>${step.type}</strong>` : step.type;
-                    html += `
-                        <div class="reasoning-step ${typeClass}">
-                            <div class="reasoning-header">
-                                <span class="reasoning-icon">${step.icon}</span>
-                                <span class="reasoning-type">${agentLabel}</span>
-                                <span class="reasoning-timestamp">${step.timestamp.split(' ')[1] || ''}</span>
+        function toggleLogFollow() {
+            state.followLogs = !state.followLogs;
+            const btn = document.getElementById('log-follow-toggle');
+            btn.textContent = state.followLogs ? '👁️ Follow Tail' : '🛑 Paused';
+            btn.classList.toggle('paused', !state.followLogs);
+        }
+
+        function copyLogs() {
+            if (!state.latestLogs) return;
+            navigator.clipboard.writeText(state.latestLogs).then(() => {
+                const meta = document.getElementById('log-meta');
+                const prev = meta.textContent;
+                meta.textContent = 'Copied to clipboard.';
+                setTimeout(() => meta.textContent = prev, 2000);
+            }).catch(() => {});
+        }
+
+        function escapeHtml(str = '') {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatDuration(startIso) {
+            if (!startIso) return '--';
+            const start = new Date(startIso);
+            const now = new Date();
+            const diffMs = now - start;
+            if (diffMs < 0) return '--';
+            const totalSeconds = Math.floor(diffMs / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            }
+            if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+            }
+            return `${seconds}s`;
+        }
+
+        function renderTimeline(data) {
+            const container = document.getElementById('timeline-container');
+            if (!container) return;
+            const timeline = data.timeline || [];
+            if (!timeline.length) {
+                container.innerHTML = '<div class="empty-state">Waiting for agent reasoning...</div>';
+                return;
+            }
+            const previousScroll = container.scrollTop;
+            const nearBottom = (container.scrollHeight - container.clientHeight - container.scrollTop) < 60;
+            const html = timeline.map(step => {
+                const time = step.timestamp ? step.timestamp.split(' ')[1] || step.timestamp : '';
+                const level = step.level || 'INFO';
+                const classes = ['timeline-step'];
+                if (step.is_thought) classes.push('thought');
+                const rawBlock = step.is_thought ? `<pre class="step-raw">${escapeHtml(step.raw)}</pre>` : '';
+                return `
+                    <article class="${classes.join(' ')}">
+                        <header class="step-header">
+                            <span class="step-icon">${step.icon || '🤖'}</span>
+                            <div class="step-meta">
+                                <strong>${escapeHtml(step.agent || 'System')}</strong>
+                                <span>${escapeHtml(level)}</span>
                             </div>
-                            <div class="reasoning-message">${step.message}</div>
+                            <span class="step-time">${escapeHtml(time)}</span>
+                        </header>
+                        <div class="step-message">${escapeHtml(step.message)}</div>
+                        ${rawBlock}
+                    </article>
+                `;
+            }).join('');
+            container.innerHTML = html;
+            if (state.autoScroll || nearBottom) {
+                container.scrollTop = container.scrollHeight;
+            } else {
+                container.scrollTop = previousScroll;
+            }
+            const banner = document.getElementById('current-document-banner');
+            banner.textContent = `Current Document: ${data.current_document || '--'}`;
+        }
+
+        function renderAgentThoughts(data) {
+            const container = document.getElementById('agent-thoughts');
+            if (!container) return;
+            const agents = data.agents || [];
+            if (!agents.length) {
+                container.innerHTML = '<div class="empty-state">No agent thoughts yet.</div>';
+                return;
+            }
+            const html = agents.map(agent => {
+                const steps = [...agent.steps].reverse();
+                const stepsHtml = steps.map(step => {
+                    const cls = step.is_thought ? 'agent-step thought' : 'agent-step';
+                    return `
+                        <div class="${cls}">
+                            <time>${escapeHtml(step.timestamp || '')} • ${escapeHtml(step.level || '')}</time>
+                            <pre>${escapeHtml(step.raw || step.message || '')}</pre>
                         </div>
                     `;
-                });
+                }).join('');
+                return `
+                    <article class="agent-card">
+                        <header class="agent-card-header">
+                            <div class="step-icon">${agent.icon || '🤖'}</div>
+                            <div>
+                                <h4>${escapeHtml(agent.name || 'Agent')}</h4>
+                                <span>${escapeHtml(agent.role || '')}</span>
+                            </div>
+                        </header>
+                        <div class="agent-steps">${stepsHtml}</div>
+                    </article>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
 
-                container.innerHTML = html;
-                
-                if (autoScroll) {
-                    container.scrollTop = container.scrollHeight;
-                }
-            } catch (error) {
-                console.error('Error fetching chain of thought:', error);
-            }
-        }
-        
-        async function updateStats() {
+        async function updateChainOfThought() {
             try {
-                const response = await fetch('/api/metrics');
-                const data = await response.json();
-                
-                // Power
-                document.getElementById('power-total').textContent = data.power.total + ' W';
-                document.getElementById('power-gpu').textContent = data.power.gpu + ' W';
-                document.getElementById('power-cpu').textContent = data.power.cpu + ' W';
-                
-                // GPU
-                document.getElementById('gpu-util').textContent = data.gpu.utilization + '%';
-                document.getElementById('gpu-mem').textContent = data.gpu.memory_used + ' / ' + data.gpu.memory_total + ' GB';
-                document.getElementById('gpu-temp').textContent = data.gpu.temperature + '°C';
-                
-                // CPU
-                document.getElementById('cpu-util').textContent = data.cpu.utilization + '%';
-                document.getElementById('cpu-mem').textContent = data.cpu.memory_used + ' / ' + data.cpu.memory_total + ' GB';
-                document.getElementById('cpu-temp').textContent = data.cpu.temperature + '°C';
-                
-                // Progress
-                document.getElementById('docs-done').textContent = data.processing.completed;
-                document.getElementById('docs-total').textContent = data.processing.total;
-                
-                const progress = (data.processing.completed / data.processing.total * 100).toFixed(1);
-                const progressFill = document.getElementById('progress-fill');
-                progressFill.style.width = progress + '%';
-                progressFill.textContent = progress + '%';
-                
-                document.getElementById('current-file').textContent = data.processing.current_file || 'None';
-                document.getElementById('current-stage').textContent = data.processing.stage || 'Idle';
-                
-                if (data.processing.latest_doc && data.processing.latest_doc.id) {
-                    document.getElementById('latest-doc').textContent = data.processing.latest_doc.id;
-                    document.getElementById('latest-quality').textContent = data.processing.latest_doc.quality || '--';
-                    document.getElementById('latest-confidence').textContent = data.processing.latest_doc.confidence || '--';
-                }
-                
-                // Context Curator
-                document.getElementById('curator-personas').textContent = data.context_curator.personas + ' tokens';
-                document.getElementById('curator-health').textContent = data.context_curator.health + ' tokens';
-                document.getElementById('curator-voice').textContent = data.context_curator.voice + ' tokens';
-                document.getElementById('curator-total').textContent = data.context_curator.total + ' tokens';
-                
-                // Alerts
-                const alertCount = data.alerts.length;
-                document.getElementById('alert-count').textContent = alertCount;
-                
-                const alertList = document.getElementById('alert-list');
-                if (alertCount > 0) {
-                    let alertHtml = '';
-                    data.alerts.forEach(alert => {
-                        alertHtml += `<div class="alert-item">${alert}</div>`;
-                    });
-                    alertList.innerHTML = alertHtml;
-                } else {
-                    alertList.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">✅ No alerts</p>';
-                }
+                const res = await fetch('/api/chain_of_thought');
+                const data = await res.json();
+                renderTimeline(data);
+                renderAgentThoughts(data);
             } catch (error) {
-                console.error('Error fetching stats:', error);
+                console.error('Chain of thought fetch failed', error);
             }
         }
-        
-        // Update every 2 seconds
-        setInterval(updateChainOfThought, 2000);
-        setInterval(updateStats, 2000);
-        
-        // Initial load
-        updateChainOfThought();
-        updateStats();
+
+        function renderMetrics(data) {
+            if (!data) return;
+            state.lastMetrics = data;
+            const { power, gpu, cpu, context_curator, alerts, json, processing } = data;
+            document.getElementById('power-total').textContent = `${power.total} W`;
+            document.getElementById('power-gpu').textContent = `${power.gpu} W`;
+            document.getElementById('power-cpu').textContent = `${power.cpu} W`;
+            document.getElementById('power-other').textContent = `${power.other} W`;
+            document.getElementById('psu-bar').style.width = `${Math.min(100, power.psu_usage_percent)}%`;
+            document.getElementById('psu-meta').textContent = `PSU usage ${power.psu_usage_percent}% of ${power.psu_capacity}W`;
+
+            document.getElementById('gpu-util').textContent = `${gpu.utilization}%`;
+            document.getElementById('gpu-util-bar').style.width = `${Math.min(100, gpu.utilization)}%`;
+            document.getElementById('gpu-mem').textContent = `${gpu.memory_used} / ${gpu.memory_total} GB`;
+            document.getElementById('gpu-temp').textContent = `${gpu.temperature}°C`;
+            document.getElementById('gpu-power').textContent = `${gpu.power} W`;
+
+            document.getElementById('cpu-util').textContent = `${cpu.utilization}%`;
+            document.getElementById('cpu-util-bar').style.width = `${Math.min(100, cpu.utilization)}%`;
+            document.getElementById('cpu-mem').textContent = `${cpu.memory_used} / ${cpu.memory_total} GB`;
+            document.getElementById('cpu-load').textContent = cpu.load_avg;
+            document.getElementById('cpu-temp').textContent = `${cpu.temperature}°C`;
+            document.getElementById('cpu-meta').textContent = `Frequency ${cpu.frequency} MHz • ${cpu.cores} cores`;
+
+            document.getElementById('context-personas').textContent = `${context_curator.personas} tokens`;
+            document.getElementById('context-health').textContent = `${context_curator.health} tokens`;
+            document.getElementById('context-voice').textContent = `${context_curator.voice} tokens`;
+            document.getElementById('context-total').textContent = `${context_curator.total} tokens`;
+
+            document.getElementById('json-doc-count').textContent = json.documents;
+            document.getElementById('json-updated').textContent = json.updated ? new Date(json.updated).toLocaleTimeString() : '--';
+
+            document.getElementById('alert-count').textContent = alerts.count;
+            document.getElementById('alert-last').textContent = alerts.last_error || '--';
+            const statusBadge = document.getElementById('pipeline-status');
+            if (alerts.count > 0) {
+                statusBadge.textContent = 'ALERTS PRESENT';
+                statusBadge.classList.add('danger');
+            } else {
+                statusBadge.textContent = 'ACTIVE';
+                statusBadge.classList.remove('danger');
+            }
+
+            renderProgress(processing);
+            renderAgentStatus(data.agents || []);
+            renderAlerts(alerts);
+
+            document.getElementById('start-time-label').textContent = `Start: ${processing.start_time ? new Date(processing.start_time).toLocaleTimeString() : '--'}`;
+            document.getElementById('uptime-label').textContent = `Uptime: ${formatDuration(processing.start_time)}`;
+        }
+
+        function renderProgress(processing) {
+            const completed = processing.completed || 0;
+            const total = processing.total || 0;
+            const percent = total > 0 ? ((completed / total) * 100).toFixed(1) : '0.0';
+            const bar = document.getElementById('progress-bar-fill');
+            bar.style.width = `${Math.min(100, percent)}%`;
+            bar.textContent = `${percent}%`;
+            document.getElementById('progress-completed').textContent = completed;
+            document.getElementById('progress-total').textContent = total;
+            document.getElementById('progress-current').textContent = processing.current_file || '--';
+            document.getElementById('progress-stage').textContent = processing.stage || 'Idle';
+            document.getElementById('progress-duration').textContent = formatDuration(processing.start_time);
+            if (processing.latest_doc && processing.latest_doc.quality) {
+                document.getElementById('progress-quality').textContent = `${processing.latest_doc.quality} (conf ${processing.latest_doc.confidence || '--'})`;
+            } else {
+                document.getElementById('progress-quality').textContent = '--';
+            }
+        }
+
+        function renderAgentStatus(agents) {
+            const container = document.getElementById('agent-status-grid');
+            if (!agents || !agents.length) {
+                container.innerHTML = '<div class="empty-state">Agent telemetry loading...</div>';
+                return;
+            }
+            const html = agents.map(agent => {
+                const cls = `agent-status-card ${agent.status || 'idle'}`;
+                return `
+                    <article class="${cls}">
+                        <div class="agent-name">${agent.emoji || '🤖'} ${escapeHtml(agent.name || agent.id || 'Agent')}</div>
+                        <div class="agent-role">${escapeHtml(agent.role || '')}</div>
+                        <div class="agent-state">${escapeHtml(agent.last_action || 'Status unknown')}</div>
+                        <div class="metric-footnote">${agent.processing_time ? `Duration ${agent.processing_time}` : ''}</div>
+                    </article>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function renderAlerts(alerts) {
+            const list = document.getElementById('alerts-list');
+            if (!alerts || !alerts.entries || !alerts.entries.length) {
+                list.innerHTML = '<div class="empty-state">No alerts detected. System nominal.</div>';
+                return;
+            }
+            const html = alerts.entries.map(entry => {
+                const level = entry.level || 'INFO';
+                const cls = level === 'WARNING' ? 'alert-item warning' : 'alert-item';
+                return `
+                    <article class="${cls}">
+                        <header>${escapeHtml(level)} • ${escapeHtml(entry.timestamp || '')}</header>
+                        <pre>${escapeHtml(entry.raw || entry.message)}</pre>
+                    </article>
+                `;
+            }).join('');
+            list.innerHTML = html;
+        }
+
+        async function updateMetrics() {
+            try {
+                const res = await fetch('/api/metrics');
+                const data = await res.json();
+                renderMetrics(data);
+            } catch (error) {
+                console.error('Metric fetch failed', error);
+            }
+        }
+
+        async function updateCliLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                const output = document.getElementById('cli-output');
+                const lines = data.lines || [];
+                if (!lines.length) {
+                    output.textContent = 'No logs available';
+                    return;
+                }
+                const formatted = lines.map(line => {
+                    const escaped = escapeHtml(line);
+                    if (line.includes('ERROR') || line.includes('❌')) {
+                        return `<span class="error">${escaped}</span>`;
+                    }
+                    if (line.includes('WARNING')) {
+                        return `<span class="warning">${escaped}</span>`;
+                    }
+                    return escaped;
+                }).join('\n');
+                const wasAtBottom = (output.scrollHeight - output.clientHeight - output.scrollTop) < 60;
+                output.innerHTML = formatted;
+                state.latestLogs = data.raw || lines.join('\n');
+                document.getElementById('log-meta').textContent = `Last update ${new Date().toLocaleTimeString()}`;
+                if (state.followLogs || wasAtBottom) {
+                    output.scrollTop = output.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Log fetch failed', error);
+            }
+        }
+
+        async function refreshJsonPreview() {
+            try {
+                const res = await fetch('/api/json_preview');
+                const data = await res.json();
+                const container = document.getElementById('json-preview');
+                const meta = document.getElementById('json-meta');
+                if (data.error) {
+                    meta.textContent = data.error;
+                } else {
+                    meta.textContent = `Total documents: ${data.total} • Updated ${data.last_updated ? new Date(data.last_updated).toLocaleTimeString() : '--'}`;
+                }
+                const documents = data.documents || [];
+                if (!documents.length) {
+                    container.innerHTML = '<div class="empty-state">No documents yet. Waiting for processing output.</div>';
+                    return;
+                }
+                const html = documents.map((doc, idx) => {
+                    const label = data.total - documents.length + idx + 1;
+                    return `
+                        <details open>
+                            <summary>Document #${label}</summary>
+                            <pre>${escapeHtml(JSON.stringify(doc, null, 2))}</pre>
+                        </details>
+                    `;
+                }).join('');
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('JSON preview fetch failed', error);
+            }
+        }
+
+        function init() {
+            updateMetrics();
+            updateChainOfThought();
+            updateCliLogs();
+            refreshJsonPreview();
+            setInterval(updateMetrics, REFRESH_FAST);
+            setInterval(updateChainOfThought, REFRESH_FAST);
+            setInterval(updateCliLogs, REFRESH_MED);
+            setInterval(refreshJsonPreview, REFRESH_SLOW);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

@@ -23,6 +23,118 @@ LOG_FILE = PROJECT_ROOT / "logs" / "enlitens_complete_processing.log"
 JSON_FILE = PROJECT_ROOT / "enlitens_knowledge_base" / "enlitens_knowledge_base.json.temp"
 TOTAL_DOCUMENTS = 344
 
+# Agent metadata shared across endpoints
+AGENT_METADATA = {
+    'supervisor': {
+        'name': 'Supervisor',
+        'emoji': '🎯',
+        'description': 'Orchestrates the entire multi-agent pipeline',
+        'role': 'Coordinator',
+        'keywords': ['supervisor', 'overall supervisor']
+    },
+    'context_curator': {
+        'name': 'Context Curator',
+        'emoji': '🧬',
+        'description': 'Curates relevant personas and contextual information',
+        'role': 'Context Builder',
+        'keywords': ['context_curator', 'context curator']
+    },
+    'pdf_extraction': {
+        'name': 'PDF Extractor',
+        'emoji': '📄',
+        'description': 'Extracts text and structure from research papers',
+        'role': 'Document Parser',
+        'keywords': ['pdf_extractor', 'pdf extraction']
+    },
+    'science_extraction': {
+        'name': 'Science Extractor',
+        'emoji': '🔬',
+        'description': 'Identifies research methods, findings, and statistics',
+        'role': 'Research Analyzer',
+        'keywords': ['science_extraction', 'science extractor']
+    },
+    'clinical_synthesis': {
+        'name': 'Clinical Synthesizer',
+        'emoji': '⚕️',
+        'description': 'Synthesizes clinical implications and applications',
+        'role': 'Clinical Translator',
+        'keywords': ['clinical_synthesis', 'clinical synthesizer']
+    },
+    'educational_content': {
+        'name': 'Educational Content',
+        'emoji': '📚',
+        'description': 'Generates educational materials and summaries',
+        'role': 'Content Creator',
+        'keywords': ['educational_content']
+    },
+    'rebellion_framework': {
+        'name': 'Rebellion Framework',
+        'emoji': '🔥',
+        'description': 'Applies rebellious narrative and empowerment framing',
+        'role': 'Narrative Designer',
+        'keywords': ['rebellion_framework']
+    },
+    'founder_voice': {
+        'name': 'Founder Voice',
+        'emoji': '🗣️',
+        'description': 'Ensures content matches founder\'s authentic voice',
+        'role': 'Voice Authenticator',
+        'keywords': ['founder_voice', 'voice guide']
+    },
+    'marketing_seo': {
+        'name': 'Marketing & SEO',
+        'emoji': '📈',
+        'description': 'Optimizes content for search and engagement',
+        'role': 'Growth Optimizer',
+        'keywords': ['marketing', 'seo']
+    },
+    'validation': {
+        'name': 'Validator',
+        'emoji': '✅',
+        'description': 'Validates output quality and completeness',
+        'role': 'Quality Assurance',
+        'keywords': ['validation']
+    },
+    'profile_matcher': {
+        'name': 'Profile Matcher',
+        'emoji': '🎭',
+        'description': 'Matches content to relevant client personas',
+        'role': 'Persona Selector',
+        'keywords': ['profile_matcher', 'persona matcher']
+    },
+    'voice_guide_generator': {
+        'name': 'Voice Guide Generator',
+        'emoji': '🎤',
+        'description': 'Generates voice and tone guidelines',
+        'role': 'Style Guide',
+        'keywords': ['voice_guide_generator', 'voice guide generator']
+    },
+    'health_report_synthesizer': {
+        'name': 'Health Report Synthesizer',
+        'emoji': '🏥',
+        'description': 'Synthesizes regional health context',
+        'role': 'Health Analyst',
+        'keywords': ['health_report_synthesizer', 'health report synthesizer']
+    }
+}
+
+AGENT_KEYWORDS = []
+for agent_key, meta in AGENT_METADATA.items():
+    AGENT_KEYWORDS.append((agent_key, meta['name'].lower()))
+    for keyword in meta.get('keywords', []):
+        AGENT_KEYWORDS.append((agent_key, keyword.lower()))
+
+AGENT_KEYWORD_STRINGS = [keyword for _, keyword in AGENT_KEYWORDS]
+
+
+def identify_agent(line: str):
+    """Return the agent key that matches a log line, or None."""
+    line_lower = line.lower()
+    for agent_key, keyword in AGENT_KEYWORDS:
+        if keyword in line_lower:
+            return agent_key
+    return None
+
 # Cache for expensive log parsing
 _CACHE = {"timestamp": 0, "data": None}
 
@@ -167,90 +279,8 @@ def parse_logs():
         'latest_doc': {}
     }
     
-    # Agent metadata with proper names and descriptions
-    agent_metadata = {
-        'supervisor': {
-            'name': 'Supervisor',
-            'emoji': '🎯',
-            'description': 'Orchestrates the entire multi-agent pipeline',
-            'role': 'Coordinator'
-        },
-        'context_curator': {
-            'name': 'Context Curator',
-            'emoji': '🧬',
-            'description': 'Curates relevant personas and contextual information',
-            'role': 'Context Builder'
-        },
-        'pdf_extraction': {
-            'name': 'PDF Extractor',
-            'emoji': '📄',
-            'description': 'Extracts text and structure from research papers',
-            'role': 'Document Parser'
-        },
-        'science_extraction': {
-            'name': 'Science Extractor',
-            'emoji': '🔬',
-            'description': 'Identifies research methods, findings, and statistics',
-            'role': 'Research Analyzer'
-        },
-        'clinical_synthesis': {
-            'name': 'Clinical Synthesizer',
-            'emoji': '⚕️',
-            'description': 'Synthesizes clinical implications and applications',
-            'role': 'Clinical Translator'
-        },
-        'educational_content': {
-            'name': 'Educational Content',
-            'emoji': '📚',
-            'description': 'Generates educational materials and summaries',
-            'role': 'Content Creator'
-        },
-        'rebellion_framework': {
-            'name': 'Rebellion Framework',
-            'emoji': '🔥',
-            'description': 'Applies rebellious narrative and empowerment framing',
-            'role': 'Narrative Designer'
-        },
-        'founder_voice': {
-            'name': 'Founder Voice',
-            'emoji': '🗣️',
-            'description': 'Ensures content matches founder\'s authentic voice',
-            'role': 'Voice Authenticator'
-        },
-        'marketing_seo': {
-            'name': 'Marketing & SEO',
-            'emoji': '📈',
-            'description': 'Optimizes content for search and engagement',
-            'role': 'Growth Optimizer'
-        },
-        'validation': {
-            'name': 'Validator',
-            'emoji': '✅',
-            'description': 'Validates output quality and completeness',
-            'role': 'Quality Assurance'
-        },
-        'profile_matcher': {
-            'name': 'Profile Matcher',
-            'emoji': '🎭',
-            'description': 'Matches content to relevant client personas',
-            'role': 'Persona Selector'
-        },
-        'voice_guide_generator': {
-            'name': 'Voice Guide',
-            'emoji': '🎤',
-            'description': 'Generates voice and tone guidelines',
-            'role': 'Style Guide'
-        },
-        'health_report_synthesizer': {
-            'name': 'Health Synthesizer',
-            'emoji': '🏥',
-            'description': 'Synthesizes regional health context',
-            'role': 'Health Analyst'
-        }
-    }
-    
     agents = {}
-    alerts = {'count': 0, 'last_error': None}
+    alerts = {'count': 0, 'last_error': None, 'entries': []}
     context_curator = {'personas': 0, 'health': 0, 'voice': 0, 'total': 0}
     
     # Parse logs
@@ -287,10 +317,10 @@ def parse_logs():
                 processing['stage'] = match.group(1)
         
         # Agent status - more comprehensive parsing
-        if 'Agent' in line or any(agent_key in line.lower() for agent_key in agent_metadata.keys()):
+        if 'agent' in line.lower() or any(keyword in line.lower() for keyword in AGENT_KEYWORD_STRINGS):
             # Try to match agent name from logs
-            for agent_key, metadata in agent_metadata.items():
-                if agent_key.lower() in line.lower() or metadata['name'].lower() in line.lower():
+            for agent_key, metadata in AGENT_METADATA.items():
+                if agent_key in line.lower() or metadata['name'].lower() in line.lower():
                     if agent_key not in agents:
                         agents[agent_key] = {
                             'id': agent_key,
@@ -335,12 +365,30 @@ def parse_logs():
                     context_curator['voice'] = int(match.group(1))
         
         # Errors
-        if 'ERROR' in line or '❌' in line:
+        if any(tag in line for tag in ['ERROR', '❌', 'CRITICAL', 'WARNING']):
             alerts['count'] += 1
-            alerts['last_error'] = line.strip()[-200:]  # Last 200 chars
+            parts = line.split(' - ', 2)
+            timestamp = parts[0].strip() if parts else ''
+            level = 'INFO'
+            if 'CRITICAL' in line:
+                level = 'CRITICAL'
+            elif 'ERROR' in line or '❌' in line:
+                level = 'ERROR'
+            elif 'WARNING' in line:
+                level = 'WARNING'
+            message = parts[-1].strip() if len(parts) >= 3 else line.strip()
+            alerts['entries'].append({
+                'timestamp': timestamp,
+                'level': level,
+                'message': message,
+                'raw': line.strip()
+            })
     
     # Calculate context curator total
     context_curator['total'] = context_curator['personas'] + context_curator['health'] + context_curator['voice']
+    alerts['entries'] = alerts['entries'][-25:]
+    if alerts['entries']:
+        alerts['last_error'] = alerts['entries'][-1]['message']
     
     # Get start time
     for line in current_lines[:50]:
@@ -402,120 +450,147 @@ def metrics():
 
 @app.route('/api/chain_of_thought')
 def chain_of_thought():
-    """Get the AI's chain-of-thought reasoning for current document"""
+    """Get structured and raw chain-of-thought reasoning grouped by agent."""
     try:
         if not LOG_FILE.exists():
-            return jsonify({"reasoning_steps": [], "current_document": None})
-        
+            return jsonify({
+                "timeline": [],
+                "agents": [],
+                "raw_excerpt": [],
+                "current_document": None,
+                "step_count": 0
+            })
+
         with open(LOG_FILE, 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
-        
-        # Find the most recent document being processed
+
+        # Determine the most recent document being processed
         current_doc = None
-        for line in reversed(lines[-500:]):  # Check last 500 lines
+        for line in reversed(lines[-600:]):
             if '📖 Processing file' in line or '🧠 Starting multi-agent processing' in line:
-                # Extract document name
                 parts = line.split(':')
                 if len(parts) > 2:
                     current_doc = parts[-1].strip()
                 break
-        
-        # Extract reasoning steps - PRIORITIZE "🧠 THINKING:" logs from agents
-        reasoning_steps = []
-        
-        for line in lines[-300:]:  # Last 300 lines for more context
-            line_lower = line.lower()
-            
-            # Skip system/debug lines
-            if any(skip in line_lower for skip in ['gpu', 'memory', 'unloading', 'cache cleared', 'checking persona file']):
+
+        recent_lines = lines[-600:]
+        timeline = []
+        agent_buckets = {}
+        raw_excerpt = []
+
+        for raw_line in recent_lines:
+            stripped = raw_line.strip()
+            if not stripped:
                 continue
-            
-            # PRIORITY: Agent chain-of-thought reasoning (🧠 THINKING:)
-            if '🧠 THINKING:' in line or '🧠 thinking:' in line_lower:
-                parts = line.split(' - ')
-                if len(parts) >= 3:
-                    timestamp = parts[0].strip()
-                    # Extract the thinking message after "THINKING:"
-                    message = line.split('THINKING:', 1)[-1].strip()
-                    
-                    # Determine agent from context
-                    agent = 'Unknown Agent'
-                    if 'profile_matcher' in line_lower:
-                        agent = 'Profile Matcher'
-                    elif 'health_report' in line_lower:
-                        agent = 'Health Report Synthesizer'
-                    elif 'voice_guide' in line_lower:
-                        agent = 'Voice Guide Generator'
-                    elif 'context_curator' in line_lower:
-                        agent = 'Context Curator'
-                    
-                    reasoning_steps.append({
-                        'timestamp': timestamp,
-                        'type': f'{agent}',
-                        'message': message[:300],  # More chars for thinking
-                        'icon': '🧠',
-                        'is_thought': True
-                    })
-                    continue
-            
-            # Secondary: Key agent actions
-            action_patterns = {
-                '🎯 Starting persona matching': ('Profile Matcher', '🎯', 'Initiating persona selection'),
-                '🏥 Agent 2: Health Report Synthesizer': ('Health Report Synthesizer', '🏥', 'Starting health brief synthesis'),
-                '📝 Agent 3: Voice Guide Generator': ('Voice Guide Generator', '📝', 'Creating style guide'),
-                '✅ Selected': ('Profile Matcher', '✅', None),  # Will extract message
-                '✅ Synthesized health context': ('Health Report Synthesizer', '✅', None),
-                '✅ Generated voice guide': ('Voice Guide Generator', '✅', None),
+
+            raw_excerpt.append(stripped)
+            parts = raw_line.split(' - ', 2)
+            timestamp = parts[0].strip() if parts else ''
+            remainder = parts[-1].strip() if len(parts) >= 3 else stripped
+
+            level = 'INFO'
+            if 'CRITICAL' in raw_line:
+                level = 'CRITICAL'
+            elif 'ERROR' in raw_line or '❌' in raw_line:
+                level = 'ERROR'
+            elif 'WARNING' in raw_line:
+                level = 'WARNING'
+
+            agent_key = identify_agent(raw_line) or 'system'
+            agent_meta = AGENT_METADATA.get(agent_key, {
+                'name': 'System',
+                'emoji': '🛰️',
+                'description': 'Pipeline event',
+                'role': 'Runtime'
+            })
+
+            is_thought = '🧠 thinking' in raw_line.lower() or 'thinking:' in remainder.lower()
+            if 'THINKING:' in remainder:
+                message = remainder.split('THINKING:', 1)[-1].strip()
+            else:
+                message = remainder
+
+            entry = {
+                'timestamp': timestamp,
+                'agent_key': agent_key,
+                'agent': agent_meta['name'],
+                'icon': agent_meta['emoji'],
+                'level': level,
+                'message': message,
+                'raw': stripped,
+                'is_thought': is_thought
             }
-            
-            for pattern, (agent, icon, default_msg) in action_patterns.items():
-                if pattern.lower() in line_lower:
-                    parts = line.split(' - ')
-                    if len(parts) >= 3:
-                        timestamp = parts[0].strip()
-                        message = default_msg if default_msg else ' - '.join(parts[2:]).strip()
-                        
-                        reasoning_steps.append({
-                            'timestamp': timestamp,
-                            'type': agent,
-                            'message': message[:200],
-                            'icon': icon,
-                            'is_thought': False
-                        })
-                        break
-        
-        # Keep only last 25 steps (more for detailed thinking)
-        reasoning_steps = reasoning_steps[-25:]
-        
+            timeline.append(entry)
+
+            bucket = agent_buckets.setdefault(agent_key, {
+                'agent_key': agent_key,
+                'name': agent_meta['name'],
+                'icon': agent_meta['emoji'],
+                'role': agent_meta.get('role', ''),
+                'description': agent_meta.get('description', ''),
+                'steps': []
+            })
+            bucket['steps'].append({
+                'timestamp': timestamp,
+                'message': message,
+                'raw': stripped,
+                'level': level,
+                'is_thought': is_thought
+            })
+
+        # Limit history to keep payload manageable
+        timeline = timeline[-150:]
+        raw_excerpt = raw_excerpt[-250:]
+        agent_cards = []
+        for bucket in agent_buckets.values():
+            bucket['steps'] = bucket['steps'][-12:]
+            agent_cards.append(bucket)
+
+        agent_cards.sort(key=lambda b: b['steps'][-1]['timestamp'] if b['steps'] else '', reverse=True)
+
         return jsonify({
-            "reasoning_steps": reasoning_steps,
+            "timeline": timeline,
+            "agents": agent_cards,
+            "raw_excerpt": raw_excerpt,
             "current_document": current_doc,
-            "step_count": len(reasoning_steps)
+            "step_count": len(timeline)
         })
     except Exception as e:
-        return jsonify({"reasoning_steps": [], "error": str(e)})
+        return jsonify({
+            "timeline": [],
+            "agents": [],
+            "raw_excerpt": [],
+            "current_document": None,
+            "error": str(e),
+            "step_count": 0
+        })
 
 @app.route('/api/logs')
 def logs():
-    """Get recent logs from current run"""
+    """Get recent logs from current run in CLI-friendly format"""
     try:
         if LOG_FILE.exists():
             with open(LOG_FILE, 'r') as f:
                 lines = f.readlines()
-                
+
                 start_idx = 0
                 for i in range(len(lines) - 1, -1, -1):
                     if '🚀 Starting MULTI-AGENT' in lines[i]:
                         start_idx = i
                         break
-                
+
                 current_lines = lines[start_idx:]
-                recent = current_lines[-200:]
-                return jsonify({'logs': [line.strip() for line in recent]})
-    except:
-        pass
-    
-    return jsonify({'logs': ['No logs available']})
+                recent = [line.rstrip('\n') for line in current_lines[-400:]]
+                return jsonify({
+                    'lines': recent,
+                    'raw': '\n'.join(recent),
+                    'logs': recent,
+                    'latest': recent[-1] if recent else ''
+                })
+    except Exception as exc:
+        return jsonify({'lines': ['Log read error: {}'.format(exc)], 'raw': str(exc), 'logs': []})
+
+    return jsonify({'lines': ['No logs available'], 'raw': '', 'logs': []})
 
 @app.route('/api/download')
 def download():
@@ -523,6 +598,55 @@ def download():
     if JSON_FILE.exists():
         return send_file(JSON_FILE, as_attachment=True, download_name='enlitens_knowledge_base.json')
     return jsonify({'error': 'File not found'}), 404
+
+@app.route('/api/json_preview')
+def json_preview():
+    """Return a preview of the most recent JSON knowledge base entries."""
+    if not JSON_FILE.exists():
+        return jsonify({
+            'documents': [],
+            'total': 0,
+            'last_updated': None,
+            'error': 'Knowledge base file not found.'
+        })
+
+    try:
+        with open(JSON_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read().strip()
+            if not content:
+                return jsonify({
+                    'documents': [],
+                    'total': 0,
+                    'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
+                    'error': 'Knowledge base file is empty.'
+                })
+            data = json.loads(content)
+
+        if isinstance(data, list):
+            documents = data
+        else:
+            documents = data.get('documents', [])
+
+        preview = documents[-5:]
+        return jsonify({
+            'documents': preview,
+            'total': len(documents),
+            'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat()
+        })
+    except json.JSONDecodeError as exc:
+        return jsonify({
+            'documents': [],
+            'total': 0,
+            'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
+            'error': f'JSON decode error: {exc}'
+        })
+    except Exception as exc:
+        return jsonify({
+            'documents': [],
+            'total': 0,
+            'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
+            'error': str(exc)
+        })
 
 if __name__ == '__main__':
     print("🚀 Starting Enhanced Enlitens Dashboard...")
