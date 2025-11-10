@@ -459,7 +459,7 @@ class MultiAgentProcessor:
                 curated_context = await self.context_curator.curate_context(
                     paper_text=text,
                     entities=entities,
-                    health_report_text=context.get("st_louis_context", {}).get("report_text", ""),
+                    health_report_text=context.get("health_report", {}).get("text", ""),
                     llm_client=llm_client
                 )
                 
