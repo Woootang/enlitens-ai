@@ -160,8 +160,24 @@ class ProfileMatcherAgent:
                 diagnoses_found = set()
                 for p in selected_personas[:3]:  # Sample first 3
                     neuro = p.get('neurodivergence_mental_health', {})
-                    diagnoses_found.update(neuro.get('diagnoses', []))
-                logger.info(f"🧠 THINKING: Successfully matched {len(selected_personas)} personas. They include conditions like: {', '.join(list(diagnoses_found)[:5])}. These personas should align well with the paper's focus on {', '.join(entities.get('diseases', [])[:3])}.")
+                    dx_list = neuro.get('diagnoses', [])
+                    # Handle both strings and dicts in diagnoses
+                    for dx in dx_list:
+                        if isinstance(dx, str):
+                            diagnoses_found.add(dx)
+                        elif isinstance(dx, dict):
+                            diagnoses_found.add(dx.get('condition', 'Unknown'))
+                
+                # Get disease list as strings
+                disease_list = entities.get('diseases', [])
+                disease_names = []
+                for d in disease_list[:3]:
+                    if isinstance(d, str):
+                        disease_names.append(d)
+                    elif isinstance(d, dict):
+                        disease_names.append(d.get('text', 'Unknown'))
+                
+                logger.info(f"🧠 THINKING: Successfully matched {len(selected_personas)} personas. They include conditions like: {', '.join(list(diagnoses_found)[:5])}. These personas should align well with the paper's focus on {', '.join(disease_names)}.")
             
             if len(selected_personas) == 0:
                 logger.error(f"❌ CRITICAL: NO PERSONAS SELECTED! This should not happen!")

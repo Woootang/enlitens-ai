@@ -11,52 +11,71 @@
             box-sizing: border-box;
         }
         
-        body {
+        :root {
+            --primary: #C105F5;
+            --secondary: #05F2C7;
+            --success: #7CFC00;
+            --warning: #FFA500;
+            --error: #FF4502;
+            --bg-dark: #0f0c29;
+            --bg-mid: #302b63;
+            --text-light: #e1e1e1;
+            --text-muted: #9CA3AF;
+        }
+        
+        html, body {
+            height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #e1e1e1;
-            min-height: 100vh;
-            padding: 15px;
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-mid), #24243e);
+            color: var(--text-light);
+            font-size: 16px;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* Full-screen responsive container */
+        .main-container {
+            height: 100vh;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
         
+        /* Header */
         .header {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
             border: 1px solid rgba(193, 5, 245, 0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            flex-shrink: 0;
         }
         
         .header h1 {
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #C105F5, #05F2C7);
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
         
         .status-badge {
-            padding: 8px 16px;
+            padding: 0.5em 1em;
             background: rgba(124, 252, 0, 0.1);
-            border: 1px solid #7CFC00;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            border: 1px solid var(--success);
+            border-radius: 2em;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
         }
         
         .status-badge::before {
             content: '●';
-            color: #7CFC00;
-            margin-right: 8px;
+            color: var(--success);
             animation: pulse 2s infinite;
         }
         
@@ -65,351 +84,110 @@
             50% { opacity: 0.3; }
         }
         
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-        
-        .card-title {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #C105F5;
-            font-weight: 600;
+        /* Tabs */
+        .tabs {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-shrink: 0;
         }
         
-        .metric-row {
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .tab.active {
+            background: rgba(193, 5, 245, 0.2);
+            border-color: var(--primary);
+            color: var(--text-light);
+            box-shadow: 0 4px 12px rgba(193, 5, 245, 0.3);
+        }
+        
+        .tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Chain of Thought Tab - Full Screen */
+        .chain-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+            padding: 2rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chain-header {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .metric-row:last-child {
-            border-bottom: none;
+        .chain-header h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
         }
         
-        .metric-label {
-            color: #9CA3AF;
-            font-size: 0.9rem;
-        }
-        
-        .metric-value {
-            font-weight: 600;
-            color: #fff;
-            font-size: 1rem;
-        }
-        
-        .metric-value.highlight {
-            color: #C105F5;
-            font-size: 1.2rem;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #C105F5, #05F2C7);
-            transition: width 0.5s ease;
-        }
-        
-        .wide-card {
-            grid-column: 1 / -1;
-        }
-        
-        .agent-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .agent-card {
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border-left: 4px solid #666;
-            transition: all 0.3s ease;
-        }
-        
-        .agent-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .agent-card.running {
-            border-left-color: #05F2C7;
-            background: rgba(5, 242, 199, 0.08);
-            box-shadow: 0 0 20px rgba(5, 242, 199, 0.2);
-        }
-        
-        .agent-card.completed {
-            border-left-color: #7CFC00;
-            background: rgba(124, 252, 0, 0.08);
-        }
-        
-        .agent-card.error {
-            border-left-color: #FF4502;
-            background: rgba(255, 69, 2, 0.08);
-            box-shadow: 0 0 20px rgba(255, 69, 2, 0.2);
-        }
-        
-        .agent-card.idle {
-            border-left-color: #666;
-            opacity: 0.7;
-        }
-        
-        .agent-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .agent-emoji {
-            font-size: 1.8rem;
-        }
-        
-        .agent-title {
-            flex: 1;
-        }
-        
-        .agent-name {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-        
-        .agent-role {
-            font-size: 0.75rem;
-            color: #9CA3AF;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .agent-status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .agent-status-badge.running {
-            background: rgba(5, 242, 199, 0.2);
-            color: #05F2C7;
-        }
-        
-        .agent-status-badge.completed {
-            background: rgba(124, 252, 0, 0.2);
-            color: #7CFC00;
-        }
-        
-        .agent-status-badge.error {
-            background: rgba(255, 69, 2, 0.2);
-            color: #FF4502;
-        }
-        
-        .agent-status-badge.idle {
-            background: rgba(255, 255, 255, 0.1);
-            color: #9CA3AF;
-        }
-        
-        .agent-description {
-            font-size: 0.85rem;
-            color: #9CA3AF;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-        
-        .agent-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: #666;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .agent-action {
-            color: #C105F5;
-            font-weight: 500;
-        }
-        
-        .agent-time {
-            color: #05F2C7;
-        }
-        
-        .log-container {
-            background: #000;
-            border-radius: 8px;
-            padding: 15px;
-            height: 350px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            line-height: 1.4;
-            border: 1px solid rgba(193, 5, 245, 0.3);
-        }
-        
-        .log-line {
-            margin-bottom: 4px;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        
-        .log-line.success { color: #7CFC00; }
-        .log-line.warning { color: #FFF700; }
-        .log-line.error { color: #FF4502; }
-        .log-line.info { color: #05F2C7; }
-        
-        .btn {
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #C105F5, #05F2C7);
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-weight: 600;
+        .auto-scroll-toggle {
+            padding: 0.5rem 1rem;
+            background: rgba(193, 5, 245, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 0.5rem;
+            color: var(--text-light);
             cursor: pointer;
-            font-size: 0.95rem;
-            width: 100%;
-            margin-top: 10px;
-            transition: transform 0.2s;
+            font-size: 0.875rem;
         }
         
-        .btn:hover {
-            transform: scale(1.02);
+        .auto-scroll-toggle.paused {
+            background: rgba(255, 165, 0, 0.2);
+            border-color: var(--warning);
         }
         
-        .temp-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        .chain-steps {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 1rem;
         }
         
-        .temp-normal { background: rgba(124, 252, 0, 0.2); color: #7CFC00; }
-        .temp-warm { background: rgba(255, 247, 0, 0.2); color: #FFF700; }
-        .temp-hot { background: rgba(255, 69, 2, 0.2); color: #FF4502; }
-        
-        .power-meter {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-        }
-        
-        .power-meter-title {
-            font-size: 0.9rem;
-            color: #9CA3AF;
-            margin-bottom: 8px;
-        }
-        
-        .power-meter-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #C105F5;
-            margin-bottom: 8px;
-        }
-        
-        .alert-box {
-            background: rgba(255, 69, 2, 0.1);
-            border: 1px solid rgba(255, 69, 2, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #FF4502;
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.4rem;
-            }
-            
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .agent-list {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #C105F5;
-            border-radius: 4px;
-        }
-
-        /* Chain of Thought Styles */
+        /* Reasoning Step - MORE SPACE */
         .reasoning-step {
-            background: rgba(193, 5, 245, 0.05);
-            border-left: 3px solid #C105F5;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
             animation: fadeIn 0.3s ease;
         }
-
-        /* Agent thinking steps - MOST PROMINENT */
+        
         .reasoning-step.thinking {
             background: rgba(193, 5, 245, 0.15);
-            border-left: 4px solid #C105F5;
-            padding: 15px 18px;
-            box-shadow: 0 2px 8px rgba(193, 5, 245, 0.2);
+            border-left-width: 5px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(193, 5, 245, 0.3);
         }
-
-        .reasoning-step.analyzing {
-            border-left-color: #05F2C7;
-            background: rgba(5, 242, 199, 0.05);
-        }
-
-        .reasoning-step.completed {
-            border-left-color: #7CFC00;
-            background: rgba(124, 252, 0, 0.05);
-        }
-
-        .reasoning-step.planning {
-            border-left-color: #FFA500;
-            background: rgba(255, 165, 0, 0.05);
-        }
-
+        
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -420,383 +198,388 @@
                 transform: translateY(0);
             }
         }
-
+        
         .reasoning-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 5px;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .reasoning-icon {
+            font-size: 1.75rem;
+        }
+        
+        .reasoning-type {
+            color: var(--primary);
+            font-size: 1.125rem;
             font-weight: 600;
         }
-
-        .reasoning-icon {
-            font-size: 1.2rem;
-        }
-
-        .reasoning-type {
-            color: #C105F5;
-            font-size: 0.9rem;
-        }
-
+        
         .reasoning-timestamp {
-            color: #9CA3AF;
-            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
             margin-left: auto;
         }
-
+        
         .reasoning-message {
-            color: #e1e1e1;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
-
-        .no-reasoning {
-            text-align: center;
-            color: #9CA3AF;
-            padding: 40px 20px;
-            font-style: italic;
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .metric-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .metric-value.highlight {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            margin: 1rem 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        /* Alert Box */
+        .alert-card {
+            background: rgba(255, 69, 2, 0.1);
+            border: 1px solid rgba(255, 69, 2, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .alert-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 69, 2, 0.05);
+            border-radius: 0.5rem;
+        }
+        
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 0.5rem;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 0.25rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="main-container">
         <div class="header">
             <h1>🧠 Enlitens AI Processing Dashboard</h1>
-            <span class="status-badge">PROCESSING ACTIVE</span>
+            <div class="status-badge">Active</div>
         </div>
-
-        <!-- Power & System Overview -->
-        <div class="card wide-card">
-            <div class="card-title">⚡ System Power & Resources</div>
-            <div class="grid" style="margin-bottom: 0;">
-                <div class="power-meter">
-                    <div class="power-meter-title">Total Power Draw</div>
-                    <div class="power-meter-value" id="power-total">-- W</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="power-bar" style="width: 0%"></div>
-                    </div>
-                    <div class="metric-label" style="margin-top: 5px;">
-                        <span id="power-percent">0%</span> of 1000W PSU capacity
-                    </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('chain')">🧠 Agent Reasoning</div>
+            <div class="tab" onclick="switchTab('stats')">📊 System Stats</div>
+            <div class="tab" onclick="switchTab('progress')">📈 Progress</div>
+            <div class="tab" onclick="switchTab('alerts')">⚠️ Alerts (<span id="alert-count">0</span>)</div>
+        </div>
+        
+        <!-- Chain of Thought Tab -->
+        <div id="chain-tab" class="tab-content active">
+            <div class="chain-container">
+                <div class="chain-header">
+                    <h2>Agent Chain of Thought</h2>
+                    <button class="auto-scroll-toggle" onclick="toggleAutoScroll()">
+                        <span id="scroll-status">🔄 Auto-scroll ON</span>
+                    </button>
                 </div>
-                <div>
+                <div class="chain-steps" id="chain-steps">
+                    <p style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        ⏳ Waiting for agent reasoning...
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-title">⚡ Power</div>
                     <div class="metric-row">
-                        <span class="metric-label">GPU Power</span>
+                        <span class="metric-label">Total Draw</span>
+                        <span class="metric-value highlight" id="power-total">-- W</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">GPU</span>
                         <span class="metric-value" id="power-gpu">-- W</span>
                     </div>
                     <div class="metric-row">
-                        <span class="metric-label">CPU Power (est.)</span>
+                        <span class="metric-label">CPU</span>
                         <span class="metric-value" id="power-cpu">-- W</span>
                     </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">🎮 GPU</div>
                     <div class="metric-row">
-                        <span class="metric-label">System Overhead</span>
-                        <span class="metric-value" id="power-other">-- W</span>
+                        <span class="metric-label">Utilization</span>
+                        <span class="metric-value" id="gpu-util">--%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Memory</span>
+                        <span class="metric-value" id="gpu-mem">-- GB</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Temperature</span>
+                        <span class="metric-value" id="gpu-temp">--°C</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">🖥️ CPU</div>
+                    <div class="metric-row">
+                        <span class="metric-label">Utilization</span>
+                        <span class="metric-value" id="cpu-util">--%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Memory</span>
+                        <span class="metric-value" id="cpu-mem">-- GB</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Temperature</span>
+                        <span class="metric-value" id="cpu-temp">--°C</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">🎯 Context Curator</div>
+                    <div class="metric-row">
+                        <span class="metric-label">Personas</span>
+                        <span class="metric-value" id="curator-personas">-- tokens</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Health Brief</span>
+                        <span class="metric-value" id="curator-health">-- tokens</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Voice Guide</span>
+                        <span class="metric-value" id="curator-voice">-- tokens</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Context</span>
+                        <span class="metric-value highlight" id="curator-total">-- tokens</span>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Processing Overview -->
-        <div class="card wide-card">
-            <div class="card-title">📊 Processing Progress</div>
-            <div class="metric-row">
-                <span class="metric-label">Documents Completed</span>
-                <span class="metric-value highlight"><span id="docs-done">0</span> / <span id="docs-total">345</span></span>
-            </div>
-            <div class="progress-bar" style="height: 20px; margin: 15px 0;">
-                <div class="progress-fill" id="progress-bar" style="width: 0%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; color: #000;">
-                    <span id="progress-text">0%</span>
-                </div>
-            </div>
-            <div class="grid" style="margin-bottom: 0;">
-                <div>
+        
+        <!-- Progress Tab -->
+        <div id="progress-tab" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-title">📊 Processing Progress</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Completed</span>
+                        <span class="metric-value" id="docs-done">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total</span>
+                        <span class="metric-value" id="docs-total">344</span>
+                    </div>
                     <div class="metric-row">
                         <span class="metric-label">Current File</span>
-                        <span class="metric-value" id="current-file" style="font-size: 0.85rem; word-break: break-all;">--</span>
+                        <span class="metric-value" id="current-file" style="font-size: 0.875rem;">None</span>
                     </div>
                     <div class="metric-row">
-                        <span class="metric-label">Current Stage</span>
-                        <span class="metric-value" id="current-stage">--</span>
+                        <span class="metric-label">Stage</span>
+                        <span class="metric-value" id="current-stage">Idle</span>
                     </div>
                 </div>
-                <div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-title">📄 Latest Document</div>
                     <div class="metric-row">
-                        <span class="metric-label">Latest Document</span>
-                        <span class="metric-value" id="latest-doc" style="font-size: 0.85rem;">--</span>
+                        <span class="metric-label">ID</span>
+                        <span class="metric-value" id="latest-doc" style="font-size: 0.875rem;">--</span>
                     </div>
                     <div class="metric-row">
-                        <span class="metric-label">Quality / Confidence</span>
-                        <span class="metric-value"><span id="latest-quality">--</span> / <span id="latest-confidence">--</span></span>
+                        <span class="metric-label">Quality</span>
+                        <span class="metric-value" id="latest-quality">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Confidence</span>
+                        <span class="metric-value" id="latest-confidence">--</span>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Hardware Stats -->
-        <div class="grid">
-            <div class="card">
-                <div class="card-title">🎮 GPU</div>
-                <div class="metric-row">
-                    <span class="metric-label">Utilization</span>
-                    <span class="metric-value highlight" id="gpu-util">0%</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Memory</span>
-                    <span class="metric-value" id="gpu-mem">0 / 24 GB</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Temperature</span>
-                    <span class="metric-value" id="gpu-temp">
-                        <span class="temp-badge temp-normal">--°C</span>
-                    </span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Fan Speed</span>
-                    <span class="metric-value" id="gpu-fan">--%</span>
+        
+        <!-- Alerts Tab -->
+        <div id="alerts-tab" class="tab-content">
+            <div class="alert-card">
+                <div class="stat-card-title">⚠️ System Alerts</div>
+                <div id="alert-list">
+                    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        ✅ No alerts
+                    </p>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="card-title">💻 CPU</div>
-                <div class="metric-row">
-                    <span class="metric-label">Utilization</span>
-                    <span class="metric-value highlight" id="cpu-util">0%</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Memory</span>
-                    <span class="metric-value" id="cpu-mem">0 / 64 GB</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Temperature</span>
-                    <span class="metric-value" id="cpu-temp">
-                        <span class="temp-badge temp-normal">--°C</span>
-                    </span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Load Average</span>
-                    <span class="metric-value" id="cpu-load">--</span>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">🧬 Context Curator</div>
-                <div class="metric-row">
-                    <span class="metric-label">Personas Context</span>
-                    <span class="metric-value" id="curator-personas">-- tokens</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Health Brief</span>
-                    <span class="metric-value" id="curator-health">-- tokens</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Voice Guide</span>
-                    <span class="metric-value" id="curator-voice">-- tokens</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Total Payload</span>
-                    <span class="metric-value highlight" id="curator-total">-- tokens</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chain of Thought Reasoning -->
-        <div class="card wide-card">
-            <div class="card-title">🧠 Chain of Thought Reasoning</div>
-            <div id="chain-of-thought" style="max-height: 400px; overflow-y: auto;"></div>
-        </div>
-
-        <!-- Agent Pipeline -->
-        <div class="card wide-card">
-            <div class="card-title">🤖 Agent Pipeline Status</div>
-            <div class="agent-list" id="agent-list">
-                <div style="color: #9CA3AF; grid-column: 1/-1; text-align: center; padding: 20px;">
-                    Waiting for agent telemetry...
-                </div>
-            </div>
-        </div>
-
-        <!-- Alerts -->
-        <div class="card wide-card" id="alerts-card" style="display: none;">
-            <div class="card-title">⚠️ Alerts (<span id="alert-count">0</span>)</div>
-            <div class="alert-box" id="alert-message"></div>
-        </div>
-
-        <!-- Logs -->
-        <div class="card wide-card">
-            <div class="card-title">📋 Live Processing Logs</div>
-            <div class="log-container" id="log-container"></div>
-        </div>
-
-        <!-- Download -->
-        <div class="card wide-card">
-            <div class="card-title">💾 Knowledge Base</div>
-            <div class="metric-row">
-                <span class="metric-label">Documents</span>
-                <span class="metric-value" id="json-docs">0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">File Size</span>
-                <span class="metric-value" id="json-size">-- KB</span>
-            </div>
-            <button class="btn" onclick="window.location.href='/api/download'">⬇️ Download JSON</button>
         </div>
     </div>
-
+    
     <script>
-        function updateDashboard() {
-            fetch('/api/metrics')
-                .then(res => res.json())
-                .then(data => {
-                    // Power
-                    document.getElementById('power-total').textContent = data.power.total + ' W';
-                    document.getElementById('power-gpu').textContent = data.power.gpu + ' W';
-                    document.getElementById('power-cpu').textContent = data.power.cpu + ' W';
-                    document.getElementById('power-other').textContent = data.power.other + ' W';
-                    document.getElementById('power-percent').textContent = data.power.psu_usage_percent + '%';
-                    document.getElementById('power-bar').style.width = data.power.psu_usage_percent + '%';
-
-                    // GPU
-                    document.getElementById('gpu-util').textContent = data.gpu.utilization + '%';
-                    document.getElementById('gpu-mem').textContent = data.gpu.memory_used + ' / ' + data.gpu.memory_total + ' GB';
-                    document.getElementById('gpu-fan').textContent = data.gpu.fan_speed + '%';
-                    
-                    const gpuTemp = document.getElementById('gpu-temp').querySelector('.temp-badge');
-                    gpuTemp.textContent = data.gpu.temperature + '°C';
-                    gpuTemp.className = 'temp-badge ' + getTempClass(data.gpu.temperature);
-
-                    // CPU
-                    document.getElementById('cpu-util').textContent = data.cpu.utilization + '%';
-                    document.getElementById('cpu-mem').textContent = data.cpu.memory_used + ' / ' + data.cpu.memory_total + ' GB';
-                    document.getElementById('cpu-load').textContent = data.cpu.load_avg;
-                    
-                    const cpuTemp = document.getElementById('cpu-temp').querySelector('.temp-badge');
-                    cpuTemp.textContent = data.cpu.temperature + '°C';
-                    cpuTemp.className = 'temp-badge ' + getTempClass(data.cpu.temperature);
-
-                    // Processing
-                    document.getElementById('docs-done').textContent = data.processing.completed;
-                    document.getElementById('docs-total').textContent = data.processing.total;
-                    
-                    const progress = (data.processing.completed / data.processing.total * 100).toFixed(1);
-                    document.getElementById('progress-bar').style.width = progress + '%';
-                    document.getElementById('progress-text').textContent = progress + '%';
-                    
-                    document.getElementById('current-file').textContent = data.processing.current_file || 'None';
-                    document.getElementById('current-stage').textContent = data.processing.stage || 'Idle';
-                    
-                    if (data.processing.latest_doc && data.processing.latest_doc.id) {
-                        document.getElementById('latest-doc').textContent = data.processing.latest_doc.id;
-                        document.getElementById('latest-quality').textContent = data.processing.latest_doc.quality || '--';
-                        document.getElementById('latest-confidence').textContent = data.processing.latest_doc.confidence || '--';
-                    }
-
-                    // Context Curator
-                    document.getElementById('curator-personas').textContent = data.context_curator.personas + ' tokens';
-                    document.getElementById('curator-health').textContent = data.context_curator.health + ' tokens';
-                    document.getElementById('curator-voice').textContent = data.context_curator.voice + ' tokens';
-                    document.getElementById('curator-total').textContent = data.context_curator.total + ' tokens';
-
-                    // Agents
-                    const agentList = document.getElementById('agent-list');
-                    if (data.agents && data.agents.length > 0) {
-                        agentList.innerHTML = data.agents.map(agent => 
-                            `<div class="agent-card ${agent.status}">
-                                <div class="agent-header">
-                                    <div class="agent-emoji">${agent.emoji}</div>
-                                    <div class="agent-title">
-                                        <div class="agent-name">${agent.name}</div>
-                                        <div class="agent-role">${agent.role}</div>
-                                    </div>
-                                    <div class="agent-status-badge ${agent.status}">
-                                        ${agent.status}
-                                    </div>
-                                </div>
-                                <div class="agent-description">${agent.description}</div>
-                                <div class="agent-meta">
-                                    <div class="agent-action">${agent.last_action || 'Waiting...'}</div>
-                                    ${agent.processing_time ? `<div class="agent-time">${agent.processing_time}</div>` : ''}
-                                </div>
-                            </div>`
-                        ).join('');
-                    } else {
-                        agentList.innerHTML = '<div style="color: #9CA3AF; grid-column: 1/-1; text-align: center; padding: 20px;">Agents will appear once processing begins...</div>';
-                    }
-
-                    // Alerts
-                    if (data.alerts.count > 0) {
-                        document.getElementById('alerts-card').style.display = 'block';
-                        document.getElementById('alert-count').textContent = data.alerts.count;
-                        document.getElementById('alert-message').textContent = data.alerts.last_error || 'No details';
-                    }
-
-                    // JSON
-                    document.getElementById('json-docs').textContent = data.json.documents;
-                    document.getElementById('json-size').textContent = (data.json.size / 1024).toFixed(2) + ' KB';
-                })
-                .catch(err => console.error('Metrics error:', err));
+        let autoScroll = true;
+        
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
         }
-
-        function updateLogs() {
-            fetch('/api/logs')
-                .then(res => res.json())
-                .then(data => {
-                    const logContainer = document.getElementById('log-container');
-                    const shouldScroll = logContainer.scrollHeight - logContainer.scrollTop === logContainer.clientHeight;
-                    
-                    logContainer.innerHTML = data.logs.map(log => {
-                        let level = 'info';
-                        if (log.includes('ERROR') || log.includes('❌')) level = 'error';
-                        else if (log.includes('WARNING') || log.includes('⚠️')) level = 'warning';
-                        else if (log.includes('✅') || log.includes('SUCCESS')) level = 'success';
-                        
-                        return `<div class="log-line ${level}">${log}</div>`;
-                    }).join('');
-
-                    if (shouldScroll) {
-                        logContainer.scrollTop = logContainer.scrollHeight;
-                    }
-                })
-                .catch(err => console.error('Logs error:', err));
+        
+        function toggleAutoScroll() {
+            autoScroll = !autoScroll;
+            const btn = document.querySelector('.auto-scroll-toggle');
+            const status = document.getElementById('scroll-status');
+            
+            if (autoScroll) {
+                btn.classList.remove('paused');
+                status.textContent = '🔄 Auto-scroll ON';
+            } else {
+                btn.classList.add('paused');
+                status.textContent = '⏸️ Auto-scroll PAUSED';
+            }
         }
-
-        function getTempClass(temp) {
-            if (temp < 60) return 'temp-normal';
-            if (temp < 80) return 'temp-warm';
-            return 'temp-hot';
-        }
-
-        function getStatusIcon(status) {
-            const icons = {
-                'running': '🟡',
-                'completed': '✅',
-                'error': '❌',
-                'idle': '⏳'
-            };
-            return icons[status] || '⏳';
-        }
-
-        // Chain of Thought
+        
         async function updateChainOfThought() {
             try {
                 const response = await fetch('/api/chain_of_thought');
                 const data = await response.json();
-                const container = document.getElementById('chain-of-thought');
+                const container = document.getElementById('chain-steps');
                 
                 if (!data.reasoning_steps || data.reasoning_steps.length === 0) {
-                    container.innerHTML = '<div class="no-reasoning">⏳ Waiting for AI reasoning steps...</div>';
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;">⏳ Waiting for agent reasoning...</p>';
                     return;
                 }
 
                 let html = '';
                 if (data.current_document) {
-                    html += `<div style="padding: 10px; background: rgba(193, 5, 245, 0.1); border-radius: 6px; margin-bottom: 15px;">
-                        <strong style="color: #C105F5;">📖 Current Document:</strong> 
-                        <span style="color: #05F2C7;">${data.current_document}</span>
+                    html += `<div style="padding: 1.5rem; background: rgba(193, 5, 245, 0.1); border-radius: 1rem; margin-bottom: 2rem; border: 1px solid rgba(193, 5, 245, 0.3);">
+                        <strong style="color: var(--primary); font-size: 1.125rem;">📖 Current Document:</strong> 
+                        <span style="color: var(--secondary); font-size: 1rem;">${data.current_document}</span>
                     </div>`;
                 }
 
                 data.reasoning_steps.forEach(step => {
-                    const typeClass = step.is_thought ? 'thinking' : step.type.toLowerCase().replace(' ', '-');
+                    const typeClass = step.is_thought ? 'thinking' : '';
                     const agentLabel = step.is_thought ? `<strong>${step.type}</strong>` : step.type;
                     html += `
                         <div class="reasoning-step ${typeClass}">
@@ -811,21 +594,86 @@
                 });
 
                 container.innerHTML = html;
-                container.scrollTop = container.scrollHeight;
+                
+                if (autoScroll) {
+                    container.scrollTop = container.scrollHeight;
+                }
             } catch (error) {
                 console.error('Error fetching chain of thought:', error);
             }
         }
-
+        
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/metrics');
+                const data = await response.json();
+                
+                // Power
+                document.getElementById('power-total').textContent = data.power.total + ' W';
+                document.getElementById('power-gpu').textContent = data.power.gpu + ' W';
+                document.getElementById('power-cpu').textContent = data.power.cpu + ' W';
+                
+                // GPU
+                document.getElementById('gpu-util').textContent = data.gpu.utilization + '%';
+                document.getElementById('gpu-mem').textContent = data.gpu.memory_used + ' / ' + data.gpu.memory_total + ' GB';
+                document.getElementById('gpu-temp').textContent = data.gpu.temperature + '°C';
+                
+                // CPU
+                document.getElementById('cpu-util').textContent = data.cpu.utilization + '%';
+                document.getElementById('cpu-mem').textContent = data.cpu.memory_used + ' / ' + data.cpu.memory_total + ' GB';
+                document.getElementById('cpu-temp').textContent = data.cpu.temperature + '°C';
+                
+                // Progress
+                document.getElementById('docs-done').textContent = data.processing.completed;
+                document.getElementById('docs-total').textContent = data.processing.total;
+                
+                const progress = (data.processing.completed / data.processing.total * 100).toFixed(1);
+                const progressFill = document.getElementById('progress-fill');
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+                
+                document.getElementById('current-file').textContent = data.processing.current_file || 'None';
+                document.getElementById('current-stage').textContent = data.processing.stage || 'Idle';
+                
+                if (data.processing.latest_doc && data.processing.latest_doc.id) {
+                    document.getElementById('latest-doc').textContent = data.processing.latest_doc.id;
+                    document.getElementById('latest-quality').textContent = data.processing.latest_doc.quality || '--';
+                    document.getElementById('latest-confidence').textContent = data.processing.latest_doc.confidence || '--';
+                }
+                
+                // Context Curator
+                document.getElementById('curator-personas').textContent = data.context_curator.personas + ' tokens';
+                document.getElementById('curator-health').textContent = data.context_curator.health + ' tokens';
+                document.getElementById('curator-voice').textContent = data.context_curator.voice + ' tokens';
+                document.getElementById('curator-total').textContent = data.context_curator.total + ' tokens';
+                
+                // Alerts
+                const alertCount = data.alerts.length;
+                document.getElementById('alert-count').textContent = alertCount;
+                
+                const alertList = document.getElementById('alert-list');
+                if (alertCount > 0) {
+                    let alertHtml = '';
+                    data.alerts.forEach(alert => {
+                        alertHtml += `<div class="alert-item">${alert}</div>`;
+                    });
+                    alertList.innerHTML = alertHtml;
+                } else {
+                    alertList.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">✅ No alerts</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+        
         // Update every 2 seconds
-        setInterval(updateDashboard, 2000);
-        setInterval(updateLogs, 3000);
         setInterval(updateChainOfThought, 2000);
+        setInterval(updateStats, 2000);
         
         // Initial load
-        updateDashboard();
-        updateLogs();
         updateChainOfThought();
+        updateStats();
     </script>
 </body>
 </html>
+
