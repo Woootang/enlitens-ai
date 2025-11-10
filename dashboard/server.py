@@ -420,48 +420,72 @@ def chain_of_thought():
                     current_doc = parts[-1].strip()
                 break
         
-        # Extract reasoning steps (last 100 lines)
+        # Extract reasoning steps - PRIORITIZE "🧠 THINKING:" logs from agents
         reasoning_steps = []
-        reasoning_patterns = {
-            '🎯': 'Planning',
-            '🔍': 'Analyzing',
-            '✅': 'Completed',
-            '🧠': 'Thinking',
-            '📊': 'Evaluating',
-            '🏥': 'Synthesizing',
-            '📝': 'Extracting',
-            '⚙️': 'Processing',
-            '🔄': 'Loading',
-            'INFO - 🎯': 'Strategy',
-            'INFO - Starting': 'Initiating',
-            'agent': 'Agent Action'
-        }
         
-        for line in lines[-200:]:  # Last 200 lines
+        for line in lines[-300:]:  # Last 300 lines for more context
             line_lower = line.lower()
-            # Skip debug/system lines
-            if any(skip in line_lower for skip in ['gpu', 'memory', 'unloading', 'cache cleared']):
+            
+            # Skip system/debug lines
+            if any(skip in line_lower for skip in ['gpu', 'memory', 'unloading', 'cache cleared', 'checking persona file']):
                 continue
-                
-            # Find reasoning indicators
-            for pattern, label in reasoning_patterns.items():
+            
+            # PRIORITY: Agent chain-of-thought reasoning (🧠 THINKING:)
+            if '🧠 THINKING:' in line or '🧠 thinking:' in line_lower:
+                parts = line.split(' - ')
+                if len(parts) >= 3:
+                    timestamp = parts[0].strip()
+                    # Extract the thinking message after "THINKING:"
+                    message = line.split('THINKING:', 1)[-1].strip()
+                    
+                    # Determine agent from context
+                    agent = 'Unknown Agent'
+                    if 'profile_matcher' in line_lower:
+                        agent = 'Profile Matcher'
+                    elif 'health_report' in line_lower:
+                        agent = 'Health Report Synthesizer'
+                    elif 'voice_guide' in line_lower:
+                        agent = 'Voice Guide Generator'
+                    elif 'context_curator' in line_lower:
+                        agent = 'Context Curator'
+                    
+                    reasoning_steps.append({
+                        'timestamp': timestamp,
+                        'type': f'{agent}',
+                        'message': message[:300],  # More chars for thinking
+                        'icon': '🧠',
+                        'is_thought': True
+                    })
+                    continue
+            
+            # Secondary: Key agent actions
+            action_patterns = {
+                '🎯 Starting persona matching': ('Profile Matcher', '🎯', 'Initiating persona selection'),
+                '🏥 Agent 2: Health Report Synthesizer': ('Health Report Synthesizer', '🏥', 'Starting health brief synthesis'),
+                '📝 Agent 3: Voice Guide Generator': ('Voice Guide Generator', '📝', 'Creating style guide'),
+                '✅ Selected': ('Profile Matcher', '✅', None),  # Will extract message
+                '✅ Synthesized health context': ('Health Report Synthesizer', '✅', None),
+                '✅ Generated voice guide': ('Voice Guide Generator', '✅', None),
+            }
+            
+            for pattern, (agent, icon, default_msg) in action_patterns.items():
                 if pattern.lower() in line_lower:
-                    # Extract timestamp and message
                     parts = line.split(' - ')
                     if len(parts) >= 3:
                         timestamp = parts[0].strip()
-                        message = ' - '.join(parts[2:]).strip()
+                        message = default_msg if default_msg else ' - '.join(parts[2:]).strip()
                         
                         reasoning_steps.append({
                             'timestamp': timestamp,
-                            'type': label,
-                            'message': message[:200],  # Limit length
-                            'icon': pattern if pattern in reasoning_patterns else '🤔'
+                            'type': agent,
+                            'message': message[:200],
+                            'icon': icon,
+                            'is_thought': False
                         })
-                    break
+                        break
         
-        # Keep only last 20 steps
-        reasoning_steps = reasoning_steps[-20:]
+        # Keep only last 25 steps (more for detailed thinking)
+        reasoning_steps = reasoning_steps[-25:]
         
         return jsonify({
             "reasoning_steps": reasoning_steps,

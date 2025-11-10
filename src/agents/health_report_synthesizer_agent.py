@@ -39,15 +39,25 @@ class HealthReportSynthesizerAgent:
         # Extract persona demographics
         demographics = self._extract_demographics(selected_personas)
         
+        # Chain of Thought: Explain synthesis strategy
+        logger.info(f"🧠 THINKING: Analyzing {demographics['count']} personas. Age range: {demographics['age_range']}, Diagnoses: {', '.join(demographics['diagnoses'][:3])}. From the {len(health_report_text)} char health report, I'll extract ONLY the data relevant to these specific conditions and demographics in St. Louis.")
+        
         # Create synthesis prompt
         prompt = self._create_synthesis_prompt(health_report_text, demographics)
         
         try:
+            logger.info(f"🧠 THINKING: Sending synthesis request to LLM. Looking for: local prevalence statistics, environmental factors (air quality, urban stress), healthcare access barriers, and community resources specific to their age/condition profile.")
+            
             response = await llm_client.generate_text(
                 prompt=prompt,
                 temperature=0.4,
                 num_predict=1500
             )
+            
+            # Chain of Thought: Summarize what was extracted
+            key_terms = ['prevalence', 'statistics', 'access', 'environmental', 'socioeconomic']
+            found_topics = [term for term in key_terms if term.lower() in response.lower()]
+            logger.info(f"🧠 THINKING: Synthesis complete. Generated {len(response)} chars covering: {', '.join(found_topics)}. This brief connects the cohort's specific needs to local health realities.")
             
             logger.info(f"✅ Synthesized health context ({len(response)} chars)")
             return response

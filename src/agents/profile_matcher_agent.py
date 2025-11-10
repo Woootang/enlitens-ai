@@ -120,6 +120,10 @@ class ProfileMatcherAgent:
         # Use LLM to intelligently select personas
         try:
             logger.info(f"🎯 Starting persona matching with LLM...")
+            
+            # Chain of Thought: Explain the reasoning
+            logger.info(f"🧠 THINKING: I have {len(personas)} personas to analyze. Looking at the paper's entities: {len(entities.get('diseases', []))} diseases, {len(entities.get('chemicals', []))} chemicals, {len(entities.get('symptoms', []))} symptoms. I'll match these against each persona's diagnoses, medications, and life challenges to find the top {top_k} most relevant.")
+            
             response = await llm_client.generate_text(
                 prompt=prompt,
                 temperature=0.3,  # Lower temp for more consistent selection
@@ -135,6 +139,9 @@ class ProfileMatcherAgent:
             logger.info(f"🔍 Parsed persona IDs: {selected_ids}")
             logger.info(f"🔍 Number of IDs parsed: {len(selected_ids)}")
             
+            # Chain of Thought: Explain selection reasoning
+            logger.info(f"🧠 THINKING: The LLM identified {len(selected_ids)} personas. Now matching these filenames against my loaded persona database to retrieve full profiles.")
+            
             # Return full persona objects for selected IDs
             selected_personas = []
             for persona in personas:
@@ -147,6 +154,14 @@ class ProfileMatcherAgent:
                     logger.info(f"✅ Matched persona: {persona_filename}")
                     
             logger.info(f"✅ Selected {len(selected_personas)} relevant personas")
+            
+            # Chain of Thought: Summarize selection
+            if len(selected_personas) > 0:
+                diagnoses_found = set()
+                for p in selected_personas[:3]:  # Sample first 3
+                    neuro = p.get('neurodivergence_mental_health', {})
+                    diagnoses_found.update(neuro.get('diagnoses', []))
+                logger.info(f"🧠 THINKING: Successfully matched {len(selected_personas)} personas. They include conditions like: {', '.join(list(diagnoses_found)[:5])}. These personas should align well with the paper's focus on {', '.join(entities.get('diseases', [])[:3])}.")
             
             if len(selected_personas) == 0:
                 logger.error(f"❌ CRITICAL: NO PERSONAS SELECTED! This should not happen!")

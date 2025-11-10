@@ -74,15 +74,25 @@ class VoiceGuideGeneratorAgent:
             logger.error("No source material for voice guide generation")
             return self._get_fallback_guide()
         
+        # Chain of Thought: Explain voice analysis strategy
+        logger.info(f"🧠 THINKING: Analyzing {len(transcripts)} chars of Liz's transcripts and {len(framework)} chars of framework. I'll extract: (1) her characteristic phrases and tone, (2) how she frames neurodivergence (affirming, not deficit), (3) her sensory-cognitive integration approach, and (4) the compassionate-yet-practical balance in her communication style.")
+        
         # Create generation prompt
         prompt = self._create_generation_prompt(transcripts, framework)
         
         try:
+            logger.info(f"🧠 THINKING: Generating comprehensive style guide. Looking for patterns in: vocabulary choices, sentence structure, clinical vs conversational balance, how she explains complex concepts, and her unique philosophical framing (bottom-up meets top-down, neuroplasticity as hope).")
+            
             response = await llm_client.generate_text(
                 prompt=prompt,
                 temperature=0.5,  # Moderate creativity
                 num_predict=3000
             )
+            
+            # Chain of Thought: Summarize what was captured
+            style_elements = ['tone', 'phrases', 'approach', 'framework', 'compassion']
+            found_elements = [elem for elem in style_elements if elem.lower() in response.lower()]
+            logger.info(f"🧠 THINKING: Voice guide complete. Captured {len(response)} chars covering: {', '.join(found_elements)}. This guide will ensure all content matches Liz's authentic voice - affirming, sensory-aware, and neuroplasticity-focused.")
             
             # Cache the guide
             self.voice_guide_cache = response

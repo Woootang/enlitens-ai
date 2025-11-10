@@ -387,6 +387,14 @@
             animation: fadeIn 0.3s ease;
         }
 
+        /* Agent thinking steps - MOST PROMINENT */
+        .reasoning-step.thinking {
+            background: rgba(193, 5, 245, 0.15);
+            border-left: 4px solid #C105F5;
+            padding: 15px 18px;
+            box-shadow: 0 2px 8px rgba(193, 5, 245, 0.2);
+        }
+
         .reasoning-step.analyzing {
             border-left-color: #05F2C7;
             background: rgba(5, 242, 199, 0.05);
@@ -788,12 +796,13 @@
                 }
 
                 data.reasoning_steps.forEach(step => {
-                    const typeClass = step.type.toLowerCase().replace(' ', '-');
+                    const typeClass = step.is_thought ? 'thinking' : step.type.toLowerCase().replace(' ', '-');
+                    const agentLabel = step.is_thought ? `<strong>${step.type}</strong>` : step.type;
                     html += `
                         <div class="reasoning-step ${typeClass}">
                             <div class="reasoning-header">
                                 <span class="reasoning-icon">${step.icon}</span>
-                                <span class="reasoning-type">${step.type}</span>
+                                <span class="reasoning-type">${agentLabel}</span>
                                 <span class="reasoning-timestamp">${step.timestamp.split(' ')[1] || ''}</span>
                             </div>
                             <div class="reasoning-message">${step.message}</div>
