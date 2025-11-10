@@ -168,8 +168,8 @@ class ExtractionTeam:
             return entities
             
         except Exception as e:
-            logger.error(f"❌ Extraction Team: Entity extraction failed: {e}")
-            return {}
+            logger.error(f"❌ CRITICAL: Extraction Team entity extraction failed: {e}")
+            raise RuntimeError(f"Entity extraction pipeline FAILED - this is a critical error: {e}")
     
     async def _unload_model(self, model_key: str):
         """Unload a model from memory and clear GPU cache."""
@@ -230,8 +230,8 @@ class ExtractionTeam:
             return biomedical_entities
             
         except Exception as e:
-            logger.warning(f"⚠️ Disease NER model unavailable (optional), skipping: {str(e)[:100]}")
-            return []
+            logger.error(f"❌ CRITICAL: Disease entity extraction failed: {e}")
+            raise RuntimeError(f"Required NER model failed to extract disease entities: {e}")
     
     async def _extract_neuroscience_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract chemical/neurotransmitter entities using OpenMed PharmaDetect"""
@@ -270,8 +270,8 @@ class ExtractionTeam:
             return neuro_entities
             
         except Exception as e:
-            logger.error(f"Chemical entity extraction failed: {e}")
-            return []
+            logger.error(f"❌ CRITICAL: Chemical entity extraction failed: {e}")
+            raise RuntimeError(f"Required NER model failed to extract chemical entities: {e}")
     
     async def _extract_psychology_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract anatomical entities using OpenMed AnatomyDetect"""
@@ -310,8 +310,8 @@ class ExtractionTeam:
             return psych_entities
             
         except Exception as e:
-            logger.error(f"Anatomy entity extraction failed: {e}")
-            return []
+            logger.error(f"❌ CRITICAL: Anatomy entity extraction failed: {e}")
+            raise RuntimeError(f"Required NER model failed to extract anatomy entities: {e}")
     
     async def _extract_clinical_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract gene/protein entities using OpenMed GenomeDetect"""
@@ -350,8 +350,8 @@ class ExtractionTeam:
             return clinical_entities
             
         except Exception as e:
-            logger.warning(f"⚠️ Gene NER model unavailable (optional), skipping: {str(e)[:100]}")
-            return []
+            logger.error(f"❌ CRITICAL: Gene entity extraction failed: {e}")
+            raise RuntimeError(f"Required NER model failed to extract gene entities: {e}")
     
     async def _extract_clinical_symptoms(self, text: str) -> List[Dict[str, Any]]:
         """Extract clinical symptoms/treatments using ClinicalDistilBERT"""
@@ -390,8 +390,8 @@ class ExtractionTeam:
             return clinical_entities
             
         except Exception as e:
-            logger.warning(f"⚠️ Clinical NER model unavailable (optional), skipping: {str(e)[:100]}")
-            return []
+            logger.error(f"❌ CRITICAL: Clinical symptom extraction failed: {e}")
+            raise RuntimeError(f"Required NER model failed to extract clinical entities: {e}")
     
     async def _extract_statistical_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract statistical entities using regex patterns"""
