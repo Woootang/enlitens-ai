@@ -228,7 +228,7 @@ class EnhancedExtractionTools:
                     }
                 )
             if len(valid_texts) < 2:
-                logger.warning(
+                logger.debug(
                     "Topic discovery requires at least 2 samples, skipping",
                     extra={"event": "topic_discovery_skipped", "text_count": len(valid_texts)},
                 )
