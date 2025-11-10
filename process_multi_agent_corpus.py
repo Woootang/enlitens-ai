@@ -456,10 +456,26 @@ class MultiAgentProcessor:
                 from src.synthesis.ollama_client import VLLMClient
                 llm_client = VLLMClient()  # For agent operations
                 
+                # Get health report text from extraction result
+                health_report_data = context.get("health_report", {})
+                if isinstance(health_report_data, dict):
+                    # Concatenate all text content from the structured extraction
+                    health_text_parts = []
+                    for key in ["archival_content", "research_findings", "clinical_implications", "methodology_details"]:
+                        if key in health_report_data:
+                            content = health_report_data[key]
+                            if isinstance(content, str):
+                                health_text_parts.append(content)
+                            elif isinstance(content, dict):
+                                health_text_parts.append(str(content))
+                    health_report_text = "\n\n".join(health_text_parts) if health_text_parts else ""
+                else:
+                    health_report_text = ""
+                
                 curated_context = await self.context_curator.curate_context(
                     paper_text=text,
                     entities=entities,
-                    health_report_text=context.get("health_report", {}).get("text", ""),
+                    health_report_text=health_report_text,
                     llm_client=llm_client
                 )
                 
