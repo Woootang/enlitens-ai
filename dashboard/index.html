@@ -376,6 +376,78 @@
             background: #C105F5;
             border-radius: 4px;
         }
+
+        /* Chain of Thought Styles */
+        .reasoning-step {
+            background: rgba(193, 5, 245, 0.05);
+            border-left: 3px solid #C105F5;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .reasoning-step.analyzing {
+            border-left-color: #05F2C7;
+            background: rgba(5, 242, 199, 0.05);
+        }
+
+        .reasoning-step.completed {
+            border-left-color: #7CFC00;
+            background: rgba(124, 252, 0, 0.05);
+        }
+
+        .reasoning-step.planning {
+            border-left-color: #FFA500;
+            background: rgba(255, 165, 0, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reasoning-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .reasoning-icon {
+            font-size: 1.2rem;
+        }
+
+        .reasoning-type {
+            color: #C105F5;
+            font-size: 0.9rem;
+        }
+
+        .reasoning-timestamp {
+            color: #9CA3AF;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+
+        .reasoning-message {
+            color: #e1e1e1;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .no-reasoning {
+            text-align: center;
+            color: #9CA3AF;
+            padding: 40px 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -517,6 +589,12 @@
                     <span class="metric-value highlight" id="curator-total">-- tokens</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Chain of Thought Reasoning -->
+        <div class="card wide-card">
+            <div class="card-title">🧠 Chain of Thought Reasoning</div>
+            <div id="chain-of-thought" style="max-height: 400px; overflow-y: auto;"></div>
         </div>
 
         <!-- Agent Pipeline -->
@@ -689,13 +767,56 @@
             return icons[status] || '⏳';
         }
 
+        // Chain of Thought
+        async function updateChainOfThought() {
+            try {
+                const response = await fetch('/api/chain_of_thought');
+                const data = await response.json();
+                const container = document.getElementById('chain-of-thought');
+                
+                if (!data.reasoning_steps || data.reasoning_steps.length === 0) {
+                    container.innerHTML = '<div class="no-reasoning">⏳ Waiting for AI reasoning steps...</div>';
+                    return;
+                }
+
+                let html = '';
+                if (data.current_document) {
+                    html += `<div style="padding: 10px; background: rgba(193, 5, 245, 0.1); border-radius: 6px; margin-bottom: 15px;">
+                        <strong style="color: #C105F5;">📖 Current Document:</strong> 
+                        <span style="color: #05F2C7;">${data.current_document}</span>
+                    </div>`;
+                }
+
+                data.reasoning_steps.forEach(step => {
+                    const typeClass = step.type.toLowerCase().replace(' ', '-');
+                    html += `
+                        <div class="reasoning-step ${typeClass}">
+                            <div class="reasoning-header">
+                                <span class="reasoning-icon">${step.icon}</span>
+                                <span class="reasoning-type">${step.type}</span>
+                                <span class="reasoning-timestamp">${step.timestamp.split(' ')[1] || ''}</span>
+                            </div>
+                            <div class="reasoning-message">${step.message}</div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+                container.scrollTop = container.scrollHeight;
+            } catch (error) {
+                console.error('Error fetching chain of thought:', error);
+            }
+        }
+
         // Update every 2 seconds
         setInterval(updateDashboard, 2000);
         setInterval(updateLogs, 3000);
+        setInterval(updateChainOfThought, 2000);
         
         // Initial load
         updateDashboard();
         updateLogs();
+        updateChainOfThought();
     </script>
 </body>
 </html>

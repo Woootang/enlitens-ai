@@ -400,6 +400,77 @@ def metrics():
         'json': get_json_stats()
     })
 
+@app.route('/api/chain_of_thought')
+def chain_of_thought():
+    """Get the AI's chain-of-thought reasoning for current document"""
+    try:
+        if not LOG_FILE.exists():
+            return jsonify({"reasoning_steps": [], "current_document": None})
+        
+        with open(LOG_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+        
+        # Find the most recent document being processed
+        current_doc = None
+        for line in reversed(lines[-500:]):  # Check last 500 lines
+            if '📖 Processing file' in line or '🧠 Starting multi-agent processing' in line:
+                # Extract document name
+                parts = line.split(':')
+                if len(parts) > 2:
+                    current_doc = parts[-1].strip()
+                break
+        
+        # Extract reasoning steps (last 100 lines)
+        reasoning_steps = []
+        reasoning_patterns = {
+            '🎯': 'Planning',
+            '🔍': 'Analyzing',
+            '✅': 'Completed',
+            '🧠': 'Thinking',
+            '📊': 'Evaluating',
+            '🏥': 'Synthesizing',
+            '📝': 'Extracting',
+            '⚙️': 'Processing',
+            '🔄': 'Loading',
+            'INFO - 🎯': 'Strategy',
+            'INFO - Starting': 'Initiating',
+            'agent': 'Agent Action'
+        }
+        
+        for line in lines[-200:]:  # Last 200 lines
+            line_lower = line.lower()
+            # Skip debug/system lines
+            if any(skip in line_lower for skip in ['gpu', 'memory', 'unloading', 'cache cleared']):
+                continue
+                
+            # Find reasoning indicators
+            for pattern, label in reasoning_patterns.items():
+                if pattern.lower() in line_lower:
+                    # Extract timestamp and message
+                    parts = line.split(' - ')
+                    if len(parts) >= 3:
+                        timestamp = parts[0].strip()
+                        message = ' - '.join(parts[2:]).strip()
+                        
+                        reasoning_steps.append({
+                            'timestamp': timestamp,
+                            'type': label,
+                            'message': message[:200],  # Limit length
+                            'icon': pattern if pattern in reasoning_patterns else '🤔'
+                        })
+                    break
+        
+        # Keep only last 20 steps
+        reasoning_steps = reasoning_steps[-20:]
+        
+        return jsonify({
+            "reasoning_steps": reasoning_steps,
+            "current_document": current_doc,
+            "step_count": len(reasoning_steps)
+        })
+    except Exception as e:
+        return jsonify({"reasoning_steps": [], "error": str(e)})
+
 @app.route('/api/logs')
 def logs():
     """Get recent logs from current run"""
