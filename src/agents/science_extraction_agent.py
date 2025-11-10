@@ -124,19 +124,29 @@ Return as JSON with these EXACT field names:
             )
             samples = await self._run_self_consistency_sampling(prompt)
 
+            primary_sample = result or ResearchContent()
+            all_samples = [primary_sample]
             if samples:
-                aggregated, vote_stats = self._aggregate_samples(samples)
-                return {
-                    "research_content": aggregated,
-                    "extraction_quality": "high",
-                    "self_consistency": vote_stats,
-                }
+                all_samples.extend(samples)
 
-            return {"research_content": ResearchContent().model_dump()}
+            aggregated, vote_stats = self._aggregate_samples(all_samples)
+            if vote_stats.get("num_samples", 0) == 0:
+                vote_stats["num_samples"] = len(all_samples)
+                vote_stats["vote_threshold"] = max(1, math.ceil(len(all_samples) * self.vote_threshold_ratio))
+
+            return {
+                "research_content": aggregated,
+                "extraction_quality": "high" if aggregated else "low",
+                "self_consistency": vote_stats,
+            }
 
         except Exception as e:
             logger.error(f"Science extraction failed: {e}")
-            return {"research_content": ResearchContent().model_dump()}
+            return {
+                "research_content": ResearchContent().model_dump(),
+                "extraction_quality": "error",
+                "self_consistency": {"num_samples": 0, "vote_threshold": 0, "field_vote_counts": {}},
+            }
 
     async def _run_self_consistency_sampling(self, prompt: str) -> List[ResearchContent]:
         """Sample multiple generations to improve factual reliability."""

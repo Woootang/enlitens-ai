@@ -332,6 +332,10 @@ class EnlitensKnowledgeEntry(BaseModel):
     clinical_content: ClinicalContent = Field(description="Clinical content")
     research_content: ResearchContent = Field(description="Research content")
     content_creation_ideas: ContentCreationIdeas = Field(description="Content creation ideas")
+    self_consistency: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Self-consistency voting metadata for research extraction",
+    )
 
     # New field for verification
     full_document_text: Optional[str] = Field(

@@ -50,10 +50,7 @@ os.makedirs("logs", exist_ok=True)
 
 # Determine remote monitoring endpoint (defaults to local monitoring server)
 monitor_endpoint_env = os.getenv("ENLITENS_MONITOR_URL")
-if monitor_endpoint_env is None:
-    monitor_endpoint = os.getenv("ENLITENS_MONITOR_URL", "http://localhost:8765/api/log")
-else:
-    monitor_endpoint = monitor_endpoint_env.strip()
+monitor_endpoint = monitor_endpoint_env.strip() if monitor_endpoint_env else None
 
 if monitor_endpoint and monitor_endpoint.lower() in {"", "none", "disable", "disabled", "false", "0"}:
     monitor_endpoint = None
@@ -575,6 +572,7 @@ class MultiAgentProcessor:
 
             # Extract content from agent outputs
             agent_outputs = result.get("agent_outputs", {})
+            self_consistency_meta = agent_outputs.get("self_consistency")
 
             # Extract entities (simplified for now)
             extracted_entities_payload = agent_outputs.get("extracted_entities", {})
@@ -698,6 +696,7 @@ class MultiAgentProcessor:
                 clinical_content=clinical_content,
                 research_content=research_content,
                 content_creation_ideas=content_creation_ideas,
+                self_consistency=self_consistency_meta,
                 full_document_text=full_document_text  # CRITICAL: Store for citation verification
             )
 

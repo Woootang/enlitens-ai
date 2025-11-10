@@ -5,6 +5,7 @@ import hashlib
 import logging
 import math
 import os
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
@@ -228,9 +229,19 @@ class QdrantVectorStore(BaseVectorStore):
             # Priority 3: Default to local file storage (no server needed!)
             else:
                 local_path = os.path.join(os.getcwd(), "qdrant_storage")
-                self.client = QdrantClient(path=local_path)
+                self._ensure_local_qdrant_path(local_path)
+                try:
+                    self.client = QdrantClient(path=local_path)
+                except Exception as local_exc:
+                    message = str(local_exc).lower()
+                    if "already accessed" in message or "lock" in message:
+                        self._cleanup_qdrant_lock(local_path)
+                        self.client = QdrantClient(path=local_path)
+                        logger.info("♻️ Cleared stale Qdrant lock and re-opened storage: %s", local_path)
+                    else:
+                        raise
                 logger.info("✅ Using local Qdrant storage: %s", local_path)
-            
+             
             self._ensure_collection()
             logger.info("✅ Qdrant collection '%s' ready", self.collection_name)
         except Exception as exc:
@@ -395,6 +406,20 @@ class QdrantVectorStore(BaseVectorStore):
 
     def get_all_chunks(self) -> List[Dict[str, Any]]:
         return [entry["chunk"] for entry in self.local_store.values()]
+
+    @staticmethod
+    def _ensure_local_qdrant_path(local_path: str) -> None:
+        Path(local_path).mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def _cleanup_qdrant_lock(local_path: str) -> None:
+        lock_path = Path(local_path) / ".lock"
+        if lock_path.exists():
+            try:
+                lock_path.unlink()
+                logger.warning("🧹 Removed stale Qdrant lock file at %s", lock_path)
+            except OSError as exc:
+                logger.warning("⚠️ Unable to remove Qdrant lock file %s: %s", lock_path, exc)
 
 
 class ChromaVectorStore(BaseVectorStore):

@@ -5,6 +5,7 @@ import json
 import logging
 import math
 import os
+import numpy as np
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Sequence
@@ -344,8 +345,14 @@ class EmbeddingIngestionPipeline:
             segments.append({"agent": agent_name, "field_path": ".".join(path) or agent_name, "text": value})
             return segments
 
-        if isinstance(value, (int, float)):
-            segments.append({"agent": agent_name, "field_path": ".".join(path) or agent_name, "text": str(value)})
+        if isinstance(value, (int, float, np.generic)):
+            python_value = float(value) if isinstance(value, np.floating) else int(value) if isinstance(value, np.integer) else value
+            segments.append({"agent": agent_name, "field_path": ".".join(path) or agent_name, "text": str(python_value)})
+            return segments
+
+        if isinstance(value, np.ndarray):
+            for idx, item in enumerate(value.tolist()):
+                segments.extend(self._flatten_agent_payload(agent_name, item, path + [str(idx)]))
             return segments
 
         if isinstance(value, list):
@@ -359,7 +366,11 @@ class EmbeddingIngestionPipeline:
             return segments
 
         # Fallback for other data types
-        segments.append({"agent": agent_name, "field_path": ".".join(path) or agent_name, "text": json.dumps(value)})
+        try:
+            normalized = json.dumps(value, ensure_ascii=False, default=str)
+        except TypeError:
+            normalized = str(value)
+        segments.append({"agent": agent_name, "field_path": ".".join(path) or agent_name, "text": normalized})
         return segments
 
     def _select_metadata_fields(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
