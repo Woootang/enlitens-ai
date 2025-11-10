@@ -222,13 +222,23 @@ class MultiAgentProcessor:
             ]
         }
 
-        # Load additional context from St. Louis health report if provided
-        if self.st_louis_report and self.st_louis_report.exists():
+        # Load additional context from St. Louis health report
+        # Try .txt version first (simpler), then fall back to PDF extraction
+        health_report_txt = Path(__file__).parent / "enlitens_knowledge_base" / "st_louis_health_report.txt"
+        if health_report_txt.exists():
+            try:
+                with open(health_report_txt, 'r', encoding='utf-8') as f:
+                    health_text = f.read()
+                context["health_report_text"] = health_text
+                logger.info(f"✅ Loaded St. Louis health report from TXT: {len(health_text)} chars")
+            except Exception as e:
+                logger.warning(f"Could not load St. Louis health report TXT: {e}")
+        elif self.st_louis_report and self.st_louis_report.exists():
             try:
                 context["health_report"] = self.pdf_extractor.extract(str(self.st_louis_report))
-                logger.info(f"✅ Loaded St. Louis health report: {self.st_louis_report}")
+                logger.info(f"✅ Loaded St. Louis health report from PDF: {self.st_louis_report}")
             except Exception as e:
-                logger.warning(f"Could not load St. Louis health report: {e}")
+                logger.warning(f"Could not load St. Louis health report PDF: {e}")
 
         return context
 
@@ -456,21 +466,25 @@ class MultiAgentProcessor:
                 from src.synthesis.ollama_client import VLLMClient
                 llm_client = VLLMClient()  # For agent operations
                 
-                # Get health report text from extraction result
-                health_report_data = context.get("health_report", {})
-                if isinstance(health_report_data, dict):
-                    # Concatenate all text content from the structured extraction
-                    health_text_parts = []
-                    for key in ["archival_content", "research_findings", "clinical_implications", "methodology_details"]:
-                        if key in health_report_data:
-                            content = health_report_data[key]
-                            if isinstance(content, str):
-                                health_text_parts.append(content)
-                            elif isinstance(content, dict):
-                                health_text_parts.append(str(content))
-                    health_report_text = "\n\n".join(health_text_parts) if health_text_parts else ""
-                else:
-                    health_report_text = ""
+                # Get health report text - try TXT first, then structured extraction
+                health_report_text = context.get("health_report_text", "")
+                
+                if not health_report_text:
+                    # Fall back to structured extraction from PDF
+                    health_report_data = context.get("health_report", {})
+                    if isinstance(health_report_data, dict):
+                        # Concatenate all text content from the structured extraction
+                        health_text_parts = []
+                        for key in ["archival_content", "research_findings", "clinical_implications", "methodology_details"]:
+                            if key in health_report_data:
+                                content = health_report_data[key]
+                                if isinstance(content, str):
+                                    health_text_parts.append(content)
+                                elif isinstance(content, dict):
+                                    health_text_parts.append(str(content))
+                        health_report_text = "\n\n".join(health_text_parts) if health_text_parts else ""
+                
+                logger.info(f"🔍 Health report text length: {len(health_report_text)} chars")
                 
                 curated_context = await self.context_curator.curate_context(
                     paper_text=text,
