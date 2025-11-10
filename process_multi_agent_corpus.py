@@ -414,9 +414,15 @@ class MultiAgentProcessor:
                 "key_messages": founder_analysis.get("key_messages", []),
             },
             "st_louis_context": self.st_louis_context["demographics"],
+            "health_report_text": self.st_louis_context.get("health_report_text", ""),  # Pass health report text
             "insight_registry": {
                 "client": client_analysis,
                 "founder": founder_analysis,
+                "metadata": {
+                    "analysis_timestamp": datetime.utcnow().isoformat(),
+                    "client_intakes_analyzed": bool(client_analysis),
+                    "founder_transcripts_analyzed": bool(founder_analysis),
+                }
             },
             "processing_stage": "initial",
         }
