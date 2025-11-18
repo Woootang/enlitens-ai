@@ -156,10 +156,13 @@ REQUIRED SECTIONS:
 ## 5. FORBIDDEN PATTERNS (What Liz NEVER Does)
 - Clinical jargon without immediate reframe
 - Pathologizing language without rebellion context
-- Vague platitudes or empty encouragement
-- Passive voice or hedging language
+- Vague platitudes or empty encouragement ("You've got this!", "Just breathe", "Be kind to yourself")
+- Therapy clichés ("self-care", "mindfulness", "healing journey", "safe space" without context)
+- Passive voice or hedging language ("It might be helpful to consider...")
 - "Disorder" without validating the person first
 - Blame or shame (toward client OR clinician)
+- Toxic positivity or spiritual bypassing
+- Corporate wellness speak ("resilience", "grit", "growth mindset" without critique)
 
 ## 6. THE LIZ VOICE CHECKLIST
 A quick reference: "Does this sound like Liz?"
@@ -176,6 +179,12 @@ Show 5-10 before/after examples:
 - Generic clinical language → Liz voice
 - Pathologizing statement → Rebellion reframe
 - Vague advice → Specific, actionable Liz guidance
+- Therapy cliché → Liz's direct alternative
+
+CRITICAL: Include specific examples of what NOT to say:
+❌ "Practice self-care" → ✅ "Your nervous system is screaming for predictability. Here's the 3-step protocol..."
+❌ "Be mindful of your triggers" → ✅ "Let's map your sensory landmines so you can navigate them like a pro"
+❌ "You're on a healing journey" → ✅ "Your brain is rewiring. Here's the science and what to expect week by week"
 
 This guide will be used to ensure EVERY piece of content sounds authentically like Liz.
 Make it comprehensive, actionable, and fucking useful.

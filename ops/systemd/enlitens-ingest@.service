@@ -1,0 +1,17 @@
+[Unit]
+Description=Enlitens Batch Ingest (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/antons-gs/enlitens-ai
+Environment=PYTHONPATH=/home/antons-gs/enlitens-ai
+EnvironmentFile=-/etc/enlitens/enlitens.env
+ExecStart=/home/antons-gs/enlitens-ai/venv/bin/python3 scripts/run_ingest_batch.py --model llama --auto-start --auto-stop
+User=%i
+Group=%i
+
+[Install]
+WantedBy=multi-user.target
+

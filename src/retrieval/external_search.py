@@ -4,8 +4,11 @@ Uses Wikipedia, PubMed, Semantic Scholar, and DuckDuckGo.
 """
 
 import logging
+import re
 import time
 from typing import Dict, List, Any, Optional
+from urllib.parse import quote
+
 import httpx
 
 logger = logging.getLogger(__name__)
@@ -46,10 +49,40 @@ class ExternalSearchClient:
         logger.warning(f"No results found for: {entity}")
         return None
     
+    def _sanitize_wikipedia_entity(self, entity: str) -> str:
+        """
+        Sanitize and validate an entity for Wikipedia API lookup.
+        Returns empty string if entity is unsuitable (too long, contains JSON, etc.)
+        """
+        # Reject JSON-like structures
+        if any(char in entity for char in ["{", "}", "[", "]", '":']):
+            return ""
+        
+        cleaned = re.sub(r"\s+", " ", entity.strip())
+        cleaned = re.sub(r"[\"'`]", "", cleaned)
+        cleaned = cleaned.strip(".,;:()[]{}").strip()
+        
+        # Reject overly long entities (likely full sentences)
+        if len(cleaned) > 80:
+            return ""
+        
+        # Reject entities with too many words (likely sentences)
+        word_count = len(cleaned.split())
+        if word_count > 8:
+            return ""
+        
+        if not cleaned:
+            return ""
+        
+        return quote(cleaned.replace(" ", "_"), safe="_")
+
     def _search_wikipedia(self, entity: str) -> Optional[Dict[str, Any]]:
         """Search Wikipedia API (FREE)."""
         try:
-            url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + entity.replace(" ", "_")
+            slug = self._sanitize_wikipedia_entity(entity)
+            if not slug:
+                return None
+            url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + slug
             response = self.client.get(url)
             
             if response.status_code == 200:
@@ -126,23 +159,29 @@ class ExternalSearchClient:
                 "fields": "title,abstract,url"
             }
             
-            response = self.client.get(url, params=params)
-            
-            if response.status_code == 200:
-                data = response.json()
-                papers = data.get("data", [])
-                
-                if papers:
-                    paper = papers[0]
-                    self.search_count["semantic_scholar"] += 1
+            backoff = 1.0
+            for attempt in range(3):
+                response = self.client.get(url, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    papers = data.get("data", [])
                     
-                    return {
-                        "source": "semantic_scholar",
-                        "entity": entity,
-                        "summary": paper.get("title", "") + ". " + (paper.get("abstract", "") or "")[:200],
-                        "url": paper.get("url", "")
-                    }
-            
+                    if papers:
+                        paper = papers[0]
+                        self.search_count["semantic_scholar"] += 1
+                        
+                        return {
+                            "source": "semantic_scholar",
+                            "entity": entity,
+                            "summary": paper.get("title", "") + ". " + (paper.get("abstract", "") or "")[:200],
+                            "url": paper.get("url", "")
+                        }
+                    break
+                if response.status_code in {429, 500, 502, 503, 504}:
+                    time.sleep(backoff)
+                    backoff *= 2
+                    continue
+                response.raise_for_status()
             time.sleep(1.2)  # Rate limit: ~1 request/second to be safe
             
         except Exception as e:

@@ -1,0 +1,64 @@
+You are an expert neuroscience researcher performing COMPREHENSIVE information extraction on an academic paper.
+
+Your task is to extract COMPLETE scientific content with MAXIMUM DEPTH and output ONLY a valid JSON object.
+
+**CRITICAL INSTRUCTIONS**:
+1. Read the ENTIRE document before responding
+2. Extract ALL relevant information - be EXHAUSTIVE, not superficial
+3. MINIMUM 1000 characters per major field (background, methods, findings)
+4. Include EVERY detail: sample sizes, statistics, procedures, results, context
+5. For each major point, cite evidence from the text
+6. Write FULL PARAGRAPHS - not bullet points or short summaries
+7. Output ONLY valid JSON - no preamble, no explanations outside JSON
+8. Never include raw double quotes (`"`) within string values—use single quotes or escape as `\"`.
+9. Do not return markdown, code fences, or commentary—only the JSON object.
+
+**DEPTH REQUIREMENTS**:
+- Background: 1000-2000 characters (full context, theory, gap in knowledge)
+- Methods: 1500-3000 characters (complete procedures, every detail)
+- Findings: 1500-3000 characters (all results with full context)
+- Statistics: 500-1000 characters (every number, every test)
+- Limitations: 500-1000 characters (all caveats mentioned)
+- Conclusions: 1000-2000 characters (full implications)
+
+**OUTPUT FORMAT** (JSON with these exact keys):
+
+```json
+{
+  "background": "COMPREHENSIVE background covering: What problem does this study address? What is the complete theoretical context? What previous research led to this? What gap in knowledge does it fill? What hypotheses are being tested? Include all relevant prior findings mentioned. Write in full paragraphs with complete sentences. MINIMUM 1000 characters.",
+  
+  "methods": "EXHAUSTIVE methodology description covering: Study design (randomized controlled trial/observational/meta-analysis/etc.), complete participant details (N=X, mean age, gender distribution, ethnicity, inclusion criteria, exclusion criteria, recruitment method, setting), detailed procedures (what was done, how it was done, when it was done, who did it, equipment used, protocols followed), all instruments and measures used (questionnaires, scales, physiological measures with full names and scoring), complete analysis approach (statistical tests, software used, significance levels, corrections applied). Write in full paragraphs. MINIMUM 1500 characters.",
+  
+  "findings": "ALL major findings with COMPLETE data and context: For each result, include the full comparison (group A vs group B), the complete magnitude of effect (X% change, mean difference with standard deviation, effect size), statistical significance (exact p-value, confidence intervals, test statistic), and the clinical/practical meaning. Cover primary outcomes, secondary outcomes, subgroup analyses, and any unexpected findings. Explain what the numbers mean in context. Write in full paragraphs. MINIMUM 1500 characters.",
+  
+  "statistics": "EVERY statistical result extracted in detail: List all sample sizes (total N, N per group, N at each timepoint), all descriptive statistics (means±SD, medians, ranges, percentages), all inferential statistics (p-values, F-values, t-values, chi-square, effect sizes like Cohen's d/r/eta-squared, confidence intervals, odds ratios, hazard ratios), power analysis if mentioned, and any corrections applied (Bonferroni, FDR, etc.). Format as complete sentences with full context. MINIMUM 500 characters.",
+  
+  "limitations": "ALL study limitations and caveats mentioned by authors: Sample size issues, generalizability concerns, methodological constraints, potential confounding variables, short follow-up period, lack of blinding, measurement limitations, missing data, dropout rates, selection bias, and any other weaknesses acknowledged. Explain why each limitation matters. Write in full paragraphs. MINIMUM 500 characters.",
+  
+  "conclusions": "Authors' COMPLETE conclusions and implications: What do they conclude from these findings? What do they recommend for clinical practice? What do they recommend for future research? What are the theoretical implications? What are the practical applications? How does this change our understanding? Write in full paragraphs with complete context. MINIMUM 1000 characters.",
+  
+  "citations": ["List of ALL key references cited in the paper, format: 'Author et al. (Year). Title' or 'Author (Year)' - include at least 10-20 major citations"]
+}
+```
+
+**EXAMPLE OF PROPER DEPTH**:
+
+BAD (too shallow - 200 chars):
+"Methods: RCT with 120 participants. CBT vs TAU for 8 weeks. Primary outcome was BDI-II. Analysis used t-tests."
+
+GOOD (proper depth - 1500+ chars):
+"Methods: This study employed a randomized controlled trial design conducted at an urban outpatient mental health clinic in the northeastern United States between January 2022 and December 2023. Participants were 120 adults (mean age 52±8 years, range 35-68; 60% female, 40% male; 75% White, 15% Black, 10% Hispanic) who met DSM-5 criteria for major depressive disorder as confirmed by structured clinical interview (SCID-5). Inclusion criteria required: age 18-70, current major depressive episode of at least moderate severity (BDI-II score ≥20), stable on any medications for at least 4 weeks, and ability to attend weekly sessions. Exclusion criteria included: active suicidal ideation with plan or intent, current psychotic symptoms, substance use disorder requiring detoxification, cognitive impairment (MMSE <24), or concurrent psychotherapy. Participants were recruited through clinic referrals and community advertisements. After providing written informed consent, participants were randomly assigned using a computer-generated randomization sequence (stratified by baseline depression severity) to either cognitive behavioral therapy (CBT, n=60) or treatment as usual (TAU, n=60). The CBT intervention consisted of 8 weekly individual sessions (50 minutes each) delivered by licensed clinical psychologists trained in CBT with at least 5 years experience. Sessions followed a manualized protocol including: psychoeducation about depression and the cognitive model (sessions 1-2), identification and challenging of negative automatic thoughts using thought records (sessions 3-4), behavioral activation and activity scheduling (sessions 3-6), core belief work (sessions 5-7), and relapse prevention planning (session 8). The TAU condition consisted of standard care provided by the clinic, which typically included medication management visits every 4-8 weeks and supportive counseling as available. The primary outcome measure was depression severity assessed using the Beck Depression Inventory-II (BDI-II), a 21-item self-report questionnaire with scores ranging from 0-63, administered at baseline, week 4 (mid-treatment), and week 8 (post-treatment). Secondary outcomes included anxiety symptoms measured by the Generalized Anxiety Disorder-7 scale (GAD-7) and quality of life assessed with the Short Form-36 Health Survey (SF-36). All assessments were conducted by research assistants blind to treatment condition. Statistical analyses were conducted using SPSS version 28. The primary analysis used independent samples t-tests to compare mean change scores (baseline to week 8) between groups. Secondary analyses used repeated measures ANOVA to examine trajectories over time. Effect sizes were calculated using Cohen's d. All analyses used intention-to-treat principles with last observation carried forward for missing data. Statistical significance was set at p<0.05 (two-tailed)."
+
+---
+
+**SOURCE MATERIAL ({SOURCE_DESCRIPTION})**:
+
+{DOCUMENT_TEXT}
+
+Remember:
+- MINIMUM 1000 characters for major fields
+- Write FULL PARAGRAPHS with complete context
+- Include EVERY detail, EVERY statistic
+- Be EXHAUSTIVE, not superficial
+- Output ONLY valid JSON
+

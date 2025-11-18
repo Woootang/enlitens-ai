@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, Optional, Set, Annotated
+from typing import Any, Dict, Optional, Set, List, Annotated
 
 from typing_extensions import TypedDict
 
@@ -89,6 +89,15 @@ class WorkflowState(TypedDict, total=False):
     client_insights: Optional[Dict[str, Any]]
     founder_insights: Optional[Dict[str, Any]]
     st_louis_context: Optional[Dict[str, Any]]
+    regional_context: Optional[Dict[str, Any]]
+    regional_digest_chunks: Optional[List[str]]
+    regional_prompt_block: Optional[str]
+    language_profile: Optional[Dict[str, Any]]
+    analytics_insights: Optional[Dict[str, Any]]
+    language_watchouts: Optional[Dict[str, Any]]
+    persona_summary: Optional[Dict[str, Any]]
+    rag_seed_chunks: Optional[List[str]]
+    health_report_text: Optional[str]
 
     # Shared orchestration metadata - use Annotated to allow multiple updates
     stage: Annotated[str, _keep_last_value]
@@ -110,6 +119,14 @@ class WorkflowState(TypedDict, total=False):
     founder_voice_result: Optional[Dict[str, Any]]
     marketing_result: Optional[Dict[str, Any]]
     validation_result: Optional[Dict[str, Any]]
+    live_news_result: Optional[Dict[str, Any]]
+    policy_result: Optional[Dict[str, Any]]
+    resource_result: Optional[Dict[str, Any]]
+    event_result: Optional[Dict[str, Any]]
+    research_update_result: Optional[Dict[str, Any]]
+    myth_result: Optional[Dict[str, Any]]
+    community_impact_result: Optional[Dict[str, Any]]
+    symptom_trend_result: Optional[Dict[str, Any]]
 
     # Runtime bookkeeping
     start_timestamp: Optional[datetime]
@@ -153,6 +170,14 @@ def create_initial_state(
         founder_voice_result=None,
         marketing_result=None,
         validation_result=None,
+        live_news_result=None,
+        policy_result=None,
+        resource_result=None,
+        event_result=None,
+        research_update_result=None,
+        myth_result=None,
+        community_impact_result=None,
+        symptom_trend_result=None,
         start_timestamp=None,
         end_timestamp=None,
         marketing_completed=False,

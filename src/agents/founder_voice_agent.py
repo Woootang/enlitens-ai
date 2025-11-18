@@ -5,24 +5,52 @@ This agent captures and integrates Liz Wooten's authentic voice, personality,
 and clinical philosophy into all content generation.
 """
 
-import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import json
+import logging
+from datetime import datetime
+from textwrap import dedent
+from typing import Any, Dict, List, Optional
 
 from .base_agent import BaseAgent
-from ..synthesis.ollama_client import OllamaClient
 from ..models.enlitens_schemas import (
-    MarketingContent, SEOContent, WebsiteCopy, BlogContent,
-    SocialMediaContent, ContentCreationIdeas, VerifiedStatistic, Citation
+    BlogContent,
+    ContentCreationIdeas,
+    MarketingContent,
+    SEOContent,
+    SocialMediaContent,
+    VerifiedStatistic,
+    WebsiteCopy,
+    Citation,
 )
+from ..synthesis.ollama_client import OllamaClient
 
 logger = logging.getLogger(__name__)
+
 
 class FounderVoiceAgent(BaseAgent):
     """
     Specialized agent for capturing and integrating founder voice.
     """
+
+    LIZ_STYLE_GUARDRAILS = dedent(
+        """\
+        Liz's voice guardrails:
+        - Lead with rebellious compassion—validate the client's reality while calling out broken systems.
+        - Use purposeful profanity (only “fuck” / “fucking”) as a pressure release, never to attack a person.
+        - Ground every claim in neuroscience, lived experience, or observable patterns—no fluff or toxic positivity.
+        - Pair every hard truth with hope and a concrete move the reader can try next.
+        - Speak directly to St. Louis realities and cultural nuance; name inequities without shaming survivors.
+        - Stay FTC-safe: no guarantees, no testimonials, no medical instructions outside educational framing.
+        """
+    )
+    PERSONA_BRIEF_FALLBACK = (
+        "Primary audience: neurodivergent and trauma-survivor adults in St. Louis who want neuroscience, "
+        "plain language, and a therapist who will actually name the systemic harm."
+    )
+    REGIONAL_BRIEF_FALLBACK = (
+        "St. Louis mental health context: legacy violence and segregation trauma, ADHD/executive burdens, "
+        "access barriers (transportation, insurance), cultural diversity requiring respectful, localized care."
+    )
 
     def __init__(self):
         super().__init__(
@@ -40,7 +68,7 @@ class FounderVoiceAgent(BaseAgent):
                 "Empowering and hopeful messaging",
                 "St. Louis roots - real talk for real people",
                 "Trauma-informed but not trauma-focused",
-                "Strength-based rather than deficit-based"
+                "Strength-based rather than deficit-based",
             ],
             "key_phrases": [
                 "Your brain isn't broken, it's adapting",
@@ -48,16 +76,17 @@ class FounderVoiceAgent(BaseAgent):
                 "Stop treating symptoms, heal the brain",
                 "Neuroscience shows us the way forward",
                 "You're not disordered, you're responding to your environment",
-                "Real therapy for real people in the real world"
+                "Real therapy for real people in the real world",
             ],
             "clinical_philosophy": [
                 "Bottom-up (body/sensory) meets top-down (cognitive)",
                 "Neuroplasticity as hope and possibility",
                 "Interoceptive awareness as foundation",
                 "Executive function support through neuroscience",
-                "Social connection through brain-based understanding"
-            ]
+                "Social connection through brain-based understanding",
+            ],
         }
+        self.founder_phrases = self.founder_persona["key_phrases"]
 
         # St. Louis client challenges from intakes
         self.client_challenges = [
@@ -68,8 +97,155 @@ class FounderVoiceAgent(BaseAgent):
             "Work/school performance and organization",
             "Self-esteem and identity issues",
             "Sleep problems and emotional dysregulation",
-            "Treatment resistance and medication questions"
+            "Treatment resistance and medication questions",
         ]
+
+    def _compose_style_guide(self, external_guide: Optional[str]) -> str:
+        if external_guide:
+            guide = external_guide.strip()
+            combined = f"{self._truncate(guide, 800)}\n\nNon-negotiable voice rules:\n{self.LIZ_STYLE_GUARDRAILS}"
+            return combined
+        return self.LIZ_STYLE_GUARDRAILS
+
+    def _build_persona_brief(
+        self,
+        persona_insights: Dict[str, Any],
+        curated_personas_text: Optional[str],
+    ) -> str:
+        if curated_personas_text:
+            return self._truncate(curated_personas_text.strip(), 800)
+
+        if not persona_insights:
+            return self.PERSONA_BRIEF_FALLBACK
+
+        lines = []
+        pain_points = persona_insights.get("pain_points") or persona_insights.get("challenges") or []
+        if pain_points:
+            lines.append("Pain points: " + ", ".join(pain_points[:5]))
+        priorities = persona_insights.get("priorities") or []
+        if priorities:
+            lines.append("Goals: " + ", ".join(priorities[:4]))
+        themes = persona_insights.get("key_themes") or []
+        if themes:
+            lines.append("Themes: " + ", ".join(themes[:4]))
+
+        enhanced = persona_insights.get("enhanced_analysis") or {}
+        summary = enhanced.get("narrative_summary") or enhanced.get("summary")
+        if summary:
+            lines.append(self._truncate(summary, 220))
+        persona_prompt = persona_insights.get("persona_prompt_block")
+        if persona_prompt:
+            lines.append("Audience guardrails:\n" + self._truncate(persona_prompt, 400))
+
+        if not lines:
+            fallback = self._truncate(self._load_personas_context(), 800)
+            return fallback or self.PERSONA_BRIEF_FALLBACK
+        return "\n".join(lines)
+
+    def _build_regional_brief(
+        self,
+        regional_context: Dict[str, Any],
+        curated_health_brief: Optional[str],
+        digest_chunks: Optional[Any] = None,
+        prompt_block: Optional[str] = None,
+    ) -> str:
+        if curated_health_brief:
+            return self._truncate(curated_health_brief.strip(), 700)
+
+        if not regional_context:
+            return self.REGIONAL_BRIEF_FALLBACK
+
+        lines: List[str] = []
+        population = regional_context.get("population")
+        if population:
+            lines.append(f"Population: {population}")
+        mental_health = regional_context.get("mental_health_challenges") or []
+        if mental_health:
+            lines.append("Mental health pressures: " + ", ".join(mental_health[:4]))
+        socioeconomic = regional_context.get("socioeconomic_factors") or []
+        if socioeconomic:
+            lines.append("Social determinants: " + ", ".join(socioeconomic[:3]))
+        summary_bullets = regional_context.get("summary_bullets") or []
+        if summary_bullets:
+            lines.append("Regional summary:\n- " + "\n- ".join(summary_bullets[:4]))
+        flashpoints = regional_context.get("cultural_flashpoints") or []
+        if flashpoints:
+            labels = [flash.get("label") for flash in flashpoints if isinstance(flash, dict)]
+            if labels:
+                lines.append("Flashpoints to name: " + ", ".join(label for label in labels[:4] if label))
+        key_stats = regional_context.get("key_statistics") or []
+        if key_stats:
+            lines.append("Key stats:\n- " + "\n- ".join(key_stats[:4]))
+        if digest_chunks:
+            chunk_preview = "\n\n".join(str(chunk) for chunk in digest_chunks[:2] if chunk)
+            if chunk_preview:
+                lines.append("Digest snapshot:\n" + self._truncate(chunk_preview, 500))
+        if prompt_block:
+            lines.append("Digest prompt block:\n" + self._truncate(prompt_block, 350))
+
+        if not lines:
+            return self.REGIONAL_BRIEF_FALLBACK
+        return "\n".join(lines)
+
+    def _build_language_guardrails(
+        self,
+        language_profile: Dict[str, Any],
+        watchouts: Dict[str, Any],
+    ) -> str:
+        lines: List[str] = []
+        prompt_block = language_profile.get("prompt_block")
+        if prompt_block:
+            lines.append(self._truncate(prompt_block, 400))
+        words_to_use = watchouts.get("words_to_use") if isinstance(watchouts, dict) else None
+        if words_to_use:
+            lines.append("Words that land: " + ", ".join(words_to_use[:10]))
+        words_to_avoid = watchouts.get("words_to_avoid") if isinstance(watchouts, dict) else None
+        if words_to_avoid:
+            lines.append("Words to avoid unless quoting clients: " + ", ".join(words_to_avoid[:8]))
+        banned_terms = language_profile.get("banned_terms") if isinstance(language_profile, dict) else None
+        if banned_terms:
+            lines.append("Hard-no terms: " + ", ".join(banned_terms[:8]))
+        if lines:
+            return "\n".join(lines)
+        return "No mindfulness/manifestation clichés. Speak plainly, with righteous anger when needed."
+
+    def _truncate(self, text: str, max_chars: int) -> str:
+        if len(text) <= max_chars:
+            return text
+        return text[: max_chars - 3].rstrip() + "..."
+
+    def _safe_json_dump(self, payload: Any, max_chars: int = 1200) -> str:
+        try:
+            serialized = json.dumps(payload, ensure_ascii=False, indent=2)
+            return self._truncate(serialized, max_chars=max_chars)
+        except Exception:
+            return self._truncate(str(payload), max_chars=max_chars)
+
+    def _build_analytics_brief(self, analytics: Dict[str, Any]) -> str:
+        if not analytics:
+            return "Analytics signals unavailable — lean on persona insights."
+        queries = analytics.get("queries") or []
+        pages = analytics.get("pages") or []
+        top_queries = ", ".join(queries[:5]) if queries else "No live queries captured."
+        top_pages = ", ".join(pages[:5]) if pages else "No high-performing pages captured."
+        return f"Top GA4/GSC searches: {top_queries}\nLeading landing pages: {top_pages}"
+
+    def _format_mechanism_bridge(
+        self,
+        curated_context: Dict[str, Any],
+        fallback: str,
+        max_chars: int = 600,
+    ) -> str:
+        bridge = (curated_context or {}).get("mechanism_bridge")
+        if bridge:
+            return self._truncate(str(bridge), max_chars)
+        return fallback
+
+    def _format_local_stats(self, curated_context: Dict[str, Any], max_items: int = 6) -> str:
+        stats = (curated_context or {}).get("local_stats") or []
+        if not stats:
+            return "- 39% of St. Louis adults report chronic stress tied to social inequity.\n- 1 in 3 neurodivergent adults cite executive burnout from community strain."
+        return "\n".join(f"- {stat}" for stat in stats[:max_items])
 
     async def initialize(self) -> bool:
         """Initialize the founder voice agent."""
@@ -167,41 +343,56 @@ class FounderVoiceAgent(BaseAgent):
             document_text = context.get("document_text", "")
             document_id = context.get("document_id", "unknown")
             summary = self._summarize_research(document_text, max_chars=2500)
-            
-            # Use curated context if available, otherwise load personas normally
-            curated_context = context.get("curated_context")
-            if curated_context:
-                personas_context = curated_context.get("personas_text", "")
-                voice_guide = curated_context.get("voice_guide", "")
-                health_context = curated_context.get("health_brief", "")
-            else:
-                personas_context = self._load_personas_context()
-                voice_guide = ""
-                health_context = ""
-            
-            voice_section = f"\n\nLIZ'S VOICE GUIDE:\n{voice_guide}\n" if voice_guide else ""
-            health_section = f"\n\nLOCAL HEALTH CONTEXT (St. Louis):\n{health_context}\n" if health_context else ""
+
+            curated_context = context.get("curated_context") or {}
+            persona_brief = self._build_persona_brief(
+                context.get("client_insights") or {},
+                curated_context.get("personas_text"),
+            )
+            regional_brief = self._build_regional_brief(
+                context.get("regional_context") or context.get("st_louis_context") or {},
+                curated_context.get("health_brief"),
+                context.get("regional_digest_chunks"),
+                context.get("regional_prompt_block"),
+            )
+            style_guide = self._compose_style_guide(curated_context.get("voice_guide"))
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or context.get("language_profile") or {},
+                context.get("language_watchouts") or {},
+            )
+            clinical_summary = self._safe_json_dump(clinical_data, max_chars=1200)
+            analytics_brief = self._build_analytics_brief(context.get("analytics_insights") or {})
             
             prompt = f"""
 You are Liz Wooten creating UNIQUE marketing copy for document {document_id}.
 
-VOICE GUARDRAILS:
-- Direct, rebellious, never corporate
-- "Your brain isn't broken, it's adapting"
-- Ground everything in neuroscience
-- Hope + proof, not fluff
-{voice_section}
+STYLE & VOICE NON-NEGOTIABLES:
+{style_guide}
+
+LANGUAGE GUARDRAILS:
+{language_guardrails}
+
+AUDIENCE SNAPSHOT:
+{persona_brief}
+
+REGIONAL REALITIES:
+{regional_brief}
+
+ANALYTICS SIGNALS:
+{analytics_brief}
+
 RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
-RELEVANT CLIENT PROFILES (10 selected for THIS paper):
-{personas_context}
-{health_section}
+CLINICAL INSIGHTS TO ANCHOR MESSAGING:
+{clinical_summary}
+
 CRITICAL: Generate COMPLETELY UNIQUE copy for THIS document.
 - Reference THIS document's specific findings
 - Use varied language and angles
 - NO generic templates or repetitive phrases
 - Each headline/tagline must be distinct
+- Close outputs with the compliance tag: "Educational content only. This is not medical advice."
 
 Generate 3-5 items for each:
 - headlines: Punchy, research-specific (≤18 words)
@@ -217,7 +408,7 @@ Return ONLY valid JSON.
             # Use default Qwen model (no llama fallback)
             raw_notes = await self.ollama_client.generate_text(
                 prompt=prompt,
-                temperature=0.85,  # Higher temp for more variation
+                temperature=0.7,  # Purposeful creativity with guardrails
                 num_predict=1024
             )
             logger.debug(
@@ -343,9 +534,43 @@ Respond with valid JSON only. DO NOT include social_proof field (removed for FTC
                                   context: Dict[str, Any]) -> SEOContent:
         """Generate SEO content optimized for St. Louis mental health searches."""
         try:
+            curated_context = context.get("curated_context") or {}
+            persona_brief = self._build_persona_brief(
+                context.get("client_insights") or {},
+                curated_context.get("personas_text"),
+            )
+            regional_brief = self._build_regional_brief(
+                context.get("regional_context") or context.get("st_louis_context") or {},
+                curated_context.get("health_brief"),
+                context.get("regional_digest_chunks"),
+                context.get("regional_prompt_block"),
+            )
+            style_guide = self._compose_style_guide(curated_context.get("voice_guide"))
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or context.get("language_profile") or {},
+                context.get("language_watchouts") or {},
+            )
+            clinical_summary = self._safe_json_dump(clinical_data, max_chars=800)
+            analytics_brief = self._build_analytics_brief(context.get("analytics_insights") or {})
+
             prompt = f"""
 You are Liz Wooten optimizing content for St. Louis clients searching for real help.
 Create SEO content that ranks well and speaks directly to local challenges.
+
+STYLE & VOICE NON-NEGOTIABLES:
+{style_guide}
+
+LANGUAGE GUARDRAILS:
+{language_guardrails}
+
+TARGET PERSONA SIGNALS:
+{persona_brief}
+
+LOCAL CONTEXT:
+{regional_brief}
+
+ANALYTICS SIGNALS:
+{analytics_brief}
 
 SEO Context:
 - Location: St. Louis, Missouri
@@ -353,8 +578,8 @@ SEO Context:
 - Search Intent: "neuroscience therapy St. Louis", "ADHD specialist near me"
 - Competition: Traditional therapy practices, psychiatrists, counselors
 
-Clinical Data:
-{clinical_data}
+Clinical Anchors:
+{clinical_summary}
 
 St. Louis Mental Health Landscape:
 - High trauma rates, poverty, racial disparities
@@ -405,22 +630,60 @@ RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.
             document_text = context.get("document_text", "")
             document_id = context.get("document_id", "unknown")
             summary = self._summarize_research(document_text, max_chars=2500)
-
-            # Load personas for context
-            personas_context = self._load_personas_context()
+            curated_context = context.get("curated_context") or {}
+            persona_brief = self._build_persona_brief(
+                context.get("client_insights") or {},
+                curated_context.get("personas_text"),
+            )
+            regional_brief = self._build_regional_brief(
+                context.get("regional_context") or context.get("st_louis_context") or {},
+                curated_context.get("health_brief"),
+                context.get("regional_digest_chunks"),
+                context.get("regional_prompt_block"),
+            )
+            style_guide = self._compose_style_guide(curated_context.get("voice_guide"))
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or context.get("language_profile") or {},
+                context.get("language_watchouts") or {},
+            )
+            clinical_summary = self._safe_json_dump(clinical_data, max_chars=1000)
+            analytics_brief = self._build_analytics_brief(context.get("analytics_insights") or {})
+            mechanism_bridge = self._format_mechanism_bridge(
+                curated_context,
+                "Bridge CSA/inflammation to ADHD burnout, trauma stacking, and sensory overload described by the personas.",
+            )
+            stats_block = self._format_local_stats(curated_context)
 
             prompt = f"""
 You are Liz Wooten writing UNIQUE website copy for document {document_id}.
 Each document requires COMPLETELY DIFFERENT copy based on its specific research findings.
 
+STYLE & VOICE NON-NEGOTIABLES:
+{style_guide}
+
+LANGUAGE GUARDRAILS:
+{language_guardrails}
+
+AUDIENCE SNAPSHOT:
+{persona_brief}
+
+REGIONAL REALITIES:
+{regional_brief}
+
+MECHANISM ↔ PERSONA BRIDGE:
+{mechanism_bridge}
+
+LOCAL STATS PRIMER:
+{stats_block}
+
+ANALYTICS SIGNALS:
+{analytics_brief}
+
 RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
 CLINICAL INSIGHTS FROM THIS DOCUMENT:
-{clinical_data}
-
-REAL CLIENT PROFILES (use these to inform tone and pain points):
-{personas_context}
+{clinical_summary}
 
 CRITICAL RULES:
 1. DO NOT use generic templates or examples
@@ -487,21 +750,59 @@ RETURN ONLY VALID JSON with string arrays.
             document_text = context.get("document_text", "")
             document_id = context.get("document_id", "unknown")
             summary = self._summarize_research(document_text, max_chars=2500)
-            
-            # Load personas
-            personas_context = self._load_personas_context()
+            curated_context = context.get("curated_context") or {}
+            persona_brief = self._build_persona_brief(
+                context.get("client_insights") or {},
+                curated_context.get("personas_text"),
+            )
+            regional_brief = self._build_regional_brief(
+                context.get("regional_context") or context.get("st_louis_context") or {},
+                curated_context.get("health_brief"),
+                context.get("regional_digest_chunks"),
+                context.get("regional_prompt_block"),
+            )
+            style_guide = self._compose_style_guide(curated_context.get("voice_guide"))
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or context.get("language_profile") or {},
+                context.get("language_watchouts") or {},
+            )
+            clinical_summary = self._safe_json_dump(clinical_data, max_chars=1000)
+            analytics_brief = self._build_analytics_brief(context.get("analytics_insights") or {})
+            mechanism_bridge = self._format_mechanism_bridge(
+                curated_context,
+                "Spell out how CSA/stress biomarkers map to ADHD burnout, CPTSD vigilance, and executive crashes described in the personas.",
+            )
+            stats_block = self._format_local_stats(curated_context)
 
             prompt = f"""
 You are Liz Wooten writing UNIQUE blog content for document {document_id}.
+
+STYLE & VOICE NON-NEGOTIABLES:
+{style_guide}
+
+LANGUAGE GUARDRAILS:
+{language_guardrails}
+
+AUDIENCE SNAPSHOT:
+{persona_brief}
+
+REGIONAL REALITIES:
+{regional_brief}
+
+MECHANISM ↔ PERSONA BRIDGE:
+{mechanism_bridge}
+
+LOCAL STATS PRIMER:
+{stats_block}
+
+ANALYTICS SIGNALS:
+{analytics_brief}
 
 RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
 CLINICAL INSIGHTS FROM THIS DOCUMENT:
-{clinical_data}
-
-REAL CLIENT PROFILES:
-{personas_context}
+{clinical_summary}
 
 CRITICAL RULES:
 1. Generate content UNIQUE to THIS document's research
@@ -510,16 +811,16 @@ CRITICAL RULES:
 4. Use different client scenarios from the personas
 5. Each article idea must be distinct and research-specific
 
-Generate 5-10 UNIQUE items for each field:
+Generate 5-10 UNIQUE items for each field (EACH ENTRY MUST BE A SINGLE STRING — if you need a title plus detail, combine them like "Title — explanation"):
 
 article_ideas: Titles based on THIS document's findings
 blog_outlines: Structures specific to THIS research
 talking_points: Key messages from THIS document
 expert_quotes: Liz's perspective on THIS research
 statistics: ONLY from THIS document's research (with citations)
-case_studies: Hypothetical examples based on THIS research
-how_to_guides: Practical exercises from THIS research
-myth_busting: Myths challenged by THIS research
+case_studies: Hypothetical examples based on THIS research (format: "[HYPOTHETICAL] Scenario — lesson")
+how_to_guides: Practical exercises from THIS research (format: "Step 1 → Step 2 → Step 3")
+myth_busting: Myths challenged by THIS research (format: "Myth — Reframe/Truth")
 
 STATISTICS: Must cite THIS document with exact quotes
 CASE STUDIES: Mark "[HYPOTHETICAL]" and base on THIS research
@@ -527,7 +828,7 @@ NO practice data, testimonials, or fabricated scenarios
 
 Use Liz's voice. Ground in THIS document's neuroscience. Make it unique and valuable.
 
-RETURN ONLY VALID JSON.
+Return ONLY valid JSON with pure string arrays (NO nested objects or arrays inside the lists).
 """
 
             response = await self._structured_generation(
@@ -554,21 +855,55 @@ RETURN ONLY VALID JSON.
             document_text = context.get("document_text", "")
             document_id = context.get("document_id", "unknown")
             summary = self._summarize_research(document_text, max_chars=2000)
-            
-            # Load personas
-            personas_context = self._load_personas_context()
+            curated_context = context.get("curated_context") or {}
+            persona_brief = self._build_persona_brief(
+                context.get("client_insights") or {},
+                curated_context.get("personas_text"),
+            )
+            regional_brief = self._build_regional_brief(
+                context.get("regional_context") or context.get("st_louis_context") or {},
+                curated_context.get("health_brief"),
+                context.get("regional_digest_chunks"),
+                context.get("regional_prompt_block"),
+            )
+            style_guide = self._compose_style_guide(curated_context.get("voice_guide"))
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or context.get("language_profile") or {},
+                context.get("language_watchouts") or {},
+            )
+            clinical_summary = self._safe_json_dump(clinical_data, max_chars=800)
+            mechanism_bridge = self._format_mechanism_bridge(
+                curated_context,
+                "Translate CSA-driven inflammation into nervous system swings, sensory overload, and trauma layering your personas name.",
+            )
+            stats_block = self._format_local_stats(curated_context)
             
             prompt = f"""
 You are Liz Wooten creating UNIQUE social media content for document {document_id}.
+
+STYLE & VOICE NON-NEGOTIABLES:
+{style_guide}
+
+LANGUAGE GUARDRAILS:
+{language_guardrails}
+
+AUDIENCE SNAPSHOT:
+{persona_brief}
+
+REGIONAL REALITIES:
+{regional_brief}
+
+MECHANISM ↔ PERSONA BRIDGE:
+{mechanism_bridge}
+
+LOCAL STATS PRIMER:
+{stats_block}
 
 RESEARCH FROM THIS SPECIFIC DOCUMENT:
 {summary}
 
 CLINICAL DATA FROM THIS DOCUMENT:
-{clinical_data}
-
-REAL CLIENT PROFILES:
-{personas_context}
+{clinical_summary}
 
 CRITICAL RULES:
 1. Content must be UNIQUE to THIS document's research
@@ -620,7 +955,27 @@ RETURN ONLY VALID JSON with string arrays.
             
             # Get curated context
             curated_context = context.get('curated_context', {})
-            personas_context = curated_context.get('personas_context', '')[:1000]
+            persona_brief = self._build_persona_brief(
+                context.get("client_insights") or {},
+                curated_context.get("personas_text"),
+            )
+            regional_brief = self._build_regional_brief(
+                context.get("regional_context") or context.get("st_louis_context") or {},
+                curated_context.get("health_brief"),
+                context.get("regional_digest_chunks"),
+                context.get("regional_prompt_block"),
+            )
+            style_guide = self._compose_style_guide(curated_context.get("voice_guide"))
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or context.get("language_profile") or {},
+                context.get("language_watchouts") or {},
+            )
+            analytics_brief = self._build_analytics_brief(context.get("analytics_insights") or {})
+            mechanism_bridge = self._format_mechanism_bridge(
+                curated_context,
+                "Spell out the bridge between CSA/stress biomarkers and the personas' daily burnout, sensory swings, and hypervigilance.",
+            )
+            stats_block = self._format_local_stats(curated_context)
             
             prompt = f"""
 You are Liz Wooten brainstorming UNIQUE content ideas based on THIS SPECIFIC research paper.
@@ -630,8 +985,26 @@ DOCUMENT ID: {document_id}
 RESEARCH SUMMARY (THIS PAPER ONLY):
 {research_summary}
 
-SELECTED CLIENT PERSONAS:
-{personas_context}
+AUDIENCE SNAPSHOT:
+{persona_brief}
+
+REGIONAL REALITIES:
+{regional_brief}
+
+MECHANISM ↔ PERSONA BRIDGE:
+{mechanism_bridge}
+
+LOCAL STATS PRIMER:
+{stats_block}
+
+ANALYTICS SIGNALS:
+{analytics_brief}
+
+STYLE & VOICE NON-NEGOTIABLES:
+{style_guide}
+
+LANGUAGE GUARDRAILS:
+{language_guardrails}
 
 YOUR TASK:
 Generate content ideas that are 100% SPECIFIC to THIS research paper's findings.

@@ -4,24 +4,50 @@ Enhanced Dashboard Server for Enlitens AI Processing
 Provides comprehensive system monitoring and processing analytics
 """
 
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, send_file, request, render_template_string
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 import psutil
 import json
 import os
 import subprocess
 import re
 import time
+import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any
 
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__, static_folder='static')
 CORS(app)
 
 PROJECT_ROOT = Path("/home/antons-gs/enlitens-ai")
-LOG_FILE = PROJECT_ROOT / "logs" / "enlitens_complete_processing.log"
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.utils.usage_tracker import get_usage_summary
+
+# Local comparison pipeline status file
+LOCAL_STATUS_FILE = PROJECT_ROOT / "logs" / "local_status.json"
+
+# NEW PIPELINE PATHS (November 2025 rebuild)
+LOG_FILE = PROJECT_ROOT / "logs" / "processing.log"
+LEDGER_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "enliten_knowledge_base.jsonl"
+
+# OLD PATHS (for backward compatibility)
+OLD_LOG_FILE = PROJECT_ROOT / "logs" / "enlitens_complete_processing.log"
 JSON_FILE = PROJECT_ROOT / "enlitens_knowledge_base" / "enlitens_knowledge_base.json.temp"
-TOTAL_DOCUMENTS = 344
+SCIENCE_ENTRIES_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "science_entries.jsonl"
+SCIENCE_MANIFEST_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "science_manifest.json"
+
+UPLOAD_FOLDER = PROJECT_ROOT / "enlitens_corpus" / "input_pdfs"
+PROCESSED_FOLDER = PROJECT_ROOT / "enlitens_corpus" / "processed"
+FAILED_FOLDER = PROJECT_ROOT / "enlitens_corpus" / "failed"
+ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc', 'txt', 'rtf', 'odt'}
+
+# Ensure upload folder exists
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+PROCESSED_FOLDER.mkdir(parents=True, exist_ok=True)
+FAILED_FOLDER.mkdir(parents=True, exist_ok=True)
 
 # Agent metadata shared across endpoints
 AGENT_METADATA = {
@@ -115,6 +141,13 @@ AGENT_METADATA = {
         'description': 'Synthesizes regional health context',
         'role': 'Health Analyst',
         'keywords': ['health_report_synthesizer', 'health report synthesizer']
+    },
+    'health_report_translator': {
+        'name': 'Health Report Translator',
+        'emoji': '🧾',
+        'description': 'Maintains the Liz-voiced St. Louis health digest',
+        'role': 'Digest Author',
+        'keywords': ['health_report_translator', 'health digest', 'st. louis digest']
     }
 }
 
@@ -137,6 +170,71 @@ def identify_agent(line: str):
 
 # Cache for expensive log parsing
 _CACHE = {"timestamp": 0, "data": None}
+
+
+def _count_jsonl(path: Path) -> int:
+    if not path.exists():
+        return 0
+    count = 0
+    with path.open("r", encoding="utf-8", errors="ignore") as handle:
+        for line in handle:
+            if line.strip():
+                count += 1
+    return count
+
+
+def _list_pdfs(folder: Path) -> int:
+    if not folder.exists():
+        return 0
+    return sum(1 for path in folder.glob("**/*.pdf") if path.is_file())
+
+
+def get_processing_overview() -> Dict[str, Any]:
+    """Summarize pipeline throughput using the new ingest workflow."""
+    completed = _count_jsonl(LEDGER_FILE)
+    pending = _list_pdfs(UPLOAD_FOLDER)
+    failed = _list_pdfs(FAILED_FOLDER)
+    total = completed + pending + failed
+
+    stage = "Idle"
+    current_file = None
+    run_duration = None
+    last_quality = None
+
+    log_file = LOG_FILE if LOG_FILE.exists() else OLD_LOG_FILE
+    if log_file.exists():
+        with log_file.open("r", encoding="utf-8", errors="ignore") as handle:
+            lines = handle.readlines()[-400:]
+
+        last_stored_idx = None
+        last_processing_idx = None
+        for idx, line in enumerate(lines):
+            if "✅ Stored" in line:
+                last_stored_idx = idx
+                # extract doc id or duration
+                match = re.search(r"✅ Stored ([^ ]+)", line)
+                if match:
+                    last_quality = {"document_id": match.group(1)}
+            if "📄" in line and "Processing" in line:
+                last_processing_idx = idx
+
+        if last_processing_idx is not None and (last_stored_idx is None or last_processing_idx > last_stored_idx):
+            stage = "Processing"
+            line = lines[last_processing_idx]
+            match = re.search(r"Processing\s+(?:\[\d+\]\s+)?(.+)", line)
+            if match:
+                current_file = match.group(1).strip()
+
+    return {
+        "completed": completed,
+        "pending": pending,
+        "failed": failed,
+        "total": total,
+        "current_file": current_file or "None",
+        "stage": stage,
+        "run_duration": run_duration,
+        "last_quality": last_quality,
+    }
 
 def get_system_power():
     """Estimate total system power draw"""
@@ -248,16 +346,29 @@ def get_cpu_stats():
             'cores': 0
         }
 
+
+def read_local_status() -> Dict[str, Any]:
+    """Read status emitted by scripts/run_local_comparison.py."""
+    if not LOCAL_STATUS_FILE.exists():
+        return {"stage": "idle"}
+    try:
+        return json.loads(LOCAL_STATUS_FILE.read_text())
+    except Exception:
+        return {"stage": "unknown"}
+
 def parse_logs():
     """Parse logs and extract comprehensive processing analytics"""
     now = time.time()
     if _CACHE["data"] and (now - _CACHE["timestamp"]) < 1.0:
         return _CACHE["data"]
     
-    if not LOG_FILE.exists():
+    # Try NEW log file first, fall back to old
+    log_file = LOG_FILE if LOG_FILE.exists() else OLD_LOG_FILE
+    
+    if not log_file.exists():
         return {"processing": {}, "agents": [], "alerts": {}}
     
-    with open(LOG_FILE, 'r') as f:
+    with open(log_file, 'r') as f:
         lines = f.readlines()
     
     # Find current run start
@@ -269,15 +380,8 @@ def parse_logs():
     
     current_lines = lines[start_idx:]
     
-    # Initialize data structures
-    processing = {
-        'completed': 0,
-        'total': TOTAL_DOCUMENTS,
-        'current_file': 'None',
-        'stage': 'Idle',
-        'start_time': None,
-        'latest_doc': {}
-    }
+    processing = get_processing_overview()
+    processing.setdefault('latest_doc', {})
     
     agents = {}
     alerts = {'count': 0, 'last_error': None, 'entries': []}
@@ -285,24 +389,51 @@ def parse_logs():
     
     # Parse logs
     for line in current_lines:
-        # Count completed documents
+        # Legacy completion logs
         if '✅ Document' in line and 'processed successfully' in line:
-            processing['completed'] += 1
-            
-            # Extract document info
             match = re.search(r'Document (.+?) processed successfully in ([0-9.]+)s', line)
             if match:
                 processing['latest_doc'] = {
                     'id': match.group(1),
                     'duration': round(float(match.group(2)) / 60, 2)
                 }
-        
+
+        # New ingest completion logs
+        if '✅ Stored' in line:
+            match = re.search(r'✅ Stored ([^ ]+)', line)
+            if match:
+                processing['latest_doc'] = {
+                    'id': match.group(1),
+                    'duration': None
+                }
+            duration_match = re.search(r"\(([\d.]+)s\)", line)
+            if duration_match:
+                try:
+                    duration = float(duration_match.group(1))
+                    processing.setdefault('latest_doc', {})
+                    processing['latest_doc']['duration'] = round(duration, 1)
+                except ValueError:
+                    pass
+
         # Extract quality/confidence
         if 'Quality' in line and 'Confidence' in line:
             match = re.search(r'Quality ([0-9.]+) Confidence ([0-9.]+)', line)
             if match:
                 processing['latest_doc']['quality'] = float(match.group(1))
                 processing['latest_doc']['confidence'] = float(match.group(2))
+
+        if 'QUALITY_METRICS' in line:
+            try:
+                payload_str = line.split('QUALITY_METRICS', 1)[1].strip()
+                metrics_payload = json.loads(payload_str)
+                processing.setdefault('latest_doc', {})
+                processing['latest_doc']['warnings'] = metrics_payload.get('warnings', [])
+                processing['latest_doc']['quality_breakdown'] = metrics_payload.get('quality_scores', {})
+                processing['latest_doc']['validation_passed'] = not metrics_payload.get('needs_retry', False)
+                processing['latest_doc']['review_checklist'] = metrics_payload.get('review_checklist', [])
+                processing['latest_doc']['compliance_message'] = metrics_payload.get('compliance_message', '')
+            except Exception:
+                pass
         
         # Current file
         if '📖 Processing file' in line:
@@ -412,25 +543,214 @@ def parse_logs():
     return result
 
 def get_json_stats():
-    """Get knowledge base JSON statistics"""
+    """Report knowledge base size and document counts."""
+    try:
+        if LEDGER_FILE.exists():
+            stat = LEDGER_FILE.stat()
+            doc_count = _count_jsonl(LEDGER_FILE)
+            return {
+                'size': stat.st_size,
+                'documents': doc_count,
+                'updated': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                'mode': 'ledger_v1'
+            }
+    except Exception as exc:
+        logger = app.logger  # use flask logger
+        logger.warning("Failed to read ledger stats: %s", exc)
+
+    # Legacy fallbacks
+    try:
+        if SCIENCE_ENTRIES_FILE.exists():
+            stat = SCIENCE_ENTRIES_FILE.stat()
+            doc_count = _count_jsonl(SCIENCE_ENTRIES_FILE)
+            return {
+                'size': stat.st_size,
+                'documents': doc_count,
+                'updated': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                'mode': 'science_only_old'
+            }
+    except:
+        pass
+
     try:
         if JSON_FILE.exists():
             stat = JSON_FILE.stat()
             with open(JSON_FILE, 'r') as f:
                 data = json.load(f)
-                return {
-                    'size': stat.st_size,
-                    'documents': len(data.get('documents', [])),
-                    'updated': datetime.fromtimestamp(stat.st_mtime).isoformat()
-                }
+            return {
+                'size': stat.st_size,
+                'documents': len(data.get('documents', [])),
+                'updated': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                'mode': 'full_old'
+            }
     except:
         pass
-    
-    return {'size': 0, 'documents': 0, 'updated': datetime.now().isoformat()}
+
+    return {'size': 0, 'documents': 0, 'updated': datetime.now().isoformat(), 'mode': 'none'}
+
+def get_model_info():
+    """Get current model info (single-model architecture)"""
+    try:
+        # Try to import ModelManager
+        import sys
+        sys.path.insert(0, str(PROJECT_ROOT))
+        from src.utils.model_manager import get_model_manager
+        
+        manager = get_model_manager()
+        current_model = manager.get_current_model_info()
+        config = manager.MODEL_CONFIG
+        
+        # Check vLLM health
+        vllm_healthy = False
+        try:
+            import requests
+            response = requests.get('http://localhost:8000/v1/models', timeout=2)
+            vllm_healthy = response.status_code == 200
+        except:
+            pass
+        
+        return {
+            'current_model': current_model,
+            'vllm_healthy': vllm_healthy,
+            'architecture': 'single-model',
+            'model': {
+                'name': config["name"],
+                'context': config["context"],
+                'quality': config["quality"],
+                'use': config["use_case"],
+                'port': config["port"],
+            },
+            'max_output': '≈32k tokens (JSON-safe)',
+            'chain_of_thought': True,
+            'reasoning': 'Unified Llama 3.1 8B orchestrates all agent tiers',
+        }
+    except Exception as e:
+        return {
+            'current_model': None,
+            'vllm_healthy': False,
+            'architecture': 'single-model',
+            'model': {
+                'name': 'Qwen3-14B', 
+                'context': '64k tokens', 
+                'quality': '85 MMLU', 
+                'use': 'All Agents (Data, Research, Writer, QA)',
+                'port': 8000,
+            },
+            'max_output': '32k tokens',
+            'chain_of_thought': True,
+            'reasoning': 'Deep CoT reasoning enabled for all agents',
+            'error': str(e)
+        }
+
+
+def get_health_digest_stats() -> Dict[str, Any]:
+    """Extract the Liz-voiced health digest snapshot from the knowledge base."""
+    stats: Dict[str, Any] = {
+        'available': False,
+        'headline': None,
+        'summary_bullets': [],
+        'flashpoints': [],
+        'generated_at': None,
+        'prompt_preview': "",
+        'source_metadata': {}
+    }
+
+    if not JSON_FILE.exists():
+        return stats
+
+    try:
+        with open(JSON_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+            data = json.load(f)
+        documents = data.get('documents', []) if isinstance(data, dict) else data
+    except Exception:
+        return stats
+
+    for entry in documents:
+        digest = entry.get('health_report_digest')
+        if isinstance(digest, dict):
+            stats['available'] = True
+            stats['headline'] = digest.get('headline')
+            stats['summary_bullets'] = (digest.get('summary_bullets') or [])[:5]
+            stats['generated_at'] = digest.get('generated_at')
+            flashpoints = digest.get('cultural_flashpoints') or []
+            if isinstance(flashpoints, list):
+                stats['flashpoints'] = [
+                    fp.get('label')
+                    for fp in flashpoints[:6]
+                    if isinstance(fp, dict) and fp.get('label')
+                ]
+            prompt_block = digest.get('prompt_block')
+            if isinstance(prompt_block, str):
+                stats['prompt_preview'] = prompt_block[:600]
+            if isinstance(digest.get('source_metadata'), dict):
+                stats['source_metadata'] = digest['source_metadata']
+            break
+
+    return stats
+
+
+def get_verification_stats(sample_size: int = 20) -> Dict[str, Any]:
+    """Summarise verification metadata from the knowledge base JSON."""
+    stats = {
+        'context': {'pass': 0, 'revise': 0, 'error': 0, 'unknown': 0},
+        'output': {'pass': 0, 'revise': 0, 'error': 0, 'unknown': 0},
+        'recent': []
+    }
+
+    if not JSON_FILE.exists():
+        return stats
+
+    try:
+        with open(JSON_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+            data = json.load(f)
+        documents = data.get('documents', []) if isinstance(data, dict) else data
+    except Exception:
+        return stats
+
+    recent_docs = documents[-sample_size:]
+    for entry in recent_docs:
+        metadata = entry.get('metadata', {})
+        verification = entry.get('verification') or {}
+
+        context_info = verification.get('context') or {}
+        context_status = (context_info.get('final_status') or '').lower()
+        if context_status not in stats['context']:
+            context_status = 'unknown'
+        stats['context'][context_status] += 1
+
+        output_info = verification.get('output') or {}
+        output_status = (output_info.get('status') or '').lower()
+        if output_status not in stats['output']:
+            output_status = 'unknown'
+        stats['output'][output_status] += 1
+
+        context_attempts = context_info.get('attempts')
+        if isinstance(context_attempts, list) and context_attempts:
+            last_attempt = context_attempts[-1]
+            context_issues = last_attempt.get('issues', [])
+        else:
+            context_issues = []
+
+        stats['recent'].append({
+            'document_id': metadata.get('document_id'),
+            'context_status': context_status,
+            'output_status': output_status,
+            'context_issues': context_issues,
+            'output_warnings': output_info.get('warnings', []),
+            'updated': metadata.get('processing_timestamp')
+        })
+
+    return stats
 
 @app.route('/')
 def index():
     return send_file('index.html')
+
+
+@app.route('/upload')
+def upload_page():
+    """Serve the PDF upload page."""
+    return send_file('upload.html')
 
 @app.route('/api/metrics')
 def metrics():
@@ -445,14 +765,19 @@ def metrics():
         'agents': log_data['agents'],
         'alerts': log_data['alerts'],
         'context_curator': log_data['context_curator'],
-        'json': get_json_stats()
+        'json': get_json_stats(),
+        'verification': get_verification_stats(),
+        'health_digest': get_health_digest_stats(),
+        'model': get_model_info(),
+        'usage': get_usage_summary(),
     })
 
 @app.route('/api/chain_of_thought')
 def chain_of_thought():
     """Get structured and raw chain-of-thought reasoning grouped by agent."""
     try:
-        if not LOG_FILE.exists():
+        log_file = LOG_FILE if LOG_FILE.exists() else OLD_LOG_FILE
+        if not log_file.exists():
             return jsonify({
                 "timeline": [],
                 "agents": [],
@@ -461,7 +786,7 @@ def chain_of_thought():
                 "step_count": 0
             })
 
-        with open(LOG_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
 
         # Determine the most recent document being processed
@@ -565,12 +890,17 @@ def chain_of_thought():
             "step_count": 0
         })
 
+@app.route('/api/local_status')
+def local_status():
+    return jsonify(read_local_status())
+
 @app.route('/api/logs')
 def logs():
     """Get recent logs from current run in CLI-friendly format"""
     try:
-        if LOG_FILE.exists():
-            with open(LOG_FILE, 'r') as f:
+        log_file = LOG_FILE if LOG_FILE.exists() else OLD_LOG_FILE
+        if log_file.exists():
+            with open(log_file, 'r') as f:
                 lines = f.readlines()
 
                 start_idx = 0
@@ -594,20 +924,101 @@ def logs():
 
 @app.route('/api/download')
 def download():
-    """Download knowledge base JSON"""
+    """Download knowledge base - prioritizes NEW main_kb.jsonl"""
+    if MAIN_KB_FILE.exists():
+        return send_file(MAIN_KB_FILE, as_attachment=True, download_name='main_kb.jsonl')
+    if SCIENCE_ENTRIES_FILE.exists():
+        return send_file(SCIENCE_ENTRIES_FILE, as_attachment=True, download_name='science_entries.jsonl')
     if JSON_FILE.exists():
         return send_file(JSON_FILE, as_attachment=True, download_name='enlitens_knowledge_base.json')
     return jsonify({'error': 'File not found'}), 404
 
+@app.route('/api/download/manifest')
+def download_manifest():
+    """Download science manifest JSON"""
+    if SCIENCE_MANIFEST_FILE.exists():
+        return send_file(SCIENCE_MANIFEST_FILE, as_attachment=True, download_name='science_manifest.json')
+    return jsonify({'error': 'Manifest not found'}), 404
+
 @app.route('/api/json_preview')
 def json_preview():
     """Return a preview of the most recent JSON knowledge base entries."""
+    # Try NEW main_kb.jsonl first
+    if MAIN_KB_FILE.exists():
+        try:
+            documents = []
+            with open(MAIN_KB_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        documents.append(json.loads(line))
+            
+            preview = documents[-5:]
+            return jsonify({
+                'documents': preview,
+                'total': len(documents),
+                'last_updated': datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat(),
+                'mode': 'main_kb_v2'
+            })
+        except json.JSONDecodeError as exc:
+            return jsonify({
+                'documents': [],
+                'total': 0,
+                'last_updated': datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat() if MAIN_KB_FILE.exists() else None,
+                'error': f'JSON decode error: {exc}',
+                'mode': 'main_kb_v2'
+            })
+        except Exception as exc:
+            return jsonify({
+                'documents': [],
+                'total': 0,
+                'last_updated': datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat() if MAIN_KB_FILE.exists() else None,
+                'error': str(exc),
+                'mode': 'main_kb_v2'
+            })
+    
+    # Fall back to old science-only JSONL
+    if SCIENCE_ENTRIES_FILE.exists():
+        try:
+            documents = []
+            with open(SCIENCE_ENTRIES_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        documents.append(json.loads(line))
+            
+            preview = documents[-5:]
+            return jsonify({
+                'documents': preview,
+                'total': len(documents),
+                'last_updated': datetime.fromtimestamp(SCIENCE_ENTRIES_FILE.stat().st_mtime).isoformat(),
+                'mode': 'science_only_old'
+            })
+        except json.JSONDecodeError as exc:
+            return jsonify({
+                'documents': [],
+                'total': 0,
+                'last_updated': datetime.fromtimestamp(SCIENCE_ENTRIES_FILE.stat().st_mtime).isoformat(),
+                'error': f'JSON decode error: {exc}',
+                'mode': 'science_only_old'
+            })
+        except Exception as exc:
+            return jsonify({
+                'documents': [],
+                'total': 0,
+                'last_updated': datetime.fromtimestamp(SCIENCE_ENTRIES_FILE.stat().st_mtime).isoformat(),
+                'error': str(exc),
+                'mode': 'science_only_old'
+            })
+    
+    # Fall back to full pipeline JSON
     if not JSON_FILE.exists():
         return jsonify({
             'documents': [],
             'total': 0,
             'last_updated': None,
-            'error': 'Knowledge base file not found.'
+            'error': 'Knowledge base file not found.',
+            'mode': 'none'
         })
 
     try:
@@ -618,7 +1029,8 @@ def json_preview():
                     'documents': [],
                     'total': 0,
                     'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
-                    'error': 'Knowledge base file is empty.'
+                    'error': 'Knowledge base file is empty.',
+                    'mode': 'full'
                 })
             data = json.loads(content)
 
@@ -631,24 +1043,151 @@ def json_preview():
         return jsonify({
             'documents': preview,
             'total': len(documents),
-            'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat()
+            'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
+            'mode': 'full'
         })
     except json.JSONDecodeError as exc:
         return jsonify({
             'documents': [],
             'total': 0,
             'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
-            'error': f'JSON decode error: {exc}'
+            'error': f'JSON decode error: {exc}',
+            'mode': 'full'
         })
     except Exception as exc:
         return jsonify({
             'documents': [],
             'total': 0,
             'last_updated': datetime.fromtimestamp(JSON_FILE.stat().st_mtime).isoformat(),
-            'error': str(exc)
+            'error': str(exc),
+            'mode': 'full'
         })
 
+@app.route('/api/verification')
+def verification_endpoint():
+    """Expose verification summary for dashboard consumption."""
+    return jsonify(get_verification_stats())
+
+
+@app.route('/api/health_digest')
+def health_digest_endpoint():
+    """Expose the structured St. Louis health digest snapshot."""
+    return jsonify(get_health_digest_stats())
+
+
+# ============================================================================
+# PDF Upload Endpoints
+# ============================================================================
+
+def allowed_file(filename):
+    """Check if file has allowed extension."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/api/upload/pdfs', methods=['POST'])
+def upload_pdfs():
+    """Handle PDF file uploads."""
+    try:
+        if 'files' not in request.files:
+            return jsonify({'error': 'No files provided'}), 400
+        
+        files = request.files.getlist('files')
+        if not files or files[0].filename == '':
+            return jsonify({'error': 'No files selected'}), 400
+        
+        uploaded_files = []
+        errors = []
+        
+        for file in files:
+            if file and allowed_file(file.filename):
+                # Secure the filename
+                filename = secure_filename(file.filename)
+                
+                # Check if file already exists
+                filepath = UPLOAD_FOLDER / filename
+                if filepath.exists():
+                    errors.append(f"{filename}: Already exists")
+                    continue
+                
+                # Save the file
+                file.save(str(filepath))
+                uploaded_files.append({
+                    'filename': filename,
+                    'size': filepath.stat().st_size,
+                    'uploaded_at': datetime.now().isoformat()
+                })
+            else:
+                errors.append(f"{file.filename}: Invalid file type (must be PDF)")
+        
+        # Count total PDFs in corpus
+        total_pdfs = len(list(UPLOAD_FOLDER.glob('*.pdf')))
+        
+        return jsonify({
+            'success': True,
+            'uploaded': uploaded_files,
+            'errors': errors,
+            'total_pdfs': total_pdfs,
+            'message': f"Successfully uploaded {len(uploaded_files)} PDF(s)"
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/upload/list', methods=['GET'])
+def list_pdfs():
+    """List all PDFs in the corpus."""
+    try:
+        pdfs = []
+        for pdf_file in sorted(UPLOAD_FOLDER.glob('*.pdf')):
+            stat = pdf_file.stat()
+            pdfs.append({
+                'filename': pdf_file.name,
+                'size': stat.st_size,
+                'size_mb': round(stat.st_size / (1024 * 1024), 2),
+                'modified': datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+        
+        return jsonify({
+            'pdfs': pdfs,
+            'total': len(pdfs)
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/upload/delete/<filename>', methods=['DELETE'])
+def delete_pdf(filename):
+    """Delete a PDF from the corpus."""
+    try:
+        filename = secure_filename(filename)
+        filepath = UPLOAD_FOLDER / filename
+        
+        if not filepath.exists():
+            return jsonify({'error': 'File not found'}), 404
+        
+        filepath.unlink()
+        
+        total_pdfs = len(list(UPLOAD_FOLDER.glob('*.pdf')))
+        
+        return jsonify({
+            'success': True,
+            'message': f"Deleted {filename}",
+            'total_pdfs': total_pdfs
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Launch Enlitens dashboard server.")
+    parser.add_argument("--port", type=int, default=5000, help="Port to bind the dashboard on.")
+    args = parser.parse_args()
+
     print("🚀 Starting Enhanced Enlitens Dashboard...")
-    print("📊 Dashboard: http://localhost:5000")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    print(f"📊 Dashboard: http://localhost:{args.port}")
+    app.run(host='0.0.0.0', port=args.port, debug=False)

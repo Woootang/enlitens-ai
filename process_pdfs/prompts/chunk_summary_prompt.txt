@@ -1,0 +1,33 @@
+You are assisting with deep scientific extraction by summarizing a single chunk of a research paper.
+
+Focus on capturing ALL salient details from this chunk. Produce ONLY a JSON object with the structure below.
+
+**Instructions**
+1. Read the chunk carefully and extract every important detail.
+2. Preserve exact numbers, statistics, effect sizes, p-values, confidence intervals, sample sizes, time frames, dosages, etc.
+3. Quote critical sentences verbatim when they contain definitions, hypotheses, or pivotal findings.
+4. Include every citation mentioned in the chunk.
+5. Keep each string richly detailed (minimum 400 characters for `chunk_summary`).
+6. Do not include raw double quotes (`"`) anywhere inside string values—use single quotes or escape as `\"`.
+7. Output must be plain JSON with no markdown, commentary, or trailing characters.
+
+**JSON Schema**
+```json
+{
+  "chunk_index": {CHUNK_INDEX},
+  "chunk_summary": "Comprehensive narrative describing everything in this chunk (400-800 characters).",
+  "background_points": ["Detailed context or theory statements..."],
+  "method_points": ["Detailed methods/procedures from this chunk..."],
+  "finding_points": ["All results and observations with full context..."],
+  "statistics": ["Every statistic encountered with units and interpretation..."],
+  "limitations": ["Any caveats or concerns mentioned in this chunk..."],
+  "citations": ["Author et al. (Year)", "..."],
+  "verbatim_quotes": ["Quote key sentences verbatim for auditing..."]
+}
+```
+
+**Now summarize CHUNK {CHUNK_INDEX}:**
+```
+{CHUNK_TEXT}
+```
+

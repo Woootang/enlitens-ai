@@ -1,0 +1,7 @@
+# Domains approved for automated fetching.
+# Add entries as lowercase hostnames, one per line.
+- cdc.gov
+- data.cdc.gov
+- stlouis-mo.gov
+- data.stlouis-mo.gov
+- health.mo.gov

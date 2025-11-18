@@ -44,6 +44,8 @@ class ClinicalSynthesisAgent(BaseAgent):
             science_data = context.get("science_data", {})
             research_content = science_data.get("research_content", {})
             document_text = context.get("document_text", "")[:5000]  # First 5000 chars
+            pipeline_mode = (context.get("pipeline_mode") or "").lower()
+            fast_mode = pipeline_mode == "science_only"
 
             few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
                 task="clinical_synthesis",
@@ -55,6 +57,9 @@ class ClinicalSynthesisAgent(BaseAgent):
                 "FEW-SHOT EXEMPLARS (mirror structure, mark speculation clearly):\n"
                 f"{few_shot_block}\n\n" if few_shot_block else ""
             )
+            
+            # Adjust item counts for science_only mode to prevent truncation
+            item_range = "2-5" if fast_mode else "3-8"
 
             prompt = f"""
 You are a clinical psychologist extracting therapeutic applications from neuroscience research.
@@ -84,26 +89,26 @@ Extract and synthesize clinical content from this research. Base all clinical ap
 
 Generate content for ALL fields below:
 
-1. INTERVENTIONS: List 3-8 specific therapeutic interventions or techniques that could be applied based on this research. Include evidence-based practices, neuroscience-informed approaches, and practical therapy techniques.
+1. INTERVENTIONS: List {item_range} specific therapeutic interventions or techniques that could be applied based on this research. Include evidence-based practices, neuroscience-informed approaches, and practical therapy techniques.
 
-2. ASSESSMENTS: List 3-8 assessment methods or evaluation tools that would be relevant. Include diagnostic tools, measurement instruments, observational methods, and screening approaches.
+2. ASSESSMENTS: List {item_range} assessment methods or evaluation tools that would be relevant. Include diagnostic tools, measurement instruments, observational methods, and screening approaches.
 
-3. OUTCOMES: List 3-8 expected clinical outcomes or treatment goals. What changes should clients experience? Include behavioral, cognitive, emotional, and neurobiological outcomes.
+3. OUTCOMES: List {item_range} expected clinical outcomes or treatment goals. What changes should clients experience? Include behavioral, cognitive, emotional, and neurobiological outcomes.
 
-4. PROTOCOLS: List 3-8 treatment protocols or structured approaches. Include session structures, treatment phases, or therapeutic frameworks that could be used.
+4. PROTOCOLS: List {item_range} treatment protocols or structured approaches. Include session structures, treatment phases, or therapeutic frameworks that could be used.
 
-5. GUIDELINES: List 3-8 clinical guidelines or best practices. Include recommendations for implementation, ethical considerations, and evidence-based standards.
+5. GUIDELINES: List {item_range} clinical guidelines or best practices. Include recommendations for implementation, ethical considerations, and evidence-based standards.
 
-6. CONTRAINDICATIONS: List 3-8 contraindications or situations where caution is needed. When should these approaches NOT be used? Who should avoid them?
+6. CONTRAINDICATIONS: List {item_range} contraindications or situations where caution is needed. When should these approaches NOT be used? Who should avoid them?
 
-7. SIDE EFFECTS: List 3-8 potential side effects or risks to monitor. What could go wrong? What should therapists watch for?
+7. SIDE EFFECTS: List {item_range} potential side effects or risks to monitor. What could go wrong? What should therapists watch for?
 
-8. MONITORING: List 3-8 monitoring approaches or progress indicators. How should therapists track progress? What metrics matter?
+8. MONITORING: List {item_range} monitoring approaches or progress indicators. How should therapists track progress? What metrics matter?
 
 IMPORTANT:
 - Extract liberally - if research mentions anxiety, include anxiety assessment tools and interventions
 - Infer practical applications from theoretical findings
-- Each list should have 3-8 items minimum
+- Keep responses concise - aim for the lower end of the range
 - Use plain language, no numbering or bullet points in strings
 - If a field seems not applicable, still provide related content (e.g., general best practices)
 

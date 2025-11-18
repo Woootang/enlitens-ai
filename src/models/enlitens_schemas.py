@@ -332,9 +332,17 @@ class EnlitensKnowledgeEntry(BaseModel):
     clinical_content: ClinicalContent = Field(description="Clinical content")
     research_content: ResearchContent = Field(description="Research content")
     content_creation_ideas: ContentCreationIdeas = Field(description="Content creation ideas")
+    health_report_digest: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Structured Liz-voice St. Louis health digest used during processing",
+    )
     self_consistency: Optional[Dict[str, Any]] = Field(
         default=None,
         description="Self-consistency voting metadata for research extraction",
+    )
+    verification: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Verification metadata for context curation and final output judges",
     )
 
     # New field for verification
@@ -392,3 +400,64 @@ class EnlitensKnowledgeBase(BaseModel):
                 "documents": []
             }
         }
+
+
+class ScienceQuote(BaseModel):
+    """Verbatim snippets or statistics captured for downstream reuse."""
+    text: str = Field(description="Direct quote or statistic pulled from the paper")
+    citation: Optional[str] = Field(default=None, description="Optional inline citation or author-year string")
+    section: Optional[str] = Field(default=None, description="Section or page reference if available")
+
+
+class ScienceTranslationSummary(BaseModel):
+    """Lightweight translation of research findings for clinicians and clients."""
+    clinician_notes: Optional[str] = Field(default=None, description="Key mechanisms or clinical framing")
+    client_ready_takeaways: List[str] = Field(default_factory=list, description="Plain-language statements for clients")
+    translation_source: Optional[str] = Field(
+        default=None,
+        description="Source of the translation (e.g., clinical_synthesis agent, manual)",
+    )
+
+
+class ScienceStudyMetadata(BaseModel):
+    """Metadata and provenance for a science-only knowledge base record."""
+    document_id: str = Field(description="Unique identifier derived from filename")
+    title: str = Field(description="Paper title if detected")
+    doi: Optional[str] = Field(default=None, description="Digital Object Identifier")
+    pmid: Optional[str] = Field(default=None, description="PubMed identifier when available")
+    journal: Optional[str] = Field(default=None, description="Journal name")
+    publication_date: Optional[str] = Field(default=None, description="Publication date string")
+    authors: List[str] = Field(default_factory=list, description="List of author names")
+    keywords: List[str] = Field(default_factory=list, description="Keywords or topical tags")
+    ingestion_timestamp: datetime = Field(default_factory=datetime.utcnow, description="UTC timestamp of ingestion")
+    source_filename: str = Field(description="Original PDF filename")
+    source_sha256: str = Field(description="Checksum of the source PDF for provenance")
+    text_sha256: str = Field(description="Checksum of the extracted text blob")
+    revision: int = Field(default=1, description="Monotonic revision counter for the document")
+    pipeline_mode: str = Field(default="full", description="Pipeline mode used to generate this record")
+    word_count: Optional[int] = Field(default=None, description="Word count of extracted text")
+    page_count: Optional[int] = Field(default=None, description="Page count if detected")
+
+
+class ScienceExtractionRecord(BaseModel):
+    """Science-first knowledge base entry stored in JSONL/manifest form."""
+    metadata: ScienceStudyMetadata = Field(description="Provenance and ingestion metadata")
+    research_content: ResearchContent = Field(description="Structured research outputs from ScienceExtraction")
+    clinical_translation: Optional[ClinicalContent] = Field(
+        default=None,
+        description="Clinical synthesis output to provide translational framing",
+    )
+    extracted_entities: ExtractedEntities = Field(description="Structured entities for retrieval and graphing")
+    quotes: List[ScienceQuote] = Field(default_factory=list, description="Key quotes/statistics with provenance")
+    translation_summary: Optional[ScienceTranslationSummary] = Field(
+        default=None,
+        description="Quick summary for clinicians or downstream agents",
+    )
+    health_digest: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Regional health digest snapshot used during extraction",
+    )
+    source_text_path: Optional[str] = Field(
+        default=None,
+        description="Path to the persisted full-text markdown for this paper",
+    )

@@ -3,6 +3,8 @@ GPU Memory Manager - Monitor and optimize GPU memory usage
 """
 
 import logging
+import os
+import time
 import torch
 from typing import Optional, Dict
 
@@ -22,6 +24,8 @@ class GPUMemoryManager:
             self.device_count = 0
             self.device_name = "CPU"
             self.total_memory = 0
+        self._skip_gpu_clear_flag = os.getenv("ENLITENS_SKIP_GPU_CLEAR", "").lower() in {"1", "true", "yes", "on"}
+        self._skip_gpu_clear_logged = False
     
     def get_memory_stats(self, device: int = 0) -> Dict[str, float]:
         """Get current GPU memory statistics."""
@@ -63,6 +67,16 @@ class GPUMemoryManager:
         """Clear GPU cache to free up memory."""
         if not self.cuda_available:
             return
+        if not torch.cuda.is_initialized():
+            if not self._skip_gpu_clear_logged:
+                logger.info("⏭️ Skipping torch.cuda.empty_cache(); CUDA runtime not initialized in this process.")
+                self._skip_gpu_clear_logged = True
+            return
+        if self._should_skip_gpu_clear():
+            if not self._skip_gpu_clear_logged:
+                logger.info("⏭️ Skipping torch.cuda.empty_cache(); GPU is held by vLLM/another process.")
+                self._skip_gpu_clear_logged = True
+            return
         
         try:
             torch.cuda.empty_cache()
@@ -70,10 +84,15 @@ class GPUMemoryManager:
                 torch.cuda.synchronize(device)
             else:
                 torch.cuda.synchronize()
-            
             logger.info("✅ GPU cache cleared")
         except Exception as e:
-            logger.warning(f"Failed to clear GPU cache: {e}")
+            if "out of memory" in str(e).lower():
+                self._skip_gpu_clear_flag = True
+                if not self._skip_gpu_clear_logged:
+                    logger.info("⏭️ Disabling torch.cuda.empty_cache(); external process holds GPU memory (%s)", e)
+                    self._skip_gpu_clear_logged = True
+            else:
+                logger.debug("torch.cuda.empty_cache() raised %s; deferring cleanup", e)
     
     def check_available_memory(self, required_gb: float, device: int = 0) -> bool:
         """Check if enough GPU memory is available."""
@@ -115,22 +134,41 @@ class GPUMemoryManager:
         
         try:
             import gc
-            
-            # Force Python garbage collection
+
             gc.collect()
-            
-            # Clear CUDA cache
             torch.cuda.empty_cache()
             torch.cuda.synchronize(device)
-            
-            # Reset peak memory stats
             torch.cuda.reset_peak_memory_stats(device)
-            
+
             logger.info("✅ Aggressive GPU cleanup completed")
             self.log_memory_stats("After cleanup")
-            
+
         except Exception as e:
-            logger.warning(f"Failed to force cleanup: {e}")
+            logger.debug("Failed to force cleanup: %s", e)
+
+    def _should_skip_gpu_clear(self, device: int = 0) -> bool:
+        """
+        Determine whether clearing the cache is safe.  When vLLM is active it
+        owns the majority of reserved memory, so torch.cuda.empty_cache()
+        surfaces noisy OOM warnings.  We skip when either an env flag is set or
+        when most of the reserved memory is not attributable to this process.
+        """
+        if self._skip_gpu_clear_flag or not self.cuda_available:
+            return True if self._skip_gpu_clear_flag else False
+
+        try:
+            reserved = torch.cuda.memory_reserved(device)
+            allocated = torch.cuda.memory_allocated(device)
+            if reserved == 0 and allocated == 0:
+                return True
+            if reserved == 0:
+                return False
+            # If allocated memory is tiny compared to reserved, assume an external process (vLLM) owns it.
+            external_fraction = 1.0 - (allocated / reserved)
+            return external_fraction > 0.75
+        except Exception:
+            # If introspection fails, err on the side of not clearing to avoid noisy warnings.
+            return True
 
 
 # Global instance

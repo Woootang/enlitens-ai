@@ -1,0 +1,19 @@
+[Unit]
+Description=Enlitens Dashboard (instance %i)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/antons-gs/enlitens-ai
+Environment=PYTHONPATH=/home/antons-gs/enlitens-ai
+Environment=ENVIRONMENT=production
+EnvironmentFile=-/etc/enlitens/enlitens.env
+ExecStart=/home/antons-gs/enlitens-ai/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:5000 dashboard.server:app
+Restart=on-failure
+RestartSec=5
+User=%i
+Group=%i
+
+[Install]
+WantedBy=multi-user.target
+

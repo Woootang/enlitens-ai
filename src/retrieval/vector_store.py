@@ -5,11 +5,15 @@ import hashlib
 import logging
 import math
 import os
+import uuid
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
+
+if not hasattr(np, "float_"):  # NumPy 2.x compatibility for libraries expecting np.float_
+    np.float_ = np.float64  # type: ignore[attr-defined]
 
 try:  # Optional dependency - only required for persistent usage
     import chromadb
@@ -273,7 +277,7 @@ class QdrantVectorStore(BaseVectorStore):
         if self.client is not None:
             points = [
                 qmodels.PointStruct(
-                    id=chunk["chunk_id"],
+                    id=self._normalize_point_id(chunk["chunk_id"]),
                     vector=embedding.tolist(),
                     payload={**chunk, **chunk.get("metadata", {})},
                 )
@@ -286,6 +290,20 @@ class QdrantVectorStore(BaseVectorStore):
                 "chunk": chunk,
                 "embedding": np.array(embedding),
             }
+
+    @staticmethod
+    def _normalize_point_id(chunk_id: Any) -> Union[str, int]:
+        """Ensure chunk identifiers comply with Qdrant's UUID/int requirements."""
+        if isinstance(chunk_id, (int, np.integer)):
+            return int(chunk_id)
+        text = str(chunk_id or "").strip()
+        if not text:
+            text = uuid.uuid4().hex
+        try:
+            uuid.UUID(text)
+            return text
+        except (ValueError, TypeError):
+            return str(uuid.uuid5(uuid.NAMESPACE_URL, text))
 
     def search(
         self,
@@ -442,7 +460,7 @@ class ChromaVectorStore(BaseVectorStore):
         self.client: ChromaClient = chromadb.PersistentClient(path=persist_path)
         try:
             self.collection = self.client.get_collection(collection_name)
-        except InvalidCollectionException:
+        except Exception:
             logger.info("Creating Chroma collection %s at %s", collection_name, persist_path)
             self.collection = self.client.create_collection(collection_name)
 
@@ -456,8 +474,21 @@ class ChromaVectorStore(BaseVectorStore):
         )
 
         ids = [str(chunk["chunk_id"]) for chunk in chunks]
-        metadatas = [{**chunk, **chunk.get("metadata", {})} for chunk in chunks]
-        documents = [chunk.get("text", "") for chunk in chunks]
+        metadatas = []
+        documents = []
+
+        for chunk in chunks:
+            # Avoid nesting complex objects (e.g., the "metadata" dict itself) in Chroma metadata.
+            base = {k: v for k, v in chunk.items() if k not in {"text", "metadata"}}
+            extra = chunk.get("metadata") or {}
+            flat_metadata: Dict[str, Any] = {**base}
+            for key, value in extra.items():
+                if isinstance(value, (str, int, float, bool)) or value is None:
+                    flat_metadata[key] = value
+                else:
+                    flat_metadata[key] = str(value)
+            metadatas.append(flat_metadata)
+            documents.append(chunk.get("text", ""))
 
         self.collection.upsert(
             ids=ids,

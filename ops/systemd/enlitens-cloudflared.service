@@ -1,0 +1,16 @@
+[Unit]
+Description=Enlitens Cloudflare Tunnel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/enlitens/cloudflared.env
+ExecStart=/usr/bin/cloudflared --config /etc/cloudflared/config.yml tunnel run ${CF_TUNNEL_NAME}
+Restart=on-failure
+User=%i
+Group=%i
+
+[Install]
+WantedBy=multi-user.target
+

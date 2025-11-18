@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Knowledge Base Output</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e1a;
+            color: #e4e7eb;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { color: #60a5fa; margin-bottom: 10px; }
+        .stats {
+            background: #1a1f2e;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #2d3748;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item { 
+            background: #0f1419;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #60a5fa;
+        }
+        .stat-label { color: #9ca3af; font-size: 0.9em; }
+        .stat-value { color: #60a5fa; font-size: 1.5em; font-weight: bold; margin-top: 5px; }
+        .documents {
+            display: grid;
+            gap: 20px;
+        }
+        .document {
+            background: #1a1f2e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2d3748;
+        }
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2d3748;
+        }
+        .doc-title { color: #60a5fa; font-size: 1.2em; font-weight: bold; }
+        .doc-id { color: #9ca3af; font-size: 0.9em; }
+        .section {
+            margin: 15px 0;
+            padding: 15px;
+            background: #0f1419;
+            border-radius: 6px;
+        }
+        .section-title {
+            color: #34d399;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .field {
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1f2e;
+            border-radius: 4px;
+        }
+        .field-label {
+            color: #9ca3af;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .field-value {
+            color: #e4e7eb;
+            line-height: 1.6;
+        }
+        .list-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #0a0e1a;
+            border-left: 2px solid #60a5fa;
+            border-radius: 3px;
+        }
+        .error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #1e40af;
+            color: #93c5fd;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Science Knowledge Base Output</h1>
+        <p style="color: #9ca3af; margin-bottom: 20px;">Real-time view of processed research documents</p>
+        
+        <div class="stats">
+            <h2 style="color: #34d399; margin-bottom: 15px;">📊 Processing Statistics</h2>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total Documents</div>
+                    <div class="stat-value" id="total-docs">--</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Last Updated</div>
+                    <div class="stat-value" id="last-updated" style="font-size: 1em;">--</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Pipeline Mode</div>
+                    <div class="stat-value" id="pipeline-mode" style="font-size: 1em;">--</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">File Size</div>
+                    <div class="stat-value" id="file-size">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content" class="loading">Loading...</div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('/api/json_preview');
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('total-docs').textContent = data.total || 0;
+                document.getElementById('last-updated').textContent = data.last_updated ? 
+                    new Date(data.last_updated).toLocaleString() : 'N/A';
+                document.getElementById('pipeline-mode').textContent = data.mode || 'unknown';
+                
+                // Get file size from metrics
+                const metricsResp = await fetch('/api/metrics');
+                const metrics = await metricsResp.json();
+                const sizeKB = Math.round((metrics.json?.size || 0) / 1024);
+                document.getElementById('file-size').textContent = sizeKB > 0 ? `${sizeKB} KB` : '--';
+                
+                if (data.error) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="error">
+                            <strong>Error:</strong> ${data.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (!data.documents || data.documents.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="loading">No documents processed yet. Pipeline is running...</div>
+                    `;
+                    return;
+                }
+                
+                // Render documents
+                const html = data.documents.map(doc => {
+                    const metadata = doc.metadata || {};
+                    const science = doc.science_extraction || {};
+                    const clinical = doc.clinical_synthesis || {};
+                    
+                    return `
+                        <div class="document">
+                            <div class="doc-header">
+                                <div>
+                                    <div class="doc-title">${metadata.title || 'Untitled'}</div>
+                                    <div class="doc-id">ID: ${metadata.document_id || 'N/A'}</div>
+                                </div>
+                                <div>
+                                    <span class="badge">${metadata.pipeline_mode || 'unknown'}</span>
+                                </div>
+                            </div>
+                            
+                            ${science.key_findings ? `
+                                <div class="section">
+                                    <div class="section-title">🔬 Key Scientific Findings</div>
+                                    ${science.key_findings.map(f => `
+                                        <div class="list-item">${f}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${science.mechanisms ? `
+                                <div class="section">
+                                    <div class="section-title">⚙️ Mechanisms</div>
+                                    ${science.mechanisms.map(m => `
+                                        <div class="list-item">${m}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${clinical.interventions ? `
+                                <div class="section">
+                                    <div class="section-title">⚕️ Clinical Interventions</div>
+                                    ${clinical.interventions.map(i => `
+                                        <div class="list-item">${i}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${clinical.assessment_tools ? `
+                                <div class="section">
+                                    <div class="section-title">📋 Assessment Tools</div>
+                                    ${clinical.assessment_tools.map(t => `
+                                        <div class="list-item">${t}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${science.practical_applications ? `
+                                <div class="section">
+                                    <div class="section-title">💡 Practical Applications</div>
+                                    ${science.practical_applications.map(a => `
+                                        <div class="list-item">${a}</div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('content').innerHTML = `
+                    <h2 style="color: #34d399; margin: 20px 0;">📚 Recent Documents (Last 5)</h2>
+                    <div class="documents">${html}</div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <strong>Failed to load data:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Load data immediately and refresh every 10 seconds
+        loadData();
+        setInterval(loadData, 10000);
+    </script>
+</body>
+</html>
+

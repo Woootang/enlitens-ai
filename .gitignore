@@ -1,41 +1,54 @@
+# Python virtual environments
 venv/
-venv/
-*.zip
-*.env
-*.env.*
-enlitens_corpus/
-pipeline_output/
-*.log
-*.json.temp
-.DS_Store
+venv_models/
+.venv/
+.venv_vllm/
+.venv_proc/
 
-# Python
+# Python cache and bytecode
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
- 
-# Local virtualenvs
-.venv/
-.venv_vllm/
 
-# Do not commit large/binary artifacts
-*.pdf
-models/
-cache/
+# Environment variables and secrets
+*.env
+*.env.*
+
+# Data directories (large files)
+enlitens_corpus/
+enlitens_knowledge_base/*.jsonl
+data/vector_store/
+data/neo4j/
+backups/
+
+# Logs and cache
 logs/
+logs_live/
+cache/
+tmp/
+*.log
 
-# Broader temp JSON artifacts
+# Model files (large)
+models/
+*.pdf
+
+# Temporary files
 *.json.temp*
+*.zip
+.DS_Store
+
+# Database files
+qdrant_storage/
+qdrant_storage_test/
 
 # CI/CD
 .circleci/
 .github/
 
-# VSCode
+# IDE
 .vscode/
 
-# Custom
-.venv_proc/
+# Cloudflare
 cloudflared

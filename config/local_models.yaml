@@ -1,0 +1,9 @@
+llama:
+  model_name: models/llama-3.1-8b-instruct
+  base_url: http://localhost:8000/v1
+  start_command: bash scripts/start_local_model.sh llama
+  stop_command: bash scripts/stop_local_model.sh llama
+  description: >
+    Meta Llama 3.1 8B Instruct (128k context). Use when evaluating the
+    general-purpose baseline.
+

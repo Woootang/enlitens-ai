@@ -12,6 +12,14 @@ from langgraph.graph import StateGraph, END
 from .base_agent import BaseAgent
 from .science_extraction_agent import ScienceExtractionAgent
 from .clinical_synthesis_agent import ClinicalSynthesisAgent
+from .live_local_news_agent import LiveLocalNewsAgent
+from .policy_monitor_agent import PolicyMonitorAgent
+from .resource_intake_agent import ResourceIntakeAgent
+from .event_finder_agent import EventFinderAgent
+from .research_update_agent import ResearchUpdateAgent
+from .myth_scraper_agent import MythScraperAgent
+from .community_impact_mapper import CommunityImpactMapper
+from .symptom_trend_tracker_agent import SymptomTrendTrackerAgent
 from .founder_voice_agent import FounderVoiceAgent
 from .context_rag_agent import ContextRAGAgent
 from .marketing_seo_agent import MarketingSEOAgent
@@ -50,7 +58,6 @@ class SupervisorAgent(BaseAgent):
         self.doc_type_shortcuts: Dict[str, Dict[str, Any]] = {
             "science_only": {
                 "skip": {
-                    "clinical_synthesis",
                     "educational_content",
                     "rebellion_framework",
                     "founder_voice",
@@ -78,6 +85,14 @@ class SupervisorAgent(BaseAgent):
         try:
             logger.info("Initializing Supervisor Agent and all specialized agents...")
             self.agents = {
+                "live_local_news": LiveLocalNewsAgent(),
+                "policy_monitor": PolicyMonitorAgent(),
+                "resource_intake": ResourceIntakeAgent(),
+                "event_finder": EventFinderAgent(),
+                "research_update": ResearchUpdateAgent(),
+                "myth_scraper": MythScraperAgent(),
+                "community_impact": CommunityImpactMapper(),
+                "symptom_trend_tracker": SymptomTrendTrackerAgent(),
                 "science_extraction": ScienceExtractionAgent(),
                 "clinical_synthesis": ClinicalSynthesisAgent(),
                 "educational_content": EducationalContentAgent(),
@@ -139,6 +154,14 @@ class SupervisorAgent(BaseAgent):
         graph = StateGraph(WorkflowState)
 
         graph.add_node("entry", self._entry_node)
+        graph.add_node("live_local_news", self._live_news_node)
+        graph.add_node("policy_monitor", self._policy_node)
+        graph.add_node("resource_intake", self._resource_node)
+        graph.add_node("event_finder", self._event_node)
+        graph.add_node("research_update", self._research_update_node)
+        graph.add_node("myth_scraper", self._myth_node)
+        graph.add_node("community_impact", self._community_node)
+        graph.add_node("symptom_trend_tracker", self._symptom_node)
         graph.add_node("science_extraction", self._science_node)
         graph.add_node("context_rag", self._context_node)
         graph.add_node("clinical_synthesis", self._clinical_node)
@@ -149,8 +172,16 @@ class SupervisorAgent(BaseAgent):
         graph.add_node("validation", self._validation_node)
 
         graph.set_entry_point("entry")
-        graph.add_edge("entry", "science_extraction")
-        graph.add_edge("entry", "context_rag")
+        graph.add_edge("entry", "live_local_news")
+        graph.add_edge("live_local_news", "policy_monitor")
+        graph.add_edge("policy_monitor", "resource_intake")
+        graph.add_edge("resource_intake", "event_finder")
+        graph.add_edge("event_finder", "research_update")
+        graph.add_edge("research_update", "myth_scraper")
+        graph.add_edge("myth_scraper", "community_impact")
+        graph.add_edge("community_impact", "symptom_trend_tracker")
+        graph.add_edge("symptom_trend_tracker", "science_extraction")
+        graph.add_edge("symptom_trend_tracker", "context_rag")
         graph.add_edge("science_extraction", "clinical_synthesis")
         graph.add_edge("context_rag", "clinical_synthesis")
         graph.add_edge("clinical_synthesis", "educational_content")
@@ -179,6 +210,19 @@ class SupervisorAgent(BaseAgent):
             cache_prefix=payload.get("cache_prefix", payload.get("document_id", "doc")),
             cache_chunk_id=payload.get("cache_chunk_id", f"{payload.get('document_id', 'doc')}:root"),
         )
+        for key in (
+            "regional_context",
+            "regional_digest_chunks",
+            "regional_prompt_block",
+            "language_profile",
+            "analytics_insights",
+            "language_watchouts",
+            "persona_summary",
+            "rag_seed_chunks",
+            "health_report_text",
+        ):
+            if key in payload:
+                state[key] = payload[key]
 
         final_state = await self.workflow_graph.ainvoke(state)
         return self._finalize_output(final_state)
@@ -232,6 +276,46 @@ class SupervisorAgent(BaseAgent):
             "skip_nodes": skip_nodes,
             "metadata": {**state.get("metadata", {}), **metadata},
         }
+
+    async def _live_news_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload = {"document_text": state["document_text"]}
+        result = await self._run_agent_with_retry("live_local_news", state, payload)
+        return self._merge_results(state, "live_local_news", result, "live_news_result")
+
+    async def _policy_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {}
+        result = await self._run_agent_with_retry("policy_monitor", state, payload)
+        return self._merge_results(state, "policy_monitor", result, "policy_result")
+
+    async def _resource_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload = {"client_insights": state.get("client_insights") or {}}
+        result = await self._run_agent_with_retry("resource_intake", state, payload)
+        return self._merge_results(state, "resource_intake", result, "resource_result")
+
+    async def _event_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {}
+        result = await self._run_agent_with_retry("event_finder", state, payload)
+        return self._merge_results(state, "event_finder", result, "event_result")
+
+    async def _research_update_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload = {"document_text": state["document_text"]}
+        result = await self._run_agent_with_retry("research_update", state, payload)
+        return self._merge_results(state, "research_update", result, "research_update_result")
+
+    async def _myth_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload = {"document_text": state["document_text"]}
+        result = await self._run_agent_with_retry("myth_scraper", state, payload)
+        return self._merge_results(state, "myth_scraper", result, "myth_result")
+
+    async def _community_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload = {"st_louis_context": state.get("st_louis_context"), "client_insights": state.get("client_insights")}
+        result = await self._run_agent_with_retry("community_impact", state, payload)
+        return self._merge_results(state, "community_impact", result, "community_impact_result")
+
+    async def _symptom_node(self, state: WorkflowState) -> Dict[str, Any]:
+        payload = {"document_text": state["document_text"]}
+        result = await self._run_agent_with_retry("symptom_trend_tracker", state, payload)
+        return self._merge_results(state, "symptom_trend_tracker", result, "symptom_trend_result")
 
     async def _science_node(self, state: WorkflowState) -> Dict[str, Any]:
         if "science_extraction" in state.get("skip_nodes", set()):
@@ -310,6 +394,14 @@ class SupervisorAgent(BaseAgent):
             "document_text": state["document_text"],
             "science_data": state.get("science_result") or {},
             "clinical_content": state.get("clinical_result") or {},
+            "client_insights": state.get("client_insights") or {},
+            "st_louis_context": state.get("st_louis_context") or {},
+             "regional_context": state.get("regional_context") or state.get("st_louis_context") or {},
+             "regional_digest_chunks": state.get("regional_digest_chunks") or [],
+             "regional_prompt_block": state.get("regional_prompt_block"),
+             "language_profile": state.get("language_profile") or {},
+             "language_watchouts": state.get("language_watchouts") or {},
+            "curated_context": state.get("context_result") or {},
         }
         result = await self._run_agent_with_retry("educational_content", state, payload)
         return self._merge_results(state, "educational_content", result, "educational_result")
@@ -353,6 +445,14 @@ class SupervisorAgent(BaseAgent):
             "enhanced_data": state.get("intermediate_results", {}),
             "document_id": state["document_id"],
             "document_text": state["document_text"],
+            "client_insights": state.get("client_insights") or {},
+            "st_louis_context": state.get("st_louis_context") or {},
+            "regional_context": state.get("regional_context") or state.get("st_louis_context") or {},
+            "regional_digest_chunks": state.get("regional_digest_chunks") or [],
+            "regional_prompt_block": state.get("regional_prompt_block"),
+            "language_profile": state.get("language_profile") or {},
+            "language_watchouts": state.get("language_watchouts") or {},
+            "curated_context": state.get("context_result") or {},
         }
         result = await self._run_agent_with_retry("founder_voice", state, payload)
         return self._merge_results(state, "founder_voice", result, "founder_voice_result")
@@ -380,7 +480,20 @@ class SupervisorAgent(BaseAgent):
         if state.get("marketing_completed", False):
             return {"stage": "marketing_done"}
 
-        payload = {"final_context": state.get("intermediate_results", {})}
+        final_context = dict(state.get("intermediate_results") or {})
+        final_context.setdefault("client_insights", state.get("client_insights") or {})
+        final_context.setdefault("st_louis_context", state.get("st_louis_context") or {})
+        final_context.setdefault("regional_context", state.get("regional_context") or state.get("st_louis_context") or {})
+        final_context.setdefault("regional_digest_chunks", state.get("regional_digest_chunks") or [])
+        final_context.setdefault("regional_prompt_block", state.get("regional_prompt_block"))
+        final_context.setdefault("curated_context", state.get("context_result") or {})
+        final_context.setdefault("language_profile", state.get("language_profile") or {})
+        final_context.setdefault("analytics_insights", state.get("analytics_insights") or {})
+        final_context.setdefault("language_watchouts", state.get("language_watchouts") or {})
+        final_context.setdefault("persona_summary", state.get("persona_summary") or {})
+        final_context.setdefault("rag_seed_chunks", state.get("rag_seed_chunks") or [])
+        final_context.setdefault("health_report_text", state.get("health_report_text") or "")
+        payload = {"final_context": final_context}
         result = await self._run_agent_with_retry("marketing_seo", state, payload)
         merged = self._merge_results(state, "marketing_seo", result, "marketing_result")
         merged.update({"marketing_completed": True})
@@ -501,14 +614,13 @@ class SupervisorAgent(BaseAgent):
         quality_score = 0.0
         confidence_score = 0.0
         validation_passed = False
-        if state.get("validation_result"):
-            quality_score = state.get("validation_result").get("quality_scores", {}).get(
-                "overall_quality", 0.0
-            )
-            confidence_score = state.get("validation_result").get("confidence_scoring", {}).get(
-                "confidence_score", 0.0
-            )
-            validation_passed = quality_score >= self.quality_thresholds["minimum_quality"]
+        validation_payload = state.get("validation_result") or {}
+        if validation_payload:
+            quality_score = validation_payload.get("quality_scores", {}).get("overall_quality", 0.0)
+            confidence_score = validation_payload.get("confidence_scoring", {}).get("confidence_score", 0.0)
+            validation_passed = validation_payload.get("final_validation", {}).get("passed")
+            if validation_passed is None:
+                validation_passed = quality_score >= self.quality_thresholds["minimum_quality"]
 
         final_output = {
             "document_id": state["document_id"],
@@ -520,10 +632,16 @@ class SupervisorAgent(BaseAgent):
             "quality_score": quality_score,
             "confidence_score": confidence_score,
             "validation_passed": validation_passed,
-            "retry_metadata": state.get("validation_result", {}).get("retry_metadata", {}),
+            "retry_metadata": validation_payload.get("retry_metadata", {}),
+            "validation_warnings": validation_payload.get("warnings", []),
+            "quality_breakdown": validation_payload.get("quality_scores", {}),
+            "verification_report": validation_payload.get("verification_report", {}),
+            "citation_report": validation_payload.get("citation_report", {}),
+            "review_checklist": validation_payload.get("review_checklist", []),
             "retry_counts": state.get("attempt_counters", {}),
             "completed_nodes": state.get("completed_nodes", {}),
             "metadata": as_dict(state).get("metadata", {}),
+            "compliance_message": "Educational content only. This is not medical advice. Discuss any changes with your clinician.",
         }
 
         self.processing_history.append(

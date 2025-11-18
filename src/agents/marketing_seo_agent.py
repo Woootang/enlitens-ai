@@ -4,7 +4,7 @@ Marketing SEO Agent - Generates marketing and SEO content.
 
 import json
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 
 from .base_agent import BaseAgent
 from src.models.enlitens_schemas import MarketingContent, SEOContent
@@ -15,6 +15,15 @@ logger = logging.getLogger(__name__)
 
 class MarketingSEOAgent(BaseAgent):
     """Agent specialized in marketing and SEO content generation."""
+
+    PERSONA_FALLBACK = (
+        "Primary audience: neurodivergent and trauma-survivor adults in St. Louis seeking "
+        "science-backed, validating care that respects their lived experience."
+    )
+    REGIONAL_FALLBACK = (
+        "St. Louis metro realities: legacy trauma from violence and segregation, ADHD/EF burdens, "
+        "access barriers (transportation, insurance gaps), and desire for culturally competent neuroscience care."
+    )
 
     def __init__(self):
         super().__init__(
@@ -44,6 +53,29 @@ class MarketingSEOAgent(BaseAgent):
             final_context = context.get("final_context", {})
             clinical_content = final_context.get("clinical_content", {})
             research_content = final_context.get("research_content", {})
+            curated_context = final_context.get("curated_context") or {}
+            persona_brief = self._build_persona_brief(
+                final_context.get("client_insights") or {}
+            )
+            regional_brief = self._build_regional_brief(
+                final_context.get("regional_context") or final_context.get("st_louis_context") or {},
+                final_context.get("regional_digest_chunks"),
+                final_context.get("regional_prompt_block"),
+            )
+            analytics_brief = self._build_analytics_brief(
+                (final_context.get("analytics_insights") or {}).get("queries")
+                or (final_context.get("language_profile") or {}).get("search_queries")
+                or [],
+                (final_context.get("analytics_insights") or {}).get("pages")
+                or (final_context.get("language_profile") or {}).get("landing_pages")
+                or [],
+            )
+            mechanism_bridge = self._build_mechanism_bridge(curated_context)
+            stats_block = self._build_local_stats(curated_context)
+            language_guardrails = self._build_language_guardrails(
+                curated_context.get("language_profile") or final_context.get("language_profile") or {},
+                final_context.get("language_watchouts") or {},
+            )
 
             research_findings = (
                 research_content.get("key_findings")
@@ -81,6 +113,24 @@ Compliance guardrails:
 - No testimonials, guarantees, or unverifiable claims.
 - Anchor messaging in St. Louis community needs.
 - Keep tone rebellious yet trauma-informed.
+
+Language guardrails:
+{language_guardrails}
+
+Audience Insights:
+{persona_brief}
+
+Regional Signals:
+{regional_brief}
+
+Mechanism ↔ Persona Bridge:
+{mechanism_bridge}
+
+Local Stats Primer:
+{stats_block}
+
+Analytics Signals:
+{analytics_brief}
 
 {marketing_examples}RESEARCH THEMES (inspiration only):
 {research_snippet}
@@ -130,7 +180,7 @@ Return ONLY valid JSON in this exact format:
             marketing_result = await marketing_client.generate_structured_response(
                 prompt=marketing_prompt,
                 response_model=MarketingContent,
-                temperature=0.3,
+                temperature=0.45,
                 max_retries=3,
                 use_cot_prompt=False,
                 enforce_grammar=True,
@@ -139,6 +189,24 @@ Return ONLY valid JSON in this exact format:
 
             seo_prompt = f"""
 Generate SEO-optimized content for Enlitens, a neuroscience-based therapy practice in St. Louis.
+
+Target Persona Signals:
+{persona_brief}
+
+Language Guardrails:
+{language_guardrails}
+
+Local Context:
+{regional_brief}
+
+Mechanism ↔ Persona Bridge:
+{mechanism_bridge}
+
+Local Stats Primer:
+{stats_block}
+
+Analytics Signals:
+{analytics_brief}
 
 RESEARCH THEMES (context):
 {research_snippet}
@@ -217,3 +285,130 @@ Return ONLY valid JSON in this exact format:
     async def cleanup(self):
         """Clean up resources."""
         logger.info(f"Cleaning up {self.name} agent")
+
+    def _build_persona_brief(self, persona: Dict[str, Any]) -> str:
+        if not persona:
+            return self.PERSONA_FALLBACK
+
+        lines = []
+        summary = persona.get("persona_summary") or {}
+        segments = summary.get("representative_segments") or persona.get("persona_segments") or []
+        if segments:
+            top = segments[0]
+            lines.append(
+                f"Focus persona: {top.get('name', 'Neurodivergent adult')} — {top.get('tagline', 'seeks science-backed relief')}."
+            )
+        top_audience_pain = summary.get("top_pain_points") or persona.get("audience_pain_points") or []
+        if top_audience_pain:
+            lines.append("Community pain points: " + ", ".join(top_audience_pain[:5]))
+        top_audience_keywords = summary.get("top_keywords") or persona.get("audience_keywords") or []
+        if top_audience_keywords:
+            lines.append("High-intent search terms: " + ", ".join(top_audience_keywords[:6]))
+        pain_points = persona.get("pain_points") or persona.get("challenges") or []
+        if pain_points:
+            lines.append("Pain points: " + ", ".join(pain_points[:5]))
+        priorities = persona.get("priorities") or []
+        if priorities:
+            lines.append("Goals: " + ", ".join(priorities[:4]))
+        themes = persona.get("key_themes") or []
+        if themes:
+            lines.append("Themes: " + ", ".join(themes[:4]))
+
+        enhanced = persona.get("enhanced_analysis") or {}
+        summary = enhanced.get("narrative_summary") or enhanced.get("summary")
+        if summary:
+            lines.append(self._truncate(summary, 200))
+        persona_prompt = persona.get("persona_prompt_block")
+        if persona_prompt:
+            lines.append("Persona guardrails:\n" + self._truncate(persona_prompt, 350))
+
+        if not lines:
+            return self.PERSONA_FALLBACK
+        return "\n".join(lines)
+
+    def _build_regional_brief(
+        self,
+        regional: Dict[str, Any],
+        digest_chunks: Optional[Any] = None,
+        prompt_block: Optional[str] = None,
+    ) -> str:
+        if not regional:
+            return self.REGIONAL_FALLBACK
+
+        lines = []
+        population = regional.get("population")
+        if population:
+            lines.append(f"Population: {population}")
+        challenges = regional.get("mental_health_challenges") or []
+        if challenges:
+            lines.append("Mental health pressures: " + ", ".join(challenges[:4]))
+        socioeconomic = regional.get("socioeconomic_factors") or []
+        if socioeconomic:
+            lines.append("Social determinants: " + ", ".join(socioeconomic[:3]))
+        summary_bullets = regional.get("summary_bullets") or []
+        if summary_bullets:
+            lines.append("Regional summary:\n- " + "\n- ".join(summary_bullets[:4]))
+        flashpoints = regional.get("cultural_flashpoints") or []
+        if flashpoints:
+            labels = [flash.get("label") for flash in flashpoints if isinstance(flash, dict)]
+            if labels:
+                lines.append("Flashpoints to name: " + ", ".join(label for label in labels[:4] if label))
+        stats = regional.get("key_statistics") or []
+        if stats:
+            lines.append("Key stats:\n- " + "\n- ".join(stats[:4]))
+        if digest_chunks:
+            chunk_preview = "\n\n".join(str(chunk) for chunk in digest_chunks[:2] if chunk)
+            if chunk_preview:
+                lines.append("Digest snapshot:\n" + self._truncate(chunk_preview, 400))
+        if prompt_block:
+            lines.append("Digest prompt block:\n" + self._truncate(prompt_block, 320))
+
+        if not lines:
+            return self.REGIONAL_FALLBACK
+        return "\n".join(lines)
+
+    def _build_mechanism_bridge(self, curated_context: Dict[str, Any], max_chars: int = 400) -> str:
+        bridge = (curated_context or {}).get("mechanism_bridge")
+        if bridge:
+            return self._truncate(str(bridge), max_chars)
+        return "Spell out how the paper's mechanism (CSA, inflammation, nervous system swings) maps to ADHD burnout, CPTSD vigilance, and sensory overload in St. Louis clients."
+
+    def _build_local_stats(self, curated_context: Dict[str, Any], max_items: int = 6) -> str:
+        stats = (curated_context or {}).get("local_stats") or []
+        if not stats:
+            return "- 39% of St. Louis adults report chronic stress tied to social inequity.\n- 1 in 3 neurodivergent adults cite executive burnout from community strain."
+        return "\n".join(f"- {stat}" for stat in stats[:max_items])
+
+    def _truncate(self, text: str, max_chars: int) -> str:
+        if len(text) <= max_chars:
+            return text
+        return text[: max_chars - 3].rstrip() + "..."
+
+    def _build_analytics_brief(self, queries: List[str], pages: List[str]) -> str:
+        if not queries and not pages:
+            return "Analytics snapshot unavailable — rely on persona keywords."
+        top_queries = ", ".join(query for query in queries[:5]) if queries else "N/A"
+        top_pages = ", ".join(page for page in pages[:5]) if pages else "N/A"
+        return f"Top search queries: {top_queries}\nTop landing pages: {top_pages}"
+
+    def _build_language_guardrails(
+        self,
+        language_profile: Dict[str, Any],
+        watchouts: Dict[str, Any],
+    ) -> str:
+        lines: List[str] = []
+        prompt_block = language_profile.get("prompt_block")
+        if prompt_block:
+            lines.append(self._truncate(prompt_block, 320))
+        words_to_use = watchouts.get("words_to_use") if isinstance(watchouts, dict) else None
+        if words_to_use:
+            lines.append("Words that resonate: " + ", ".join(words_to_use[:8]))
+        words_to_avoid = watchouts.get("words_to_avoid") if isinstance(watchouts, dict) else None
+        if words_to_avoid:
+            lines.append("Words to avoid unless sourced: " + ", ".join(words_to_avoid[:8]))
+        banned_terms = language_profile.get("banned_terms") if isinstance(language_profile, dict) else None
+        if banned_terms:
+            lines.append("Hard-no terms: " + ", ".join(banned_terms[:8]))
+        if lines:
+            return "\n".join(lines)
+        return "Plain speech only—no mindfulness, manifesting, or therapy clichés."

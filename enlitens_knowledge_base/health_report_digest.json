@@ -1,0 +1,199 @@
+{
+  "digest_id": "stl-health-digest-20251111172657",
+  "generated_at": "2025-11-11T17:28:42.164637",
+  "version": "1.1",
+  "headline": "Navigating Cultural Pressures in St. Louis",
+  "summary_bullets": [
+    "The 'High School Question' is a social heuristic used to determine socioeconomic status and geographic origins.",
+    "The regional lexicon includes unique terms like 'Hoosier' and 'Bread Co.' that serve as social markers.",
+    "Neurodivergent individuals face specific pressures related to educational accommodations and social conformity."
+  ],
+  "liz_voice_pillars": [
+    "Direct communication about cultural pressures in St. Louis",
+    "Focus on lived experiences of neurodivergent individuals",
+    "Avoiding clinical jargon and therapy clichés"
+  ],
+  "cultural_flashpoints": [
+    {
+      "label": "The 'High School Question'",
+      "description": "The question 'So, where'd you go to high school?' is used to quickly gauge socioeconomic status and geographic origins in St. Louis. This is not just a casual inquiry but a deeply embedded social heuristic.",
+      "mental_health_impact": [
+        "Increased anxiety and stress for neurodivergent individuals who may feel judged or out of place",
+        "Pressure to conform to high-achieving peers in certain school districts"
+      ],
+      "counseling_moves": [
+        "Help clients understand the social dynamics and how to navigate them",
+        "Encourage clients to focus on their strengths and not be swayed by social pressures"
+      ]
+    },
+    {
+      "label": "The Term 'Hoosier'",
+      "description": "In St. Louis, 'Hoosier' is a deeply ingrained, class-based slur used to describe poor, rural, white residents. This term is often used to marginalize and exclude certain groups, particularly in South St. Louis County.",
+      "mental_health_impact": [
+        "Feelings of exclusion and low self-esteem among those labeled as 'Hoosiers'",
+        "Increased stress and anxiety for neurodivergent individuals who may face discrimination"
+      ],
+      "counseling_moves": [
+        "Help clients understand the historical context of the term",
+        "Encourage clients to focus on their strengths and not be swayed by negative labels"
+      ]
+    }
+  ],
+  "neighborhood_snapshots": [
+    {
+      "area": "South St. Louis County",
+      "vibe": "A region with significant cultural and class distinctions, often marked by social gatekeeping and identity curation",
+      "pressure_points": [
+        "Pressure to conform to specific norms of the community",
+        "Navigating social hierarchies and subtle social cues"
+      ],
+      "strengths": [
+        "Strong sense of community and local pride",
+        "Rich cultural heritage and diversity"
+      ],
+      "cues_to_listen_for": [
+        "Discussions about 'Hoosiers' and other local terms",
+        "Conversations about the 'High School Question'"
+      ]
+    }
+  ],
+  "resource_highlights": [
+    {
+      "name": "St. Louis Regional Health Network",
+      "description": "A network of healthcare providers specializing in mental health services for neurodivergent individuals in St. Louis",
+      "link": "https://www.stlouishealthnetwork.com"
+    }
+  ],
+  "language_watchouts": {
+    "words_to_use": [
+      "you",
+      "for",
+      "adhd",
+      "but",
+      "has",
+      "she",
+      "looking",
+      "are",
+      "help",
+      "would",
+      "therapist",
+      "was",
+      "anxiety",
+      "therapy",
+      "diagnosed"
+    ],
+    "words_to_avoid": [
+      "mindfulness",
+      "journey",
+      "manifest",
+      "pathway",
+      "toxic positivity"
+    ]
+  },
+  "recommended_actions": [
+    "Educate clients about the cultural pressures in St. Louis",
+    "Help clients navigate social hierarchies and subtle social cues",
+    "Encourage clients to focus on their strengths and not be swayed by negative labels"
+  ],
+  "key_statistics": [
+    {
+      "stat": "56,245",
+      "context": "It has the region's lowest median household income at $56,245 and the highest poverty rate at 19."
+    },
+    {
+      "stat": "18,000",
+      "context": "It is a hyper-segregated jurisdiction, where the Delmar Divide marks a stark boundary: neighborhoods to the north are over 98% Black with median incomes around $18,000, while those to the south are 73% white with median incomes of $50,000."
+    },
+    {
+      "stat": "81,441.32",
+      "context": "Louis County has the region's highest median household income at $81,441.32 However, this wealth is not evenly distributed."
+    },
+    {
+      "stat": "64,563",
+      "context": "It boasts strong economic indicators, with a per capita income of $64,563 (well above the state average) and a low working-age poverty rate of just 4."
+    },
+    {
+      "stat": "150,000",
+      "context": "Louis Arts Fair, which draws over 150,000 people."
+    },
+    {
+      "stat": "24%",
+      "context": "org/images/training/conferences/2019/Spring/2019-5-24%20-%20Due%20Process%20Rights%20for%20Children%20in%20Schools."
+    },
+    {
+      "stat": "73,000",
+      "context": "North of Delmar, the population is 98% Black, the median home value is a mere $73,000, and the average life expectancy is 67 years."
+    },
+    {
+      "stat": "335,000",
+      "context": "South of Delmar, the population is 73% white, the median home value is $335,000, and life expectancy jumps to 85 years—an 18-year difference dictated by a zip code."
+    },
+    {
+      "stat": "1,634",
+      "context": "This is exacerbated by tax abatement policies that drain over $1,634 per student per year from SLPS, a figure 91 times greater than the loss per student in a wealthy suburban district like Rockwood."
+    },
+    {
+      "stat": "140,160",
+      "context": "With the region's highest median household income ($140,160) and a workforce heavily skewed towards management, professional, and technical services, the culture prizes polished professionalism, networking, and relentless upward mobility."
+    }
+  ],
+  "prompt_block": "LIZ HEALTH DIGEST: Navigating Cultural Pressures in St. Louis\n\nHARD TRUTHS:\n- The 'High School Question' is a social heuristic used to determine socioeconomic status and geographic origins.\n- The regional lexicon includes unique terms like 'Hoosier' and 'Bread Co.' that serve as social markers.\n- Neurodivergent individuals face specific pressures related to educational accommodations and social conformity.\n\nCultural flashpoints to name:\n- The 'High School Question': The question 'So, where'd you go to high school?' is used to quickly gauge socioeconomic status and geographic origins in St. Louis. This is not just a casual inquiry but a deeply embedded social heuristic.\n- The Term 'Hoosier': In St. Louis, 'Hoosier' is a deeply ingrained, class-based slur used to describe poor, rural, white residents. This term is often used to marginalize and exclude certain groups, particularly in South St. Louis County.\n\nKey numbers we can cite:\n- 56,245: It has the region's lowest median household income at $56,245 and the highest poverty rate at 19.\n- 18,000: It is a hyper-segregated jurisdiction, where the Delmar Divide marks a stark boundary: neighborhoods to the north are over 98% Black with median incomes around $18,000, while those to the south are 73% white with median incomes of $50,000.\n- 81,441.32: Louis County has the region's highest median household income at $81,441.32 However, this wealth is not evenly distributed.\n- 64,563: It boasts strong economic indicators, with a per capita income of $64,563 (well above the state average) and a low working-age poverty rate of just 4.\n- 150,000: Louis Arts Fair, which draws over 150,000 people.\n\nNeighborhood tells + cues:\n- South St. Louis County: A region with significant cultural and class distinctions, often marked by social gatekeeping and identity curation | cues: Discussions about 'Hoosiers' and other local terms, Conversations about the 'High School Question'\n\nWords that land: you, for, adhd, but, has, she, looking, are\nWords to shoot down: mindfulness, journey, manifest, pathway, toxic positivity\n\nClient language snapshot:\nCLIENT LANGUAGE SNAPSHOT:\n- Frequent words clients use: you, for, adhd, but, has, she, looking, are, help, would, therapist, was, anxiety, therapy, diagnosed\n- Common phrases: looking for, thank you, year old, she has, for therapist, diagnosed adhd, looking for therapist, was diagnosed\n- Representative client quotes:\n  • \"My husband had severe ADHD and hoarding tendencies. Not on ADHD medication. Patient is seeing phych doctor. Needs counseling to help with tools for cleaning, decluttering, finishing tasks, follow through. He had medicare\"\n  • \"I come from a refugee family and things can be very toxic at home. I want to not just have someone to talk to, but to have a mental health professional in my corner to guide me as I heal from my trauma.\"\n  • \"I am a 41 year old woman who didn't acknowledge or start treatment for adhd until my late 30s. I am very overwhelmed with life right now and feel like I can never catch up, which is making things feel a bit hopeless. I a\"\n- Tone descriptors: neurodivergent foregrounded\n- Avoid these words unless the source explicitly uses them: breathe through it, gratitude practice, journey, manifest, manifestation, mindful, mindfully, mindfulness, pathway, pathways, toxic positivity\n- Speak plainly. No therapy clichés, no toxic positivity, no metaphor about journeys/pathways.\n\nStay blunt. No mindfulness/manifest/\"journey\" fluff. Validate the nervous system before offering strategy.",
+  "source_metadata": {
+    "char_count": 682767,
+    "generated_at": "2025-11-11T17:26:57.647255",
+    "word_count": 68782,
+    "top_terms": [
+      "https",
+      "august",
+      "accessed",
+      "louis",
+      "this",
+      "that",
+      "with",
+      "reddit"
+    ],
+    "lead_sentences": "﻿An Anthropological and Linguistic Analysis of St. Louis Social Codes\n\n\n\n\nExecutive Summary\n\n\nThis report provides a deep-level analysis of two interconnected cultural phenomena in the St. Louis, Missouri, metropolitan region: the social sorting mechanism known as the \"High School Question\" and the specific regional lexicon that serves as a marker of local identity.",
+    "quick_stats": [
+      {
+        "stat": "56,245",
+        "context": "It has the region's lowest median household income at $56,245 and the highest poverty rate at 19."
+      },
+      {
+        "stat": "18,000",
+        "context": "It is a hyper-segregated jurisdiction, where the Delmar Divide marks a stark boundary: neighborhoods to the north are over 98% Black with median incomes around $18,000, while those to the south are 73% white with median incomes of $50,000."
+      },
+      {
+        "stat": "81,441.32",
+        "context": "Louis County has the region's highest median household income at $81,441.32 However, this wealth is not evenly distributed."
+      },
+      {
+        "stat": "64,563",
+        "context": "It boasts strong economic indicators, with a per capita income of $64,563 (well above the state average) and a low working-age poverty rate of just 4."
+      },
+      {
+        "stat": "150,000",
+        "context": "Louis Arts Fair, which draws over 150,000 people."
+      },
+      {
+        "stat": "24%",
+        "context": "org/images/training/conferences/2019/Spring/2019-5-24%20-%20Due%20Process%20Rights%20for%20Children%20in%20Schools."
+      },
+      {
+        "stat": "73,000",
+        "context": "North of Delmar, the population is 98% Black, the median home value is a mere $73,000, and the average life expectancy is 67 years."
+      },
+      {
+        "stat": "335,000",
+        "context": "South of Delmar, the population is 73% white, the median home value is $335,000, and life expectancy jumps to 85 years—an 18-year difference dictated by a zip code."
+      },
+      {
+        "stat": "1,634",
+        "context": "This is exacerbated by tax abatement policies that drain over $1,634 per student per year from SLPS, a figure 91 times greater than the loss per student in a wealthy suburban district like Rockwood."
+      },
+      {
+        "stat": "140,160",
+        "context": "With the region's highest median household income ($140,160) and a workforce heavily skewed towards management, professional, and technical services, the culture prizes polished professionalism, networking, and relentless upward mobility."
+      }
+    ]
+  }
+}

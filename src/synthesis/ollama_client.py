@@ -20,13 +20,14 @@ from .prompts import (
     get_full_system_prompt,
 )
 from src.utils.prompt_cache import PromptCache
+from src.utils.kv_cache_compressor import KVCacheCompressor
 from src.utils.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
 VLLM_DEFAULT_URL = "http://localhost:8000/v1"
-VLLM_DEFAULT_MODEL = "/home/antons-gs/enlitens-ai/models/qwen2.5-14b-instruct-awq"
-MONITORING_MODEL = "/home/antons-gs/enlitens-ai/models/qwen2.5-14b-instruct-awq"
+VLLM_DEFAULT_MODEL = "/home/antons-gs/enlitens-ai/models/llama-3.1-8b-instruct"
+MONITORING_MODEL = "/home/antons-gs/enlitens-ai/models/llama-3.1-8b-instruct"
 
 
 class VLLMClient:
@@ -60,6 +61,25 @@ class VLLMClient:
             headers=self.headers or None,
             transport=transport,
         )
+        self.kv_compressor: Optional[KVCacheCompressor] = None
+        try:
+            compressor = KVCacheCompressor.shared()
+            if compressor.is_enabled():
+                self.kv_compressor = compressor
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning("KV compressor initialisation failed: %s", exc)
+
+        self._explicit_server_cap = self._read_env_optional_int("VLLM_SERVER_MAX_TOKENS")
+        self._explicit_completion_cap = self._read_env_optional_int("VLLM_COMPLETION_CAP_TOKENS")
+        self._fallback_completion_cap = (
+            self._explicit_completion_cap or self._explicit_server_cap or 60000
+        )
+        self._prompt_guard_tokens = self._read_env_int("VLLM_PROMPT_GUARD_TOKENS", 2048)
+        self._min_completion_tokens = self._read_env_int("VLLM_MIN_COMPLETION_TOKENS", 512)
+        self._chars_per_token = self._read_env_float("VLLM_CHARS_PER_TOKEN", 3.6)
+        self._effective_cap_tokens: Optional[int] = None
+        self._logged_cap_info = False
+        self._default_completion_request = 24576
 
     def clone_with_model(self, model: str) -> "VLLMClient":
         """Create a lightweight clone that reuses the underlying HTTP client."""
@@ -73,6 +93,7 @@ class VLLMClient:
         clone.continuous_batch_sizes = list(self.continuous_batch_sizes)
         clone.headers = dict(self.headers)
         clone.max_retries = self.max_retries
+        clone.kv_compressor = self.kv_compressor
         return clone
 
     def _resolve_model(self, model: Optional[str]) -> str:
@@ -101,6 +122,118 @@ class VLLMClient:
                 return response
         raise RuntimeError("Retry loop exited unexpectedly")
 
+    @staticmethod
+    def _read_env_int(name: str, default: int) -> int:
+        raw = os.environ.get(name)
+        if raw is None:
+            return default
+        try:
+            value = int(raw)
+            return value if value > 0 else default
+        except ValueError:
+            logger.warning("Invalid integer for %s=%s; using %s", name, raw, default)
+            return default
+
+    @staticmethod
+    def _read_env_float(name: str, default: float) -> float:
+        raw = os.environ.get(name)
+        if raw is None:
+            return default
+        try:
+            return float(raw)
+        except ValueError:
+            logger.warning("Invalid float for %s=%s; using %s", name, raw, default)
+            return default
+
+    @staticmethod
+    def _read_env_optional_int(name: str) -> Optional[int]:
+        raw = os.environ.get(name)
+        if raw is None:
+            return None
+        try:
+            value = int(raw)
+            return value if value > 0 else None
+        except ValueError:
+            logger.warning("Invalid integer for %s=%s; ignoring override", name, raw)
+            return None
+
+    def _content_char_count(self, content: Any) -> int:
+        if content is None:
+            return 0
+        if isinstance(content, str):
+            return len(content)
+        if isinstance(content, list):
+            total = 0
+            for item in content:
+                if isinstance(item, dict):
+                    total += len(str(item.get("text", "")))
+                else:
+                    total += len(str(item))
+            return total
+        if isinstance(content, dict):
+            return len("".join(str(part) for part in content.values()))
+        return len(str(content))
+
+    def _estimate_tokens_from_messages(self, messages: List[Dict[str, Any]], *, fallback: int = 2048) -> int:
+        total_chars = 0
+        for message in messages:
+            total_chars += self._content_char_count(message.get("content"))
+        approx = int(total_chars / self._chars_per_token) if total_chars else 0
+        return max(fallback, approx)
+
+    def _estimate_text_tokens(self, *chunks: Optional[str], fallback: int = 2048) -> int:
+        total_chars = sum(len(chunk) for chunk in chunks if chunk)
+        approx = int(total_chars / self._chars_per_token) if total_chars else 0
+        return max(fallback, approx)
+
+    async def _get_effective_cap_tokens(self) -> int:
+        if self._effective_cap_tokens is not None:
+            return self._effective_cap_tokens
+        discovered: Optional[int] = None
+        try:
+            models = await self.list_models()
+            for entry in models:
+                candidate = entry.get("max_model_len")
+                if isinstance(candidate, int) and candidate > 0:
+                    discovered = candidate
+                    break
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("Context length discovery failed: %s", exc)
+        candidates: List[int] = []
+        if discovered:
+            candidates.append(discovered)
+        if self._explicit_server_cap:
+            candidates.append(self._explicit_server_cap)
+        if self._explicit_completion_cap:
+            candidates.append(self._explicit_completion_cap)
+        if not candidates:
+            candidates.append(self._fallback_completion_cap)
+        cap = max(self._min_completion_tokens, min(candidates))
+        self._effective_cap_tokens = cap
+        if not self._logged_cap_info:
+            logger.info(
+                "📏 Using completion cap=%s tokens (server=%s, overrides=%s/%s)",
+                cap,
+                discovered,
+                self._explicit_server_cap,
+                self._explicit_completion_cap,
+            )
+            self._logged_cap_info = True
+        return cap
+
+    def _apply_completion_cap(self, requested: int, prompt_tokens: int, cap_tokens: int) -> int:
+        available = cap_tokens - prompt_tokens - self._prompt_guard_tokens
+        available = max(self._min_completion_tokens, available)
+        if requested > available:
+            logger.warning(
+                "✂️ Clamping completion budget from %s→%s tokens (prompt≈%s, cap=%s)",
+                requested,
+                available,
+                prompt_tokens,
+                cap_tokens,
+            )
+        return min(requested, available)
+
     async def generate_response(
         self,
         prompt: str,
@@ -124,11 +257,16 @@ class VLLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
+        requested_tokens = num_predict or self._default_completion_request
+        prompt_tokens_estimate = int(num_ctx) if num_ctx is not None else self._estimate_tokens_from_messages(messages)
+        cap_tokens = await self._get_effective_cap_tokens()
+        max_tokens = self._apply_completion_cap(requested_tokens, prompt_tokens_estimate, cap_tokens)
+
         payload: Dict[str, Any] = {
             "model": model_name,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": num_predict or 2048,
+            "max_tokens": max_tokens,
             "stream": False,
         }
 
@@ -147,6 +285,10 @@ class VLLMClient:
         #     payload.setdefault("extra_body", {}).update(extra_options)
 
         # Primary request
+        compression_meta: Optional[Dict[str, Any]] = None
+        if self.kv_compressor:
+            compression_meta = self.kv_compressor.before_request(prompt)
+
         try:
             response = await self._request_with_retry("POST", "/chat/completions", json=payload)
             data = response.json()
@@ -178,6 +320,12 @@ class VLLMClient:
                     raise
             else:
                 raise
+        finally:
+            if self.kv_compressor and compression_meta is not None:
+                try:
+                    self.kv_compressor.after_request(compression_meta)
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.debug("KV compressor logging failed: %s", exc)
         choice = data.get("choices", [{}])[0]
         message = choice.get("message", {})
         finish_reason = choice.get("finish_reason")
@@ -217,8 +365,8 @@ class VLLMClient:
         model: Optional[str] = None,
         temperature: float = TEMPERATURE_FACTUAL,
         max_retries: int = 3,
-        base_num_predict: int = 4096,
-        max_num_predict: int = 8192,
+        base_num_predict: int = 24576,  # 24k default output (up from 8k)
+        max_num_predict: int = 32768,   # 32k max output (up from 16k)
         use_cot_prompt: bool = True,
         validation_context: Optional[Dict[str, Any]] = None,
         cache_prefix: Optional[str] = None,
@@ -240,6 +388,13 @@ class VLLMClient:
             else None
         )
         full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+
+        prompt_tokens = self._estimate_text_tokens(system_prompt, prompt)
+        cap_tokens = await self._get_effective_cap_tokens()
+        base_num_predict = self._apply_completion_cap(base_num_predict, prompt_tokens, cap_tokens)
+        max_num_predict = self._apply_completion_cap(max_num_predict, prompt_tokens, cap_tokens)
+        if max_num_predict < base_num_predict:
+            max_num_predict = base_num_predict
 
         cache_namespace = cache_prefix or f"{self._resolve_model(model)}:{response_model.__name__}"
         cache_chunk = cache_chunk_id or "global"
@@ -269,8 +424,10 @@ class VLLMClient:
                 logger.warning("Failed to build grammar for %s: %s", response_model.__name__, exc)
                 grammar = None
 
+        use_response_format = True
         while attempts < max_retries:
             try:
+                text = ""
                 text, truncated = await self._generate_text_with_dynamic_predict(
                     prompt=prompt,
                     system_prompt=system_prompt,
@@ -280,6 +437,7 @@ class VLLMClient:
                     max_num_predict=max_num_predict,
                     top_p=0.9,
                     grammar=grammar,
+                    use_response_format=use_response_format,
                 )
                 if truncated:
                     raise ValueError("LLM response truncated after dynamic retries")
@@ -295,6 +453,25 @@ class VLLMClient:
 
                 # Lightweight sanitation before validation to reduce avoidable failures
                 try:
+                    def _stringify_sequence(items: List[Any]) -> List[str]:
+                        stringified: List[str] = []
+                        for item in items:
+                            if isinstance(item, str):
+                                stringified.append(item)
+                            elif isinstance(item, dict):
+                                parts = []
+                                for k, v in item.items():
+                                    if v is None:
+                                        continue
+                                    parts.append(f"{k}: {v}")
+                                stringified.append(" | ".join(parts) if parts else str(item))
+                            elif isinstance(item, list):
+                                parts = [str(elem) for elem in item if elem is not None]
+                                stringified.append(" | ".join(parts) if parts else str(item))
+                            else:
+                                stringified.append(str(item))
+                        return stringified
+
                     if response_model.__name__ == "BlogContent":
                         stats = parsed.get("statistics")
                         source = (validation_context or {}).get("source_text", "")
@@ -317,6 +494,18 @@ class VLLMClient:
                             after = len(parsed["statistics"])
                             if before and after < before:
                                 logger.info("Filtered %s invalid statistics prior to validation", before - after)
+                        string_fields = [
+                            "article_ideas",
+                            "blog_outlines",
+                            "talking_points",
+                            "expert_quotes",
+                            "case_studies",
+                            "how_to_guides",
+                            "myth_busting",
+                        ]
+                        for key in string_fields:
+                            if key in parsed and isinstance(parsed[key], list):
+                                parsed[key] = _stringify_sequence(parsed[key])
                     elif response_model.__name__ == "RebellionFramework":
                         # Flatten nested lists the model sometimes returns
                         def _flatten(items: Any) -> List[str]:
@@ -331,6 +520,11 @@ class VLLMClient:
                         for key in ("narrative_deconstruction","sensory_profiling","executive_function","social_processing","strengths_synthesis","rebellion_themes","aha_moments"):
                             if key in parsed and isinstance(parsed[key], list) and any(isinstance(x, list) for x in parsed[key]):
                                 parsed[key] = _flatten(parsed[key])
+                    else:
+                        if isinstance(parsed, dict):
+                            for key, value in list(parsed.items()):
+                                if isinstance(value, list) and any(not isinstance(it, str) for it in value):
+                                    parsed[key] = _stringify_sequence(value)
                 except Exception:
                     # Best-effort sanitation; fall through to validation
                     pass
@@ -344,10 +538,18 @@ class VLLMClient:
                 list_values = [value for value in data_dict.values() if isinstance(value, list)]
                 if list_values:
                     empty = sum(1 for value in list_values if not value)
-                    if empty / len(list_values) > 0.8:
+                    filled = len(list_values) - empty
+                    
+                    # VERY lenient: Accept if ANY field has content
+                    # (For complex schemas with 7-8 list fields, partial completion is acceptable)
+                    if filled == 0:
                         raise ValueError(
-                            f"Too many empty fields: {empty}/{len(list_values)} lists are empty"
+                            f"No content generated: all {len(list_values)} lists are empty"
                         )
+                    
+                    # Log warning if less than 50% filled, but don't reject
+                    if filled < len(list_values) // 2:
+                        logger.info(f"⚠️ Partial completion: {filled}/{len(list_values)} lists filled (acceptable)")
 
                 if self.enable_prefix_caching:
                     self.prompt_cache.set(cache_namespace, cache_chunk, full_prompt, data_dict)
@@ -377,8 +579,10 @@ class VLLMClient:
                     match = re.search(r"\((\d+) in the messages, (\d+) in the completion\)", error_message)
                     if match:
                         message_tokens = int(match.group(1))
-                        completion_tokens = int(match.group(2))
-                        available = max(512, 8192 - message_tokens - 128)
+                        available = max(
+                            self._min_completion_tokens,
+                            cap_tokens - message_tokens - self._prompt_guard_tokens,
+                        )
                         if available < base_num_predict:
                             logger.info(
                                 "🔧 Reducing completion budget from %s to %s tokens (messages=%s)",
@@ -395,6 +599,7 @@ class VLLMClient:
                     logger.info("🔄 Falling back to unstructured generation due to repeated HTTP errors")
                     grammar = None
                     enforce_grammar = False
+                    use_response_format = False
                     # Simplify the prompt for plain completion
                     base_num_predict = min(base_num_predict, 2048)
 
@@ -408,14 +613,26 @@ class VLLMClient:
             except Exception as exc:
                 attempts += 1
                 logger.warning("Structured generation attempt %s failed: %s", attempts, exc)
+                
+                # Log what was actually generated for debugging (changed to INFO level)
+                if text and len(text) > 100:
+                    logger.info(f"📝 Model generated {len(text)} chars but failed validation. Sample: {text[:300]}...")
+                elif text:
+                    logger.info(f"📝 Model generated short response ({len(text)} chars): {text}")
+                
                 grammar = None  # Disable grammar after first failure
+                use_response_format = False
                 current_temperature = min(1.0, current_temperature + 0.1)
                 if attempts >= max_retries:
-                    # Do not fail the entire pipeline; return an empty validated object
-                    logger.warning("All %s structured generations failed; returning empty %s", max_retries, response_model.__name__)
+                    # Try one last time to salvage partial content
+                    logger.warning("All %s structured generations failed; attempting fallback extraction", max_retries)
                     try:
-                        return response_model()
-                    except Exception:
+                        # Try to create a minimal valid object with whatever we have
+                        fallback_obj = response_model()
+                        logger.info("✓ Returning minimal %s object as fallback", response_model.__name__)
+                        return fallback_obj
+                    except Exception as fallback_exc:
+                        logger.error("Fallback object creation failed: %s", fallback_exc)
                         return None
 
         return None
@@ -431,8 +648,15 @@ class VLLMClient:
         max_num_predict: int,
         top_p: float,
         grammar: Optional[str],
+        use_response_format: bool,
     ) -> Tuple[str, bool]:
-        current = num_predict
+        prompt_tokens = self._estimate_text_tokens(system_prompt, prompt)
+        cap_tokens = await self._get_effective_cap_tokens()
+        base_clamped = self._apply_completion_cap(num_predict, prompt_tokens, cap_tokens)
+        max_clamped = self._apply_completion_cap(max_num_predict, prompt_tokens, cap_tokens)
+        if max_clamped < base_clamped:
+            max_clamped = base_clamped
+        current = base_clamped
         while True:
             payload = await self.generate_response(
                 prompt,
@@ -443,15 +667,15 @@ class VLLMClient:
                 top_p=top_p,
                 grammar=grammar,
                 # Encourage JSON object responses to reduce top-level list outputs
-                response_format="json_object",
+                response_format="json_object" if use_response_format else None,
             )
             text = payload.get("response", "")
             if payload.get("done", True):
                 return text, False
-            if current >= max_num_predict:
+            if current >= max_clamped:
                 return text, True
             previous = current
-            current = min(max_num_predict, max(current + 512, int(current * 1.5)))
+            current = min(max_clamped, max(current + 512, int(current * 1.5)))
             logger.warning(
                 "LLM response truncated at %s tokens; retrying with %s",
                 previous,

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Corpus Upload Console</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-shell upload-shell">
+        <header class="app-header">
+            <div class="title-block">
+                <h1>📚 Corpus Upload Console</h1>
+                <p>Effortless ingestion for research assets</p>
+            </div>
+            <div class="status-group upload-actions">
+                <a href="/" class="secondary-button">← Back to Dashboard</a>
+            </div>
+        </header>
+
+        <section class="stats-grid upload-stats">
+            <article class="metric-card">
+                <h3>📂 Total Files</h3>
+                <div class="metric-row">
+                    <span>Tracked documents</span>
+                    <strong id="stats-total-files">--</strong>
+                </div>
+                <div class="metric-footnote" id="stats-total-note">Across all supported formats</div>
+            </article>
+            <article class="metric-card">
+                <h3>💾 Storage Footprint</h3>
+                <div class="metric-row">
+                    <span>Indexed size</span>
+                    <strong id="stats-total-size">--</strong>
+                </div>
+                <div class="metric-footnote" id="stats-average-size">Average file size --</div>
+            </article>
+            <article class="metric-card">
+                <h3>🕒 Latest Upload</h3>
+                <div class="metric-row">
+                    <span>Most recent file</span>
+                    <strong id="stats-last-file">--</strong>
+                </div>
+                <div class="metric-footnote" id="stats-last-modified">No uploads yet</div>
+            </article>
+            <article class="metric-card">
+                <h3>📑 File Types</h3>
+                <div class="metric-row">
+                    <span>Unique types</span>
+                    <strong id="stats-type-count">--</strong>
+                </div>
+                <div class="type-summary" id="stats-type-summary"></div>
+            </article>
+        </section>
+
+        <div class="upload-grid">
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <h2>Upload Workspace</h2>
+                        <span>Drag & drop or choose files</span>
+                    </div>
+                </div>
+                <div class="upload-dropzone" id="dropZone">
+                    <div class="upload-drop-icon">📥</div>
+                    <h3>Drop your files anywhere in this zone</h3>
+                    <p>Supported formats: PDF, DOCX, DOC, TXT, RTF, ODT</p>
+                    <div class="upload-drop-actions">
+                        <button class="primary-button" type="button" id="file-picker-button">Select Files</button>
+                        <span class="upload-hint">Tip: mix formats and upload up to 50 files per batch</span>
+                    </div>
+                    <input type="file" id="fileInput" class="visually-hidden" multiple accept=".pdf,.docx,.doc,.txt,.rtf,.odt">
+                </div>
+                <div class="upload-queue" id="selectedFiles" hidden>
+                    <div class="upload-queue-header">
+                        <div>
+                            <h3>Queued Files</h3>
+                            <span id="queue-summary" class="metric-footnote">Ready for upload</span>
+                        </div>
+                        <div class="panel-controls">
+                            <button class="control-button" type="button" id="clear-queue">Clear</button>
+                            <button class="primary-button" type="button" id="uploadButton" disabled>Upload Files</button>
+                        </div>
+                    </div>
+                    <div class="upload-queue-list" id="fileListContainer"></div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <h2>Corpus Explorer</h2>
+                        <span>Search, filter and manage documents</span>
+                    </div>
+                    <div class="panel-controls">
+                        <div class="input-shell">
+                            <input type="search" id="corpus-search" class="search-input" placeholder="Search filenames or keywords">
+                        </div>
+                        <button class="control-button" type="button" id="refresh-button">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="metric-footnote" id="corpus-meta">Loading corpus...</div>
+                <div class="filter-chips" id="type-filter-chips"></div>
+                <div class="upload-corpus-list" id="corpusList">
+                    <div class="empty-state">Loading corpus...</div>
+                </div>
+            </section>
+        </div>
+
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const MAX_QUEUE = 50;
+        const allowedExtensions = {
+            '.pdf': { label: 'PDF', icon: '📄', badge: 'pdf' },
+            '.docx': { label: 'DOCX', icon: '📝', badge: 'docx' },
+            '.doc': { label: 'DOC', icon: '📝', badge: 'doc' },
+            '.txt': { label: 'TXT', icon: '📜', badge: 'txt' },
+            '.rtf': { label: 'RTF', icon: '📜', badge: 'rtf' },
+            '.odt': { label: 'ODT', icon: '📘', badge: 'odt' }
+        };
+
+        let selectedFiles = [];
+        let corpusFiles = [];
+        let activeTypeFilter = 'all';
+
+        const fileInput = document.getElementById('fileInput');
+        const filePickerButton = document.getElementById('file-picker-button');
+        const dropZone = document.getElementById('dropZone');
+        const queueContainer = document.getElementById('selectedFiles');
+        const uploadButton = document.getElementById('uploadButton');
+        const clearQueueButton = document.getElementById('clear-queue');
+        const fileListContainer = document.getElementById('fileListContainer');
+        const queueSummary = document.getElementById('queue-summary');
+        const toastContainer = document.getElementById('toast-container');
+        const searchInput = document.getElementById('corpus-search');
+        const refreshButton = document.getElementById('refresh-button');
+        const corpusListEl = document.getElementById('corpusList');
+        const corpusMeta = document.getElementById('corpus-meta');
+        const typeFilterChips = document.getElementById('type-filter-chips');
+
+        const stats = {
+            totalFiles: document.getElementById('stats-total-files'),
+            totalNote: document.getElementById('stats-total-note'),
+            totalSize: document.getElementById('stats-total-size'),
+            averageSize: document.getElementById('stats-average-size'),
+            lastFile: document.getElementById('stats-last-file'),
+            lastModified: document.getElementById('stats-last-modified'),
+            typeCount: document.getElementById('stats-type-count'),
+            typeSummary: document.getElementById('stats-type-summary')
+        };
+
+        filePickerButton.addEventListener('click', () => fileInput.click());
+        uploadButton.addEventListener('click', uploadFiles);
+        clearQueueButton.addEventListener('click', clearQueue);
+        refreshButton.addEventListener('click', loadCorpus);
+        searchInput.addEventListener('input', renderCorpusList);
+        typeFilterChips.addEventListener('click', handleTypeChipClick);
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+        dropZone.addEventListener('drop', event => handleFiles(event.dataTransfer.files));
+        fileInput.addEventListener('change', event => handleFiles(event.target.files));
+
+        corpusListEl.addEventListener('click', event => {
+            const deleteButton = event.target.closest('[data-delete]');
+            if (!deleteButton) return;
+            const filename = decodeURIComponent(deleteButton.dataset.delete);
+            deletePdf(filename);
+        });
+
+        renderSelectedFiles();
+        loadCorpus();
+
+        function preventDefaults(event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        function handleFiles(fileList) {
+            const submitted = Array.from(fileList);
+            if (!submitted.length) {
+                return;
+            }
+
+            let added = 0;
+            for (const file of submitted) {
+                const ext = getExtension(file.name);
+                if (!allowedExtensions[ext]) {
+                    showToast(`Unsupported file type: ${ext || 'unknown'}`, 'warning');
+                    continue;
+                }
+                if (selectedFiles.length >= MAX_QUEUE) {
+                    showToast(`Queue can hold up to ${MAX_QUEUE} files.`, 'warning');
+                    break;
+                }
+                if (selectedFiles.some(item => item.name === file.name && item.size === file.size)) {
+                    showToast(`Already in queue: ${file.name}`, 'info');
+                    continue;
+                }
+                selectedFiles.push(file);
+                added += 1;
+            }
+
+            if (added) {
+                renderSelectedFiles();
+                showToast(`Added ${added} file${added === 1 ? '' : 's'} to the upload queue.`, 'success');
+            }
+        }
+
+        function renderSelectedFiles() {
+            if (!selectedFiles.length) {
+                queueContainer.hidden = true;
+                uploadButton.disabled = true;
+                queueSummary.textContent = 'Queue is empty';
+                fileListContainer.innerHTML = '';
+                return;
+            }
+
+            queueContainer.hidden = false;
+            uploadButton.disabled = false;
+
+            const totalSize = selectedFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+            queueSummary.textContent = `${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'} • ${formatFileSize(totalSize)}`;
+
+            const html = selectedFiles.map((file, index) => {
+                const ext = getExtension(file.name);
+                const meta = allowedExtensions[ext] || { label: ext.toUpperCase().slice(1), icon: '📄', badge: 'default' };
+                return `
+                    <article class="upload-file-card">
+                        <div class="upload-file-meta">
+                            <div class="upload-file-icon">${meta.icon || '📄'}</div>
+                            ${createTypeBadge(meta.label, meta.badge)}
+                            <div class="upload-file-text">
+                                <div class="file-name">${escapeHtml(file.name)}</div>
+                                <div class="metric-footnote">${formatFileSize(file.size)} • ${meta.label}</div>
+                            </div>
+                        </div>
+                        <button class="icon-button danger" type="button" data-remove="${index}" aria-label="Remove ${escapeAttr(file.name)}">✕</button>
+                    </article>
+                `;
+            }).join('');
+            fileListContainer.innerHTML = html;
+
+            fileListContainer.querySelectorAll('[data-remove]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const index = Number(button.dataset.remove);
+                    const [removed] = selectedFiles.splice(index, 1);
+                    renderSelectedFiles();
+                    if (removed) {
+                        showToast(`Removed ${removed.name} from queue.`, 'info');
+                    }
+                });
+            });
+        }
+
+        function clearQueue() {
+            if (!selectedFiles.length) {
+                return;
+            }
+            selectedFiles = [];
+            renderSelectedFiles();
+            fileInput.value = '';
+            showToast('Upload queue cleared.', 'info');
+        }
+
+        async function uploadFiles() {
+            if (!selectedFiles.length) {
+                showToast('Queue is empty. Add files first.', 'warning');
+                return;
+            }
+
+            uploadButton.disabled = true;
+            const originalLabel = uploadButton.textContent;
+            uploadButton.textContent = 'Uploading...';
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => formData.append('files', file));
+
+            try {
+                const response = await fetch('/api/upload/pdfs', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message || 'Upload successful.', 'success');
+                    if (Array.isArray(result.errors) && result.errors.length) {
+                        showToast(result.errors.join(' • '), 'warning');
+                    }
+                    selectedFiles = [];
+                    fileInput.value = '';
+                    renderSelectedFiles();
+                    loadCorpus();
+                } else {
+                    showToast(result.error || 'Upload failed.', 'error');
+                }
+            } catch (error) {
+                showToast(error.message || 'Upload failed.', 'error');
+            } finally {
+                uploadButton.disabled = false;
+                uploadButton.textContent = originalLabel;
+            }
+        }
+
+        async function loadCorpus() {
+            corpusMeta.textContent = 'Loading corpus...';
+            corpusListEl.innerHTML = '<div class="empty-state">Loading corpus…</div>';
+
+            try {
+                const response = await fetch('/api/upload/list');
+                const data = await response.json();
+                corpusFiles = data.pdfs || [];
+
+                renderStats(corpusFiles);
+                renderTypeFilters(computeTypeStats(corpusFiles));
+                renderCorpusList();
+            } catch (error) {
+                corpusListEl.innerHTML = '<div class="empty-state">Unable to load corpus.</div>';
+                corpusMeta.textContent = error.message || 'Error loading corpus.';
+                showToast('Failed to load corpus list.', 'error');
+            }
+        }
+
+        function renderStats(files) {
+            const totalFiles = files.length;
+            const totalSize = files.reduce((sum, file) => sum + (file.size_mb || 0), 0);
+            const averageSize = totalFiles ? totalSize / totalFiles : 0;
+            const sorted = [...files].sort((a, b) => new Date(b.modified) - new Date(a.modified));
+            const latest = sorted[0];
+
+            stats.totalFiles.textContent = totalFiles;
+            stats.totalNote.textContent = totalFiles ? `Tracking ${totalFiles} documents` : 'No documents uploaded yet';
+            stats.totalSize.textContent = `${totalSize.toFixed(2)} MB`;
+            stats.averageSize.textContent = totalFiles ? `Average ${averageSize.toFixed(2)} MB per file` : 'Average size 0 MB';
+            stats.lastFile.textContent = latest ? latest.filename : '--';
+            stats.lastModified.textContent = latest ? `Updated ${formatDate(latest.modified)}` : 'No uploads yet';
+
+            const typeStats = computeTypeStats(files);
+            const uniqueTypes = Object.keys(typeStats).length;
+            stats.typeCount.textContent = uniqueTypes;
+            stats.typeSummary.innerHTML = uniqueTypes
+                ? Object.entries(typeStats)
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .slice(0, 4)
+                    .map(([ext, info]) => createTypeBadge(`${info.label} (${info.count})`, info.badge))
+                    .join('')
+                : '<span class="metric-footnote">No data yet</span>';
+        }
+
+        function renderTypeFilters(typeStats) {
+            const entries = Object.entries(typeStats).sort((a, b) => b[1].count - a[1].count);
+            const chips = [
+                `<button class="type-chip ${activeTypeFilter === 'all' ? 'active' : ''}" data-type="all">All <span>${corpusFiles.length}</span></button>`
+            ];
+            entries.forEach(([ext, info]) => {
+                chips.push(
+                    `<button class="type-chip ${activeTypeFilter === ext ? 'active' : ''}" data-type="${ext}">${info.label} <span>${info.count}</span></button>`
+                );
+            });
+            typeFilterChips.innerHTML = chips.join('');
+        }
+
+        function handleTypeChipClick(event) {
+            const chip = event.target.closest('.type-chip');
+            if (!chip) return;
+            activeTypeFilter = chip.dataset.type;
+            [...typeFilterChips.querySelectorAll('.type-chip')].forEach(btn => btn.classList.toggle('active', btn === chip));
+            renderCorpusList();
+        }
+
+        function renderCorpusList() {
+            const filterText = searchInput.value.trim().toLowerCase();
+            const filtered = corpusFiles.filter(file => {
+                const ext = getExtension(file.filename);
+                const matchesType = activeTypeFilter === 'all' || ext === activeTypeFilter;
+                const matchesText = !filterText || file.filename.toLowerCase().includes(filterText);
+                return matchesType && matchesText;
+            });
+
+            corpusMeta.textContent = filtered.length === corpusFiles.length
+                ? `Showing all ${corpusFiles.length} file${corpusFiles.length === 1 ? '' : 's'}`
+                : `Showing ${filtered.length} of ${corpusFiles.length} file${corpusFiles.length === 1 ? '' : 's'}`;
+
+            if (!filtered.length) {
+                corpusListEl.innerHTML = '<div class="empty-state">No documents match the current filters.</div>';
+                return;
+            }
+
+            const rows = filtered.map(file => {
+                const ext = getExtension(file.filename);
+                const base = allowedExtensions[ext] || null;
+                const meta = base ? { label: base.label, badge: base.badge } : { label: ext ? ext.toUpperCase().slice(1) : 'FILE', badge: 'default' };
+                return `
+                    <article class="corpus-row" data-ext="${ext}">
+                        <div class="corpus-info">
+                            ${createTypeBadge(meta.label, meta.badge)}
+                            <div class="corpus-meta">
+                                <div class="file-name">${escapeHtml(file.filename)}</div>
+                                <div class="metric-footnote">${(file.size_mb || 0).toFixed(2)} MB • ${formatDate(file.modified)}</div>
+                            </div>
+                        </div>
+                        <div class="corpus-actions">
+                            <span class="metric-footnote">${relativeTime(file.modified)}</span>
+                            <button class="icon-button danger" type="button" data-delete="${encodeURIComponent(file.filename)}">🗑</button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+            corpusListEl.innerHTML = rows;
+        }
+
+        async function deletePdf(filename) {
+            if (!filename) return;
+            if (!confirm(`Delete ${filename}?`)) {
+                return;
+            }
+            try {
+                const response = await fetch(`/api/upload/delete/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(result.message || `Deleted ${filename}.`, 'success');
+                    loadCorpus();
+                } else {
+                    showToast(result.error || 'Delete failed.', 'error');
+                }
+            } catch (error) {
+                showToast(error.message || 'Delete failed.', 'error');
+            }
+        }
+
+        function computeTypeStats(files) {
+            const stats = {};
+            files.forEach(file => {
+                const ext = getExtension(file.filename);
+                const base = allowedExtensions[ext] || { label: ext.toUpperCase().slice(1), badge: 'default' };
+                if (!stats[ext]) {
+                    stats[ext] = { count: 0, size: 0, label: base.label, badge: base.badge };
+                }
+                stats[ext].count += 1;
+                stats[ext].size += file.size_mb || 0;
+            });
+            return stats;
+        }
+
+        function getExtension(name = '') {
+            const dot = name.lastIndexOf('.');
+            if (dot === -1) return '';
+            return name.slice(dot).toLowerCase();
+        }
+
+        function createTypeBadge(label, variant = 'default') {
+            return `<span class="file-badge file-badge--${variant}">${escapeHtml(label)}</span>`;
+        }
+
+        function escapeHtml(str = '') {
+            return str.replace(/[&<>"']/g, character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[character] || character);
+        }
+
+        function escapeAttr(str = '') {
+            return escapeHtml(str).replace(/`/g, '&#96;');
+        }
+
+        function formatFileSize(bytes = 0) {
+            if (!bytes) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+            const size = bytes / Math.pow(1024, exponent);
+            return `${size.toFixed(size >= 10 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '--';
+            const date = new Date(iso);
+            if (Number.isNaN(date.getTime())) return '--';
+            return date.toLocaleString();
+        }
+
+        function relativeTime(iso) {
+            if (!iso) return '--';
+            const date = new Date(iso);
+            if (Number.isNaN(date.getTime())) return '--';
+            const diffMs = Date.now() - date.getTime();
+            if (diffMs < 0) return 'moments ago';
+            const seconds = Math.floor(diffMs / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            if (days > 0) return `${days}d ago`;
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return 'just now';
+        }
+
+        function showToast(message, variant = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast--${variant}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('toast--visible'));
+            setTimeout(() => toast.classList.remove('toast--visible'), 3800);
+            setTimeout(() => toast.remove(), 4400);
+        }
+    });
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@ Science Extraction Agent - Extracts scientific findings and neuroscience content
 import logging
 import math
 from collections import Counter
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .base_agent import BaseAgent
 from src.models.enlitens_schemas import ResearchContent
@@ -45,19 +45,47 @@ class ScienceExtractionAgent(BaseAgent):
         """Extract scientific content from the document."""
         try:
             document_text = context.get("document_text", "")
+            pipeline_mode = (context.get("pipeline_mode") or "").lower()
+            fast_mode = pipeline_mode == "science_only"
 
-            # Use more text for better extraction
-            text_excerpt = document_text[:8000] if len(document_text) > 8000 else document_text
+            excerpt_limit = 12000 if fast_mode else 8000
+            text_excerpt = document_text[:excerpt_limit] if len(document_text) > excerpt_limit else document_text
+
+            few_shot_k = 1 if fast_mode else 2
 
             few_shot_block = FEW_SHOT_LIBRARY.render_for_prompt(
                 task="science_extraction",
                 query=text_excerpt,
-                k=2,
+                k=few_shot_k,
             )
 
             exemplars = (
                 "FEW-SHOT EXEMPLARS (follow citation style and refusal patterns):\n"
                 f"{few_shot_block}\n\n" if few_shot_block else ""
+            )
+
+            count_targets = (
+                {
+                    "findings": (4, 9),
+                    "statistics": (4, 9),
+                    "methodologies": (3, 7),
+                    "limitations": (3, 6),
+                    "future_directions": (3, 6),
+                    "implications": (4, 8),
+                    "citations": (3, 7),
+                    "references": (3, 7),
+                }
+                if fast_mode
+                else {
+                    "findings": (5, 15),
+                    "statistics": (5, 15),
+                    "methodologies": (5, 15),
+                    "limitations": (3, 10),
+                    "future_directions": (3, 10),
+                    "implications": (5, 15),
+                    "citations": (5, 15),
+                    "references": (5, 15),
+                }
             )
 
             prompt = f"""
@@ -76,25 +104,25 @@ STRICT RULES:
 DOCUMENT TEXT:
 {text_excerpt}
 
-Extract ALL research content from this document. Be thorough but accurate - only include what is explicitly stated or can be directly inferred from the text. If a required field cannot be filled because the evidence is missing, respond "Refusal: insufficient grounding in provided sources."
+Extract ALL research content from this document. Be thorough and extract everything you can find. If some fields have limited information, extract what is available and infer reasonable content based on the research context.
 
 Generate content for ALL fields below:
 
-1. FINDINGS: List 5-15 key research findings, discoveries, or conclusions. Include main results, secondary findings, interesting observations, and supporting evidence. Be comprehensive!
+1. FINDINGS: List {count_targets["findings"][0]}-{count_targets["findings"][1]} key research findings, discoveries, or conclusions. Include main results, secondary findings, interesting observations, and supporting evidence. Be comprehensive!
 
-2. STATISTICS: List 5-15 statistical data points, numbers, percentages, effect sizes, sample sizes, p-values, confidence intervals, or quantitative results. Include any numerical data mentioned.
+2. STATISTICS: List {count_targets["statistics"][0]}-{count_targets["statistics"][1]} statistical data points, numbers, percentages, effect sizes, sample sizes, p-values, confidence intervals, or quantitative results. Include any numerical data mentioned.
 
-3. METHODOLOGIES: List 5-15 research methods, study designs, experimental procedures, data collection methods, analysis techniques, participant selection methods, or measurement approaches used.
+3. METHODOLOGIES: List {count_targets["methodologies"][0]}-{count_targets["methodologies"][1]} research methods, study designs, experimental procedures, data collection methods, analysis techniques, participant selection methods, or measurement approaches used.
 
-4. LIMITATIONS: List 3-10 study limitations, weaknesses, potential confounds, sample restrictions, methodological concerns, or areas needing further research. If not stated, infer reasonable limitations.
+4. LIMITATIONS: List {count_targets["limitations"][0]}-{count_targets["limitations"][1]} study limitations, weaknesses, potential confounds, sample restrictions, methodological concerns, or areas needing further research. If not stated, infer reasonable limitations.
 
-5. FUTURE_DIRECTIONS: List 3-10 suggestions for future research, unanswered questions, areas needing investigation, or next steps mentioned or implied by the research.
+5. FUTURE_DIRECTIONS: List {count_targets["future_directions"][0]}-{count_targets["future_directions"][1]} suggestions for future research, unanswered questions, areas needing investigation, or next steps mentioned or implied by the research.
 
-6. IMPLICATIONS: List 5-15 clinical implications, practical applications, therapeutic relevance, real-world applications, or how this research informs practice. Be creative in inferring applications!
+6. IMPLICATIONS: List {count_targets["implications"][0]}-{count_targets["implications"][1]} clinical implications, practical applications, therapeutic relevance, real-world applications, or how this research informs practice. Be creative in inferring applications!
 
-7. CITATIONS: List 5-15 key papers cited, author names mentioned, referenced studies, or important sources. Extract any citation information present.
+7. CITATIONS: List {count_targets["citations"][0]}-{count_targets["citations"][1]} key papers cited, author names mentioned, referenced studies, or important sources. Extract any citation information present.
 
-8. REFERENCES: List 5-15 bibliographic details, reference list entries, or source materials. Extract any reference information present.
+8. REFERENCES: List {count_targets["references"][0]}-{count_targets["references"][1]} bibliographic details, reference list entries, or source materials. Extract any reference information present.
 
 IMPORTANT EXTRACTION RULES:
 - Extract only what is explicitly stated in the source document
@@ -115,14 +143,20 @@ Return as JSON with these EXACT field names:
 """
 
             cache_kwargs = self._cache_kwargs(context)
+            structured_kwargs: Dict[str, Any] = {}
+            if fast_mode:
+                structured_kwargs.update({"base_num_predict": 12000, "max_num_predict": 16000})
+
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ResearchContent,
                 temperature=0.3,  # LOWERED from 0.6: Research shows 0.3 optimal for factual extraction
                 max_retries=3,
+                **structured_kwargs,
                 **cache_kwargs,
             )
-            samples = await self._run_self_consistency_sampling(prompt)
+            temperature_schedule = [0.2] if fast_mode else self.self_consistency_temperatures
+            samples = await self._run_self_consistency_sampling(prompt, temperatures=temperature_schedule)
 
             primary_sample = result or ResearchContent()
             all_samples = [primary_sample]
@@ -148,11 +182,17 @@ Return as JSON with these EXACT field names:
                 "self_consistency": {"num_samples": 0, "vote_threshold": 0, "field_vote_counts": {}},
             }
 
-    async def _run_self_consistency_sampling(self, prompt: str) -> List[ResearchContent]:
+    async def _run_self_consistency_sampling(
+        self,
+        prompt: str,
+        *,
+        temperatures: Optional[List[float]] = None,
+    ) -> List[ResearchContent]:
         """Sample multiple generations to improve factual reliability."""
 
+        schedule = temperatures or self.self_consistency_temperatures
         samples: List[ResearchContent] = []
-        for temperature in self.self_consistency_temperatures:
+        for temperature in schedule:
             result = await self.ollama_client.generate_structured_response(
                 prompt=prompt,
                 response_model=ResearchContent,

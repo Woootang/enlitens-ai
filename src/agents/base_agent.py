@@ -11,6 +11,13 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from src.utils.settings import get_settings
+from src.utils.chain_of_thought import (
+    get_cot_prefix,
+    get_data_agent_cot_prompt,
+    get_research_agent_cot_prompt,
+    get_writer_agent_cot_prompt,
+    get_qa_agent_cot_prompt,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +26,7 @@ class BaseAgent(ABC):
     Base class for all agents in the Enlitens multi-agent system.
     """
 
-    def __init__(self, name: str, role: str, model: Optional[str] = None):
+    def __init__(self, name: str, role: str, model: Optional[str] = None, enable_cot: bool = True):
         settings = get_settings()
         agent_key = self.__class__.__name__
         resolved_model = model or settings.model_for_agent(agent_key)
@@ -37,7 +44,8 @@ class BaseAgent(ABC):
             "base_url": settings.llm.endpoint_for(agent_key),
             "provider": settings.llm.provider,
         }
-        logger.info(f"Initializing agent: {name} ({role})")
+        self.enable_cot = enable_cot  # Chain-of-thought reasoning enabled by default
+        logger.info(f"Initializing agent: {name} ({role}) [CoT: {enable_cot}]")
 
     @abstractmethod
     async def initialize(self) -> bool:
@@ -107,3 +115,37 @@ class BaseAgent(ABC):
             "cache_prefix": prefix,
             "cache_chunk_id": chunk_id,
         }
+    
+    def add_cot_to_prompt(
+        self,
+        base_prompt: str,
+        *,
+        task_description: Optional[str] = None,
+        context_description: Optional[str] = None,
+        output_format: Optional[str] = None,
+        emphasis: str = "relationships",
+    ) -> str:
+        """Add chain-of-thought reasoning to a prompt.
+        
+        Args:
+            base_prompt: The base prompt to enhance
+            task_description: Optional task description (defaults to agent role)
+            context_description: Description of available context
+            output_format: Expected output format
+            emphasis: Reasoning emphasis ("relationships", "synthesis", "accuracy", "creativity")
+        
+        Returns:
+            Enhanced prompt with CoT reasoning instructions
+        """
+        if not self.enable_cot:
+            return base_prompt
+        
+        task = task_description or f"{self.role} task"
+        cot_prefix = get_cot_prefix(
+            task_description=task,
+            context_description=context_description,
+            output_format=output_format,
+            emphasis=emphasis,
+        )
+        
+        return f"{cot_prefix}\n\n---\n\n{base_prompt}"

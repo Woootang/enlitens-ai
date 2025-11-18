@@ -180,6 +180,7 @@ class ExtractionTeam:
                 
                 # Use GPU manager for cleanup
                 self.gpu_manager.clear_cache()
+                await asyncio.sleep(0.3)
                 self.gpu_manager.log_memory_stats(f"After unloading {model_key}")
                 
                 logger.info(f"✅ {model_key} unloaded")

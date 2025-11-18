@@ -269,14 +269,6 @@ class DocumentProcessor:
             logger.info("Stage 3: AI Synthesis", extra={"processing_stage": "synthesis"})
             if not self.ollama_client.is_available():
                 logger.error("Ollama is not available")
-                return False, None, "Ollama is not available"
-
-            synthesis_result = self.synthesizer.synthesize(extraction_result, retriever=self.retriever)
-                logger.error("vLLM inference service is not available")
-                return False, None, "vLLM inference service is not available"
-            
-            synthesis_result = self.synthesizer.synthesize(extraction_result)
-            
                 self.observability.record_stage_timing(
                     document_id,
                     "AI Synthesis",
@@ -298,7 +290,10 @@ class DocumentProcessor:
                 "pipeline.ai_synthesis",
                 {"document.id": document_id},
             ) as span:
-                synthesis_result = self.synthesizer.synthesize(extraction_result)
+                synthesis_result = self.synthesizer.synthesize(
+                    extraction_result,
+                    retriever=self.retriever,
+                )
                 span.set_attribute("synthesis.quality_score", synthesis_result.quality_score)
                 if getattr(synthesis_result, "validation_issues", None):
                     span.set_attribute(
@@ -503,8 +498,6 @@ class DocumentProcessor:
         
         # Create processing metadata
         processing_metadata = ProcessingMetadata(
-            extraction_method="pymupdf4llm_marker",
-            synthesis_method="two_stage_mistral7b_awq",
             extraction_method="hybrid_docling_marker",
             synthesis_method="mistral7b_awq_vllm",
             quality_scores={
