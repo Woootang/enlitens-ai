@@ -32,6 +32,7 @@ LOCAL_STATUS_FILE = PROJECT_ROOT / "logs" / "local_status.json"
 # NEW PIPELINE PATHS (November 2025 rebuild)
 LOG_FILE = PROJECT_ROOT / "logs" / "processing.log"
 LEDGER_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "enliten_knowledge_base.jsonl"
+MAIN_KB_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "main_kb.jsonl"
 
 # OLD PATHS (for backward compatibility)
 OLD_LOG_FILE = PROJECT_ROOT / "logs" / "enlitens_complete_processing.log"
@@ -925,13 +926,20 @@ def logs():
 @app.route('/api/download')
 def download():
     """Download knowledge base - prioritizes NEW main_kb.jsonl"""
-    if MAIN_KB_FILE.exists():
-        return send_file(MAIN_KB_FILE, as_attachment=True, download_name='main_kb.jsonl')
-    if SCIENCE_ENTRIES_FILE.exists():
-        return send_file(SCIENCE_ENTRIES_FILE, as_attachment=True, download_name='science_entries.jsonl')
-    if JSON_FILE.exists():
-        return send_file(JSON_FILE, as_attachment=True, download_name='enlitens_knowledge_base.json')
-    return jsonify({'error': 'File not found'}), 404
+    fallback_files = [
+        (MAIN_KB_FILE, 'main_kb.jsonl'),
+        (SCIENCE_ENTRIES_FILE, 'science_entries.jsonl'),
+        (JSON_FILE, 'enlitens_knowledge_base.json'),
+    ]
+
+    for path, download_name in fallback_files:
+        if path and path.exists():
+            return send_file(path, as_attachment=True, download_name=download_name)
+
+    return jsonify({
+        'error': 'No knowledge base artifacts available for download.',
+        'checked_paths': [str(path) for path, _ in fallback_files],
+    }), 404
 
 @app.route('/api/download/manifest')
 def download_manifest():
@@ -944,7 +952,7 @@ def download_manifest():
 def json_preview():
     """Return a preview of the most recent JSON knowledge base entries."""
     # Try NEW main_kb.jsonl first
-    if MAIN_KB_FILE.exists():
+    if MAIN_KB_FILE and MAIN_KB_FILE.exists():
         try:
             documents = []
             with open(MAIN_KB_FILE, 'r', encoding='utf-8', errors='ignore') as f:
@@ -961,18 +969,24 @@ def json_preview():
                 'mode': 'main_kb_v2'
             })
         except json.JSONDecodeError as exc:
+            last_updated = None
+            if MAIN_KB_FILE and MAIN_KB_FILE.exists():
+                last_updated = datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat()
             return jsonify({
                 'documents': [],
                 'total': 0,
-                'last_updated': datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat() if MAIN_KB_FILE.exists() else None,
+                'last_updated': last_updated,
                 'error': f'JSON decode error: {exc}',
                 'mode': 'main_kb_v2'
             })
         except Exception as exc:
+            last_updated = None
+            if MAIN_KB_FILE and MAIN_KB_FILE.exists():
+                last_updated = datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat()
             return jsonify({
                 'documents': [],
                 'total': 0,
-                'last_updated': datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat() if MAIN_KB_FILE.exists() else None,
+                'last_updated': last_updated,
                 'error': str(exc),
                 'mode': 'main_kb_v2'
             })
@@ -1017,9 +1031,14 @@ def json_preview():
             'documents': [],
             'total': 0,
             'last_updated': None,
-            'error': 'Knowledge base file not found.',
-            'mode': 'none'
-        })
+            'error': 'Knowledge base artifacts not found in expected locations.',
+            'mode': 'none',
+            'checked_paths': [
+                str(MAIN_KB_FILE),
+                str(SCIENCE_ENTRIES_FILE),
+                str(JSON_FILE),
+            ],
+        }), 404
 
     try:
         with open(JSON_FILE, 'r', encoding='utf-8', errors='ignore') as f:
