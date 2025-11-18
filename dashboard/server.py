@@ -14,6 +14,7 @@ import subprocess
 import re
 import time
 import sys
+from collections import deque
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any
@@ -38,6 +39,22 @@ MAIN_KB_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "main_kb.jsonl"
 OLD_LOG_FILE = PROJECT_ROOT / "logs" / "enlitens_complete_processing.log"
 JSON_FILE = PROJECT_ROOT / "enlitens_knowledge_base" / "enlitens_knowledge_base.json.temp"
 SCIENCE_ENTRIES_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "science_entries.jsonl"
+
+
+def _stream_jsonl_preview(file_path: Path, max_entries: int = 5):
+    """Return a tuple of (most recent entries, total count) by streaming a JSONL file."""
+    recent_entries = deque(maxlen=max_entries)
+    total_documents = 0
+
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as file_handle:
+        for raw_line in file_handle:
+            line = raw_line.strip()
+            if not line:
+                continue
+            total_documents += 1
+            recent_entries.append(json.loads(line))
+
+    return list(recent_entries), total_documents
 SCIENCE_MANIFEST_FILE = PROJECT_ROOT / "data" / "knowledge_base" / "science_manifest.json"
 
 UPLOAD_FOLDER = PROJECT_ROOT / "enlitens_corpus" / "input_pdfs"
@@ -954,17 +971,10 @@ def json_preview():
     # Try NEW main_kb.jsonl first
     if MAIN_KB_FILE and MAIN_KB_FILE.exists():
         try:
-            documents = []
-            with open(MAIN_KB_FILE, 'r', encoding='utf-8', errors='ignore') as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        documents.append(json.loads(line))
-            
-            preview = documents[-5:]
+            preview, total = _stream_jsonl_preview(MAIN_KB_FILE)
             return jsonify({
                 'documents': preview,
-                'total': len(documents),
+                'total': total,
                 'last_updated': datetime.fromtimestamp(MAIN_KB_FILE.stat().st_mtime).isoformat(),
                 'mode': 'main_kb_v2'
             })
@@ -994,17 +1004,10 @@ def json_preview():
     # Fall back to old science-only JSONL
     if SCIENCE_ENTRIES_FILE.exists():
         try:
-            documents = []
-            with open(SCIENCE_ENTRIES_FILE, 'r', encoding='utf-8', errors='ignore') as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        documents.append(json.loads(line))
-            
-            preview = documents[-5:]
+            preview, total = _stream_jsonl_preview(SCIENCE_ENTRIES_FILE)
             return jsonify({
                 'documents': preview,
-                'total': len(documents),
+                'total': total,
                 'last_updated': datetime.fromtimestamp(SCIENCE_ENTRIES_FILE.stat().st_mtime).isoformat(),
                 'mode': 'science_only_old'
             })
