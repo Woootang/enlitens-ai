@@ -25,6 +25,7 @@ DIRECT_TEXT_CHAR_LIMIT = 10000
 CHUNK_CHAR_LIMIT = 2500
 CHUNK_CHAR_OVERLAP = 150
 CONTEXT_SNIPPET_CHAR_LIMIT = 8000
+SHORT_SNIPPET_CHAR_LIMIT = 4500
 
 DEFAULT_FIELD_RULES: Dict[str, Dict[str, Any]] = {
     "background": {"type": "string", "min_chars": 1000, "max_chars": 8000},
@@ -605,11 +606,45 @@ def _build_section_prompt(
     )
 
 
+def _short_snippet_rescue(
+    field: str,
+    context_text: str,
+    field_rules: Dict[str, Dict[str, Any]],
+    llm_client: LLMClient,
+) -> Optional[Any]:
+    """Lightweight fallback that reuses the standard prompt with a shorter context snippet."""
+    short_context = context_text[:SHORT_SNIPPET_CHAR_LIMIT]
+    prompt = _build_section_prompt(field, short_context, field_rules, llm_client.model_name)
+    prompt += (
+        "\n\nContext above was abridged for a last-resort repair. Return best-effort JSON even if information is missing."
+    )
+    try:
+        response = llm_client.generate_json(
+            prompt=prompt,
+            max_tokens=1200 if field_rules[field]["type"] == "string" else 512,
+            temperature=0.35,
+            timeout=600,
+            json_schema=_build_single_field_schema(field, field_rules),
+            max_attempts=2,
+        )
+    except Exception as exc:
+        logger.debug("Short-snippet rescue for %s failed: %s", field, exc)
+        return None
+
+    candidate = response.get(field)
+    if field_rules[field]["type"] == "array":
+        candidate = _normalize_citations(candidate)
+    if _validate_field(field, candidate, field_rules):
+        return candidate
+    logger.debug("Short-snippet rescue returned invalid payload for %s", field)
+    return None
+
+
 def _rescue_sections(
     context_text: str,
     llm_client: LLMClient,
     existing_result: Dict[str, Any],
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], List[str]]:
     logger.info("Attempting targeted section rescue to fill missing or shallow fields.")
     repaired = dict(existing_result)
     field_rules = _get_field_rules(llm_client.model_name)
@@ -632,6 +667,8 @@ def _rescue_sections(
                 repaired[field] = normalized
         elif not _validate_field(field, value, field_rules):
             fields_to_fix.add(field)
+
+    failed_fields: List[str] = []
 
     for field in fields_to_fix:
         section_schema = _build_single_field_schema(field, field_rules)
@@ -679,10 +716,20 @@ def _rescue_sections(
                     logger.info("✅ Section %s reconstructed via Gemini CLI fallback", field)
                     continue
                 logger.info("Gemini CLI fallback produced invalid content for %s.", field)
+            if field in {"citations", "methods"}:
+                logger.info("Attempting short-snippet fallback for %s", field)
+                short_candidate = _short_snippet_rescue(field, context_text, field_rules, llm_client)
+                if short_candidate is not None:
+                    repaired[field] = short_candidate
+                    logger.info("✅ Section %s reconstructed via short-snippet fallback", field)
+                    continue
             logger.error("Unable to repair section %s after targeted attempts.", field)
-            raise RuntimeError(f"Failed to reconstruct section '{field}'")
+            failed_fields.append(field)
 
-    return repaired
+    if failed_fields:
+        logger.warning("⚠️ Section rescue failed for fields: %s", failed_fields)
+
+    return repaired, failed_fields
 
 
 def _extract_with_sequential_sections(
@@ -826,8 +873,10 @@ def extract_scientific_content(
                     logger.info("Retrying extraction (attempt %s/%s)", attempt + 2, local_max_retries + 1)
                     continue
                 try:
-                    result = _rescue_sections(context_text, llm_client, result)
+                    result, failed_fields = _rescue_sections(context_text, llm_client, result)
                     missing_fields, shallow_fields = _analyze_result(result, field_rules)
+                    if failed_fields:
+                        missing_fields = sorted(set(missing_fields).union(failed_fields))
                 except Exception as rescue_exc:
                     logger.error("Targeted section rescue failed: %s", rescue_exc)
                     # Graceful degradation: accept partial results with placeholder content
@@ -850,8 +899,10 @@ def extract_scientific_content(
                         retry_suffix += f"\nDETAILED REQUIREMENTS: {hint}"
                     continue
                 try:
-                    result = _rescue_sections(context_text, llm_client, result)
+                    result, failed_fields = _rescue_sections(context_text, llm_client, result)
                     missing_fields, shallow_fields = _analyze_result(result, field_rules)
+                    if failed_fields:
+                        missing_fields = sorted(set(missing_fields).union(failed_fields))
                 except Exception as rescue_exc:
                     logger.error("Section depth repair failed: %s", rescue_exc)
                     # Graceful degradation: accept shallow content rather than failing
