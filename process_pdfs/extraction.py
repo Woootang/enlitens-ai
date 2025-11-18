@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 DIRECT_TEXT_CHAR_LIMIT = 10000
 CHUNK_CHAR_LIMIT = 2500
 CHUNK_CHAR_OVERLAP = 150
+CONTEXT_SNIPPET_CHAR_LIMIT = 8000
 
 DEFAULT_FIELD_RULES: Dict[str, Dict[str, Any]] = {
     "background": {"type": "string", "min_chars": 1000, "max_chars": 8000},
@@ -140,7 +141,7 @@ def _gemini_section_fallback(
     rules = field_rules[field]
     requirements = _describe_field_requirements(field, field_rules)
     existing = current_value if current_value else "<empty>"
-    context_snippet = context_text[:20000]
+    context_snippet = context_text[:CONTEXT_SNIPPET_CHAR_LIMIT]
 
     prompt = textwrap.dedent(
         f"""
@@ -160,12 +161,13 @@ def _gemini_section_fallback(
         """
     ).strip()
 
-    cmd = [executable, "-p", prompt, "--output-format", "json"]
+    cmd = [executable, "--output-format", "json"]
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
+            input=prompt,
             timeout=240,
         )
     except (FileNotFoundError, subprocess.TimeoutExpired):
